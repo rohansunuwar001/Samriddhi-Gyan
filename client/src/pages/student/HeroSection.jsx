@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useCallback } from "react";
+import { useCallback } from "react";
 // Import Embla Carousel and its autoplay plugin
-import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
+import useEmblaCarousel from "embla-carousel-react";
 import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
 
 // Import your slide data

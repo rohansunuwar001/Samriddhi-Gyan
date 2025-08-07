@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import React, { useState, useMemo } from "react";
-
+import PropTypes from "prop-types";
 const allCategories = [
   "HTML", "CSS", "JavaScript", "TypeScript",
   "Frontend Development", "Backend Development", "Fullstack Development",
@@ -111,6 +111,9 @@ const Filter = ({ handleFilterChange }) => {
       </div>
     </div>
   );
+};
+Filter.propTypes = {
+  handleFilterChange: PropTypes.func.isRequired,
 };
 
 export default React.memo(Filter);

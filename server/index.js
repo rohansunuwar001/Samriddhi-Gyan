@@ -1,21 +1,23 @@
-import express from "express";
-import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import dotenv from "dotenv";
+import express from "express";
+import session from 'express-session';
+import morgan from "morgan";
+import passport from "passport";
 import connectDB from "./database/db.js";
-import userRoute from "./routes/user.route.js";
+import { configurePassport } from "./database/passport-config.js";
+import aiRoutes from "./routes/ai.route.js";
+import articleRouter from "./routes/article.route.js";
+import categoryRoutes from './routes/category.route.js';
 import courseRoute from "./routes/course.route.js";
+import courseProgressRoute from "./routes/courseProgress.route.js";
+import esewaRoute from "./routes/esewa.route.js";
 import mediaRoute from "./routes/media.route.js";
 import purchaseRoute from "./routes/purchaseCourse.route.js";
-import courseProgressRoute from "./routes/courseProgress.route.js";
-import esewaRoute from "./routes/esewa.route.js"
-import aiRoutes from "./routes/ai.route.js";
-import passport from "passport";
-import session from 'express-session';
-import { configurePassport } from "./database/passport-config.js";
-import morgan from "morgan";
-import { generateGeminiResponse } from "./utils/geminiClient.js";
 import searchRouter from "./routes/searchSug.routes.js";
+import userRoute from "./routes/user.route.js";
+import authorRouter from "./routes/author.route.js";
 
 dotenv.config({});
 
@@ -48,7 +50,7 @@ app.use(
     credentials: true,
   })
 );
-app.use(morgan("dev"))
+app.use(morgan("dev"));
 
 // apis
 app.use("/api/v1/media", mediaRoute);
@@ -59,6 +61,9 @@ app.use("/api/v1/buy", esewaRoute);
 app.use("/api/v1/progress", courseProgressRoute);
 app.use("/api/v1/ai", aiRoutes);
 app.use('/api/v1/search', searchRouter);
+app.use('/api/v1/authors', authorRouter);
+app.use('/api/v1/categories', categoryRoutes);
+app.use('/api/v1/articles', articleRouter);
 
 
 app.listen(PORT, () => {

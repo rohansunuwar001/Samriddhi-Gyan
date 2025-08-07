@@ -1,3 +1,4 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -64,3 +65,14 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* 1. Import the font from Google Fonts at the very top */
+
+/* 2. Apply the font to the body or a root element */
+body {
+  font-family: 'Outfit', sans-serif;
+  -webkit-font-smoothing: antialiased; /* Optional: Makes font look smoother on Mac */
+  -moz-osx-font-smoothing: grayscale; /* Optional: Makes font look smoother on Firefox */
+}
+
+

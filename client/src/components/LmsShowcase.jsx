@@ -1,8 +1,10 @@
+import PropTypes from "prop-types";
 import { GraduationCap, MonitorPlay, BookOpenCheck, Clock, Smartphone, Award, BarChart2, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Link } from "react-router-dom";
 
 const LmsShowcase = () => {
   return (
@@ -68,7 +70,7 @@ const LmsShowcase = () => {
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
                 <h3 className="text-xl font-bold mb-4 flex items-center gap-3">
                   <GraduationCap className="text-blue-600 dark:text-blue-400" />
-                  What You'll Get
+                  What You`ll Get
                 </h3>
                 <ul className="space-y-3">
                   <li className="flex items-start gap-2">
@@ -171,8 +173,19 @@ const LmsShowcase = () => {
             Join thousands of students advancing their careers with our courses
           </p>
           <div className="flex gap-4 justify-center">
-            <Button size="lg">Browse All Courses</Button>
+            <Link to="/course/search" className="text-center">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white">
+                Browse Courses  
+              </Button>
+            </Link>
+            <Link to="/how-it-works" className="text-center">
             <Button variant="outline" size="lg">How It Works</Button>
+            </Link>
+            <Link to="/contact" className="text-center">
+              <Button size="lg" className="bg-blue-600 hover:bg-blue-700 text-white">
+                Contact Us
+              </Button> 
+            </Link>
           </div>
         </div>
       </div>
@@ -197,6 +210,13 @@ const FeatureCard = ({ icon, title, description }) => (
   </Card>
 );
 
+FeatureCard.propTypes = {
+  icon: PropTypes.node.isRequired,
+  title: PropTypes.string.isRequired,
+  description: PropTypes.string.isRequired,
+};
+
+
 const TestimonialCard = ({ name, role, avatar, quote, stats }) => (
   <Card className="h-full">
     <CardContent className="p-6">
@@ -210,11 +230,19 @@ const TestimonialCard = ({ name, role, avatar, quote, stats }) => (
           <p className="text-sm text-gray-500 dark:text-gray-400">{role}</p>
         </div>
       </div>
-      <p className="italic mb-4">"{quote}"</p>
+      <p className="italic mb-4">`{quote}`</p>
       <p className="text-sm text-gray-500 dark:text-gray-400">{stats}</p>
     </CardContent>
   </Card>
 );
+
+TestimonialCard.propTypes = {
+  name: PropTypes.string.isRequired,
+  role: PropTypes.string,
+  avatar: PropTypes.string,
+  quote: PropTypes.string,
+  stats: PropTypes.string,
+};
 
 const StatItem = ({ value, label }) => (
   <div>
@@ -222,5 +250,9 @@ const StatItem = ({ value, label }) => (
     <p className="text-blue-100">{label}</p>
   </div>
 );
+StatItem.propTypes = {
+  value: PropTypes.string.isRequired,
+  label: PropTypes.string.isRequired,
+};
 
 export default LmsShowcase;

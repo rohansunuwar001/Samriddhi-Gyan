@@ -1,6 +1,5 @@
 // File Path: app/components/LearningGoalsSection.js
-
-"use client";
+import PropTypes from "prop-types";
 
 
 import { useState } from 'react';
@@ -120,6 +119,21 @@ const LearningGoalsSection = () => {
       </div>
     </section>
   );
+};
+LearningGoalsSection.propTypes = {
+  feature: PropTypes.shape({
+    id: PropTypes.string.isRequired,
+    icon: PropTypes.node.isRequired,
+    title: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    cta: PropTypes.shape({
+      text: PropTypes.string.isRequired,
+      href: PropTypes.string.isRequired,
+    }).isRequired,
+    tag: PropTypes.string,
+  }).isRequired,
+  isActive: PropTypes.bool.isRequired,
+  onClick: PropTypes.func.isRequired,
 };
 
 export default LearningGoalsSection;

@@ -1,4 +1,4 @@
-
+import PropTypes from "prop-types";
 const TitleandHeader = ({ first, second }) => {
   return (
     <div className="max-w-3xl">
@@ -13,6 +13,11 @@ const TitleandHeader = ({ first, second }) => {
       </h3>
     </div>
   );
+};
+
+TitleandHeader.propTypes = {
+  first: PropTypes.string.isRequired,
+  second: PropTypes.string.isRequired,
 };
 
 export default TitleandHeader

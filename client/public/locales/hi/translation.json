@@ -1,0 +1,71 @@
+{
+  "navbar": {
+    "explore": "अन्वेषण करें",
+    "search_placeholder": "कुछ भी खोजें...",
+    "about": "हमारे बारे में",
+    "how_it_works": "यह कैसे काम करता है",
+    "contact": "संपर्क",
+    "blog": "ब्लॉग",
+    "instructor": "प्रशिक्षक",
+    "login": "लॉग इन करें",
+    "signup": "साइन अप करें",
+    "wishlist": "मेरी इच्छा-सूची",
+    "cart": "शॉपिंग कार्ट",
+    "notifications": "सूचनाएं",
+    "profile": "प्रोफ़ाइल",
+    "my_learning": "मेरी सीख",
+    "logout": "लॉग आउट",
+    "no_results": "\"{{query}}\" के लिए कोई परिणाम नहीं मिला",
+    "courses_heading": "पाठ्यक्रम",
+    "home": "होम",
+    "instructor_dashboard": "प्रशिक्षक डैशबोर्ड"
+  },
+  "footer": {
+    "about_section": {
+      "title": "हमारे बारे में",
+      "about_us": "हमारे बारे में",
+      "careers": "करियर",
+      "contact_us": "हमसे संपर्क करें",
+      "blog": "ब्लॉग",
+      "investors": "निवेशक"
+    },
+    "discover_section": {
+      "title": "समृद्धि ज्ञान खोजें",
+      "get_app": "ऐप प्राप्त करें",
+      "teach": "समृद्धि ज्ञान पर सिखाएं",
+      "pricing": "योजनाएं और मूल्य निर्धारण",
+      "affiliate": "सहबद्ध",
+      "support": "सहायता और समर्थन"
+    },
+    "business_section": {
+      "title": "समृद्धि ज्ञान बिजनेस",
+      "business": "समृद्धि ज्ञान बिजनेस"
+    },
+    "legal_section": {
+      "title": "कानूनी और सुलभता",
+      "accessibility": "सुलभता कथन",
+      "privacy": "गोपनीयता नीति",
+      "sitemap": "साइटमैप",
+      "terms": "शर्तें"
+    },
+    "cookie_settings": "कुकी सेटिंग्स"
+  },
+  "language_switcher": {
+    "choose_language": "भाषा चुनें"
+  },
+  "languages": {
+    "en": "अंग्रेज़ी",
+    "es": "स्पेनिश",
+    "fr": "फ्रेंच",
+    "de": "जर्मन",
+    "it": "इतालवी",
+    "ja": "जापानी",
+    "ko": "कोरियाई",
+    "pt": "पुर्तगाली",
+    "ru": "रूसी",
+    "zh-CN": "चीनी (सरलीकृत)",
+    "hi": "हिन्दी",
+    "ne": "नेपाली",
+    "ar": "अरबी"
+  }
+}

@@ -1,0 +1,71 @@
+{
+  "footer": {
+    "about_section": {
+      "title": "Sobre nosotros",
+      "about_us": "Sobre nosotros",
+      "careers": "Carreras",
+      "contact_us": "Contáctenos",
+      "blog": "Blog",
+      "investors": "Inversores"
+    },
+    "discover_section": {
+      "title": "Descubre Samriddhi Gyan",
+      "get_app": "Obtener la aplicación",
+      "teach": "Enseña en Samriddhi Gyan",
+      "pricing": "Planes y precios",
+      "affiliate": "Afiliado",
+      "support": "Ayuda y soporte"
+    },
+    "business_section": {
+      "title": "Samriddhi Gyan Business",
+      "business": "Samriddhi Gyan Business"
+    },
+    "legal_section": {
+      "title": "Legal y Accesibilidad",
+      "accessibility": "Declaración de accesibilidad",
+      "privacy": "Política de privacidad",
+      "sitemap": "Mapa del sitio",
+      "terms": "Términos"
+    },
+    "cookie_settings": "Configuración de cookies"
+  },
+  "navbar": {
+    "explore": "Explorar",
+    "search_placeholder": "Buscar cualquier cosa...",
+    "about": "Sobre nosotros",
+    "how_it_works": "Cómo funciona",
+    "contact": "Contacto",
+    "blog": "Blog",
+    "instructor": "Instructor",
+    "login": "Iniciar sesión",
+    "signup": "Registrarse",
+    "wishlist": "Mi lista de deseos",
+    "cart": "Carrito de compras",
+    "notifications": "Notificaciones",
+    "profile": "Perfil",
+    "my_learning": "Mi aprendizaje",
+    "logout": "Cerrar sesión",
+    "no_results": "No se encontraron resultados para \"{{query}}\"",
+    "courses_heading": "Cursos",
+    "home": "Inicio",
+    "instructor_dashboard": "Panel de Instructor"
+  },
+  "language_switcher": {
+    "choose_language": "Elige un idioma"
+  },
+  "languages": {
+    "en": "Inglés",
+    "es": "Español",
+    "fr": "Francés",
+    "de": "Alemán",
+    "it": "Italiano",
+    "ja": "Japonés",
+    "ko": "Coreano",
+    "pt": "Portugués",
+    "ru": "Ruso",
+    "zh-CN": "Chino (simplificado)",
+    "hi": "Hindi",
+    "ne": "Nepalí",
+    "ar": "Árabe"
+  }
+}

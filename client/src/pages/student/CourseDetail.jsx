@@ -11,11 +11,10 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useGetCourseDetailWithStatusQuery } from "@/features/api/purchaseApi";
+import { format } from "date-fns";
 import { BadgeInfo, Lock, PlayCircle, UsersIcon } from "lucide-react";
-import React from "react";
 import ReactPlayer from "react-player";
 import { useNavigate, useParams } from "react-router-dom";
-import { format } from "date-fns";
 
 const CourseDetail = () => {
   const params = useParams();

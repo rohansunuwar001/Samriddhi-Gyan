@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
-import { Button } from "./ui/button";
 import { useCreateCheckoutSessionMutation } from "@/features/api/purchaseApi";
 import { Loader2 } from "lucide-react";
+import { useEffect } from "react";
 import { toast } from "sonner";
-
+import { Button } from "./ui/button";
+import PropTypes from "prop-types";
 const BuyCourseButton = ({ courseId }) => {
   const [createCheckoutSession, {data, isLoading, isSuccess, isError, error }] =
     useCreateCheckoutSessionMutation();
@@ -41,6 +41,10 @@ const BuyCourseButton = ({ courseId }) => {
       )}
     </Button>
   );
+};
+
+BuyCourseButton.propTypes = {
+  courseId: PropTypes.string.isRequired,
 };
 
 export default BuyCourseButton;

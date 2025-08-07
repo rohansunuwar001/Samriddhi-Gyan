@@ -1,10 +1,9 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Star, Users, Clock, BookOpen } from "lucide-react";
-import React from "react";
+import { BookOpen, Clock, Star, Users } from "lucide-react";
 import { Link } from "react-router-dom";
-
+import PropTypes from "prop-types";
 const Course = ({ course }) => {
   // Calculate discount percentage if discounted
   const hasDiscount = course.originalPrice && course.originalPrice > course.coursePrice;
@@ -100,6 +99,28 @@ const Course = ({ course }) => {
       </Card>
     </Link>
   );
+};
+
+Course.propTypes = {
+  course: PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    id: PropTypes.string,
+    courseTitle: PropTypes.string.isRequired,
+    courseThumbnail: PropTypes.string.isRequired,
+    coursePrice: PropTypes.number.isRequired,
+    originalPrice: PropTypes.number,
+    courseLevel: PropTypes.string.isRequired,
+    rating: PropTypes.number,
+    enrollments: PropTypes.number,
+    enrolledStudents: PropTypes.number,
+    duration: PropTypes.string,
+    lessonsCount: PropTypes.number,
+    shortDescription: PropTypes.string,
+    creator: PropTypes.shape({
+      name: PropTypes.string,
+      photoUrl: PropTypes.string,
+    }),
+  }),
 };
 
 export default Course;

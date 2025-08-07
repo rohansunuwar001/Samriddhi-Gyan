@@ -1,0 +1,71 @@
+{
+  "footer": {
+    "about_section": {
+      "title": "About",
+      "about_us": "About us",
+      "careers": "Careers",
+      "contact_us": "Contact Us",
+      "blog": "Blog",
+      "investors": "Investors"
+    },
+    "discover_section": {
+      "title": "Discover Samriddhi Gyan",
+      "get_app": "Get the app",
+      "teach": "Teach on Samriddhi Gyan",
+      "pricing": "Plans and Pricing",
+      "affiliate": "Affiliate",
+      "support": "Help and Support"
+    },
+    "business_section": {
+      "title": "Samriddhi Gyan Business",
+      "business": "Samriddhi Gyan Business"
+    },
+    "legal_section": {
+      "title": "Legal & Accessibility",
+      "accessibility": "Accessibility statement",
+      "privacy": "Privacy policy",
+      "sitemap": "Sitemap",
+      "terms": "Terms"
+    },
+    "cookie_settings": "Cookie settings"
+  },
+  "navbar": {
+    "explore": "Explore",
+    "search_placeholder": "Search for anything...",
+    "about": "About",
+    "how_it_works": "How It Works",
+    "contact": "Contact",
+    "blog": "Blog",
+    "instructor": "Instructor",
+    "login": "Log in",
+    "signup": "Sign up",
+    "wishlist": "My Wishlist",
+    "cart": "Shopping Cart",
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "my_learning": "My Learning",
+    "logout": "Logout",
+    "no_results": "No results found for \"{{query}}\"",
+    "courses_heading": "Courses",
+    "home": "Home",
+    "instructor_dashboard": "Instructor Dashboard"
+  },
+  "language_switcher": {
+    "choose_language": "Choose a language"
+  },
+  "languages": {
+    "en": "English",
+    "es": "Spanish",
+    "fr": "French",
+    "de": "German",
+    "it": "Italian",
+    "ja": "Japanese",
+    "ko": "Korean",
+    "pt": "Portuguese",
+    "ru": "Russian",
+    "zh-CN": "Chinese (Simplified)",
+    "hi": "Hindi",
+    "ne": "Nepali",
+    "ar": "Arabic"
+  }
+}
