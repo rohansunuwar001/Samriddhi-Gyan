@@ -16,7 +16,7 @@ gsap.registerPlugin(ScrollTrigger);
 
 
 // Renamed from 'page' to 'ContactPage' for better readability and best practices
-const ContactPage = () => {
+const Contact = () => {
   // Data for the OriginsSection component (unchanged)
   const originsData = {
     title: "Our origins",
@@ -78,4 +78,4 @@ const ContactPage = () => {
   );
 };
 
-export default ContactPage;
+export default Contact;

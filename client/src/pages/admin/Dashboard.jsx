@@ -1,95 +1,85 @@
+import React from 'react';
+import {
+    Bar,
+    BarChart,
+    CartesianGrid,
+    Legend,
+    ResponsiveContainer,
+    Tooltip,
+    XAxis,
+    YAxis,
+    LineChart,
+    Line
+} from "recharts";
+import { useGetCreatorDashboardAnalyticsQuery } from "@/features/api/instructorApi"; // A NEW API slice is needed
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Skeleton } from '@/components/ui/skeleton';
+import { Users, DollarSign, Star, BookOpen } from "lucide-react";
 
+// --- Skeleton Component for a better loading state ---
+const DashboardSkeleton = () => (
+    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+        {[...Array(4)].map((_, i) => (
+             <Card key={i}><CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader><CardContent><Skeleton className="h-10 w-3/4" /></CardContent></Card>
+        ))}
+        <Card className="col-span-1 sm:col-span-2 lg:col-span-4"><CardContent className="pt-6"><Skeleton className="h-72 w-full" /></CardContent></Card>
+    </div>
+);
 
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useGetPurchasedCoursesQuery } from "@/features/api/purchaseApi";
-import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 const Dashboard = () => {
+    // IMPORTANT: This requires a new endpoint in a new 'instructorApi' slice
+    // that fetches aggregated data from the backend.
+    const { data: analyticsData, isLoading, isError } = useGetCreatorDashboardAnalyticsQuery();
+    console.log("Analytics Data:", analyticsData);
 
-  const { data, isError, isLoading } = useGetPurchasedCoursesQuery();
+    if (isLoading) return <DashboardSkeleton />;
+    if (isError) return <div className="text-red-500 text-center py-10">Failed to load dashboard analytics.</div>;
 
-  // Handle loading and error states first
-  if (isLoading) return <h1>Loading...</h1>
-  if (isError) return <h1 className="text-red-500">Failed to get purchased course data.</h1>
+    const stats = analyticsData?.stats || {};
+    const monthlySales = analyticsData?.monthlySales || [];
 
+    // --- Key Metrics ---
+    const totalRevenue = stats.totalRevenue || 0;
+    const totalStudents = stats.totalStudents || 0;
+    const totalCourses = stats.totalCourses || 0;
+    const averageRating = stats.averageRating || 0;
 
-  const purchasedCourse = data?.purchasedCourse || [];
-
-
-  const validCourses = purchasedCourse.filter(course => course && course.courseId);
-
-  const courseData = validCourses.map((course) => ({
-    name: course.courseId.courseTitle,
-    price: course.courseId.coursePrice
-  }));
-
-  const totalRevenue = validCourses.reduce((acc, element) => acc + (element.amount || 0), 0);
-  
-  const totalSales = validCourses.length;
-
-  return (
-    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-      {/* Total Sales Card */}
-      <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
-        <CardHeader>
-          <CardTitle>Total Sales</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-3xl font-bold text-blue-600">{totalSales}</p>
-        </CardContent>
-      </Card>
-
-      {/* Total Revenue Card */}
-      <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
-        <CardHeader>
-          <CardTitle>Total Revenue</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-3xl font-bold text-green-600">₹{totalRevenue.toFixed(2)}</p>
-        </CardContent>
-      </Card>
-
-      {/* Course Prices Chart Card */}
-      <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300 col-span-1 sm:col-span-2 lg:col-span-4">
-        <CardHeader>
-          <CardTitle className="text-xl font-semibold text-gray-700">
-            Course Sales Analysis
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={courseData} margin={{ top: 5, right: 30, left: 20, bottom: 50 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e0e0e0" />
-              <XAxis
-                dataKey="name"
-                stroke="#6b7280"
-                angle={-45}
-                textAnchor="end"
-                interval={0}
-                height={100} // Give more space for angled labels
-              />
-              <YAxis stroke="#6b7280" />
-              <Tooltip
-                formatter={value => [`Rs${value}`, "Price"]}
-                labelStyle={{ color: '#333' }}
-                itemStyle={{ color: '#4a90e2' }}
-              />
-              <Legend verticalAlign="top" height={36}/>
-              <Line
-                type="monotone"
-                dataKey="price"
-                stroke="#4a90e2"
-                strokeWidth={3}
-                dot={{ r: 5, stroke: "#fff", strokeWidth: 2 }}
-                activeDot={{ r: 8 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </CardContent>
-      </Card>
-    </div>
-  );
+    return (
+        <div className="space-y-6">
+            <h1 className="text-3xl font-bold tracking-tight">Your Instructor Dashboard</h1>
+            
+            {/* --- Key Metric Cards --- */}
+            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Total Revenue</CardTitle><DollarSign className="h-4 w-4 text-muted-foreground"/></CardHeader><CardContent><div className="text-2xl font-bold">Rs{totalRevenue.toLocaleString()}</div></CardContent></Card>
+                <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Total Students</CardTitle><Users className="h-4 w-4 text-muted-foreground"/></CardHeader><CardContent><div className="text-2xl font-bold">{totalStudents.toLocaleString()}</div></CardContent></Card>
+                <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Published Courses</CardTitle><BookOpen className="h-4 w-4 text-muted-foreground"/></CardHeader><CardContent><div className="text-2xl font-bold">{totalCourses}</div></CardContent></Card>
+                <Card><CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2"><CardTitle className="text-sm font-medium">Average Rating</CardTitle><Star className="h-4 w-4 text-muted-foreground"/></CardHeader><CardContent><div className="text-2xl font-bold">{averageRating.toFixed(1)}</div></CardContent></Card>
+            </div>
+            
+            {/* --- Sales Chart Card --- */}
+            <Card className="col-span-1 sm:col-span-2 lg:col-span-4">
+                <CardHeader>
+                    <CardTitle>Sales Over Last 6 Months</CardTitle>
+                    <CardDescription>
+                        An overview of your revenue from course sales.
+                    </CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <ResponsiveContainer width="100%" height={350}>
+                        <BarChart data={monthlySales}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="month" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                            <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `Rs${value / 1000}k`}/>
+                            <Tooltip formatter={(value) => [`Rs${value.toLocaleString()}`]}/>
+                            <Legend />
+                            <Bar dataKey="revenue" fill="#2563eb" radius={[4, 4, 0, 0]} />
+                        </BarChart>
+                    </ResponsiveContainer>
+                </CardContent>
+            </Card>
+        </div>
+    );
 };
 
 export default Dashboard;

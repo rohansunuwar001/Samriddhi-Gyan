@@ -18,6 +18,10 @@ import purchaseRoute from "./routes/purchaseCourse.route.js";
 import searchRouter from "./routes/searchSug.routes.js";
 import userRoute from "./routes/user.route.js";
 import authorRouter from "./routes/author.route.js";
+import reviewRouter from "./routes/review.route.js";
+import sectionRouter from "./routes/section.route.js";
+import lectureRouter from "./routes/lecture.route.js";
+import dashboardRouter from "./routes/instructor.dashboard.js";
 
 dotenv.config({});
 
@@ -64,7 +68,11 @@ app.use('/api/v1/search', searchRouter);
 app.use('/api/v1/authors', authorRouter);
 app.use('/api/v1/categories', categoryRoutes);
 app.use('/api/v1/articles', articleRouter);
+app.use("/api/v1/reviews", reviewRouter);
+app.use('/api/v1', sectionRouter);
+app.use("/api/v1", lectureRouter);
 
+app.use("/api/v1/instructor", dashboardRouter);
 
 app.listen(PORT, () => {
   console.log(`Server listen at port ${PORT}`);

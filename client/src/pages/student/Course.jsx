@@ -75,11 +75,11 @@ const Course = ({ course }) => {
             <div>
               {hasDiscount && (
                 <span className="text-gray-400 dark:text-gray-500 line-through text-sm mr-2">
-                  ₹{course.originalPrice}
+                  Rs{course.originalPrice}
                 </span>
               )}
               <span className="font-bold text-lg text-gray-900 dark:text-white">
-                ₹{course.coursePrice}
+                Rs{course.coursePrice}
               </span>
             </div>
             

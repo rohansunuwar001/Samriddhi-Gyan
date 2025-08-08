@@ -1,161 +1,109 @@
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectLabel,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useCreateCourseMutation } from "@/features/api/courseApi";
-import { Loader2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Loader2 } from "lucide-react";
+import { useCreateCourseMutation } from "@/features/api/courseApi";
+
+const categories = ["Web Development", "Data Science", "Mobile Development", "DevOps", "UI/UX Design"];
+
 const AddCourse = () => {
-  const [courseTitle, setCourseTitle] = useState("");
-  const [category, setCategory] = useState("");
+    const [courseDetails, setCourseDetails] = useState({
+        title: "",
+        category: "",
+        price: { current: "", original: "" },
+    });
+    const navigate = useNavigate();
+    const [createCourse, { data, isLoading, error, isSuccess, isError }] = useCreateCourseMutation();
 
-  const [createCourse, { data, isLoading, error, isSuccess }] =
-    useCreateCourseMutation();
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setCourseDetails(prev => ({ ...prev, [name]: value }));
+    };
 
-  const navigate = useNavigate();
+    const handlePriceChange = (e) => {
+        const { name, value } = e.target;
+        setCourseDetails(prev => ({ ...prev, price: { ...prev.price, [name]: value } }));
+    };
 
-  const getSelectedCategory = (value) => {
-    setCategory(value);
-  };
+    const handleCategoryChange = (value) => {
+        setCourseDetails(prev => ({ ...prev, category: value }));
+    };
 
-  const createCourseHandler = async () => {
-    await createCourse({ courseTitle, category });
-  };
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        const { title, category, price } = courseDetails;
+        if (!title.trim() || !category || !price.current) {
+            toast.error("Please provide a Title, Category, and a Current Price.");
+            return;
+        }
+        await createCourse(courseDetails);
+    };
 
-  // for displaying toast
-  useEffect(() => {
-    if (isSuccess) {
-      toast.success(data?.message || "Course created.");
-      navigate("/admin/course");
-    }
-  }, [isSuccess, error]);
+    useEffect(() => {
+        if (isSuccess && data?.course?._id) {
+            toast.success(data.message || "Course created! Let's add more details.");
+            navigate(`/admin/course/${data.course._id}`);
+        }
+        if (isError) {
+            toast.error(error.data?.message || "Something went wrong.");
+        }
+    }, [isSuccess, isError, data, error, navigate]);
 
-  return (
-    <div className="flex-1 mx-10">
-      <div className="mb-4">
-        <h1 className="font-bold text-xl">
-          Lets add course, add some basic course details for your new course
-        </h1>
-        <p className="text-sm">
-          Lorem, ipsum dolor sit amet consectetur adipisicing elit. Possimus,
-          laborum!
-        </p>
-      </div>
-      <div className="space-y-4">
-        <div>
-          <Label>Title</Label>
-          <Input
-            type="text"
-            value={courseTitle}
-            onChange={(e) => setCourseTitle(e.target.value)}
-            placeholder="Your Course Name"
-          />
+    return (
+        <div className="flex-1 mx-auto max-w-2xl p-4">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Create Your New Course</CardTitle>
+                    <CardDescription>
+                        Start with the basics. You can add the curriculum and landing page content in the next step.
+                    </CardDescription>
+                </CardHeader>
+                <form onSubmit={handleSubmit}>
+                    <CardContent className="space-y-6">
+                        <div className="space-y-2">
+                            <Label htmlFor="title">Course Title</Label>
+                            <Input id="title" name="title" value={courseDetails.title} onChange={handleChange} placeholder="e.g., The Complete 2025 Web Development Bootcamp" />
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="currentPrice">Current Price (NPR)</Label>
+                                <Input id="currentPrice" name="current" type="number" value={courseDetails.price.current} onChange={handlePriceChange} placeholder="e.g., 1999" />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="originalPrice">Original Price (optional)</Label>
+                                <Input id="originalPrice" name="original" type="number" value={courseDetails.price.original} onChange={handlePriceChange} placeholder="e.g., 9999" />
+                            </div>
+                        </div>
+                        <div className="space-y-2">
+                            <Label>Category</Label>
+                            <Select onValueChange={handleCategoryChange} value={courseDetails.category}>
+                                <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectGroup>
+                                        <SelectLabel>Categories</SelectLabel>
+                                        {categories.map(cat => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}
+                                    </SelectGroup>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </CardContent>
+                    <CardFooter className="flex justify-end gap-4 pt-6">
+                        <Button type="button" variant="outline" onClick={() => navigate("/admin/course")}>Cancel</Button>
+                        <Button type="submit" disabled={isLoading}>
+                            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            Create & Continue
+                        </Button>
+                    </CardFooter>
+                </form>
+            </Card>
         </div>
-        <div>
-          <Label>Category</Label>
-          <Select onValueChange={getSelectedCategory}>
-            <SelectTrigger className="w-[220px]">
-              <SelectValue placeholder="Select a category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectGroup>
-                <SelectLabel>Category</SelectLabel>
-
-                <SelectItem value="HTML">HTML</SelectItem>
-                <SelectItem value="CSS">CSS</SelectItem>
-                <SelectItem value="JavaScript">JavaScript</SelectItem>
-                <SelectItem value="TypeScript">TypeScript</SelectItem>
-                <SelectItem value="Frontend Development">
-                  Frontend Development
-                </SelectItem>
-                <SelectItem value="Backend Development">
-                  Backend Development
-                </SelectItem>
-                <SelectItem value="Fullstack Development">
-                  Fullstack Development
-                </SelectItem>
-                <SelectItem value="MERN Stack Development">
-                  MERN Stack Development
-                </SelectItem>
-                <SelectItem value="Next JS">Next JS</SelectItem>
-                <SelectItem value="React JS">React JS</SelectItem>
-                <SelectItem value="Vue JS">Vue JS</SelectItem>
-                <SelectItem value="Node JS">Node JS</SelectItem>
-                <SelectItem value="Express JS">Express JS</SelectItem>
-                <SelectItem value="MongoDB">MongoDB</SelectItem>
-                <SelectItem value="SQL">SQL</SelectItem>
-                <SelectItem value="Python">Python</SelectItem>
-                <SelectItem value="Data Science">Data Science</SelectItem>
-                <SelectItem value="Machine Learning">
-                  Machine Learning
-                </SelectItem>
-                <SelectItem value="Artificial Intelligence">
-                  Artificial Intelligence
-                </SelectItem>
-                <SelectItem value="DevOps">DevOps</SelectItem>
-                <SelectItem value="Docker">Docker</SelectItem>
-                <SelectItem value="Git & GitHub">Git & GitHub</SelectItem>
-                <SelectItem value="UI/UX Design">UI/UX Design</SelectItem>
-                <SelectItem value="Figma">Figma</SelectItem>
-                <SelectItem value="Adobe XD">Adobe XD</SelectItem>
-                <SelectItem value="Photoshop">Photoshop</SelectItem>
-                <SelectItem value="Cybersecurity">Cybersecurity</SelectItem>
-                <SelectItem value="Cloud Computing">Cloud Computing</SelectItem>
-                <SelectItem value="AWS">AWS</SelectItem>
-                <SelectItem value="Firebase">Firebase</SelectItem>
-                <SelectItem value="Java">Java</SelectItem>
-                <SelectItem value="C++">C++</SelectItem>
-                <SelectItem value="C#">C#</SelectItem>
-                <SelectItem value="Android Development">
-                  Android Development
-                </SelectItem>
-                <SelectItem value="iOS Development">iOS Development</SelectItem>
-                <SelectItem value="Mobile App Development">
-                  Mobile App Development
-                </SelectItem>
-                <SelectItem value="Software Testing">
-                  Software Testing
-                </SelectItem>
-                <SelectItem value="System Design">System Design</SelectItem>
-                <SelectItem value="Operating Systems">
-                  Operating Systems
-                </SelectItem>
-                <SelectItem value="DSA (Data Structures & Algorithms)">
-                  DSA (Data Structures & Algorithms)
-                </SelectItem>
-              </SelectGroup>
-            </SelectContent>
-          </Select>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={() => navigate("/admin/course")}>
-            Back
-          </Button>
-          <Button disabled={isLoading} onClick={createCourseHandler}>
-            {isLoading ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Please wait
-              </>
-            ) : (
-              "Create"
-            )}
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
+    );
 };
 
 export default AddCourse;

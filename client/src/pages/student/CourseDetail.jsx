@@ -1,216 +1,97 @@
-import BuyCourseButton from "@/components/BuyCourseButton";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useGetCourseDetailWithStatusQuery } from "@/features/api/purchaseApi";
-import { format } from "date-fns";
-import { BadgeInfo, Lock, PlayCircle, UsersIcon } from "lucide-react";
-import ReactPlayer from "react-player";
-import { useNavigate, useParams } from "react-router-dom";
+// --- CORE REACT & ROUTING ---
 
-const CourseDetail = () => {
-  const params = useParams();
-  const courseId = params.courseId;
-  const navigate = useNavigate();
-  const { data, isLoading, isError } = useGetCourseDetailWithStatusQuery(courseId);
+import { useNavigate, useParams } from 'react-router-dom';
 
-  if (isLoading) return <CourseDetailSkeleton />;
-  if (isError) return <ErrorLoadingCourse />;
+// --- UI COMPONENTS (Shadcn/ui, etc.) ---
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 
-  const { course, purchased } = data;
-  const firstLecture = course.lectures[0];
-  const enrolledCount = course.enrolledStudents?.length || 0;
+// --- DATA FETCHING (RTK Query) ---
+import { useGetCourseDetailWithStatusQuery } from '@/features/api/purchaseApi';
 
-  const handleContinueCourse = () => {
-    if (purchased) {
-      navigate(`/course-progress/${courseId}`);
-    }
-  };
+// --- NEW UI CHILD COMPONENTS (for the Udemy-like layout) ---
 
-  return (
-    <main className="space-y-5">
-      {/* Course Header Section */}
-      <section className="bg-[#2D2F31] text-white">
-        <div className="max-w-7xl mx-auto py-8 px-4 md:px-8 flex flex-col gap-3">
-          <h1 className="font-bold text-2xl md:text-3xl lg:text-4xl">
-            {course.courseTitle}
-          </h1>
-          {course.subtitle && (
-            <p className="text-base md:text-lg text-gray-300">
-              {course.subtitle}
-            </p>
-          )}
-          <p className="text-sm md:text-base">
-            Created by{" "}
-            <span className="text-[#C0C4FC] underline italic">
-              {course.creator.name}
-            </span>
-          </p>
-          <div className="flex flex-wrap items-center gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <BadgeInfo size={16} aria-hidden="true" />
-              <span>
-                Last updated{" "}
-                {format(new Date(course.updatedAt || course.createdAt), "MMMM d, yyyy")}
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <PlayCircle size={16} aria-hidden="true" />
-              <span>{course.lectures.length} lectures</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <UsersIcon size={16} aria-hidden="true" />
-              <span>
-                {enrolledCount.toLocaleString()} student{enrolledCount !== 1 ? "s" : ""} enrolled
-              </span>
-            </div>
-          </div>
-        </div>
-      </section>
 
-      {/* Main Content */}
-      <div className="max-w-7xl mx-auto my-5 px-4 md:px-8 flex flex-col lg:flex-row gap-8">
-        {/* Left Column - Description & Content */}
-        <div className="w-full lg:w-2/3 space-y-6">
-          <section>
-            <h2 className="font-bold text-xl md:text-2xl mb-4">Description</h2>
-            <div
-              className="prose dark:prose-invert max-w-none"
-              dangerouslySetInnerHTML={{ __html: course.description }}
-            />
-          </section>
+// --- YOUR REVIEW COMPONENTS ---
+ // Make sure path is correct
+import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import CourseContent from '../Courses/CourseContent';
+import CourseHeader from '../Courses/CourseHeader';
+import CourseIncludes from '../Courses/CourseIncludes';
+import InstructorProfile from '../Courses/InstructorProfile';
+import PurchaseCard from '../Courses/PurchaseCard';
+import Requirements from '../Courses/Requirements';
+import WhatYouWillLearn from '../Courses/WhatYouWillLearn';
+import AddReviewForm from '../Reviews/AddReviewform';
+import ReviewsSection from '../Reviews/ReviewSection';
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Course Content</CardTitle>
-              <CardDescription>
-                {course.lectures.length} lecture{course.lectures.length !== 1 ? "s" : ""}
-                {course.totalDuration && ` • ${formatDuration(course.totalDuration)}`}
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {course.lectures.map((lecture, idx) => (
-                <div 
-                  key={lecture._id || idx} 
-                  className="flex items-start gap-4 p-3 hover:bg-gray-50 dark:hover:bg-gray-800 rounded-lg transition-colors"
-                >
-                  <span className="mt-0.5">
-                    {purchased ? (
-                      <PlayCircle size={16} className="text-blue-500" />
-                    ) : (
-                      <Lock size={16} className="text-gray-400" />
-                    )}
-                  </span>
-                  <div className="flex-1">
-                    <h3 className="text-sm md:text-base font-medium">
-                      {lecture.lectureTitle}
-                    </h3>
-                    {lecture.duration && (
-                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                        {formatDuration(lecture.duration)}
-                      </p>
-                    )}
-                  </div>
+const CourseDetailPage = () => {
+    // 1. Core Hooks and Data Fetching
+    const params = useParams();
+    const courseId = params.courseId;
+    const navigate = useNavigate();
+    const { data, isLoading, isError } = useGetCourseDetailWithStatusQuery(courseId);
+
+    // 2. Loading and Error States
+    if (isLoading) return <CourseDetailSkeleton />;
+    if (isError || !data) return <ErrorLoadingCourse />; // Check for data object too
+
+    // 3. Destructure Data for Cleaner Usage
+    const { course, purchased } = data;
+    
+    // Check if the populated creator object exists before accessing its properties
+    const creator = course.creator || { name: 'Unknown Instructor', title: '' };
+
+    return (
+        <div className="bg-white text-gray-800">
+            {/* Dark themed header section - This will now show live data */}
+            <CourseHeader course={{...course, creatorName: creator.name}} />
+            
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="lg:flex lg:flex-row-reverse lg:gap-8">
+                    
+                    {/* Right Column (Sticky Purchase Card) - Shows live data */}
+                    <div className="lg:w-1/3 w-full mb-8 lg:mb-0">
+                       <PurchaseCard course={course} purchased={purchased} courseId={courseId} />
+                    </div>
+
+                    {/* Left Column (Main Content) - All components get live data */}
+                    <div className="lg:w-2/3 w-full">
+                        <main className="space-y-8 md:space-y-12">
+                            {/* Assuming your API provides 'learnings' array */}
+                            {course.learnings && course.learnings.length > 0 && <WhatYouWillLearn learnings={course.learnings} />}
+                            
+                            {/* Assuming your API provides 'includes' array */}
+                            {course.includes && course.includes.length > 0 && <CourseIncludes includes={course.includes} />}
+
+                            <CourseContent 
+                                sections={course.lectures || []} 
+                                totalLectures={course.lectures?.length || 0} 
+                                // You might need to calculate totalLength on the backend or frontend
+                                totalLength={course.totalDuration || 'N/A'}
+                            />
+                            
+                            {/* Assuming your API provides 'requirements' array */}
+                            {course.requirements && course.requirements.length > 0 && <Requirements requirements={course.requirements} />}
+                            
+                            {/* <Description descriptionHtml={course.description || '<p>No description provided.</p>'} /> */}
+
+                            <InstructorProfile instructor={creator} />
+                            
+                            {/* Your existing review logic - now fully integrated */}
+                            {purchased && <AddReviewForm courseId={courseId} />}
+                            <ReviewsSection course={course} />
+                        </main>
+                    </div>
+
                 </div>
-              ))}
-            </CardContent>
-          </Card>
+            </div>
         </div>
-
-        {/* Right Column - Video & Purchase */}
-        <div className="w-full lg:w-1/3">
-          <Card className="sticky top-6">
-            {firstLecture?.videoUrl ? (
-              <div className="w-full aspect-video bg-black">
-                <ReactPlayer
-                  width="100%"
-                  height="100%"
-                  url={firstLecture.videoUrl}
-                  controls={true}
-                  light={course.courseThumbnail}
-                  playIcon={<PlayCircle size={48} className="text-white" />}
-                />
-              </div>
-            ) : (
-              <div className="w-full aspect-video bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                <div className="text-center p-4">
-                  <PlayCircle size={48} className="mx-auto text-gray-400" />
-                  <p className="mt-2 text-gray-500 dark:text-gray-400">
-                    Preview not available
-                  </p>
-                </div>
-              </div>
-            )}
-            <CardContent className="p-4 space-y-3">
-              {firstLecture && (
-                <>
-                  <h3 className="font-medium text-lg">
-                    {firstLecture.lectureTitle}
-                  </h3>
-                  <Separator />
-                </>
-              )}
-              <div className="flex items-center justify-between">
-                <h4 className="font-semibold">Price:</h4>
-                <div className="text-right">
-                  {course.discountedPrice ? (
-                    <>
-                      <span className="text-lg font-bold">
-                        Rs{course.discountedPrice}
-                      </span>
-                      <span className="ml-2 text-sm text-gray-500 line-through">
-                        Rs{course.coursePrice}
-                      </span>
-                    </>
-                  ) : (
-                    <span className="text-lg font-bold">
-                      Rs{course.coursePrice}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-            <CardFooter className="p-4">
-              {purchased ? (
-                <Button 
-                  onClick={handleContinueCourse} 
-                  className="w-full"
-                  aria-label="Continue course"
-                >
-                  Continue Course
-                </Button>
-              ) : (
-                <BuyCourseButton 
-                  courseId={courseId} 
-                  price={course.coursePrice}
-                  className="w-full"
-                />
-              )}
-            </CardFooter>
-          </Card>
-        </div>
-      </div>
-    </main>
-  );
+    );
 };
 
-// Helper function to format duration (assuming duration is in seconds)
-const formatDuration = (seconds) => {
-  const hours = Math.floor(seconds / 3600);
-  const minutes = Math.floor((seconds % 3600) / 60);
-  
-  return `${hours > 0 ? `${hours}h ` : ""}${minutes}m`;
-};
-
-// Skeleton loading state
+// --- SKELETON & ERROR COMPONENTS ---
+// No changes needed here. These are well-built.
 const CourseDetailSkeleton = () => (
   <div className="space-y-5">
     <div className="bg-[#2D2F31] text-white">
@@ -277,8 +158,8 @@ const ErrorLoadingCourse = () => (
       <p className="text-red-600 dark:text-red-400 mb-4">
         Please try refreshing the page or check your internet connection
       </p>
-      <Button 
-        variant="outline" 
+      <Button
+        variant="outline"
         onClick={() => window.location.reload()}
         className="text-red-700 dark:text-red-300"
       >
@@ -288,4 +169,4 @@ const ErrorLoadingCourse = () => (
   </div>
 );
 
-export default CourseDetail;
+export default CourseDetailPage;

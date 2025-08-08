@@ -1,94 +1,76 @@
-import { Star } from "lucide-react";
-import { motion } from "framer-motion";
-import PropTypes from "prop-types";
-const CourseCard = ({ course }) => {
-  // --- Future-Proof Data ---
-  const rating = course.rating || 4.5; // Placeholder
-  const reviewsCount = course.reviewsCount || 175; // Placeholder
-  const originalPrice = course.originalPrice || null; // Placeholder
-  const isNew = course.isNew || false;
+import PropsType from 'prop-types';
+import { FaBullhorn, FaChartBar, FaCloud, FaCode, FaGamepad, FaLightbulb, FaStar } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
+// Icon mapping remains the same
+const iconMap = {
+  cloud: { icon: <FaCloud />, bg: 'bg-green-500' },
+  data: { icon: <FaChartBar />, bg: 'bg-purple-500' },
+  marketing: { icon: <FaBullhorn />, bg: 'bg-indigo-500' },
+  fullstack: { icon: <FaCode />, bg: 'bg-yellow-500' },
+  game: { icon: <FaGamepad />, bg: 'bg-teal-500' },
+  product: { icon: <FaLightbulb />, bg: 'bg-orange-500' },
+};
 
-  // Helper to render star ratings
-  const renderStars = () => {
-    return Array.from({ length: 5 }, (_, i) => (
-      <Star
-        key={i}
-        size={16}
-        className={i < Math.round(rating) ? "text-yellow-500 fill-current" : "text-gray-300"}
-      />
-    ));
+const CareerCard = ({ career }) => {
+  const navigate = useNavigate();
+
+  const { icon, bg } = iconMap[career.iconKey] || {
+    icon: <FaLightbulb />,
+    bg: 'bg-gray-400',
   };
 
-  // --- **THE FIX IS HERE** ---
-  // Safely determine the display price.
-  const displayPrice = typeof course.price === 'number'
-    ? `$${course.price.toFixed(2)}`
-    : 'Free'; // Show "Free" if price is not a number
+  const handleClick = () => {
+    navigate(`/course-detail/${career._id}`);
+  }
 
   return (
-    <motion.div
-      whileHover={{ y: -5 }}
-      transition={{ type: "spring", stiffness: 300 }}
-      className="flex-shrink-0 w-full cursor-pointer group"
+    <div
+      onClick={handleClick}
+      className="cursor-pointer bg-white rounded-lg border border-gray-200 overflow-hidden transition-shadow duration-300 hover:shadow-xl"
     >
-      <div className="relative overflow-hidden rounded-lg">
-        <img
-          src={course.thumbnail?.url || "/placeholder.png"}
-          alt={course.title || 'Course thumbnail'}
-          className="w-full aspect-video object-cover transition-transform duration-300 group-hover:scale-105"
-        />
-        {isNew && (
-           <div className="absolute top-3 left-3 bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-1 rounded-full">
-            Hot & New
-           </div>
-        )}
-      </div>
-      <div className="mt-3 px-1">
-        <h3 className="text-md font-bold text-gray-900 dark:text-white truncate group-hover:text-primary">
-          {/* Add a fallback for the title as well, just in case */}
-          {course.title || 'Untitled Course'}
-        </h3>
-        <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-          {course.author?.name || 'Unknown Author'}
-        </p>
-
-        {course.rating && (
-          <div className="flex items-center mt-1.5 gap-1">
-            <span className="font-bold text-sm text-yellow-600">{rating.toFixed(1)}</span>
-            <div className="flex">{renderStars()}</div>
-            <span className="text-sm text-gray-400">({reviewsCount.toLocaleString()})</span>
-          </div>
-        )}
-
-        <div className="flex items-center gap-2 mt-1.5">
-           {/* Use the safe displayPrice variable */}
-          <p className="text-md font-bold text-gray-900 dark:text-white">{displayPrice}</p>
-          {originalPrice && (
-            <p className="text-sm text-gray-500 line-through">${originalPrice.toFixed(2)}</p>
-          )}
+      <div className={`relative h-52 w-full ${bg}`}>
+        <div className="absolute inset-0 flex items-center justify-start p-6 text-white/20 text-8xl z-0">
+          {icon}
+        </div>
+        <div className="relative w-full h-full z-10">
+          {/* Use standard <img> tag instead of next/image */}
+          <img
+            src={career.courseThumbnail}
+            alt={career.courseTitle}
+            className="w-full h-full object-contain object-bottom-right" // Use Tailwind classes for object-fit and object-position
+          />
         </div>
       </div>
-    </motion.div>
+      <div className="p-5">
+        <h3 className="text-xl font-bold text-gray-900">{career.courseTitle}</h3>
+        <div className="flex flex-wrap items-center gap-2 mt-3 text-sm text-gray-600">
+          <div className="flex items-center gap-1 border border-gray-300 rounded-md px-2 py-1">
+            <FaStar className="text-yellow-500" />
+            <span>{career.rating || "4.5"}</span>
+          </div>
+          <div className="border border-gray-300 rounded-md px-2 py-1">
+            {career.courseLevel || "N/A"} ratings
+          </div>
+          <div className="border border-gray-300 rounded-md px-2 py-1">
+            {career.originalPrice || "N/A"} total hours
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
-
-CourseCard.propTypes = {
-  course: PropTypes.shape({
-    title: PropTypes.string.isRequired,
-    thumbnail: PropTypes.shape({
-      url: PropTypes.string
-    }),
-    author: PropTypes.shape({
-        name: PropTypes.string
-    }),
-    rating: PropTypes.number,
-    reviewsCount: PropTypes.number,
-    price: PropTypes.number.isRequired,
-    originalPrice: PropTypes.number,
-    isNew: PropTypes.bool
-    }).isRequired
+CareerCard.propTypes = {
+  career: PropsType.shape({
+    _id: PropsType.string.isRequired,
+    courseTitle: PropsType.string.isRequired,
+    courseThumbnail: PropsType.string.isRequired,
+    iconKey: PropsType.string.isRequired,
+    rating: PropsType.number,
+    courseLevel: PropsType.string,
+    originalPrice: PropsType.number,
+  }).isRequired,
 };
 
 
-export default CourseCard;
+export default CareerCard;

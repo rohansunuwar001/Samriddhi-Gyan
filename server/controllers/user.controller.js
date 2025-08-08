@@ -1,7 +1,7 @@
-import { User } from "../models/user.model.js";
 import bcrypt from "bcryptjs";
+import { User } from "../models/user.model.js";
+import { deleteFromCloudinary, uploadMedia } from "../utils/cloudinary.js";
 import { generateToken } from "../utils/generateToken.js";
-import { deleteMediaFromCloudinary, uploadMedia } from "../utils/cloudinary.js";
 
 export const register = async (req, res) => {
   try {
@@ -206,7 +206,7 @@ export const updateUserAvatar = async (req, res) => {
       try {
         // Extracts the public_id from a URL like: http://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg
         const publicId = user.photoUrl.split("/").pop().split(".")[0];
-        await deleteMediaFromCloudinary(publicId);
+        await deleteFromCloudinary(publicId);
       } catch (deleteError) {
         // Log the error but don't block the upload of the new avatar
         console.error(

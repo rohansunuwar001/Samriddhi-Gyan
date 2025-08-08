@@ -3,64 +3,67 @@ import { Lecture } from "../models/lecture.model.js";
 import { SearchSuggestion } from "../models/searchSuggestion.js";
 import { User } from "../models/user.model.js";
 import {
-  deleteMediaFromCloudinary,
-  deleteVideoFromCloudinary,
+  deleteFromCloudinary,
   uploadMedia,
 } from "../utils/cloudinary.js";
 
 export const createCourse = async (req, res) => {
-  try {
-    const { courseTitle, category } = req.body;
-    if (!courseTitle || !category) {
-      return res.status(400).json({
-        message: "Course title and category is required.",
-      });
+    try {
+        // UPDATED: Destructuring new fields from the model
+        const { title, category, language, level, price } = req.body;
+        
+        if (!title || !category || !price || !price.original || !price.current) {
+            return res.status(400).json({
+                message: "Title, category, and a full price object (original, current) are required.",
+            });
+        }
+        
+        const course = await Course.create({
+            title,
+            category,
+            language: language || 'English',
+            level: level || 'All Levels',
+            price, // Pass the entire price object
+            creator: req.id,
+        });
+        
+        return res.status(201).json({
+            course,
+            message: "Course created successfully.",
+        });
+
+    } catch (error) {
+        console.error("Failed to create course:", error);
+        return res.status(500).json({ message: "Failed to create course" });
     }
-
-    const course = await Course.create({
-      courseTitle,
-      category,
-      creator: req.id,
-    });
-
-    return res.status(201).json({
-      course,
-      message: "Course created.",
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      message: "Failed to create course",
-    });
-  }
 };
-
+/**
+ * @desc    Search for courses with filters and sorting
+ * @route   GET /api/v1/search/courses
+ * @access  Public
+ */
 export const searchCourse = async (req, res) => {
   try {
     const { query = "", categories = [], sortByPrice = "" } = req.query;
-    console.log(categories);
 
-    // create search query
     const searchCriteria = {
       isPublished: true,
       $or: [
-        { courseTitle: { $regex: query, $options: "i" } },
-        { subTitle: { $regex: query, $options: "i" } },
+        { courseTitle: { $regex: query, $options: "i" } }, // UPDATED: courseTitle -> title
+        { subtitle: { $regex: query, $options: "i" } }, // UPDATED: subTitle -> subtitle
         { category: { $regex: query, $options: "i" } },
       ],
     };
 
-    // if categories selected
     if (categories.length > 0) {
       searchCriteria.category = { $in: categories };
     }
 
-    // define sorting order
     const sortOptions = {};
     if (sortByPrice === "low") {
-      sortOptions.coursePrice = 1; //sort by price in ascending
+      sortOptions['price.current'] = 1; // UPDATED: coursePrice -> price.current
     } else if (sortByPrice === "high") {
-      sortOptions.coursePrice = -1; // descending
+      sortOptions['price.current'] = -1;
     }
 
     let courses = await Course.find(searchCriteria)
@@ -72,10 +75,10 @@ export const searchCourse = async (req, res) => {
       courses: courses || [],
     });
   } catch (error) {
-    console.log(error);
+    console.error("Search Course error:", error);
+    res.status(500).json({ message: "Failed to search courses." });
   }
 };
-
 
 
 /**
@@ -88,13 +91,13 @@ export const getSearchResults = async (req, res) => {
     const { q } = req.query;
 
     // Return empty results if the query is missing or empty
-    if (!q || q.trim() === '') {
+    if (!q || q.trim() === "") {
       return res.status(200).json({ suggestions: [], courses: [] });
     }
 
     // Sanitize the query to prevent Regex Injection attacks
-    const sanitizedQuery = q.trim().replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const searchRegex = new RegExp(sanitizedQuery, 'i'); // 'i' for case-insensitivity
+    const sanitizedQuery = q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const searchRegex = new RegExp(sanitizedQuery, "i"); // 'i' for case-insensitivity
 
     // Run both database lookups in parallel for maximum efficiency
     const [courses, suggestionDocs] = await Promise.all([
@@ -103,23 +106,23 @@ export const getSearchResults = async (req, res) => {
         // Stage 1: Initial match to filter for only published courses.
         // This is a crucial performance optimization.
         {
-          $match: { isPublished: true }
+          $match: { isPublished: true },
         },
         // Stage 2: Join with the 'users' collection to get creator's name
         {
           $lookup: {
-            from: 'users', // The name of the users collection
-            localField: 'creator',
-            foreignField: '_id',
-            as: 'creatorInfo'
-          }
+            from: "users", // The name of the users collection
+            localField: "creator",
+            foreignField: "_id",
+            as: "creatorInfo",
+          },
         },
         // Stage 3: Deconstruct the creatorInfo array to an object
         {
           $unwind: {
-            path: '$creatorInfo',
-            preserveNullAndEmptyArrays: true // Keep courses even if creator is not found
-          }
+            path: "$creatorInfo",
+            preserveNullAndEmptyArrays: true, // Keep courses even if creator is not found
+          },
         },
         // Stage 4: Match against all relevant fields
         {
@@ -128,38 +131,37 @@ export const getSearchResults = async (req, res) => {
               { courseTitle: searchRegex },
               { subTitle: searchRegex },
               { category: searchRegex },
-              { 'creatorInfo.name': searchRegex } // Search by the creator's name
-            ]
-          }
+              { "creatorInfo.name": searchRegex }, // Search by the creator's name
+            ],
+          },
         },
         // Stage 5: Limit the number of results
         {
-          $limit: 5
+          $limit: 5,
         },
         // Stage 6: Project only the fields needed by the frontend for a smaller payload
         {
           $project: {
             _id: 1, // The course ID is needed for the link
-            title: '$courseTitle', // Rename for consistency
-            thumbnail: '$courseThumbnail',
-            creatorName: '$creatorInfo.name' // Send only the creator's name
-          }
-        }
+            title: "$courseTitle", // Rename for consistency
+            thumbnail: "$courseThumbnail",
+            creatorName: "$creatorInfo.name", // Send only the creator's name
+          },
+        },
       ]),
 
       // --- Query 2: Find Search Suggestions ---
-      SearchSuggestion.find({ term: searchRegex }).limit(8).lean()
+      SearchSuggestion.find({ term: searchRegex }).limit(8).lean(),
     ]);
 
     // Format suggestions into a simple array of strings
-    const suggestions = suggestionDocs.map(s => s.term);
+    const suggestions = suggestionDocs.map((s) => s.term);
 
     // Send the final, combined results
     res.status(200).json({ suggestions, courses });
-
   } catch (error) {
-    console.error('Search controller error:', error);
-    res.status(500).json({ message: 'Server error during search.' });
+    console.error("Search controller error:", error);
+    res.status(500).json({ message: "Server error during search." });
   }
 };
 
@@ -204,80 +206,101 @@ export const getCreatorCourses = async (req, res) => {
     });
   }
 };
+/**
+ * @desc    Update an existing course
+ * @route   PUT /api/v1/courses/:courseId
+ * @access  Private (Instructor only)
+ */
 export const editCourse = async (req, res) => {
-  try {
-    const courseId = req.params.courseId;
-    const {
-      courseTitle,
-      subTitle,
-      description,
-      category,
-      courseLevel,
-      coursePrice,
-    } = req.body;
-    const thumbnail = req.file;
+    try {
+        const { courseId } = req.params;
+        // UPDATED: Destructure all the new updatable fields
+        const {
+            title, subtitle, description, category, language, level, price,
+            learnings, requirements, includes
+        } = req.body;
+        const thumbnailFile = req.file;
 
-    let course = await Course.findById(courseId);
-    if (!course) {
-      return res.status(404).json({
-        message: "Course not found!",
-      });
+        let course = await Course.findById(courseId);
+        if (!course) {
+            return res.status(404).json({ message: "Course not found!" });
+        }
+
+        // --- Handle Thumbnail Upload ---
+        if (thumbnailFile) {
+            if (course.thumbnail) { // Delete old thumbnail if it exists
+                const publicId = course.thumbnail.split("/").pop().split(".")[0];
+                await deleteFromCloudinary(publicId);
+            }
+            const newThumbnail = await uploadMedia(thumbnailFile.path);
+            course.thumbnail = newThumbnail.secure_url;
+        }
+        
+        // --- Update All Fields ---
+        course.title = title || course.title;
+        course.subtitle = subtitle || course.subtitle;
+        course.description = description || course.description;
+        course.category = category || course.category;
+        course.language = language || course.language;
+        course.level = level || course.level;
+        if (price) { // Update nested price object
+             course.price.original = price.original || course.price.original;
+             course.price.current = price.current || course.price.current;
+        }
+        if (learnings) course.learnings = learnings; // Directly replace array
+        if (requirements) course.requirements = requirements;
+        if (includes) course.includes = includes;
+        
+        const updatedCourse = await course.save();
+        
+        return res.status(200).json({
+            course: updatedCourse,
+            message: "Course updated successfully.",
+        });
+
+    } catch (error) {
+        console.error("Failed to update course:", error);
+        return res.status(500).json({ message: "Failed to update course" });
     }
-    let courseThumbnail;
-    if (thumbnail) {
-      if (course.courseThumbnail) {
-        const publicId = course.courseThumbnail.split("/").pop().split(".")[0];
-        await deleteMediaFromCloudinary(publicId); // delete old image
-      }
-      // upload a thumbnail on clourdinary
-      courseThumbnail = await uploadMedia(thumbnail.path);
-    }
-
-    const updateData = {
-      courseTitle,
-      subTitle,
-      description,
-      category,
-      courseLevel,
-      coursePrice,
-      courseThumbnail: courseThumbnail?.secure_url,
-    };
-
-    course = await Course.findByIdAndUpdate(courseId, updateData, {
-      new: true,
-    });
-
-    return res.status(200).json({
-      course,
-      message: "Course updated successfully.",
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      message: "Failed to create course",
-    });
-  }
 };
+/**
+ * @desc    Get a single course by its ID, with fully populated nested data
+ * @route   GET /api/v1/courses/:courseId
+ * @access  Public
+ */
 export const getCourseById = async (req, res) => {
-  try {
-    const { courseId } = req.params;
+    try {
+        const { courseId } = req.params;
 
-    const course = await Course.findById(courseId);
+        const course = await Course.findById(courseId)
+            .populate({
+                path: 'sections', // 1. Populate the new 'sections' array
+                populate: {
+                    path: 'lectures' // 2. For each section, populate its 'lectures'
+                }
+            })
+            .populate('creator', 'name headline photoUrl')
+            .populate({
+                path: 'reviews',
+                populate: {
+                    path: 'user',
+                    select: 'name photoUrl'
+                }
+            });
 
-    if (!course) {
-      return res.status(404).json({
-        message: "Course not found!",
-      });
+        if (!course) {
+            return res.status(404).json({ message: "Course not found!" });
+        }
+        
+        return res.status(200).json({
+            success: true,
+            course,
+        });
+
+    } catch (error) {
+        console.error("Error in getCourseById:", error);
+        return res.status(500).json({ message: "Failed to get course by id" });
     }
-    return res.status(200).json({
-      course,
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      message: "Failed to get course by id",
-    });
-  }
 };
 
 export const createLecture = async (req, res) => {
@@ -378,7 +401,7 @@ export const removeLecture = async (req, res) => {
     }
     // delete the lecture from couldinary as well
     if (lecture.publicId) {
-      await deleteVideoFromCloudinary(lecture.publicId);
+      await deleteFromCloudinary(lecture.publicId);
     }
 
     // Remove the lecture reference from the associated course
