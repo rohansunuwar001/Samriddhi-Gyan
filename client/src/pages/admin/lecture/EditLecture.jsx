@@ -1,27 +1,23 @@
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
-import React from "react";
 import { Link, useParams } from "react-router-dom";
-import LectureTab from "./LectureTab";
+import EditLectureForm from "./EditLectureForm";
 
 const EditLecture = () => {
-  const params = useParams();
-  const courseId = params.courseId;
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-5">
-        <div className="flex items-center gap-2">
-          <Link to={`/admin/course/${courseId}/lecture`}>
-            <Button size="icon" variant="outline" className="rounded-full">
-              <ArrowLeft size={16} />
-            </Button>
-          </Link>
-          <h1 className="font-bold text-xl">Update Your Lecture</h1>
+    const { courseId } = useParams();
+
+    return (
+        <div className="mx-auto max-w-2xl p-4 sm:p-6 lg:p-8 space-y-6">
+            <div className="flex items-center justify-between">
+                <Link to={`/admin/course/${courseId}`}>
+                    <Button variant="ghost" className="flex items-center gap-2">
+                        <ArrowLeft size={16} /> Back to Curriculum
+                    </Button>
+                </Link>
+            </div>
+            <EditLectureForm />
         </div>
-      </div>
-      <LectureTab />
-    </div>
-  );
+    );
 };
 
 export default EditLecture;

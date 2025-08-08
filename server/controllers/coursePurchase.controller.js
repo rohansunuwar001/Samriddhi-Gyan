@@ -1,7 +1,6 @@
 import Stripe from "stripe";
 import { Course } from "../models/course.model.js";
 import { CoursePurchase } from "../models/coursePurchase.model.js";
-import { Lecture } from "../models/lecture.model.js";
 import { User } from "../models/user.model.js";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
@@ -129,30 +128,46 @@ export const stripeWebhook = async (req, res) => {
   }
   res.status(200).send();
 };
-export const getCourseDetailWithPurchaseStatus = async (req, res) => {
-  try {
-    const { courseId } = req.params;
-    const userId = req.id;
+export const getCourseDetailWithStatus = async (req, res) => {
+    try {
+        const { courseId } = req.params;
+        const userId = req.id; // From isAuthenticated middleware
 
-    const course = await Course.findById(courseId)
-      .populate({ path: "creator" })
-      .populate({ path: "lectures" });
+        // 1. FIND THE COURSE AND ADD THE POPULATE LOGIC HERE
+        const course = await Course.findById(courseId)
+            .populate({
+                path: 'reviews',
+                options: { sort: { createdAt: -1 } },
+                populate: {
+                    path: 'user',
+                    select: 'name photoUrl'
+                }
+            })
+            .populate('creator', 'name headline')
+            .populate('enrolledStudents', 'name photoUrl headline')
+            .populate({
+                path: 'sections',
+                populate: {
+                    path: 'lectures'
+                }
+            });
 
-    // This is the key to access control
-    const purchased = await CoursePurchase.findOne({ userId, courseId, status: "completed" });
+        if (!course) {
+            return res.status(404).json({ message: "Course not found." });
+        }
 
-    if (!course) {
-      return res.status(404).json({ message: "course not found!" });
+        // 2. CHECK THE PURCHASE STATUS (your existing logic)
+      const purchased = await CoursePurchase.findOne({ userId, courseId, status: "completed" });
+        
+        // 3. SEND THE POPULATED COURSE AND THE STATUS
+        res.status(200).json({ course, purchased });
+
+    } catch (error) {
+        console.error("Error fetching course detail with status:", error);
+        res.status(500).json({ message: "Server Error" });
     }
-
-    return res.status(200).json({
-      course,
-      purchased: !!purchased, // true if purchased, false otherwise
-    });
-  } catch (error) {
-    console.log(error);
-  }
 };
+
 
 export const getAllPurchasedCourse = async (_, res) => {
   try {

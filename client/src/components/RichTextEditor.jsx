@@ -1,13 +1,12 @@
-import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+const RichTextEditor = ({ value, onChange }) => {
+  return <ReactQuill theme="snow" value={value} onChange={onChange} />;
+};
 
-const RichTextEditor = ({input, setInput}) => {
-
-    const handleChange = (content) => {
-        setInput({...input, description:content});
-    }
-   
-  return <ReactQuill theme="snow" value={input.description} onChange={handleChange} />;
-}
-export default RichTextEditor
+RichTextEditor.propTypes = {
+  value: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+};
+export default RichTextEditor;

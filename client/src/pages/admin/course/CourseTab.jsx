@@ -29,6 +29,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
 const CourseTab = () => {
+  
   const [input, setInput] = useState({
     courseTitle: "",
     subTitle: "",
@@ -41,17 +42,14 @@ const CourseTab = () => {
 
   const params = useParams();
   const courseId = params.courseId;
-  const {
-    data: courseByIdData,
-    isLoading: courseByIdLoading,
-    refetch,
-  } = useGetCourseByIdQuery(courseId);
+  const { data: courseByIdData, isLoading: courseByIdLoading , refetch} =
+    useGetCourseByIdQuery(courseId);
 
-  const [publishCourse, {}] = usePublishCourseMutation();
-
+    const [publishCourse, {}] = usePublishCourseMutation();
+ 
   useEffect(() => {
-    if (courseByIdData?.course) {
-      const course = courseByIdData?.course;
+    if (courseByIdData?.course) { 
+        const course = courseByIdData?.course;
       setInput({
         courseTitle: course.courseTitle,
         subTitle: course.subTitle,
@@ -107,15 +105,15 @@ const CourseTab = () => {
 
   const publishStatusHandler = async (action) => {
     try {
-      const response = await publishCourse({ courseId, query: action });
-      if (response.data) {
+      const response = await publishCourse({courseId, query:action});
+      if(response.data){
         refetch();
         toast.success(response.data.message);
       }
     } catch (error) {
       toast.error("Failed to publish or unpublish course");
     }
-  };
+  }
 
   useEffect(() => {
     if (isSuccess) {
@@ -126,8 +124,8 @@ const CourseTab = () => {
     }
   }, [isSuccess, error]);
 
-  if (courseByIdLoading) return <h1>Loading...</h1>;
-
+  if(courseByIdLoading) return <h1>Loading...</h1>
+ 
   return (
     <Card>
       <CardHeader className="flex flex-row justify-between">
@@ -138,15 +136,7 @@ const CourseTab = () => {
           </CardDescription>
         </div>
         <div className="space-x-2">
-          <Button
-            // disabled={courseByIdData?.course.lectures.length === 0}
-            variant="outline"
-            onClick={() =>
-              publishStatusHandler(
-                courseByIdData?.course.isPublished ? "false" : "true"
-              )
-            }
-          >
+          <Button disabled={courseByIdData?.course.lectures.length === 0} variant="outline" onClick={()=> publishStatusHandler(courseByIdData?.course.isPublished ? "false" : "true")}>
             {courseByIdData?.course.isPublished ? "Unpublished" : "Publish"}
           </Button>
           <Button>Remove Course</Button>
@@ -191,16 +181,10 @@ const CourseTab = () => {
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>Category</SelectLabel>
-
-                    <SelectItem value="HTML">HTML</SelectItem>
-                    <SelectItem value="CSS">CSS</SelectItem>
-                    <SelectItem value="JavaScript">JavaScript</SelectItem>
-                    <SelectItem value="TypeScript">TypeScript</SelectItem>
+                    <SelectItem value="Next JS">Next JS</SelectItem>
+                    <SelectItem value="Data Science">Data Science</SelectItem>
                     <SelectItem value="Frontend Development">
                       Frontend Development
-                    </SelectItem>
-                    <SelectItem value="Backend Development">
-                      Backend Development
                     </SelectItem>
                     <SelectItem value="Fullstack Development">
                       Fullstack Development
@@ -208,56 +192,11 @@ const CourseTab = () => {
                     <SelectItem value="MERN Stack Development">
                       MERN Stack Development
                     </SelectItem>
-                    <SelectItem value="Next JS">Next JS</SelectItem>
-                    <SelectItem value="React JS">React JS</SelectItem>
-                    <SelectItem value="Vue JS">Vue JS</SelectItem>
-                    <SelectItem value="Node JS">Node JS</SelectItem>
-                    <SelectItem value="Express JS">Express JS</SelectItem>
-                    <SelectItem value="MongoDB">MongoDB</SelectItem>
-                    <SelectItem value="SQL">SQL</SelectItem>
+                    <SelectItem value="Javascript">Javascript</SelectItem>
                     <SelectItem value="Python">Python</SelectItem>
-                    <SelectItem value="Data Science">Data Science</SelectItem>
-                    <SelectItem value="Machine Learning">
-                      Machine Learning
-                    </SelectItem>
-                    <SelectItem value="Artificial Intelligence">
-                      Artificial Intelligence
-                    </SelectItem>
-                    <SelectItem value="DevOps">DevOps</SelectItem>
                     <SelectItem value="Docker">Docker</SelectItem>
-                    <SelectItem value="Git & GitHub">Git & GitHub</SelectItem>
-                    <SelectItem value="UI/UX Design">UI/UX Design</SelectItem>
-                    <SelectItem value="Figma">Figma</SelectItem>
-                    <SelectItem value="Adobe XD">Adobe XD</SelectItem>
-                    <SelectItem value="Photoshop">Photoshop</SelectItem>
-                    <SelectItem value="Cybersecurity">Cybersecurity</SelectItem>
-                    <SelectItem value="Cloud Computing">
-                      Cloud Computing
-                    </SelectItem>
-                    <SelectItem value="AWS">AWS</SelectItem>
-                    <SelectItem value="Firebase">Firebase</SelectItem>
-                    <SelectItem value="Java">Java</SelectItem>
-                    <SelectItem value="C++">C++</SelectItem>
-                    <SelectItem value="C#">C#</SelectItem>
-                    <SelectItem value="Android Development">
-                      Android Development
-                    </SelectItem>
-                    <SelectItem value="iOS Development">
-                      iOS Development
-                    </SelectItem>
-                    <SelectItem value="Mobile App Development">
-                      Mobile App Development
-                    </SelectItem>
-                    <SelectItem value="Software Testing">
-                      Software Testing
-                    </SelectItem>
-                    <SelectItem value="System Design">System Design</SelectItem>
-                    <SelectItem value="Operating Systems">
-                      Operating Systems
-                    </SelectItem>
-                    <SelectItem value="DSA (Data Structures & Algorithms)">
-                      DSA (Data Structures & Algorithms)
-                    </SelectItem>
+                    <SelectItem value="MongoDB">MongoDB</SelectItem>
+                    <SelectItem value="HTML">HTML</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
@@ -282,7 +221,7 @@ const CourseTab = () => {
               </Select>
             </div>
             <div>
-              <Label>Price in (NPR)</Label>
+              <Label>Price in (INR)</Label>
               <Input
                 type="number"
                 name="coursePrice"

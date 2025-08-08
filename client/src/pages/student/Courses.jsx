@@ -1,12 +1,12 @@
-import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { ExclamationTriangleIcon, RocketIcon } from "@radix-ui/react-icons";
-import React, { useRef, useState } from "react";
-import Course from "./Course";
-import { useGetPublishedCourseQuery } from "@/features/api/courseApi";
 import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useGetPublishedCourseQuery } from "@/features/api/courseApi";
+import { ExclamationTriangleIcon, RocketIcon } from "@radix-ui/react-icons";
+import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useRef, useState } from "react";
+import Course from "./Course";
 
 const Courses = () => {
   const { data, isLoading, isError, error, refetch } = useGetPublishedCourseQuery();

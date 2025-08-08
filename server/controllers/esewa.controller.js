@@ -76,11 +76,6 @@ export const completePayment = async (req, res, next) => {
       },
     });
 
-    await Course.findByIdAndUpdate(
-      coursePurchase.courseId,
-      { $addToSet: { enrolledStudents: coursePurchase.userId } } // Add user ID to enrolledStudents
-    );
-
     res.redirect(`http://localhost:5173/my-learning`);
     // await sendMail({
     //   to: `lazyfox916@gmail.com`,

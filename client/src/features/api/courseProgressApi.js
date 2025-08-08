@@ -1,46 +1,56 @@
-import { BASE_URL } from "@/app/constant";
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { apiSlice } from './apiSlice'; // Import the central apiSlice
 
-const COURSE_PROGRESS_API = `${BASE_URL}/api/v1/progress`;
+export const courseProgressApi = apiSlice.injectEndpoints({
+    endpoints: (builder) => ({
+        /**
+         * @desc Fetches the current user's progress for a specific course.
+         */
+        getCourseProgress: builder.query({
+            query: (courseId) => `/progress/${courseId}`,
+            // Provides a tag specific to this course's progress
+            providesTags: (result, error, courseId) => [{ type: 'CourseProgress', id: courseId }],
+        }),
+        
+        /**
+         * @desc Marks a specific lecture as viewed/completed.
+         */
+        updateLectureProgress: builder.mutation({
+            query: ({ courseId, lectureId }) => ({
+                url: `/progress/${courseId}/lecture/${lectureId}/view`,
+                method: 'POST',
+            }),
+            // On success, invalidates the progress for this course, forcing a refetch
+            invalidatesTags: (result, error, { courseId }) => [{ type: 'CourseProgress', id: courseId }],
+        }),
 
-export const courseProgressApi = createApi({
-  reducerPath: "courseProgressApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: COURSE_PROGRESS_API,
-    credentials: "include",
-  }),
-  endpoints: (builder) => ({
-    getCourseProgress: builder.query({
-      query: (courseId) => ({
-        url: `/${courseId}`,
-        method: "GET",
-      }),
-    }),
-    updateLectureProgress: builder.mutation({
-      query: ({ courseId, lectureId }) => ({
-        url: `/${courseId}/lecture/${lectureId}/view`,
-        method:"POST"
-      }),
-    }),
+        /**
+         * @desc Marks the entire course as completed by the user.
+         */
+        completeCourse: builder.mutation({
+            query: (courseId) => ({
+                url: `/progress/${courseId}/complete`,
+                method: 'POST',
+            }),
+            invalidatesTags: (result, error, courseId) => [{ type: 'CourseProgress', id: courseId }],
+        }),
 
-    completeCourse: builder.mutation({
-        query:(courseId) => ({
-            url:`/${courseId}/complete`,
-            method:"POST"
-        })
+        /**
+         * @desc Unmarks the course as completed (marks it as incomplete).
+         */
+        inCompleteCourse: builder.mutation({
+            query: (courseId) => ({
+                url: `/progress/${courseId}/incomplete`,
+                method: 'POST',
+            }),
+            invalidatesTags: (result, error, courseId) => [{ type: 'CourseProgress', id: courseId }],
+        }),
     }),
-    inCompleteCourse: builder.mutation({
-        query:(courseId) => ({
-            url:`/${courseId}/incomplete`,
-            method:"POST"
-        })
-    }),
-    
-  }),
 });
+
+// Export the auto-generated hooks.
 export const {
-useGetCourseProgressQuery,
-useUpdateLectureProgressMutation,
-useCompleteCourseMutation,
-useInCompleteCourseMutation
+    useGetCourseProgressQuery,
+    useUpdateLectureProgressMutation,
+    useCompleteCourseMutation,
+    useInCompleteCourseMutation
 } = courseProgressApi;
