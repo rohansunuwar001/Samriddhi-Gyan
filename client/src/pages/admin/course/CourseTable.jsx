@@ -2,14 +2,18 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useGetCreatorCourseQuery } from "@/features/api/courseApi";
-import { Edit, PlusCircle } from "lucide-react";
+import { useGetCreatorCourseQuery, useRemoveCourseMutation } from "@/features/api/courseApi";
+import { Edit, PlusCircle, Trash2, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { toast } from "react-hot-toast"; // or your preferred toast library
+import Swal from 'sweetalert2';
+import { useState } from "react";
 
-const CourseTable = () => {
-    const { data, isLoading, isError } = useGetCreatorCourseQuery();
-    console.log("Course Data:", data); // Debugging line to check fetched data
-    const navigate = useNavigate();
+let CourseTable = () => {
+    let { data, isLoading, isError, refetch } = useGetCreatorCourseQuery();
+    let [removeCourse, { isLoading: isRemoving }] = useRemoveCourseMutation();
+    let navigate = useNavigate();
+    const [deletingId, setDeletingId] = useState(null); // Track which course is being deleted
 
     if (isLoading) {
         return (
@@ -22,6 +26,32 @@ const CourseTable = () => {
     if (isError) return <div className="text-center text-red-500 py-10">Failed to load courses. Please try again.</div>
 
     const courses = data?.courses || [];
+
+    // Remove handler with SweetAlert2
+    const handleRemove = async (courseId) => {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "This will permanently delete the course.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#d33',
+            cancelButtonColor: '#3085d6',
+            confirmButtonText: 'Yes, delete it!',
+        });
+
+        if (result.isConfirmed) {
+            try {
+                setDeletingId(courseId); // Set the deleting course id
+                await removeCourse(courseId).unwrap();
+                toast.success("Course removed!");
+                refetch();
+            } catch {
+                toast.error("Failed to remove course.");
+            } finally {
+                setDeletingId(null); // Reset after deletion
+            }
+        }
+    };
 
     return (
         <div className="p-4 sm:p-6">
@@ -47,25 +77,32 @@ const CourseTable = () => {
                     {courses.length > 0 ? (
                         courses.map((course) => (
                             <TableRow key={course._id}>
-                                {/* --- THE FIX IS HERE --- */}
-                                {/* 1. Use 'courseTitle' instead of 'title' */}
                                 <TableCell className="font-semibold">{course.title}</TableCell>
-                                
-                                {/* 2. Use 'coursePrice' instead of 'price.current' */}
-                                <TableCell>Rs{course.coursePrice ?? 'N/A'}</TableCell>
-                                
-                                {/* 3. The 'totalLectures' field is correct in your JSON */}
+                                <TableCell>
+                                  Rs{course.price?.current ?? course.coursePrice ?? 'N/A'}
+                                </TableCell>
                                 <TableCell>{course.totalLectures || 0}</TableCell>
-                                
                                 <TableCell>
                                     <Badge variant={course.isPublished ? "default" : "secondary"}>
                                         {course.isPublished ? "Published" : "Draft"}
                                     </Badge>
                                 </TableCell>
-                                
-                                <TableCell className="text-right">
+                                <TableCell className="text-right flex gap-2 justify-end">
                                     <Button size="icon" variant="ghost" onClick={() => navigate(`${course._id}`)}>
                                         <Edit className="h-4 w-4" />
+                                    </Button>
+                                    <Button
+                                        size="icon"
+                                        variant="destructive"
+                                        onClick={() => handleRemove(course._id)}
+                                        disabled={isRemoving && deletingId === course._id}
+                                        title="Remove Course"
+                                    >
+                                        {isRemoving && deletingId === course._id ? (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                        ) : (
+                                            <Trash2 className="h-4 w-4" />
+                                        )}
                                     </Button>
                                 </TableCell>
                             </TableRow>

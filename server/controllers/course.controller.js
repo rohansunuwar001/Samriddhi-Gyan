@@ -1,7 +1,9 @@
 import { Course } from "../models/course.model.js";
+import { Section } from "../models/section.model.js";
 import { Lecture } from "../models/lecture.model.js";
 import { SearchSuggestion } from "../models/searchSuggestion.js";
 import { User } from "../models/user.model.js";
+import { Payment } from "../models/payment.model.js"; // Import your Payment model
 import {
   deleteFromCloudinary,
   uploadMedia,
@@ -303,142 +305,7 @@ export const getCourseById = async (req, res) => {
     }
 };
 
-export const createLecture = async (req, res) => {
-  try {
-    const { lectureTitle } = req.body;
-    const { courseId } = req.params;
-
-    if (!lectureTitle || !courseId) {
-      return res.status(400).json({
-        message: "Lecture title is required",
-      });
-    }
-
-    // create lecture
-    const lecture = await Lecture.create({ lectureTitle });
-
-    const course = await Course.findById(courseId);
-    if (course) {
-      course.lectures.push(lecture._id);
-      await course.save();
-    }
-
-    return res.status(201).json({
-      lecture,
-      message: "Lecture created successfully.",
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      message: "Failed to create lecture",
-    });
-  }
-};
-export const getCourseLecture = async (req, res) => {
-  try {
-    const { courseId } = req.params;
-    const course = await Course.findById(courseId).populate("lectures");
-    if (!course) {
-      return res.status(404).json({
-        message: "Course not found",
-      });
-    }
-    return res.status(200).json({
-      lectures: course.lectures,
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      message: "Failed to get lectures",
-    });
-  }
-};
-export const editLecture = async (req, res) => {
-  try {
-    const { lectureTitle, videoInfo, isPreviewFree } = req.body;
-
-    const { courseId, lectureId } = req.params;
-    const lecture = await Lecture.findById(lectureId);
-    if (!lecture) {
-      return res.status(404).json({
-        message: "Lecture not found!",
-      });
-    }
-
-    // update lecture
-    if (lectureTitle) lecture.lectureTitle = lectureTitle;
-    if (videoInfo?.videoUrl) lecture.videoUrl = videoInfo.videoUrl;
-    if (videoInfo?.publicId) lecture.publicId = videoInfo.publicId;
-    lecture.isPreviewFree = isPreviewFree;
-
-    await lecture.save();
-
-    // Ensure the course still has the lecture id if it was not aleardy added;
-    const course = await Course.findById(courseId);
-    if (course && !course.lectures.includes(lecture._id)) {
-      course.lectures.push(lecture._id);
-      await course.save();
-    }
-    return res.status(200).json({
-      lecture,
-      message: "Lecture updated successfully.",
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      message: "Failed to edit lectures",
-    });
-  }
-};
-export const removeLecture = async (req, res) => {
-  try {
-    const { lectureId } = req.params;
-    const lecture = await Lecture.findByIdAndDelete(lectureId);
-    if (!lecture) {
-      return res.status(404).json({
-        message: "Lecture not found!",
-      });
-    }
-    // delete the lecture from couldinary as well
-    if (lecture.publicId) {
-      await deleteFromCloudinary(lecture.publicId);
-    }
-
-    // Remove the lecture reference from the associated course
-    await Course.updateOne(
-      { lectures: lectureId }, // find the course that contains the lecture
-      { $pull: { lectures: lectureId } } // Remove the lectures id from the lectures array
-    );
-
-    return res.status(200).json({
-      message: "Lecture removed successfully.",
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      message: "Failed to remove lecture",
-    });
-  }
-};
-export const getLectureById = async (req, res) => {
-  try {
-    const { lectureId } = req.params;
-    const lecture = await Lecture.findById(lectureId);
-    if (!lecture) {
-      return res.status(404).json({
-        message: "Lecture not found!",
-      });
-    }
-    return res.status(200).json({
-      lecture,
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      message: "Failed to get lecture by id",
-    });
-  }
-};
+// 
 
 // publich unpublish course logic
 
@@ -467,7 +334,6 @@ export const togglePublishCourse = async (req, res) => {
     });
   }
 };
-
 export const getRecommendedCourses = async (req, res) => {
   try {
     const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
@@ -548,5 +414,116 @@ export const getRecommendedCourses = async (req, res) => {
   } catch (error) {
     console.error("Recommendation error:", error);
     res.status(500).json({ message: "Server error" });
+  }
+};
+/**
+ * @desc    Remove a course and its related data
+ * @route   DELETE /api/v1/course/:courseId
+ * @access  Private (Instructor only)
+ */
+export const removeCourse = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    const course = await Course.findById(courseId);
+
+    if (!course) {
+      return res.status(404).json({ message: "Course not found!" });
+    }
+
+    // Delete thumbnail from Cloudinary if exists
+    if (course.thumbnail) {
+      const publicId = course.thumbnail.split("/").pop().split(".")[0];
+      await deleteFromCloudinary(publicId);
+    }
+
+    // Delete course
+    await Course.findByIdAndDelete(courseId);
+
+    return res.status(200).json({ message: "Course removed successfully." });
+  } catch (error) {
+    console.error("Failed to remove course:", error);
+    return res.status(500).json({ message: "Failed to remove course" });
+  }
+};
+
+export const getCoursesWithEnrolledStudents = async (req, res) => {
+  try {
+    // 1. Fetch all courses
+    const courses = await Course.find()
+      .populate('enrolledStudents', 'name email photoUrl');
+
+    // 2. Format the response
+    const result = courses.map(course => ({
+      courseId: course._id,
+      courseTitle: course.title || course.courseTitle,
+      students: course.enrolledStudents,
+    }));
+
+    // 3. Send the response
+    res.status(200).json({ courses: result });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch courses and students" });
+  }
+};
+
+export const getCoursesWithEnrolledStudentsAndReviews = async (req, res) => {
+  try {
+    // Fetch all courses, populate enrolled students and reviews (with user info)
+    const courses = await Course.find()
+      .populate('enrolledStudents', 'name email photoUrl')
+      .populate({
+        path: 'reviews',
+        populate: {
+          path: 'user',
+          select: 'name email photoUrl'
+        }
+      });
+
+    // Format the response
+    const result = courses.map(course => ({
+      courseId: course._id,
+      courseTitle: course.title || course.courseTitle,
+      students: course.enrolledStudents,
+      reviews: course.reviews.map(review => ({
+        reviewId: review._id,
+        rating: review.rating,
+        comment: review.comment,
+        user: review.user // { name, email, photoUrl }
+      }))
+    }));
+
+    res.status(200).json({ courses: result });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch courses, students, and reviews" });
+  }
+};
+
+export const getPaidCoursesWithEnrolledStudentsAndPayments = async (req, res) => {
+  try {
+    // Find paid courses
+    const courses = await Course.find({ "price.current": { $gt: 0 } })
+      .populate('enrolledStudents', 'name email photoUrl');
+
+    // For each course, get payments
+    const result = await Promise.all(courses.map(async (course) => {
+      const payments = await Payment.find({ course: course._id })
+        .populate('user', 'name email photoUrl');
+      return {
+        courseId: course._id,
+        courseTitle: course.title || course.courseTitle,
+        price: course.price.current,
+        students: course.enrolledStudents,
+        payments: payments.map(payment => ({
+          user: payment.user,
+          amount: payment.amount,
+          date: payment.date
+        }))
+      };
+    }));
+
+    res.status(200).json({ courses: result });
+  } catch (error) {
+    console.error("Error in getPaidCoursesWithEnrolledStudentsAndPayments:", error);
+    res.status(500).json({ message: "Failed to fetch paid courses and payments" });
   }
 };

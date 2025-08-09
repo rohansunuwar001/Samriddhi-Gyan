@@ -8,7 +8,7 @@ import { FaStar } from 'react-icons/fa';
 import PropTypes from 'prop-types';
 
 // --- (CORRECTED) IMPORT The useToast hook ---
-import { useToast } from '@/hooks/use-toast'; // Make sure this path is correct
+// import { useToast } from '@/hooks/use-toast'; // Make sure this path is correct
 
 
 const StarRatingInput = ({ rating, setRating, hoverRating, setHoverRating }) => {
@@ -34,7 +34,7 @@ const StarRatingInput = ({ rating, setRating, hoverRating, setHoverRating }) => 
 
 const AddReviewForm = ({ courseId }) => {
     // This line will now work correctly.
-    const { toast } = useToast();
+    // const { toast } = useToast();
     const [rating, setRating] = useState(0);
     const [hoverRating, setHoverRating] = useState(0);
     const [comment, setComment] = useState('');
@@ -44,22 +44,22 @@ const AddReviewForm = ({ courseId }) => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (rating === 0) {
-            toast({ variant: "destructive", title: "Rating Required", description: "Please select a star rating before submitting." });
+            alert({ variant: "destructive", title: "Rating Required", description: "Please select a star rating before submitting." });
             return;
         }
         if (comment.trim() === '') {
-            toast({ variant: "destructive", title: "Comment Required", description: "Please write a comment to go with your review." });
+            alert({ variant: "destructive", title: "Comment Required", description: "Please write a comment to go with your review." });
             return;
         }
 
         try {
             await addReview({ courseId, reviewData: { rating, comment } }).unwrap();
-            toast({ title: "Success!", description: "Thank you! Your review has been submitted." });
+            alert({ title: "Success!", description: "Thank you! Your review has been submitted." });
             setRating(0);
             setComment('');
         } catch (err) {
             const errorMessage = err.data?.message || "Failed to submit review. You may have already reviewed this course.";
-            toast({ variant: "destructive", title: "Submission Failed", description: errorMessage });
+            alert({ variant: "destructive", title: "Submission Failed", description: errorMessage });
         }
     };
 

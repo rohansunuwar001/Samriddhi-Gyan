@@ -155,10 +155,11 @@ const CourseLandingPageTab = () => {
 
   const handlePublishToggle = async () => {
     const currentStatus = courseData?.course?.isPublished;
+    const publish = !currentStatus ? "true" : "false"; // must be string
     try {
       const res = await publishCourse({
         courseId,
-        isPublished: !currentStatus,
+        publish,
       }).unwrap();
       toast.success(res.message);
       refetch();

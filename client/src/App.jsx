@@ -45,13 +45,18 @@ import CourseTable from "./pages/admin/course/CourseTable";
 import EditCourse from "./pages/admin/course/EditCourse"; // This is the new tabbed Course Manager
 
 // Lecture Management Imports (Refined)
-import EditLecture from "./pages/admin/lecture/EditLecture"; // Only EditLecture is needed
-import Contact from "./pages/Contact/Contact";
-import BlogPage from "./components/Blog/BlogPage";
-import WishList from "./pages/WishList/WishList";
-import SingleBlogPage from "./components/Blog/SingleBlogPage";
 import AIAssistant from "./components/AIAssistant";
+import BlogPage from "./components/Blog/BlogPage";
+import SingleBlogPage from "./components/Blog/SingleBlogPage";
 import ForumPage from "./components/ForumPage";
+import CourseAnalytics from "./pages/admin/course/CourseAnalytics";
+import CoursePayout from "./pages/admin/course/CoursePayout";
+import CourseReviews from "./pages/admin/course/CourseReviews";
+import CourseStudent from "./pages/admin/course/CourseStudent";
+import EditLecture from "./pages/admin/lecture/EditLecture"; // Only EditLecture is needed
+import Cart from "./pages/cart/Cart";
+import CourseDetailPage from "./pages/Courses/CourseDetailPage";
+import WishList from "./pages/WishList/WishList";
 
 
 // --- LAYOUT WRAPPER COMPONENT ---
@@ -77,7 +82,7 @@ const appRouter = createBrowserRouter([
         element: <AIAssistant />,
       },
       { path: "/about", element: <About /> },
-      { path: "/contact", element: <Contact /> },
+      { path: "/contact", element: <CourseDetailPage /> },
       { path: "/blog", element: <BlogPage /> },
       {path: "/wishlist", element: <WishList />}, // Placeholder for Wishlist
       {path: "/blog/:slug", element: <SingleBlogPage />}, // Dynamic blog post page
@@ -85,6 +90,10 @@ const appRouter = createBrowserRouter([
       {
         path: "/community",
         element: <ForumPage />,
+      },
+
+      {path: "/cart",
+        element: <ProtectedRoute><PurchaseCourseProtectedRoute><Cart /></PurchaseCourseProtectedRoute></ProtectedRoute>
       },
 
       { path: "/how-it-works", element: <HowItWorks /> },
@@ -145,6 +154,23 @@ const appRouter = createBrowserRouter([
             path: "course/:courseId/lecture/:lectureId",
             element: <EditLecture />
           },
+          {
+            path:`course/students`,
+            element: <CourseStudent />
+          },
+          {
+            path: `course/reviews`,
+            element: <CourseReviews />
+          },
+          {
+            path: `course/payouts`,
+            element: <CoursePayout />
+
+          },
+          {
+            path: "course/analytics",
+            element: <CourseAnalytics />
+          }
         ],
       },
     ],

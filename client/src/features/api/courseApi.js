@@ -66,13 +66,11 @@ export const courseApi = apiSlice.injectEndpoints({
         }),
         
         publishCourse: builder.mutation({
-            query: ({ courseId, isPublished }) => ({
-                url: `/course/${courseId}/publish`, // <-- plural 'courses'
+            query: ({ courseId, publish }) => ({
+                url: `/course/${courseId}/publish?publish=${publish}`,
                 method: 'PATCH',
-                body: { isPublished },
             }),
             invalidatesTags: (result, error, { courseId }) => [
-                { type: 'Course', id: 'LIST' },
                 { type: 'CourseDetail', id: courseId }
             ],
         }),
@@ -124,7 +122,7 @@ export const courseApi = apiSlice.injectEndpoints({
         // getCourseLecture: builder.query(...) // REMOVED
         
         updateLecture: builder.mutation({
-            query: ({ lectureId, formData, courseId }) => ({
+            query: ({ lectureId, formData }) => ({
                 url: `/lectures/${lectureId}`,
                 method: 'PUT',
                 body: formData,
@@ -145,6 +143,33 @@ export const courseApi = apiSlice.injectEndpoints({
             // Lectures don't really need tags as they are almost always fetched as part of a course.
         }),
         
+        removeCourse: builder.mutation({
+            query: (courseId) => ({
+                url: `/course/${courseId}`,
+                method: 'DELETE',
+            }),
+            invalidatesTags: [{ type: 'Course', id: 'LIST' }],
+        }),
+
+        getCourseEnrolledStudents: builder.query({
+            query: (courseId) => `/course/${courseId}/enrolled-students`,
+        }),
+
+        // NEW: Get all courses with enrolled students
+        getCoursesWithEnrolledStudents: builder.query({
+            query: () => 'course/courses-with-students',
+        }),
+
+        // NEW: Get all courses with enrolled students AND reviews
+        getCoursesWithEnrolledStudentsAndReviews: builder.query({
+            query: () => 'course/courses-with-students-reviews',
+        }),
+
+        // NEW: Get all paid courses with enrolled students AND payments
+        getPaidCoursesWithEnrolledStudentsAndPayments: builder.query({
+            query: () => 'course/paid-courses-with-students-payments',
+        }),
+
     }),
     overrideExisting: false,
 });
@@ -159,6 +184,7 @@ export const {
     useGetRecommendedCourseQuery,
     useGetSearchCourseQuery,
     usePublishCourseMutation,
+    useRemoveCourseMutation,
 
     // Add new section hooks
     useCreateSectionMutation,
@@ -173,4 +199,9 @@ export const {
     
     // removeLecture is now deleteLecture for consistency
     // useRemoveLectureMutation,
+
+    useGetCourseEnrolledStudentsQuery,
+    useGetCoursesWithEnrolledStudentsQuery, // <-- Add this export
+    useGetCoursesWithEnrolledStudentsAndReviewsQuery, // <-- Add this export
+    useGetPaidCoursesWithEnrolledStudentsAndPaymentsQuery, // <-- Add this export
 } = courseApi;
