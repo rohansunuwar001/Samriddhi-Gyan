@@ -49,10 +49,6 @@ const CourseStudent = () => {
                     <td className="border px-4 py-2 text-center" colSpan={3}>No students enrolled yet.</td>
                   </tr>
                 )}
-<<<<<<< HEAD
-=======
-                {/* heeloo */}
->>>>>>> 0812625c789758448b9a17a4a36441b3992c4a7e
               </tbody>
             </table>
           </div>
