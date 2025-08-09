@@ -7,10 +7,10 @@ const router = express.Router();
 router.route("/create").post(isAuthenticated,createCourse);
 router.get('/recommendations', getRecommendedCourses);
 router.route("/search").get(isAuthenticated, searchCourse);
-router.get('/course/published', getPublishedCourse); // <-- static first
+router.get('/published', getPublishedCourse); // <-- static first
 router.route("/creator").get(isAuthenticated,getCreatorCourses);
 router.route("/:courseId").put(isAuthenticated,upload.single("courseThumbnail"),editCourse);
-router.get('/course/:courseId', getCourseById);       // <-- dynamic after
+router.get('/:courseId', getCourseById);       // <-- dynamic after
 // router.route("/:courseId/lecture").post(isAuthenticated, createLecture);
 // router.route("/:courseId/lecture").get(isAuthenticated, getCourseLecture);
 // router.route("/:courseId/lecture/:lectureId").post(isAuthenticated, editLecture);
