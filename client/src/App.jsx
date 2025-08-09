@@ -1,4 +1,5 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 // --- CORE LAYOUT & UTILITY IMPORTS ---
 import AnimatedErrorPage from "./AnimatedErrorPage";
@@ -178,6 +179,9 @@ const appRouter = createBrowserRouter([
 ]);
 
 function App() {
+  const { user } = useSelector((store) => store.auth);
+  const isInstructor = user?.role === "instructor";
+
   return (
     <main>
       <RouterProvider router={appRouter} />

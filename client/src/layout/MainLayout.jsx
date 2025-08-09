@@ -1,4 +1,5 @@
 import { Outlet } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 // --- Your Original Imports ---
 import Footer from '@/components/Footer';
@@ -12,6 +13,8 @@ const MainLayout = () => {
   // Call the hook to check for a logged-in user on initial app load.
   // We only need the `isLoading` state for this component's logic.
   const { isLoading } = useLoadUserQuery();
+  const { user } = useSelector((store) => store.auth);
+  const isInstructor = user?.role === 'instructor';
 
   return (
     <div className='flex flex-col min-h-screen'>
@@ -22,7 +25,7 @@ const MainLayout = () => {
         {isLoading ? <LoadingSpinner /> : <Outlet />}
       </main>
       
-      <Footer />
+      {!isInstructor && <Footer />}
     </div>
   );
 };

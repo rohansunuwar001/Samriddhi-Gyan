@@ -170,6 +170,11 @@ export const courseApi = apiSlice.injectEndpoints({
             query: () => 'course/paid-courses-with-students-payments',
         }),
 
+        // NEW: Get course analytics
+        getCourseAnalytics: builder.query({
+            query: () => 'course/analytics',
+        }),
+
     }),
     overrideExisting: false,
 });
@@ -204,4 +209,7 @@ export const {
     useGetCoursesWithEnrolledStudentsQuery, // <-- Add this export
     useGetCoursesWithEnrolledStudentsAndReviewsQuery, // <-- Add this export
     useGetPaidCoursesWithEnrolledStudentsAndPaymentsQuery, // <-- Add this export
+
+    // NEW: Course analytics hook
+    useGetCourseAnalyticsQuery,
 } = courseApi;

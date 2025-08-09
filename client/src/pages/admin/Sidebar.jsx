@@ -40,11 +40,11 @@ const Sidebar = () => {
                 <div className="flex flex-col h-full">
                     <nav className="flex-grow space-y-2">
                         <AdminNavLink to="dashboard" icon={<LayoutDashboard size={20} />} label="Dashboard" />
+                        <AdminNavLink to="course/analytics" icon={<BarChart3 size={20} />} label="Analytics" />
                         <AdminNavLink to="course" icon={<BookCopy size={20} />} label="My Courses" />
                         <AdminNavLink to="course/students" icon={<Users size={20} />} label="Students" />
                         <AdminNavLink to="course/reviews" icon={<MessageSquare size={20} />} label="Reviews" />
                         <AdminNavLink to="course/payouts" icon={<DollarSign size={20} />} label="Payouts" />
-                        <AdminNavLink to="course/analytics" icon={<BarChart3 size={20} />} label="Analytics" />
                     </nav>
                 </div>
             </aside>

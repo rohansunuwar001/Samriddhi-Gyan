@@ -527,3 +527,43 @@ export const getPaidCoursesWithEnrolledStudentsAndPayments = async (req, res) =>
     res.status(500).json({ message: "Failed to fetch paid courses and payments" });
   }
 };
+
+export const getCourseAnalytics = async (req, res) => {
+  try {
+    // Fetch all courses
+    const courses = await Course.find()
+      .populate('enrolledStudents', 'name email photoUrl')
+      .populate({
+        path: 'reviews',
+        select: 'rating'
+      });
+
+    // For each course, get payments and calculate analytics
+    const result = await Promise.all(courses.map(async (course) => {
+      // Get payments for this course
+      const payments = await Payment.find({ course: course._id });
+      const totalRevenue = payments.reduce((sum, p) => sum + (p.amount || 0), 0);
+      const purchaseCount = payments.length;
+
+      // Calculate average rating
+      const ratings = course.reviews.map(r => r.rating).filter(r => typeof r === 'number');
+      const avgRating = ratings.length > 0
+        ? (ratings.reduce((sum, r) => sum + r, 0) / ratings.length).toFixed(2)
+        : null;
+
+      return {
+        courseId: course._id,
+        courseTitle: course.title || course.courseTitle,
+        enrolledCount: course.enrolledStudents.length,
+        totalRevenue,
+        purchaseCount,
+        avgRating,
+      };
+    }));
+
+    res.status(200).json({ analytics: result });
+  } catch (error) {
+    console.error("Error in getCourseAnalytics:", error);
+    res.status(500).json({ message: "Failed to fetch course analytics" });
+  }
+};
