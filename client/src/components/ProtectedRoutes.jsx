@@ -27,7 +27,7 @@ export const AdminRoute = ({children}) => {
         return <Navigate to="/login"/>
     }
 
-    if(user?.role !== "instructor"){
+    if(user?.role !== "admin"){
         return <Navigate to="/"/>
     }
 
@@ -48,6 +48,20 @@ export const InstructorRoute = ({children}) => {
     return children;
 };
 
+export const StudentRoute = ({ children }) => {
+  const { user, isAuthenticated } = useSelector(store => store.auth);
+
+  // Allow if not logged in, or if logged in as student
+  if (isAuthenticated && user?.role !== "student") {
+    // Redirect instructors/admins to their dashboard
+    if (user?.role === "instructor") return <Navigate to="/instructor/dashboard" />;
+    if (user?.role === "admin") return <Navigate to="/admin/dashboard" />;
+    return <Navigate to="/" />;
+  }
+
+  return children;
+};
+
 AdminRoute.propTypes = {
     children: PropTypes.node.isRequired,   
 };
@@ -59,4 +73,7 @@ ProtectedRoute.propTypes = {
 };
 InstructorRoute.propTypes = {
     children: PropTypes.node.isRequired,
+};
+StudentRoute.propTypes = {
+  children: PropTypes.node.isRequired,
 };

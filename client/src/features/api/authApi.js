@@ -17,7 +17,7 @@ export const authApi = apiSlice.injectEndpoints({
         }),
 
         /**
-         * @desc Logs in an existing user. 
+         * @desc Logs in an existing user.
          */
         loginUser: builder.mutation({
             query: (inputData) => ({
@@ -29,6 +29,7 @@ export const authApi = apiSlice.injectEndpoints({
                 try {
                     const result = await queryFulfilled;
                     dispatch(userLoggedIn({ user: result.data.user }));
+                    console.log("Login successful:", result.data.user);
                 } catch (error) { console.error("Login failed:", error); }
             },
         }),
