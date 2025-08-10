@@ -12,8 +12,8 @@ const CoursePayout = () => {
     <div>
       <h2 className="text-2xl font-bold mb-6">Paid Courses & Purchases</h2>
       {courses.length === 0 ? (
-        <div>No paid courses found.</div>
-      ) : (
+        <div>No paid courses found .</div>
+      ) : ( 
         courses.map(course => (
           <div key={course.courseId} className="mb-10">
             <h3 className="text-lg font-semibold mb-2">{course.courseTitle}</h3>
