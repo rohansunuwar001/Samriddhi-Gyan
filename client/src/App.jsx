@@ -1,5 +1,5 @@
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 
 // --- CORE LAYOUT & UTILITY IMPORTS ---
 import AnimatedErrorPage from "./AnimatedErrorPage";
@@ -55,9 +55,9 @@ import CoursePayout from "./pages/admin/course/CoursePayout";
 import CourseReviews from "./pages/admin/course/CourseReviews";
 import CourseStudent from "./pages/admin/course/CourseStudent";
 import EditLecture from "./pages/admin/lecture/EditLecture"; // Only EditLecture is needed
-import Cart from "./pages/cart/Cart";
-import CourseDetailPage from "./pages/Courses/CourseDetailPage";
+import Contact from "./pages/Contact/Contact";
 import WishList from "./pages/WishList/WishList";
+import Cart from "./pages/cart/Cart";
 
 
 // --- LAYOUT WRAPPER COMPONENT ---
@@ -78,9 +78,9 @@ const appRouter = createBrowserRouter([
       // --- Public Routes (now student-only) ---
       { path: "/", element: <StudentRoute><Home /></StudentRoute> },
       { path: "/about", element: <StudentRoute><About /></StudentRoute> },
-      { path: "/contact", element: <StudentRoute><CourseDetailPage /></StudentRoute> },
+      { path: "/contact", element: <StudentRoute><Contact /></StudentRoute> },
       { path: "/blog", element: <StudentRoute><BlogPage /></StudentRoute> },
-      { path: "/wishlist", element: <StudentRoute><WishList /></StudentRoute> },
+       { path: "/wishlist", element: <StudentRoute><WishList /></StudentRoute> },
       { path: "/blog/:slug", element: <StudentRoute><SingleBlogPage /></StudentRoute> },
       { path: "/community", element: <StudentRoute><ForumPage /></StudentRoute> },
       { path: "/how-it-works", element: <StudentRoute><HowItWorks /></StudentRoute> },
@@ -92,7 +92,7 @@ const appRouter = createBrowserRouter([
 
       {
         path: "/cart",
-        element: <ProtectedRoute><PurchaseCourseProtectedRoute><Cart /></PurchaseCourseProtectedRoute></ProtectedRoute>
+        element: <ProtectedRoute><Cart /></ProtectedRoute>
       },
 
       { path: "login", element: <AuthenticatedUser><Login /></AuthenticatedUser> },

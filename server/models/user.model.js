@@ -27,6 +27,18 @@ const userSchema = new mongoose.Schema({
             ref: 'Course'
         }
     ],
+    wishlist: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course'
+      }
+    ],
+     cart: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Course'
+      }
+    ],
     photoUrl: {
         type: String,
         default: ""

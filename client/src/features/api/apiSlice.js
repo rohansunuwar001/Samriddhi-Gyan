@@ -21,7 +21,10 @@ export const apiSlice = createApi({
         'CourseDetail', // For the detailed data of a single course
         'Review',       // For review data
         'CourseProgress',// For a user's progress in a course
-        'DashboardAnalytics' // For instructor dashboard stats
+        'DashboardAnalytics', // For instructor dashboard stats
+        'Notifications', // For user notifications
+        'Wishlist',     // For the user's wishlist items
+        
     ],
     
     // The base query function that will be used for all API calls.
