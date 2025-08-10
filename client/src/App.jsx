@@ -7,7 +7,7 @@ import ScrollToTop from "./components/ScrollToTop";
 import MainLayout from "./layout/MainLayout";
 
 // --- AUTHENTICATION & ROUTE PROTECTION ---
-import { AdminRoute, AuthenticatedUser, ProtectedRoute } from "./components/ProtectedRoutes";
+import { AdminRoute, AuthenticatedUser, InstructorRoute, ProtectedRoute } from "./components/ProtectedRoutes";
 import PurchaseCourseProtectedRoute from "./components/PurchaseCourseProtectedRoute";
 
 // --- ALL PAGE COMPONENT IMPORTS ---
@@ -134,8 +134,8 @@ const appRouter = createBrowserRouter([
       // --- REVISED ADMIN/INSTRUCTOR ROUTES ---
       // ===================================
       {
-        path: "admin",
-        element: <AdminRoute><Sidebar /></AdminRoute>,
+        path: "instructor",
+        element: <InstructorRoute><Sidebar /></InstructorRoute>,
         children: [
           // A. Default admin route and explicit dashboard route
           { path: "", element: <Dashboard /> },
@@ -174,6 +174,19 @@ const appRouter = createBrowserRouter([
           }
         ],
       },
+      {
+        path: "admin",
+        element: <AdminRoute><Sidebar /></AdminRoute>,
+        children: [
+          // A. Default admin route and explicit dashboard route
+          // { path: "", element: <Dashboard /> },
+          // { path: "dashboard", element: <Dashboard /> },
+          // // B. Course management routes
+          // { path: "course", element: <CourseTable /> },
+          // { path: "course/create", element: <AddCourse /> },
+          // { path: "course/:courseId", element: <EditCourse /> },
+        ]
+      }
     ],
   },
 ]);

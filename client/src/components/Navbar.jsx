@@ -241,7 +241,7 @@ const Navbar = () => {
             <NavLink to="/how-it-works">{t('navbar.how_it_works')}</NavLink>
             <NavLink to="/contact">{t('navbar.contact')}</NavLink>
             <NavLink to="/blog">{t('navbar.blog')}</NavLink>
-            {user?.role === 'instructor' && (<NavLink to="/admin/dashboard">{t('navbar.instructor')}</NavLink>)}
+            {user?.role === 'instructor' && (<NavLink to="/instructor/dashboard">{t('navbar.instructor')}</NavLink>)}
           </div>
           <div className="h-10 min-w-[220px] flex items-center justify-end">{renderAuthSection()}</div>
         </div>
