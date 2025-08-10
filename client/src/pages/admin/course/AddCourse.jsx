@@ -94,7 +94,7 @@ const AddCourse = () => {
                         </div>
                     </CardContent>
                     <CardFooter className="flex justify-end gap-4 pt-6">
-                        <Button type="button" variant="outline" onClick={() => navigate("/admin/course")}>Cancel</Button>
+                        <Button type="button" variant="outline" onClick={() => navigate("/instructor/course")}>Cancel</Button>
                         <Button type="submit" disabled={isLoading}>
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Create & Continue

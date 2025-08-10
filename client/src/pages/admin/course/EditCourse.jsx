@@ -13,7 +13,7 @@ const EditCourse = () => {
     return (
         <div className="flex-1 mx-auto max-w-5xl p-4 sm:p-6 lg:p-8 space-y-6">
             <header className="flex items-center justify-between">
-                <Link to="/admin/course" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary">
+                <Link to="/instructor/course" className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary">
                     <ArrowLeft size={16} />
                     Back to My Courses
                 </Link>

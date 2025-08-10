@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
+import { useSelector } from 'react-redux'; // <-- Import useSelector
 
 // Icons for each navigation link
 import { 
@@ -13,11 +14,30 @@ import {
 
 // Reusable NavLink component to avoid code repetition
 const AdminNavLink = ({ to, icon, label }) => {
-    // NavLink from react-router-dom automatically gets an `isActive` prop
     return (
         <NavLink
             to={to}
-            end // Use 'end' to prevent parent routes from staying active
+            end
+            className={({ isActive }) =>
+                `flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-muted/50 dark:hover:bg-muted/20 ${
+                isActive
+                    ? 'bg-muted dark:bg-muted/30 font-semibold text-primary'
+                    : 'text-muted-foreground'
+                }`
+            }
+        >
+            {icon}
+            {label}
+        </NavLink>
+    );
+};
+
+// Reusable NavLink component for Instructor
+const InstructorNavLink = ({ to, icon, label }) => {
+    return (
+        <NavLink
+            to={to}
+            end
             className={({ isActive }) =>
                 `flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-muted/50 dark:hover:bg-muted/20 ${
                 isActive
@@ -33,18 +53,23 @@ const AdminNavLink = ({ to, icon, label }) => {
 };
 
 const Sidebar = () => {
+    const { user } = useSelector(store => store.auth); // <-- Get user from Redux
+
+    // Decide which NavLink to use based on role
+    const NavLinkComponent = user?.role === 'instructor' ? InstructorNavLink : AdminNavLink;
+
     return (
         <div className="flex h-screen bg-background">
             {/* --- Sidebar Navigation --- */}
             <aside className="hidden lg:block w-[250px] flex-shrink-0 border-r dark:border-gray-800 p-4">
                 <div className="flex flex-col h-full">
                     <nav className="flex-grow space-y-2">
-                        <AdminNavLink to="dashboard" icon={<LayoutDashboard size={20} />} label="Dashboard" />
-                        <AdminNavLink to="course/analytics" icon={<BarChart3 size={20} />} label="Analytics" />
-                        <AdminNavLink to="course" icon={<BookCopy size={20} />} label="My Courses" />
-                        <AdminNavLink to="course/students" icon={<Users size={20} />} label="Students" />
-                        <AdminNavLink to="course/reviews" icon={<MessageSquare size={20} />} label="Reviews" />
-                        <AdminNavLink to="course/payouts" icon={<DollarSign size={20} />} label="Payouts" />
+                        <NavLinkComponent to="dashboard" icon={<LayoutDashboard size={20} />} label="Dashboard" />
+                        <NavLinkComponent to="course/analytics" icon={<BarChart3 size={20} />} label="Analytics" />
+                        <NavLinkComponent to="course" icon={<BookCopy size={20} />} label="My Courses" />
+                        <NavLinkComponent to="course/students" icon={<Users size={20} />} label="Students" />
+                        <NavLinkComponent to="course/reviews" icon={<MessageSquare size={20} />} label="Reviews" />
+                        <NavLinkComponent to="course/payouts" icon={<DollarSign size={20} />} label="Payouts" />
                     </nav>
                 </div>
             </aside>
@@ -58,4 +83,4 @@ const Sidebar = () => {
     );
 };
 
-export default Sidebar; 
+export default Sidebar;

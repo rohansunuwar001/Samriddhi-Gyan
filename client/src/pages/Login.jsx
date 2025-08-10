@@ -24,26 +24,36 @@ const Login = () => {
     },
   ] = useLoginUserMutation();
 
+  
   const navigate = useNavigate();
 
   const changeInputHandler = (e) => {
     const { name, value } = e.target;
     setLoginInput({ ...loginInput, [name]: value });
   };
-
+  
   const handleLogin = async () => {
     await loginUser(loginInput);
   };
-
+  
   useEffect(() => {
     if (loginIsSuccess && loginData) {
       toast.success(loginData?.message || "Login successful.");
-      navigate("/");
+      console.log("Login Data:", loginData); // <-- Add this line
+      const role = loginData?.user?.role?.toLowerCase();
+      console.log("User role:", role); // <-- Add this line
+      if (role === "instructor") {
+        navigate("/instructor/dashboard");
+      } else if (role === "admin") {
+        navigate("/admin/dashboard");
+      } else {
+        navigate("/");
+      }
     }
     if (loginError) {
       toast.error(loginError?.data?.message || "Login failed");
     }
-  }, [loginIsSuccess, loginError]);
+  }, [loginIsSuccess, loginError, loginData, navigate]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
