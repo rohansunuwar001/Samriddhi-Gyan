@@ -32,7 +32,7 @@ const EditCourse = () => {
                     </TabsTrigger>
                     <TabsTrigger value="curriculum">
                         <Presentation className="mr-2 h-4 w-4" />
-                        Curriculum
+                        Curriculum 
                     </TabsTrigger>
                 </TabsList>
                 <TabsContent value="landing-page" className="mt-6">

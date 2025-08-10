@@ -210,6 +210,6 @@ export const {
     useGetCoursesWithEnrolledStudentsAndReviewsQuery, // <-- Add this export
     useGetPaidCoursesWithEnrolledStudentsAndPaymentsQuery, // <-- Add this export
 
-    // NEW: Course analytics hook
+    // NEW: Course analytics hook 
     useGetCourseAnalyticsQuery,
 } = courseApi;

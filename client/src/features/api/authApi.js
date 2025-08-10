@@ -17,7 +17,7 @@ export const authApi = apiSlice.injectEndpoints({
         }),
 
         /**
-         * @desc Logs in an existing user.
+         * @desc Logs in an existing user. 
          */
         loginUser: builder.mutation({
             query: (inputData) => ({

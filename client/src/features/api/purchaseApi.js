@@ -11,7 +11,7 @@ export const purchaseApi = apiSlice.injectEndpoints({
                 method: 'POST',
                 body: { courseId },
             }),
-        }),
+        }), 
         
         /**
          * @desc Fetches detailed course info along with the user's purchase status.

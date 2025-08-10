@@ -19,7 +19,7 @@ export const instructorApi = apiSlice.injectEndpoints({
              * If another mutation (e.g., a new course purchase) invalidates this tag,
              * RTK Query will automatically re-fetch this data to update the dashboard.
              */
-            providesTags: ['DashboardAnalytics'],
+            providesTags: ['DashboardAnalytics'], 
         }),
 
         // You could add other instructor-specific endpoints here in the future, for example:

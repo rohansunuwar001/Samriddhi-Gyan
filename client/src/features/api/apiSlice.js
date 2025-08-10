@@ -11,7 +11,7 @@ const API_V1_URL = `${BASE_URL}/api/v1`;
  */
 export const apiSlice = createApi({
     // A single reducer path for managing all API state.
-    reducerPath: 'api',
+    reducerPath: 'api', 
     
     // A comprehensive list of tag types for caching and automatic data re-fetching.
     // These tags act as names for different pieces of data.

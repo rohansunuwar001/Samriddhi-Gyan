@@ -17,7 +17,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Users, DollarSign, Star, BookOpen } from "lucide-react";
 
 // --- Skeleton Component for a better loading state ---
-const DashboardSkeleton = () => (
+const DashboardSkeleton = () => ( 
     <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         {[...Array(4)].map((_, i) => (
              <Card key={i}><CardHeader><Skeleton className="h-6 w-1/2" /></CardHeader><CardContent><Skeleton className="h-10 w-3/4" /></CardContent></Card>

@@ -15,4 +15,4 @@ const initializeApp = async () => {
     );
 };
 
-initializeApp();
+initializeApp(); 

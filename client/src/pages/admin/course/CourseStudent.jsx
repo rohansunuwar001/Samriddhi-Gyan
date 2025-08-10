@@ -14,7 +14,7 @@ const CourseStudent = () => {
       {courses.length === 0 ? (
         <div className="text-gray-500">No courses found.</div>
       ) : (
-        courses.map((course) => (
+        courses.map((course) => ( 
           <div key={course.courseId} className="mb-10">
             <h3 className="text-lg font-semibold mb-4">Course Title: {course.courseTitle}</h3>
             <table className="min-w-full border mb-6">

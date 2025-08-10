@@ -38,7 +38,7 @@ const CourseTab = () => {
     courseLevel: "",
     coursePrice: "",
     courseThumbnail: "",
-  });
+  }); 
 
   const params = useParams();
   const courseId = params.courseId;

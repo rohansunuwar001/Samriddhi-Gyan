@@ -125,7 +125,7 @@ const appRouter = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <Courses />
-          </ProtectedRoute>
+          </ProtectedRoute> 
         ),
       }
 ,

@@ -15,7 +15,7 @@ const EditLecture = () => {
                     </Button>
                 </Link>
             </div>
-            <EditLectureForm />
+            <EditLectureForm /> 
         </div>
     );
 };

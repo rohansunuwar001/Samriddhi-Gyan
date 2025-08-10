@@ -173,7 +173,7 @@ const Navbar = () => {
       <div className="container mx-auto px-4 h-16 flex justify-between items-center gap-4">
         <div className="flex items-center gap-4 shrink-0">
           <Link to="/"><img src="/samriddhi_logo1.png" alt="Samriddhi Logo" width="82" height="34" /></Link>
-          <div className="hidden lg:block"><NavLink to="/course/search">{t('navbar.explore')}</NavLink></div>
+          <div className="hidden lg:block"><NavLink to="/course/search">{t('navbar.explore')}</NavLink></div> 
         </div>
 
         <div ref={searchContainerRef} className="flex-grow hidden sm:block mx-4 relative">

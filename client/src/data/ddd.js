@@ -10,7 +10,7 @@ export const togglePublishCourse = async (req, res) => {
     }
     // publish status based on the query paramter
     course.isPublished = publish === "true";
-    await course.save();
+    await course.save(); 
 
     const statusMessage = course.isPublished ? "Published" : "Unpublished";
     return res.status(200).json({

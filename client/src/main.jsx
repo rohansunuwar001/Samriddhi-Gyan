@@ -11,7 +11,7 @@ import { appStore } from "./app/store.js";
 // Get the root element from the HTML
 const rootElement = document.getElementById("root");
 
-// Create the root and render the app
+// Create the root and render the app 
 ReactDOM.createRoot(rootElement).render(
   <StrictMode>
     <Provider store={appStore}>

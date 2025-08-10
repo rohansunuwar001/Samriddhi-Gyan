@@ -13,7 +13,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
     };
 
     return (
-        <div className="flex items-center justify-between bg-background px-3 py-2 rounded border hover:bg-muted/50">
+        <div className="flex items-center justify-between bg-background px-3 py-2 rounded border hover:bg-muted/50"> 
             <div className="flex items-center gap-3">
                 <Video size={16} className="text-muted-foreground" />
                 <p className="font-medium text-sm">

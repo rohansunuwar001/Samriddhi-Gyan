@@ -42,7 +42,7 @@ const Signup = () => {
     formState: { errors, isSubmitting },
     watch,
   } = useForm({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema), 
   });
 
   const password = watch("password", "");

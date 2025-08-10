@@ -11,7 +11,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 
 const EditLectureForm = () => {
-    const { lectureId, courseId } = useParams();
+    const { lectureId, courseId } = useParams(); 
     const navigate = useNavigate();
 
     const [title, setTitle] = useState("");

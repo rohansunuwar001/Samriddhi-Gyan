@@ -15,7 +15,7 @@ const GoogleSuccess = () => {
     if (!token) {
       navigate("/login");
       return;
-    }
+    } 
 
     const fetchUserData = async () => {
       try {

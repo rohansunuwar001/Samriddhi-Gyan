@@ -53,4 +53,4 @@ export const {
     useUpdateLectureProgressMutation,
     useCompleteCourseMutation,
     useInCompleteCourseMutation
-} = courseProgressApi;
+} = courseProgressApi; 

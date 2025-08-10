@@ -18,7 +18,7 @@ const CourseCurriculumTab = () => {
     const { data: courseData, isLoading: isLoadingCourse, isError } = useGetCourseByIdQuery(courseId);
     const [createSection, { isLoading: isCreatingSection }] = useCreateSectionMutation();
 
-    const handleAddSection = async (e) => {
+    const handleAddSection = async (e) => { 
         e.preventDefault();
         if (!newSectionTitle.trim()) {
             toast.error("Please provide a title for the section.");

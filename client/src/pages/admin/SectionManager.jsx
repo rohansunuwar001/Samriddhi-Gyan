@@ -13,7 +13,7 @@ import PropTypes from 'prop-types';
 const SectionManager = ({ section, courseId }) => {
     const [newLectureTitle, setNewLectureTitle] = useState("");
     const [isEditingTitle, setIsEditingTitle] = useState(false);
-    const [editedTitle, setEditedTitle] = useState(section.title);
+    const [editedTitle, setEditedTitle] = useState(section.title); 
 
     const [createLecture, { isLoading: isCreatingLecture }] = useCreateLectureMutation();
     const [deleteSection, { isLoading: isDeletingSection }] = useDeleteSectionMutation();

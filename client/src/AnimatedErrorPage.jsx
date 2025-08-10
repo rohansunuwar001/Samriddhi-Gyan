@@ -17,7 +17,7 @@ export default function AnimatedErrorPage() {
       // Animate a proxy object for a smooth number scroll effect
       let counter = { value: 0 };
       tl.to(counter, {
-        value: errorStatusCode,
+        value: errorStatusCode, 
         duration: 1.5,
         ease: 'power2.out',
         onUpdate: () => {

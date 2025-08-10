@@ -13,7 +13,7 @@ const Home = () => {
             <RecommendedCourse />
             <LmsShowcase />
     </div>
-  )
+  ) 
 }
 
 export default Home

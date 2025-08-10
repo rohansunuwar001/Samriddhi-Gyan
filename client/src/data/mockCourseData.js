@@ -9,7 +9,7 @@ export const mockCourseData = {
         name: 'Dr. Angela Yu',
         title: 'Developer and Lead Instructor',
     },
-    lastUpdated: '1/2025',
+    lastUpdated: '1/2025', 
     language: 'English',
     subtitles: ['English', 'Arabic', 'French', 'German', 'Italian', 'Japanese', 'Korean', 'Polish', 'Portuguese', 'Romanian', 'Russian', 'Simplified Chinese', 'Spanish', 'Thai', 'Traditional Chinese', 'Turkish', 'Vietnamese'],
     isBestseller: true,

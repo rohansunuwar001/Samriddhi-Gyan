@@ -11,7 +11,7 @@ export const blogArticles = [
     title: "Job Searching with AI: The Ultimate Guide with Example Prompts",
     lastUpdated: "August 2025",
     author: {
-      name: "Rachel Anderson",
+      name: "Rachel Anderson", 
       avatar: "https://i.pravatar.cc/40?u=rachelanderson",
       bio: "Rachel is a career coach and tech enthusiast specializing in the impact of AI on the modern workforce.",
       recentArticles: [{ id: 4, slug: "what-is-vibe-coding", title: "What is Vibe Coding?" }]
