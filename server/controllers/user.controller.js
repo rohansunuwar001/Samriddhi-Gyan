@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { User } from "../models/user.model.js";
 import { deleteFromCloudinary, uploadMedia } from "../utils/cloudinary.js";
 import { generateToken } from "../utils/generateToken.js";
+import { createNotification } from "../service/notification.service.js";
 
 export const register = async (req, res) => {
   try {
@@ -249,14 +250,12 @@ export const updateUserPassword = async (req, res) => {
         .json({ message: "Please provide both current and new passwords." });
     }
 
-    // Find the user but explicitly include the password field
     const user = await User.findById(userId).select("+password");
 
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
 
-    // If the user signed up via Google, they don't have a local password to change
     if (!user.password) {
       return res
         .status(400)
@@ -266,23 +265,33 @@ export const updateUserPassword = async (req, res) => {
         });
     }
 
-    // 1. Verify the current password
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
       return res.status(401).json({ message: "Incorrect current password." });
     }
 
-    // 2. Hash the new password
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(newPassword, salt);
 
-    // 3. Save the user with the new password
+    // Save the user with the new password
     await user.save();
 
+    // --- 2. TRIGGER THE NOTIFICATION ---
+    // This happens *after* the password is confirmed to be saved successfully
+    // and *before* we send the final response to the user.
+    await createNotification(
+        userId,                              // The ID of the user to notify
+        "Your password was successfully changed.", // The message to display
+        "/profile/security",                 // The link for the notification
+        "password_update"                    // The type of notification
+    );
+
+    // Now, send the final success response
     return res.status(200).json({
       success: true,
       message: "Password updated successfully.",
     });
+
   } catch (error) {
     console.error("Error updating password:", error);
     return res.status(500).json({

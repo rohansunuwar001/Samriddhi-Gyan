@@ -1,5 +1,9 @@
 import { CourseProgress } from "../models/courseProgress.js";
 import { Course } from "../models/course.model.js";
+import { createNotification } from "../service/notification.service.js";
+
+
+
 
 export const getCourseProgress = async (req, res) => {
   try {
@@ -87,6 +91,17 @@ export const updateLectureProgress = async (req, res) => {
 
     if (course.lectures.length === lectureProgressLength)
       courseProgress.completed = true;
+
+
+      // Trigger the completion notification
+        await createNotification(
+            userId,
+            `Congratulations! You have completed the course "${course.courseTitle}".`,
+            `/course-progress/${course._id}`, // Can also link to a certificate page
+            'course_completion'
+        );
+    
+
 
     await courseProgress.save();
 

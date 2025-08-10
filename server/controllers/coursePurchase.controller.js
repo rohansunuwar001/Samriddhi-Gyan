@@ -1,7 +1,10 @@
+// --- 1. IMPORT THE NOTIFICATION SERVICE ---
 import Stripe from "stripe";
 import { Course } from "../models/course.model.js";
 import { CoursePurchase } from "../models/coursePurchase.model.js";
 import { User } from "../models/user.model.js";
+import { createNotification } from "../service/notification.service.js";
+
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
@@ -65,6 +68,7 @@ export const createCheckoutSession = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };
 
@@ -95,7 +99,7 @@ export const stripeWebhook = async (req, res) => {
 
       const purchase = await CoursePurchase.findOne({
         paymentId: session.id,
-      }).populate({ path: "courseId" });
+      }).populate("courseId"); // Use populate to get course details
 
       if (!purchase) {
         return res.status(404).json({ message: "Purchase not found" });
@@ -111,16 +115,28 @@ export const stripeWebhook = async (req, res) => {
       // Update user's enrolledCourses
       await User.findByIdAndUpdate(
         purchase.userId,
-        { $addToSet: { enrolledCourses: purchase.courseId._id } }, // Add course ID to enrolledCourses
+        { $addToSet: { enrolledCourses: purchase.courseId._id } },
         { new: true }
       );
 
       // Update course to add user ID to enrolledStudents
       await Course.findByIdAndUpdate(
         purchase.courseId._id,
-        { $addToSet: { enrolledStudents: purchase.userId } }, // Add user ID to enrolledStudents
+        { $addToSet: { enrolledStudents: purchase.userId } },
         { new: true }
       );
+
+      // --- 2. TRIGGER THE NOTIFICATION HERE ---
+      const course = purchase.courseId; // Get the populated course details
+      if (course) { // Ensure course is not null
+        await createNotification(
+            purchase.userId,
+            `You have successfully enrolled in "${course.courseTitle}"!`,
+            `/course-progress/${course._id}`,
+            'course_enrollment'
+        );
+      }
+
     } catch (error) {
       console.error("Error handling event:", error);
       return res.status(500).json({ message: "Internal Server Error" });
@@ -128,12 +144,12 @@ export const stripeWebhook = async (req, res) => {
   }
   res.status(200).send();
 };
+
 export const getCourseDetailWithStatus = async (req, res) => {
     try {
         const { courseId } = req.params;
         const userId = req.id; // From isAuthenticated middleware
 
-        // 1. FIND THE COURSE AND ADD THE POPULATE LOGIC HERE
         const course = await Course.findById(courseId)
             .populate({
                 path: 'reviews',
@@ -156,10 +172,8 @@ export const getCourseDetailWithStatus = async (req, res) => {
             return res.status(404).json({ message: "Course not found." });
         }
 
-        // 2. CHECK THE PURCHASE STATUS (your existing logic)
-      const purchased = await CoursePurchase.findOne({ userId, courseId, status: "completed" });
+        const purchased = await CoursePurchase.findOne({ userId, courseId, status: "completed" });
         
-        // 3. SEND THE POPULATED COURSE AND THE STATUS
         res.status(200).json({ course, purchased });
 
     } catch (error) {
@@ -184,5 +198,6 @@ export const getAllPurchasedCourse = async (_, res) => {
     });
   } catch (error) {
     console.log(error);
+    res.status(500).json({ success: false, message: "Server error" });
   }
 };

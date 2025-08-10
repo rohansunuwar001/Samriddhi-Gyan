@@ -1,9 +1,10 @@
-// import { sendMail } from "../lib/email-sender/sendOrderMail.js";
 import crypto from "crypto";
 import { CoursePurchase } from "../models/coursePurchase.model.js";
 import { Course } from "../models/course.model.js";
 import { getEsewaPaymentHash, verifyEsewaPayment } from "../utils/esewa.js";
 import { User } from "../models/user.model.js";
+import { createNotification } from "../service/notification.service.js";
+
 
 export const initializePayment = async (req, res) => {
   try {
@@ -13,16 +14,14 @@ export const initializePayment = async (req, res) => {
     const course = await Course.findById(courseId);
     if (!course) return res.status(404).json({ message: "Course not found!" });
 
-    // Create a new course purchase record
     const newPurchase = new CoursePurchase({
       courseId,
       userId,
       amount: course.coursePrice,
       status: "pending",
     });
-    await newPurchase.save(); // ✅ Save it before using
+    await newPurchase.save();
 
-    // Generate eSewa payment hash
     const paymentInitiate = await getEsewaPaymentHash({
       amount: course.coursePrice,
       transaction_uuid: course._id,
@@ -47,81 +46,42 @@ export const completePayment = async (req, res, next) => {
   const { data } = req.query;
   try {
     const paymentInfo = await verifyEsewaPayment(data);
-    const createOrder = await CoursePurchase.findById(
-      paymentInfo.decodedData.transaction_uuid
-    );
-    if (!createOrder) {
-      return res.status(500).json({
-        success: false,
-        message: "Order not found",
-      });
-    }
-    await CoursePurchase.findByIdAndUpdate(
+    
+    const coursePurchase = await CoursePurchase.findByIdAndUpdate(
       paymentInfo.decodedData.transaction_uuid,
       {
         status: "completed",
         paymentId: paymentInfo.decodedData.transaction_code,
-      }
-    );
-    const coursePurchase = await CoursePurchase.findById(
-      paymentInfo.decodedData.transaction_uuid
-    );
+      },
+      { new: true } // Return the updated document
+    ).populate('courseId'); // Populate to get course details for the notification
+
     if (!coursePurchase) {
-      throw new Error("CoursePurchase not found");
+      // You might want to redirect to a failure page here
+      return res.status(404).json({ success: false, message: "Order not found after update." });
     }
 
+    // Enroll the user in the course
     await User.findByIdAndUpdate(coursePurchase.userId, {
       $addToSet: {
-        enrolledCourses: coursePurchase.courseId,
+        enrolledCourses: coursePurchase.courseId._id,
       },
     });
 
-    res.redirect(`http://localhost:5173/my-learning`);
-    // await sendMail({
-    //   to: `lazyfox916@gmail.com`,
-    //   subject: "Payment Completed",
-    //   html: `
-    //   <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-    //     <h1 style="color: #4CAF50;">Payment Completed</h1>
-    //     <p>Dear Admin,</p>
-    //     <p>We are pleased to inform you that a payment has been successfully completed for the following order:</p>
-    //     <table style="width: 100%; border-collapse: collapse; margin: 20px 0;">
-    //       <tr style="background-color: #f2f2f2;">
-    //         <th style="padding: 10px; border: 1px solid #ddd;">Detail</th>
-    //         <th style="padding: 10px; border: 1px solid #ddd;">Value</th>
-    //       </tr>
-    //       <tr>
-    //         <td style="padding: 10px; border: 1px solid #ddd;">Transaction ID</td>
-    //         <td style="padding: 10px; border: 1px solid #ddd;">${paymentData.transactionId}</td>
-    //       </tr>
-    //       <tr>
-    //         <td style="padding: 10px; border: 1px solid #ddd;">PIDX</td>
-    //         <td style="padding: 10px; border: 1px solid #ddd;">${paymentData.pidx}</td>
-    //       </tr>
-    //       <tr>
-    //         <td style="padding: 10px; border: 1px solid #ddd;">Order ID</td>
-    //         <td style="padding: 10px; border: 1px solid #ddd;">${paymentData.productId}</td>
-    //       </tr>
-    //       <tr>
-    //         <td style="padding: 10px; border: 1px solid #ddd;">Order Name</td>
-    //         <td style="padding: 10px; border: 1px solid #ddd;">XXX</td>
-    //       </tr>
-    //        <tr>
-    //         <td style="padding: 10px; border: 1px solid #ddd;">Amount</td>
-    //         <td style="padding: 10px; border: 1px solid #ddd;">${paymentData.amount}</td>
-    //       </tr>
-    //        <tr>
-    //         <td style="padding: 10px; border: 1px solid #ddd;">Payment Method</td>
-    //         <td style="padding: 10px; border: 1px solid #ddd;">Esewa</td>
-    //       </tr>
-    //     </table>
-    //     <p>Thank you for your prompt action.</p>
-    //     <p style="color: #555;">Regards,</p>
-    //     <p style="font-weight: bold;">Prabin Shretsha</p>
-    //   </div>
-    //   `,
-    // });
+    // --- 2. TRIGGER THE NOTIFICATION HERE ---
+    const course = coursePurchase.courseId;
+    if (course) {
+      await createNotification(
+          coursePurchase.userId,
+          `You have successfully enrolled in "${course.courseTitle}"!`,
+          `/course-progress/${course._id}`,
+          'course_enrollment'
+      );
+    }
+
+    res.redirect(`${process.env.FRONTEND_URL}/my-learning`);
   } catch (error) {
+    console.log(error);
     res.status(400).json({
       success: false,
       message: error.message,
