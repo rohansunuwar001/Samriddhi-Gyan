@@ -2,6 +2,7 @@ import { Course } from "../models/course.model.js";
 import { Lecture } from "../models/lecture.model.js";
 import { Section } from "../models/section.model.js";
 import { deleteFromCloudinary, uploadVideo } from "../utils/cloudinary.js"; // Assuming you have an `uploadVideo` helper
+import ffmpeg from "fluent-ffmpeg";
 
 /**
  * @desc    Create a new lecture within a specific section
@@ -11,7 +12,7 @@ import { deleteFromCloudinary, uploadVideo } from "../utils/cloudinary.js"; // A
 export const createLecture = async (req, res) => {
     try {
         const { sectionId } = req.params;
-        const { title, durationInSeconds = 0 } = req.body;
+        const { title } = req.body;
 
         if (!title) {
             return res.status(400).json({ message: "Lecture title is required." });
@@ -22,10 +23,24 @@ export const createLecture = async (req, res) => {
             return res.status(404).json({ message: "Section not found." });
         }
 
+        // Suppose req.file.path is the path to the uploaded video file
+        const videoPath = req.file?.path;
+
+        let durationInSeconds = 0;
+        if (videoPath) {
+            // Get duration using ffmpeg
+            durationInSeconds = await new Promise((resolve, reject) => {
+                ffmpeg.ffprobe(videoPath, (err, metadata) => {
+                    if (err) return reject(err);
+                    resolve(Math.floor(metadata.format.duration));
+                });
+            });
+        }
+
         // Create the new lecture, linking it to its parent section
         const lecture = await Lecture.create({
             title,
-            durationInSeconds: Number(durationInSeconds),
+            durationInSeconds,
             section: sectionId,
         });
 
@@ -82,10 +97,13 @@ export const updateLecture = async (req, res) => {
                 await deleteFromCloudinary(lecture.publicId);
             }
             // Upload new video
-            const videoData = await uploadVideo(videoFile.path); // You may need to create an uploadVideo helper
+            const videoData = await uploadVideo(videoFile.path);
+            // videoData.duration is in seconds (if Cloudinary returns it)
+            const durationInSeconds = Math.floor(videoData.duration);
+
             lecture.videoUrl = videoData.secure_url;
             lecture.publicId = videoData.public_id;
-            // You can also get duration from videoData if your uploader provides it
+            lecture.durationInSeconds = durationInSeconds;
         }
         
         // --- Update Lecture Fields ---

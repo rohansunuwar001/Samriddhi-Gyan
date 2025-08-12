@@ -46,7 +46,7 @@ const EditLectureForm = () => {
             try {
                 await deleteLecture({ lectureId, courseId }).unwrap();
                 toast.success("Lecture deleted.");
-                navigate(`/admin/course/${courseId}`);
+                navigate(`/instructor/course/${courseId}`);
             } catch (err) { toast.error(err.data?.message || "Deletion failed."); }
         }
     };

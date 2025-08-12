@@ -1,8 +1,11 @@
-
 // --- (Import Child Components) ---
 
 
 // --- (Import Mock Data) ---
+
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+import { useGetCourseByIdQuery } from '@/features/api/courseApi';
 
 import CourseHeader from './CourseHeader';
 import PurchaseCard from './PurchaseCard';
@@ -10,13 +13,26 @@ import WhatYouWillLearn from './WhatYouWillLearn';
 import CourseIncludes from './CourseIncludes';
 import CourseContent from './CourseContent';
 import Requirements from './Requirements';
-import { Description } from '@radix-ui/react-dialog';
 import InstructorProfile from './InstructorProfile';
 import ReviewsSection from '../Reviews/ReviewSection';
-import { mockCourseData } from '@/data/mockCourseData';
+import { Description } from './Description';
 
 const CourseDetailPage = () => {
-    const course = mockCourseData;
+    const { courseId } = useParams();
+    const { data, isLoading, isError } = useGetCourseByIdQuery(courseId);
+
+
+    // Defensive: extract the actual course object
+    const course = data?.course;
+    console.log("Course data:", course);
+
+    if (isLoading) {
+        return <div className="text-center py-10">Loading...</div>;
+    }
+
+    if (isError || !course) {
+        return <div className="text-center py-10 text-red-500">Course not found.</div>;
+    }
 
     return (
         <div className="bg-white text-gray-800">
@@ -37,11 +53,10 @@ const CourseDetailPage = () => {
                         <main className="space-y-8">
                             <WhatYouWillLearn learnings={course.learnings} /> 
                             <CourseIncludes includes={course.includes} />
-                            <CourseContent sections={course.sections} totalLectures={course.totalLectures} totalLength={course.totalLength} />
+                            <CourseContent sections={course.sections} totalLectures={course.totalLectures} totalLength={course.totalDurationInSeconds} />
                             <Requirements requirements={course.requirements} />
-                            {/* <Description descriptionHtml={course.descriptionHtml} /> */}
-                            <InstructorProfile instructor={course.instructor} />
-                            Assuming your ReviewsSection is compatible
+                            <Description descriptionHtml={course.description} />
+                            <InstructorProfile instructor={course.creator} />
                             <ReviewsSection course={course} />
                         </main>
                     </div>

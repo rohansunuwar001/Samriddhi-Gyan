@@ -9,7 +9,7 @@ const EditLecture = () => {
     return (
         <div className="mx-auto max-w-2xl p-4 sm:p-6 lg:p-8 space-y-6">
             <div className="flex items-center justify-between">
-                <Link to={`/admin/course/${courseId}`}>
+                <Link to={`/instructor/course/${courseId}`}>
                     <Button variant="ghost" className="flex items-center gap-2">
                         <ArrowLeft size={16} /> Back to Curriculum
                     </Button>

@@ -114,6 +114,7 @@ const courseSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+   
 
     // --- REVIEWS & RATINGS (Existing fields are good) ---
     ratings: {

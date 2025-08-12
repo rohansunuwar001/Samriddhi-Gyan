@@ -15,7 +15,10 @@ export const getDashboardAnalytics = async (req, res) => {
         
         // --- Calculate Stats ---
         const totalCourses = courses.filter(c => c.isPublished).length;
-        const totalRevenue = courses.reduce((acc, course) => acc + (course.price.current * course.enrolledStudents.length), 0);
+        const totalRevenue = courses.reduce(
+          (acc, course) => acc + ((course.price?.current || 0) * (course.enrolledStudents?.length || 0)),
+          0
+        );
         
         // Get a unique set of all student IDs across all courses
         const allStudentIds = courses.reduce((acc, course) => {

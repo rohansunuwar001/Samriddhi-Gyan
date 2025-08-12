@@ -61,7 +61,7 @@ export const courseApi = apiSlice.injectEndpoints({
                 if(categories && categories.length > 0) {
                     categories.forEach(cat => params.append('categories', cat));
                 }
-                return `/search/course?${params.toString()}`;
+                return `/course/search?${params.toString()}`;
             }
         }),
         

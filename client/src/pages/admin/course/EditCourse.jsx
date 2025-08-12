@@ -18,7 +18,7 @@ const EditCourse = () => {
                     Back to My Courses
                 </Link>
                 <Button variant="outline" asChild>
-                    <Link to={`/course/${courseId}`} target="_blank" rel="noopener noreferrer">
+                    <Link to={`/course-detail/${courseId}`} target="_blank" rel="noopener noreferrer">
                         Preview Course Page
                     </Link>
                 </Button>

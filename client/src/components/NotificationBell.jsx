@@ -1,4 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import { Button } from "@/components/ui/button";
+import { Bell, BellRing, Loader2, Trash2, X } from "lucide-react";
+import { useEffect, useRef, useState } from 'react';
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useSocket } from '../context/SocketContext';
@@ -8,8 +10,6 @@ import {
     useGetNotificationsQuery,
     useMarkAsReadMutation
 } from '../features/api/notificationApi';
-import { Button } from "@/components/ui/button";
-import { Bell, BellRing, Loader2, Trash2, X } from "lucide-react";
 
 /**
  * A utility function to format a date into a human-readable "time ago" string.

@@ -1,37 +1,64 @@
+// import { sendMail } from "../lib/email-sender/sendOrderMail.js";
 import crypto from "crypto";
-import { CoursePurchase } from "../models/coursePurchase.model.js";
-import { Course } from "../models/course.model.js";
-import { getEsewaPaymentHash, verifyEsewaPayment } from "../utils/esewa.js";
 import { User } from "../models/user.model.js";
-import { createNotification } from "../service/notification.service.js";
-
+import { getEsewaPaymentHash, verifyEsewaPayment } from "../utils/esewa.js";
+import { Course } from "../models/course.model.js";
+import { CoursePurchase } from "../models/coursePurchase.model.js";
+import { v4 as uuidv4 } from "uuid";
 
 export const initializePayment = async (req, res) => {
   try {
     const userId = req.id;
-    const { courseId } = req.body;
+    const { courseIds } = req.body; // Accepts array of courseIds
 
-    const course = await Course.findById(courseId);
-    if (!course) return res.status(404).json({ message: "Course not found!" });
+    if (!Array.isArray(courseIds) || courseIds.length === 0) {
+      return res.status(400).json({ message: "No courses selected!" });
+    }
 
+    // Fetch all courses
+    const courses = await Course.find({ _id: { $in: courseIds } });
+    if (courses.length !== courseIds.length) {
+      return res.status(404).json({ message: "One or more courses not found!" });
+    }
+
+    // Prepare purchase details
+    const purchaseCourses = [];
+    let totalAmount = 0;
+
+    courses.forEach((course) => {
+      purchaseCourses.push({
+        courseId: course._id,
+        priceAtPurchase: course.price.current,
+      });
+      totalAmount += course.price.current;
+    });
+
+    // Generate unique orderId
+    const orderId = `LMS-ORD-${uuidv4().split("-")[0].toUpperCase()}`;
+
+    // Create a new course purchase record
     const newPurchase = new CoursePurchase({
-      courseId,
+      orderId,
       userId,
-      amount: course.coursePrice,
+      courses: purchaseCourses,
+      totalAmount,
+      paymentMethod: "eSewa",
       status: "pending",
+      paymentDetails: {},
     });
     await newPurchase.save();
 
+    // Generate eSewa payment hash
     const paymentInitiate = await getEsewaPaymentHash({
-      amount: course.coursePrice,
-      transaction_uuid: course._id,
+      amount: totalAmount,
+      transaction_uuid: newPurchase._id,
     });
 
     res.status(200).json({
       success: true,
       message: "Payment initiated successfully",
       paymentInitiate: paymentInitiate,
-      payment_url: `${process.env.BACKEND_URI}/api/v1/buy/generate-esewa-form?amount=${course.coursePrice}&transaction_uuid=${newPurchase._id}`,
+      payment_url: `${process.env.BACKEND_URI}/api/v1/buy/generate-esewa-form?amount=${totalAmount}&transaction_uuid=${newPurchase._id}`,
     });
   } catch (error) {
     console.log(error);
@@ -46,42 +73,40 @@ export const completePayment = async (req, res, next) => {
   const { data } = req.query;
   try {
     const paymentInfo = await verifyEsewaPayment(data);
-    
-    const coursePurchase = await CoursePurchase.findByIdAndUpdate(
-      paymentInfo.decodedData.transaction_uuid,
-      {
-        status: "completed",
-        paymentId: paymentInfo.decodedData.transaction_code,
-      },
-      { new: true } // Return the updated document
-    ).populate('courseId'); // Populate to get course details for the notification
+    const purchaseId = paymentInfo.decodedData.transaction_uuid;
+    const refId = paymentInfo.decodedData.transaction_code;
 
-    if (!coursePurchase) {
-      // You might want to redirect to a failure page here
-      return res.status(404).json({ success: false, message: "Order not found after update." });
+    const purchase = await CoursePurchase.findById(purchaseId);
+    if (!purchase) {
+      return res.status(500).json({
+        success: false,
+        message: "Order not found",
+      });
     }
 
-    // Enroll the user in the course
-    await User.findByIdAndUpdate(coursePurchase.userId, {
-      $addToSet: {
-        enrolledCourses: coursePurchase.courseId._id,
-      },
-    });
+    // Update purchase status and store eSewa refId
+    purchase.status = "completed";
+    purchase.paymentDetails.eSewaRefId = refId;
+    await purchase.save();
 
-    // --- 2. TRIGGER THE NOTIFICATION HERE ---
-    const course = coursePurchase.courseId;
-    if (course) {
-      await createNotification(
-          coursePurchase.userId,
-          `You have successfully enrolled in "${course.courseTitle}"!`,
-          `/course-progress/${course._id}`,
-          'course_enrollment'
+    // Enroll user in all purchased courses
+    for (const courseObj of purchase.courses) {
+      await Course.findByIdAndUpdate(
+        courseObj.courseId,
+        { $addToSet: { enrolledStudents: purchase.userId } },
+        { new: true }
       );
     }
 
-    res.redirect(`${process.env.FRONTEND_URL}/my-learning`);
+     await User.findByIdAndUpdate(CoursePurchase.userId, {
+      $addToSet: {
+        enrolledCourses: CoursePurchase.courses.courseId,
+      },
+    });
+
+    res.redirect(`http://localhost:5173/my-learning`);
+    // Optionally, send email notification here
   } catch (error) {
-    console.log(error);
     res.status(400).json({
       success: false,
       message: error.message,

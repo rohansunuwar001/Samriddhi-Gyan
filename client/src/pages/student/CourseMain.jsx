@@ -2,7 +2,8 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { useGetPublishedCourseQuery } from "@/features/api/courseApi";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
-import CareerCard from "./CourseCard";
+import CourseCard from "./CourseCard";
+import PropTypes from "prop-types";
 
 const CourseMain = () => {
     const { data, isLoading, isError, error, refetch } = useGetPublishedCourseQuery();
@@ -29,8 +30,8 @@ const CourseMain = () => {
                         </Alert>
                     ) : (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {data?.courses?.map((career) => (
-                                <CareerCard key={career._id} career={career} />
+                            {data?.courses?.map((course) => (
+                                <CourseCard key={course._id} course={course} />
                             ))}
                         </div>
                     )}
@@ -41,3 +42,20 @@ const CourseMain = () => {
 };
 
 export default CourseMain;
+
+CourseMain.propTypes = {
+    courses: PropTypes.arrayOf(
+        PropTypes.shape({
+            _id: PropTypes.string.isRequired,
+            title: PropTypes.string.isRequired,
+            thumbnail: PropTypes.string,
+            price: PropTypes.shape({
+                current: PropTypes.number.isRequired,
+                original: PropTypes.number
+            }),
+            creator: PropTypes.shape({
+                name: PropTypes.string.isRequired
+            })
+        })
+    )
+};

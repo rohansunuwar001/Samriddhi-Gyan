@@ -1,10 +1,12 @@
-import { Skeleton } from "@/components/ui/skeleton";
-import Course from "./Course";
-import { useGetRecommendedCourseQuery } from "@/features/api/courseApi";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { RocketIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useGetRecommendedCourseQuery } from "@/features/api/courseApi";
+import { ExclamationTriangleIcon, RocketIcon } from "@radix-ui/react-icons";
 import { Sparkles } from "lucide-react";
+import PropTypes from "prop-types";
+import CourseCard from "./CourseCard";
+
 
 const RecommendedCourse = () => {
   const { data, isLoading, isError, error, refetch } = useGetRecommendedCourseQuery();
@@ -49,11 +51,8 @@ const RecommendedCourse = () => {
         ) : data?.recommendedCourses?.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {data.recommendedCourses.map((course) => (
-              <Course 
-                key={course._id} 
-                course={course} 
-                showRecommendationBadge
-              />
+              <CourseCard key={course.id} course={course}
+                showRecommendationBadge/>
             ))}
           </div>
         ) : (
@@ -76,6 +75,26 @@ const RecommendedCourse = () => {
     </section>
   );
 };
+
+
+
+RecommendedCourse.propTypes = {
+  courses: PropTypes.arrayOf(
+    PropTypes.shape({
+      _id: PropTypes.string.isRequired,
+      title: PropTypes.string.isRequired,
+      thumbnail: PropTypes.string,
+      price: PropTypes.shape({
+        current: PropTypes.number.isRequired,
+        original: PropTypes.number
+      }),
+      creator: PropTypes.shape({
+        name: PropTypes.string.isRequired
+      })
+    })
+  )
+};
+
 
 const CourseSkeleton = () => {
   return (

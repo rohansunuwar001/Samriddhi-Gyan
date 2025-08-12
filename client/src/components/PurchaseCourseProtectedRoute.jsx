@@ -10,7 +10,7 @@ const PurchaseCourseProtectedRoute = ({children}) => {
 
     if(isLoading) return <p>Loading...</p>
 
-    return data?.purchased ? children : <Navigate to={`/course-detail/${courseId}`}/>
+    return data?.purchaseStatus === "completed" ? children : <Navigate to={`/course-detail/${courseId}`}/>
 }
 
 PurchaseCourseProtectedRoute.propTypes = {
