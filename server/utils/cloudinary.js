@@ -31,26 +31,22 @@ export const uploadMedia = async (localFilePath) => {
         return uploadResponse;
 
     } catch (error) {
-        // If an error occurs, still remove the locally saved temporary file
+       
         fs.unlinkSync(localFilePath); 
         console.error("Cloudinary media upload failed:", error);
         return null;
     }
 };
 
-/**
- * @description Uploads a video file to Cloudinary with video-specific settings
- * @param {string} localFilePath - The local path to the video file
- * @returns {object | null} - The Cloudinary upload response with video metadata, or null on failure
- */
+
 export const uploadVideo = async (localFilePath) => {
     if (!localFilePath) return null;
     
     try {
         const uploadResponse = await cloudinary.uploader.upload(localFilePath, {
-            resource_type: "video", // EXPLICITLY set for videos
-            // This is powerful: It requests the video duration and format info in the response
-            eager_async: true, // Recommended for better performance on larger videos
+            resource_type: "video", 
+            
+            eager_async: true, 
         });
 
         // The Cloudinary response for video will include a `duration` field.
@@ -64,11 +60,7 @@ export const uploadVideo = async (localFilePath) => {
     }
 };
 
-/**
- * @description Deletes any media (image or video) from Cloudinary
- * @param {string} publicId - The public_id of the media to delete
- * @param {string} resource_type - Optional: "video", "image". Defaults to "image".
- */
+
 export const deleteFromCloudinary = async (publicId, resource_type = "image") => {
     if (!publicId) return;
 
@@ -82,9 +74,4 @@ export const deleteFromCloudinary = async (publicId, resource_type = "image") =>
     }
 };
 
-// --- Your OLD Functions can now be removed or kept for backward compatibility ---
-// The new `deleteFromCloudinary` function makes these two redundant.
-/*
-export const deleteMediaFromCloudinary = async (publicId) => { ... }
-export const deleteVideoFromCloudinary = async (publicId) => { ... }
-*/
+

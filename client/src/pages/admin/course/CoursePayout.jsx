@@ -1,4 +1,5 @@
-import { useGetPaidCoursesWithEnrolledStudentsAndPaymentsQuery } from "@/features/api/courseApi";
+import { useGetPaidCoursesWithEnrolledStudentsAndPaymentsQuery } from "@/features/api/adminDataApi";
+
 
 const CoursePayout = () => {
   const { data, isLoading, isError } =

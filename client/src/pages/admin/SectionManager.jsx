@@ -2,13 +2,16 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { useCreateLectureMutation, useDeleteSectionMutation, useUpdateSectionMutation } from '@/features/api/courseApi';
+
 
 import { Edit, Loader2, PlusCircle, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 import { toast } from 'sonner';
 import LectureItem from './lecture/LectureItem';
 import PropTypes from 'prop-types';
+
+import { useDeleteSectionMutation, useUpdateSectionMutation } from '@/features/api/sectionApi';
+import { useCreateLectureMutation } from '@/features/api/lectureApi';
 
 const SectionManager = ({ section, courseId }) => {
     const [newLectureTitle, setNewLectureTitle] = useState("");

@@ -24,7 +24,7 @@ import dashboardRouter from "./routes/instructor.dashboard.js";
 import cartRouter from "./routes/cart.route.js";
 import wishlistRouter from "./routes/wishlist.route.js";
 import { configurePassport } from "./database/passport-config.js"; // adjust path as needed
-
+import recommendedRoutes from "./routes/recommended.route.js";
 dotenv.config({});
 
 const app = express();
@@ -78,5 +78,5 @@ app.use("/api/v1/instructor", dashboardRouter);
 app.use("/api/v1/wishlist", wishlistRouter);
 app.use("/api/v1/cart", cartRouter);
 app.use("/api/v1/notifications", notificationRouter);
-
+app.use("/api/v1/recommendations", recommendedRoutes);
 export default app;

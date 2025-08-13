@@ -5,7 +5,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { useGetCourseByIdQuery } from '@/features/api/courseApi';
+
 
 import CourseHeader from './CourseHeader';
 import PurchaseCard from './PurchaseCard';
@@ -16,6 +16,7 @@ import Requirements from './Requirements';
 import InstructorProfile from './InstructorProfile';
 import ReviewsSection from '../Reviews/ReviewSection';
 import { Description } from './Description';
+import { useGetCourseByIdQuery } from '@/features/api/courseApi';
 
 const CourseDetailPage = () => {
     const { courseId } = useParams();

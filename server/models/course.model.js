@@ -1,26 +1,23 @@
 import mongoose from "mongoose";
+import { generateEmbedding } from "../service/embedding.service.js";
 
 const courseSchema = new mongoose.Schema(
   {
-    // --- CORE COURSE INFO (Updated for consistency) ---
+    // --- CORE COURSE INFO ---
     title: {
-      // RENAMED from courseTitle
       type: String,
       required: true,
       trim: true,
     },
     subtitle: {
-      // RENAMED from subTitle
       type: String,
       trim: true,
     },
     description: {
-      // This will hold the main description HTML
       type: String,
       trim: true,
     },
     language: {
-      // NEW
       type: String,
       required: true,
       default: "English",
@@ -30,74 +27,54 @@ const courseSchema = new mongoose.Schema(
       required: true,
     },
     level: {
-      // RENAMED from courseLevel
       type: String,
       enum: ["Beginner", "Intermediate", "Advanced", "All Levels"],
       default: "All Levels",
     },
 
-    // --- PRICING & METADATA (Updated for new structure) ---
+    // --- PRICING & METADATA ---
     price: {
-      // UPDATED to a nested object
       original: { type: Number, required: true },
       current: { type: Number, required: true },
-      // The discount percentage will be calculated on the frontend or backend dynamically
     },
     thumbnail: {
       type: String,
-      // The thumbnail is NOT required for initial creation.
-      // It can be added later. We can give it a default placeholder.
       default: "https://via.placeholder.com/720x405.png?text=Course+Thumbnail",
     },
-
     isBestseller: {
-      // NEW
       type: Boolean,
       default: false,
     },
 
-    // --- COURSE STRUCTURE (Major Architectural Change) ---
-    // A Course now has Sections, and each Section has Lectures.
+    // --- COURSE STRUCTURE ---
     sections: [
       {
-        // REPLACED the old 'lectures' array
         type: mongoose.Schema.Types.ObjectId,
         ref: "Section",
       },
     ],
     totalLectures: {
-      // NEW - For quick display
       type: Number,
       default: 0,
     },
     totalDurationInSeconds: {
-      // NEW - For calculation and display
       type: Number,
       default: 0,
     },
 
     // --- STUDENT-FACING CONTENT ---
     learnings: {
-      // NEW - "What you'll learn"
       type: [String],
       default: [],
     },
     requirements: {
-      // NEW
       type: [String],
       default: [],
     },
     includes: {
-      // NEW - "This course includes"
       type: [String],
       default: [],
     },
-    subtitles: {
-      // NEW - Array of available subtitle languages
-      type: [String],
-      default: [],
-    },
-
     // --- USER RELATIONSHIPS & PUBLISHING ---
     creator: {
       type: mongoose.Schema.Types.ObjectId,
@@ -114,9 +91,8 @@ const courseSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
-   
 
-    // --- REVIEWS & RATINGS (Existing fields are good) ---
+    // --- REVIEWS & RATINGS ---
     ratings: {
       type: Number,
       default: 0,
@@ -134,8 +110,66 @@ const courseSchema = new mongoose.Schema(
         ref: "Review",
       },
     ],
+
+    // --- EMBEDDINGS FOR RECOMMENDATIONS ---
+    embedding: {
+      type: [Number],
+      // IMPORTANT: For fast vector search, create a "Vector Search Index"
+      // in MongoDB Atlas on this field. The `index: '2dsphere'` is for
+      // geospatial queries and should not be used here.
+    },
   },
   { timestamps: true }
 );
+
+// Step 2: Add Mongoose middleware to automatically generate embeddings
+courseSchema.pre("save", async function (next) {
+  // Check if the document is new or if any of the key text fields were modified.
+  const fieldsToMonitor = [
+    'title',
+    'subtitle',
+    'description',
+    'language',
+    'category',
+    'level',
+    'learnings',
+    'requirements',
+  ];
+
+  const wasModified = fieldsToMonitor.some(field => this.isModified(field));
+
+  if (this.isNew || wasModified) {
+    try {
+      // Create a comprehensive text block for embedding.
+      // This combines all relevant info into one string for the AI model.
+      const textToEmbed = [
+        `Title: ${this.title || ""}`,
+        `Subtitle: ${this.subtitle || ""}`,
+        `Description: ${this.description || ""}`,
+        `Category: ${this.category || ""}`,
+        `Level: ${this.level || ""}`,
+        `Language: ${this.language || ""}`,
+        `What you'll learn: ${(this.learnings || []).join(', ')}`,
+        `Requirements: ${(this.requirements || []).join(', ')}`,
+      ]
+      .filter(Boolean) // Remove any empty or null lines
+      .join(". ");
+
+      console.log(`INFO: Generating new embedding for course "${this.title}"...`);
+
+      // Generate the embedding using the service
+      this.embedding = await generateEmbedding(textToEmbed);
+
+      console.log(`SUCCESS: Embedding updated for course "${this.title}".`);
+
+    } catch (error) {
+      // If embedding fails, log the error but don't block the save operation
+      console.error(`ERROR: Failed to generate embedding for course "${this.title}".`, error);
+    }
+  }
+
+  // Continue with the save operation
+  next();
+});
 
 export const Course = mongoose.model("Course", courseSchema);

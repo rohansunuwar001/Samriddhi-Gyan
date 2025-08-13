@@ -2,12 +2,12 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { useGetCreatorCourseQuery, useRemoveCourseMutation } from "@/features/api/courseApi";
 import { Edit, PlusCircle, Trash2, Loader2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast"; // or your preferred toast library
 import Swal from 'sweetalert2';
 import { useState } from "react";
+import { useGetCreatorCourseQuery, useRemoveCourseMutation } from "@/features/api/courseApi";
 
 let CourseTable = () => {
     let { data, isLoading, isError, refetch } = useGetCreatorCourseQuery();

@@ -10,6 +10,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Loader2 } from "lucide-react";
 import { useCreateCourseMutation } from "@/features/api/courseApi";
 
+
 // const categories = ["Web Development", "Data Science", "Mobile Development", "DevOps", "UI/UX Design"];
 const categories = [
   "HTML", "CSS", "JavaScript", "TypeScript",

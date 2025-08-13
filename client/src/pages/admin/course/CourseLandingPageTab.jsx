@@ -21,12 +21,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  useEditCourseMutation,
-  useGetCourseByIdQuery,
-  usePublishCourseMutation,
-} from "@/features/api/courseApi";
+
 import { Loader2, PlusCircle, Trash2 } from "lucide-react";
+import { useEditCourseMutation, useGetCourseByIdQuery, usePublishCourseMutation } from "@/features/api/courseApi";
 const categories = [
   "HTML",
   "CSS",

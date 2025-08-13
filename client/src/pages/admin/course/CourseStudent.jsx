@@ -1,4 +1,5 @@
-import { useGetCoursesWithEnrolledStudentsQuery } from "@/features/api/courseApi";
+import { useGetCoursesWithEnrolledStudentsQuery } from "@/features/api/adminDataApi";
+
 
 const CourseStudent = () => {
   const { data, isLoading, isError } = useGetCoursesWithEnrolledStudentsQuery();

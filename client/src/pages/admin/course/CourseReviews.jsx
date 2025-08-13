@@ -1,5 +1,5 @@
-import React from 'react';
-import { useGetCoursesWithEnrolledStudentsAndReviewsQuery } from '@/features/api/courseApi';
+import { useGetCoursesWithEnrolledStudentsAndReviewsQuery } from "@/features/api/adminDataApi";
+
 
 const CourseReviews = () => {
   const { data, isLoading, isError } = useGetCoursesWithEnrolledStudentsAndReviewsQuery();

@@ -13,7 +13,8 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Skeleton } from '@/components/ui/skeleton';
 import { Users, DollarSign, BookOpen } from "lucide-react";
-import { useGetCourseAnalyticsQuery } from '@/features/api/courseApi';
+import { useGetCourseAnalyticsQuery } from '@/features/api/adminDataApi';
+
 
 // --- Skeleton Component for a better loading state ---
 const DashboardSkeleton = () => ( 

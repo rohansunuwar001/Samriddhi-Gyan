@@ -6,9 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
-import { useCreateSectionMutation, useGetCourseByIdQuery } from '@/features/api/courseApi';
+
 import { Loader2, PlusCircle } from 'lucide-react';
 import SectionManager from './SectionManager';
+import { useGetCourseByIdQuery } from '@/features/api/courseApi';
+import { useCreateSectionMutation } from '@/features/api/sectionApi';
 
 
 const CourseCurriculumTab = () => {
