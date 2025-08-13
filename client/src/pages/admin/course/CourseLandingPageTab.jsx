@@ -17,23 +17,54 @@ import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
-  SelectItem,  
+  SelectItem,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  useEditCourseMutation,
-  useGetCourseByIdQuery,
-  usePublishCourseMutation,
-} from "@/features/api/courseApi";
-import { Loader2, PlusCircle, Trash2 } from "lucide-react";
 
+import { Loader2, PlusCircle, Trash2 } from "lucide-react";
+import { useEditCourseMutation, useGetCourseByIdQuery, usePublishCourseMutation } from "@/features/api/courseApi";
 const categories = [
-  "Web Development",
+  "HTML",
+  "CSS",
+  "JavaScript",
+  "TypeScript",
+  "Frontend Development",
+  "Backend Development",
+  "Fullstack Development",
+  "MERN Stack Development",
+  "Next JS",
+  "React JS",
+  "Vue JS",
+  "Node JS",
+  "Express JS",
+  "MongoDB",
+  "SQL",
+  "Python",
   "Data Science",
-  "Mobile Development",
+  "Machine Learning",
+  "Artificial Intelligence",
   "DevOps",
+  "Docker",
+  "Git & GitHub",
   "UI/UX Design",
+  "Figma",
+  "Adobe XD",
+  "Photoshop",
+  "Cybersecurity",
+  "Cloud Computing",
+  "AWS",
+  "Firebase",
+  "Java",
+  "C++",
+  "C#",
+  "Android Development",
+  "iOS Development",
+  "Mobile App Development",
+  "Software Testing",
+  "System Design",
+  "Operating Systems",
+  "DSA (Data Structures & Algorithms)",
 ];
 const levels = ["Beginner", "Intermediate", "Advanced", "All Levels"];
 
@@ -50,6 +81,7 @@ const CourseLandingPageTab = () => {
     thumbnailFile: null,
     learnings: [""],
     requirements: [""],
+    includes: [""], // <-- Add this line
   });
   const [previewThumbnail, setPreviewThumbnail] = useState("");
 
@@ -79,6 +111,7 @@ const CourseLandingPageTab = () => {
         learnings: course.learnings?.length > 0 ? course.learnings : [""],
         requirements:
           course.requirements?.length > 0 ? course.requirements : [""],
+        includes: course.includes?.length > 0 ? course.includes : [""], // <-- Add this line
         thumbnailFile: null,
       });
       setPreviewThumbnail(course.thumbnail || "");
@@ -142,6 +175,9 @@ const CourseLandingPageTab = () => {
     details.requirements
       .filter((item) => item.trim() !== "")
       .forEach((item) => formData.append("requirements[]", item));
+    details.includes
+      .filter((item) => item.trim() !== "")
+      .forEach((item) => formData.append("includes[]", item)); // <-- Add this line
     if (details.thumbnailFile)
       formData.append("courseThumbnail", details.thumbnailFile); // <-- use 'courseThumbnail'
 
@@ -323,6 +359,34 @@ const CourseLandingPageTab = () => {
           >
             <PlusCircle className="h-4 w-4 mr-2" />
             Add requirement
+          </Button>
+        </div>
+        <div className="space-y-2">
+          <Label>What’s included</Label>
+          {details.includes.map((item, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <Input
+                value={item}
+                onChange={(e) => handleArrayChange(e, i, "includes")}
+              />
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                onClick={() => removeArrayItem(i, "includes")}
+              >
+                <Trash2 className="h-4 w-4 text-red-500" />
+              </Button>
+            </div>
+          ))}
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={() => addArrayItem("includes")}
+          >
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Add include
           </Button>
         </div>
         <div className="space-y-2">

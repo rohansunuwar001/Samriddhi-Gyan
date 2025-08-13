@@ -3,7 +3,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useDeleteLectureMutation, useGetLectureByIdQuery, useUpdateLectureMutation } from "@/features/api/courseApi";
+import { useDeleteLectureMutation, useGetLectureByIdQuery, useUpdateLectureMutation } from "@/features/api/lectureApi";
+
 
 import { Loader2 } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -46,7 +47,7 @@ const EditLectureForm = () => {
             try {
                 await deleteLecture({ lectureId, courseId }).unwrap();
                 toast.success("Lecture deleted.");
-                navigate(`/admin/course/${courseId}`);
+                navigate(`/instructor/course/${courseId}`);
             } catch (err) { toast.error(err.data?.message || "Deletion failed."); }
         }
     };

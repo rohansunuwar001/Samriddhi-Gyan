@@ -1,8 +1,6 @@
-import { CourseProgress } from "../models/courseProgress.js";
+import { CourseProgress } from "../models/courseProgress.model.js";
 import { Course } from "../models/course.model.js";
 import { createNotification } from "../service/notification.service.js";
-
-
 
 
 export const getCourseProgress = async (req, res) => {
@@ -16,7 +14,15 @@ export const getCourseProgress = async (req, res) => {
       userId,
     }).populate("courseId");
 
-    const courseDetails = await Course.findById(courseId).populate("lectures");
+    const courseDetails = await Course.findById(courseId)
+      .populate({
+        path: "sections",
+        populate: {
+          path: "lectures",
+          select: "title videoUrl durationInSeconds isPreview", // add fields as needed
+        },
+        select: "title lectures totalDurationInSeconds",
+      });
 
     if (!courseDetails) {
       return res.status(404).json({
@@ -53,11 +59,9 @@ export const updateLectureProgress = async (req, res) => {
     const { courseId, lectureId } = req.params;
     const userId = req.id;
 
-    // fetch or create course progress
     let courseProgress = await CourseProgress.findOne({ courseId, userId });
 
     if (!courseProgress) {
-      // If no progress exist, create a new record
       courseProgress = new CourseProgress({
         userId,
         courseId,
@@ -66,42 +70,41 @@ export const updateLectureProgress = async (req, res) => {
       });
     }
 
-    // find the lecture progress in the course progress
     const lectureIndex = courseProgress.lectureProgress.findIndex(
-      (lecture) => lecture.lectureId === lectureId
+      (lecture) => lecture.lectureId.toString() === lectureId
     );
 
     if (lectureIndex !== -1) {
-      // if lecture already exist, update its status
       courseProgress.lectureProgress[lectureIndex].viewed = true;
     } else {
-      // Add new lecture progress
       courseProgress.lectureProgress.push({
         lectureId,
         viewed: true,
       });
     }
 
-    // if all lecture is complete
+    // Calculate total lectures
+    const courseDetails = await Course.findById(courseId)
+      .populate({ path: "sections", select: "lectures title" });
+
+    const totalLectures = courseDetails.sections.reduce(
+      (sum, section) => sum + (section.lectures?.length || 0),
+      0
+    );
+
     const lectureProgressLength = courseProgress.lectureProgress.filter(
       (lectureProg) => lectureProg.viewed
     ).length;
 
-    const course = await Course.findById(courseId);
-
-    if (course.lectures.length === lectureProgressLength)
+    if (lectureProgressLength === totalLectures) {
       courseProgress.completed = true;
-
-
-      // Trigger the completion notification
-        await createNotification(
-            userId,
-            `Congratulations! You have completed the course "${course.courseTitle}".`,
-            `/course-progress/${course._id}`, // Can also link to a certificate page
-            'course_completion'
-        );
-    
-
+      await createNotification(
+        userId,
+        `Congratulations! You have completed the course "${courseDetails.title}".`,
+        `/course-detail/${courseDetails._id}/content`,
+        'course_completion'
+      );
+    }
 
     await courseProgress.save();
 
@@ -110,6 +113,7 @@ export const updateLectureProgress = async (req, res) => {
     });
   } catch (error) {
     console.log(error);
+    return res.status(500).json({ message: "Internal server error" });
   }
 };
 

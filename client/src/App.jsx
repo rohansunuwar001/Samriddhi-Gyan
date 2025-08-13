@@ -30,7 +30,6 @@ import Profile from "./pages/Profile/Profile";
 import ProfileEdit from "./pages/Profile/ProfileEdit";
 
 // Student-Facing Course Pages
-import CourseDetail from "./pages/student/CourseDetail";
 import CourseProgress from "./pages/student/CourseProgress";
 import Courses from "./pages/student/Courses";
 import MyLearning from "./pages/student/MyLearning";
@@ -55,9 +54,11 @@ import CoursePayout from "./pages/admin/course/CoursePayout";
 import CourseReviews from "./pages/admin/course/CourseReviews";
 import CourseStudent from "./pages/admin/course/CourseStudent";
 import EditLecture from "./pages/admin/lecture/EditLecture"; // Only EditLecture is needed
-import Contact from "./pages/Contact/Contact";
-import WishList from "./pages/WishList/WishList";
 import Cart from "./pages/cart/Cart";
+import Contact from "./pages/Contact/Contact";
+import CourseDetailPage from "./pages/Courses/CourseDetailPage";
+import WishList from "./pages/WishList/WishList";
+import InstructorProfilePage from "./pages/Profile/InstructorProfilePage";
 
 
 // --- LAYOUT WRAPPER COMPONENT ---
@@ -89,7 +90,10 @@ const appRouter = createBrowserRouter([
         path: "/ai-assistant",
         element: <AIAssistant />,
       },
-
+{
+  path: "/instructor-profile/:instructorId", // The path must match the Link
+  element: <InstructorProfilePage /> 
+},
       {
         path: "/cart",
         element: <ProtectedRoute><Cart /></ProtectedRoute>
@@ -109,11 +113,11 @@ const appRouter = createBrowserRouter([
       { path: "course/search", element: <ProtectedRoute><SearchPage /></ProtectedRoute> },
 
       // NOTE: The main course detail page for students
-      { path: "course-detail/:courseId", element: <ProtectedRoute><CourseDetail /></ProtectedRoute> },
+      { path: "course-detail/:courseId", element: <ProtectedRoute><CourseDetailPage /></ProtectedRoute> },
 
       // NOTE: The course player/progress page for enrolled students
       {
-        path: "course-progress/:courseId",
+        path: "course-detail/:courseId/content",
         element: <ProtectedRoute><PurchaseCourseProtectedRoute><CourseProgress /></PurchaseCourseProtectedRoute></ProtectedRoute>
       },
 
@@ -194,6 +198,7 @@ function App() {
 
   return (
     <main>
+      {/* <ScrollToTop /> */}
       <RouterProvider router={appRouter} />
     </main>
   );

@@ -64,8 +64,8 @@ export const getSearchResults = async (req, res) => {
         {
           $project: {
             _id: 1, // The course ID is needed for the link
-            title: '$courseTitle', // Rename for consistency
-            thumbnail: '$courseThumbnail',
+            title: '$title', // Rename for consistency
+            thumbnail: '$Thumbnail',
             creatorName: '$creatorInfo.name' // Send only the creator's name
           }
         }

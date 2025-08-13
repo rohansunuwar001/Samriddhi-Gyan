@@ -10,18 +10,18 @@ const SearchResult = ({ course }) => {
       <Link
         to={`/course-detail/${course._id}`}
         className="flex flex-col md:flex-row gap-4 flex-1"
-        aria-label={`View ${course.courseTitle} course details`}
+        aria-label={`View ${course.title} course details`}
       >
         <div className="relative aspect-video w-full md:w-56 flex-shrink-0">
           <img
-            src={course.courseThumbnail}
-            alt={course.courseTitle}
+            src={course.thumbnail}
+            alt={course.title}
             className="h-full w-full object-cover rounded-lg transition-transform duration-300 group-hover:scale-[1.02]"
             loading="lazy"
           />
-          {course.isNew && (
+          {course.isBestseller && (
             <Badge variant="secondary" className="absolute top-2 left-2">
-              New
+              Bestseller
             </Badge>
           )}
         </div>
@@ -30,14 +30,14 @@ const SearchResult = ({ course }) => {
           <div className="flex items-start justify-between gap-2">
             <div>
               <h2 className="font-bold text-lg md:text-xl line-clamp-2">
-                {course.courseTitle}
+                {course.title}
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
-                {course.subTitle}
+                {course.subtitle}
               </p>
             </div>
             <div className="md:hidden">
-              <PriceDisplay price={course.coursePrice} />
+              <PriceDisplay price={course.price?.current} />
             </div>
           </div>
 
@@ -46,23 +46,23 @@ const SearchResult = ({ course }) => {
               <Users className="h-4 w-4" />
               {course.enrolledStudents?.length || 0} students
             </span>
-            {course.duration && (
+            {course.totalDurationInSeconds > 0 && (
               <span className="flex items-center gap-1">
                 <Clock className="h-4 w-4" />
-                {course.duration}
+                {formatDuration(course.totalDurationInSeconds)}
               </span>
             )}
-            {course.rating && (
+            {course.ratings > 0 && (
               <span className="flex items-center gap-1">
                 <Star className="h-4 w-4 text-yellow-500 fill-yellow-500" />
-                {course.rating.toFixed(1)}
+                {course.ratings.toFixed(1)}
               </span>
             )}
           </div>
 
           <div className="flex items-center gap-2 text-sm">
             <Badge variant="outline" className="capitalize">
-              {course.courseLevel}
+              {course.level}
             </Badge>
             {course.category && (
               <Badge variant="secondary" className="capitalize">
@@ -83,21 +83,32 @@ const SearchResult = ({ course }) => {
       </Link>
 
       <div className="hidden md:flex flex-col items-end justify-between gap-4 w-32 flex-shrink-0">
-        <PriceDisplay price={course.coursePrice} />
+        <PriceDisplay price={course.price?.current} />
         <Button
           asChild
           size="sm"
           className="w-full"
-          variant={course.isFree ? "outline" : "default"}
+          variant={course.price?.current === 0 ? "outline" : "default"}
         >
           <Link to={`/course-detail/${course._id}`}>
-            {course.isFree ? "Enroll Now" : "Buy Now"}
+            {course.price?.current === 0 ? "Enroll Now" : "Buy Now"}
           </Link>
         </Button>
       </div>
     </article>
   );
 };
+
+// Helper to format seconds to h:mm:ss or m:ss
+function formatDuration(seconds) {
+  if (!seconds) return "0:00";
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  return h > 0
+    ? `${h}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`
+    : `${m}:${s.toString().padStart(2, "0")}`;
+}
 
 const PriceDisplay = ({ price }) => {
   if (price === 0 || price === null) {
@@ -110,10 +121,10 @@ const PriceDisplay = ({ price }) => {
 
   return (
     <div className="text-right">
-      <span className="font-bold text-lg">₹{price.toLocaleString()}</span>
+      <span className="font-bold text-lg">Rs{price?.toLocaleString()}</span>
       {price > 999 && (
         <span className="block text-xs text-gray-500 dark:text-gray-400">
-          or ₹{Math.round(price / 12)}/mo
+          or Rs{Math.round(price / 12)}/mo
         </span>
       )}
     </div>

@@ -10,7 +10,19 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Loader2 } from "lucide-react";
 import { useCreateCourseMutation } from "@/features/api/courseApi";
 
-const categories = ["Web Development", "Data Science", "Mobile Development", "DevOps", "UI/UX Design"];
+
+// const categories = ["Web Development", "Data Science", "Mobile Development", "DevOps", "UI/UX Design"];
+const categories = [
+  "HTML", "CSS", "JavaScript", "TypeScript",
+  "Frontend Development", "Backend Development", "Fullstack Development",
+  "MERN Stack Development", "Next JS", "React JS", "Vue JS", "Node JS",
+  "Express JS", "MongoDB", "SQL", "Python", "Data Science", "Machine Learning",
+  "Artificial Intelligence", "DevOps", "Docker", "Git & GitHub", "UI/UX Design",
+  "Figma", "Adobe XD", "Photoshop", "Cybersecurity", "Cloud Computing", "AWS",
+  "Firebase", "Java", "C++", "C#", "Android Development", "iOS Development",
+  "Mobile App Development", "Software Testing", "System Design",
+  "Operating Systems", "DSA (Data Structures & Algorithms)"
+];
 
 const AddCourse = () => {
     const [courseDetails, setCourseDetails] = useState({
@@ -48,7 +60,7 @@ const AddCourse = () => {
     useEffect(() => {
         if (isSuccess && data?.course?._id) {
             toast.success(data.message || "Course created! Let's add more details.");
-            navigate(`/admin/course/${data.course._id}`);
+            navigate(`/instructor/course/${data.course._id}`);
         }
         if (isError) {
             toast.error(error.data?.message || "Something went wrong.");

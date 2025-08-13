@@ -1,14 +1,14 @@
-import React from "react";
-import Course from "./Course";
-import { useLoadUserQuery } from "@/features/api/authApi";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLoadUserQuery } from "@/features/api/authApi";
 import { BookOpen, Rocket } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import CourseCard from "./CourseCard";
 
 const MyLearning = () => {
   const navigate = useNavigate();
   const { data, isLoading, isError } = useLoadUserQuery();
+  console.log("User data:", data);
   const myLearning = data?.user?.enrolledCourses || [];
 
   if (isError) {
@@ -56,7 +56,7 @@ const MyLearning = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
           {myLearning.map((course) => (
-            <Course key={course._id} course={course} showProgress />
+            <CourseCard key={course._id} course={course} showProgress />
           ))}
         </div>
       )}
@@ -95,7 +95,7 @@ const EmptyLearningState = () => {
         Your learning journey starts here
       </h3>
       <p className="text-gray-500 dark:text-gray-400 mb-6">
-        You haven't enrolled in any courses yet. Explore our catalog to find
+        You haven`t enrolled in any courses yet. Explore our catalog to find
         courses that match your interests.
       </p>
       <div className="flex flex-col sm:flex-row justify-center gap-3">

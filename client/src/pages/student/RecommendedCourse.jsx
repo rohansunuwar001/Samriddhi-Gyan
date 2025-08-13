@@ -1,13 +1,17 @@
-import { Skeleton } from "@/components/ui/skeleton";
-import Course from "./Course";
-import { useGetRecommendedCourseQuery } from "@/features/api/courseApi";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { RocketIcon, ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+
+import { ExclamationTriangleIcon, RocketIcon } from "@radix-ui/react-icons";
 import { Sparkles } from "lucide-react";
+import CourseCard from "./CourseCard";
+import { useGetRecommendedCourseQuery } from "@/features/api/recommendedApi";
+
 
 const RecommendedCourse = () => {
   const { data, isLoading, isError, error, refetch } = useGetRecommendedCourseQuery();
+
+  console.log("recommended course data:", data);
 
   return (
     <section className="bg-gray-50 dark:bg-[#141414] py-12">
@@ -31,7 +35,7 @@ const RecommendedCourse = () => {
               <ExclamationTriangleIcon className="h-4 w-4" />
               <AlertTitle>Error loading recommendations</AlertTitle>
               <AlertDescription>
-                {error?.data?.message || 'Failed to fetch recommended courses'}
+                {error?.data?.message || "Failed to fetch recommended courses"}
                 <div className="mt-4">
                   <Button variant="outline" size="sm" onClick={refetch}>
                     Try Again
@@ -49,10 +53,10 @@ const RecommendedCourse = () => {
         ) : data?.recommendedCourses?.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {data.recommendedCourses.map((course) => (
-              <Course 
-                key={course._id} 
-                course={course} 
-                showRecommendationBadge
+              <CourseCard
+                key={course._id}
+                course={course}
+                showRecommendationBadge={!course.isPurchased} // Show badge only if NOT purchased
               />
             ))}
           </div>
@@ -62,9 +66,13 @@ const RecommendedCourse = () => {
               <RocketIcon className="h-4 w-4" />
               <AlertTitle>No recommendations yet</AlertTitle>
               <AlertDescription>
-                Complete some courses or update your preferences to get personalized recommendations
+                Complete some courses or update your preferences to get
+                personalized recommendations
                 <div className="mt-4">
-                  <Button variant="outline" onClick={() => window.location.reload()}>
+                  <Button
+                    variant="outline"
+                    onClick={() => window.location.reload()}
+                  >
                     Refresh Recommendations
                   </Button>
                 </div>

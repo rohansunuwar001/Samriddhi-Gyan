@@ -1,7 +1,16 @@
 import { Star } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import PropTypes from 'prop-types';
+
 const CourseHeader = ({ course }) => {
+    // Defensive: fallback values
+    const rating = typeof course.ratings === 'number' ? course.ratings : 0;
+    const reviewsCount = typeof course.numOfReviews === 'number' ? course.numOfReviews : 0;
+    const studentsCount = Array.isArray(course.enrolledStudents) ? course.enrolledStudents.length : 0;
+    const lastUpdated = course.updatedAt
+        ? new Date(course.updatedAt).toLocaleDateString()
+        : 'N/A';
+
     return (
         <div className="bg-gray-800 text-white pt-8 pb-12">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -11,15 +20,17 @@ const CourseHeader = ({ course }) => {
                     <div className="mt-4 flex items-center flex-wrap gap-x-4 gap-y-2">
                         {course.isBestseller && <Badge className="bg-yellow-400 text-black">Bestseller</Badge>}
                         <div className="flex items-center gap-1">
-                            <span className="font-bold text-yellow-400">{course.rating}</span>
+                            <span className="font-bold text-yellow-400">{rating}</span>
                             <Star className="h-4 w-4 text-yellow-400 fill-current" />
-                            <span className="text-blue-300 underline">({course.reviewsCount.toLocaleString()} ratings)</span>
+                            <span className="text-blue-300 underline">({reviewsCount.toLocaleString()} ratings)</span>
                         </div>
-                        <span>{course.studentsCount.toLocaleString()} students</span>
+                        <span>{studentsCount.toLocaleString()} students</span>
                     </div>
-                    <p className="mt-2 text-sm">Created by <span className="text-blue-300 underline">{course.creator.name}</span></p>
+                    <p className="mt-2 text-sm">
+                        Created by <span className="text-blue-300 underline">{course.creator?.name || "Unknown"}</span>
+                    </p>
                     <div className="mt-2 text-sm flex items-center flex-wrap gap-x-4">
-                        <span>Last updated {course.lastUpdated}</span>
+                        <span>Last updated {lastUpdated}</span>
                         <span>{course.language}</span>
                     </div>
                 </div>
@@ -33,15 +44,15 @@ CourseHeader.propTypes = {
         title: PropTypes.string.isRequired,
         subtitle: PropTypes.string,
         isBestseller: PropTypes.bool,
-        rating: PropTypes.number.isRequired,
-        reviewsCount: PropTypes.number.isRequired,
-        studentsCount: PropTypes.number.isRequired,
+        ratings: PropTypes.number,
+        numOfReviews: PropTypes.number,
+        enrolledStudents: PropTypes.array,
         creator: PropTypes.shape({
-            name: PropTypes.string.isRequired,
-        }).isRequired,
-        lastUpdated: PropTypes.string.isRequired,
-        language: PropTypes.string.isRequired,
-        }).isRequired,
+            name: PropTypes.string,
+        }),
+        updatedAt: PropTypes.string,
+        language: PropTypes.string,
+    }).isRequired,
 };
 
 export default CourseHeader;

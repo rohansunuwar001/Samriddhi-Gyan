@@ -9,7 +9,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
 
     const goToUpdateLecture = () => {
         // Correct, more explicit path for editing
-        navigate(`/admin/course/${courseId}/lecture/${lecture._id}`);
+        navigate(`/instructor/course/${courseId}/lecture/${lecture._id}`);
     };
 
     return (

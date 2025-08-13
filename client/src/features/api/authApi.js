@@ -32,6 +32,7 @@ export const authApi = apiSlice.injectEndpoints({
                     console.log("Login successful:", result.data.user);
                 } catch (error) { console.error("Login failed:", error); }
             },
+            invalidatesTags: ["Courses"],
         }),
 
         /**
@@ -48,6 +49,7 @@ export const authApi = apiSlice.injectEndpoints({
                     dispatch(userLoggedOut());
                 } catch (error) { console.error("Logout failed:", error); }
             },
+            invalidatesTags: ["Courses"],
         }),
 
         /**
@@ -60,7 +62,7 @@ export const authApi = apiSlice.injectEndpoints({
                 try {
                     const result = await queryFulfilled;
                     dispatch(userLoggedIn({ user: result.data.user }));
-                } catch (error) { console.log("No user session found or session expired."); }
+                } catch (error) { console.log("No user session found or session expired."+error); }
             },
         }),
 

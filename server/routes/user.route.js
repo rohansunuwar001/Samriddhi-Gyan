@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import passport from "passport";
 import {
   checkUser,
+  getPublicUserProfile,
   getUserProfile,
   login,
   logout,
@@ -34,6 +35,8 @@ router.patch(
 // Route to update the password
 router.patch("/profile/update-password", isAuthenticated, updateUserPassword);
 
+router.get('/profile', isAuthenticated, getUserProfile);
+router.get("/instructor-profile/:id", isAuthenticated,getPublicUserProfile)
 router.get(
   "/google",
   passport.authenticate("google", { scope: ["profile", "email"] })
