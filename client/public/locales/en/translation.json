@@ -48,7 +48,8 @@
     "no_results": "No results found for \"{{query}}\"",
     "courses_heading": "Courses",
     "home": "Home",
-    "instructor_dashboard": "Instructor Dashboard"
+    "instructor_dashboard": "Instructor Dashboard",
+    "admin_dashboard": "Admin Dashboard"
   },
   "language_switcher": {
     "choose_language": "Choose a language"

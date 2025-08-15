@@ -3,17 +3,14 @@ import PropTypes from 'prop-types';
 import { useState } from 'react';
 import { toast } from "sonner";
 
-// --- API Hooks ---
-import {
-    useLoadUserQuery,
-    useUpdateUserPasswordMutation
-} from '@/features/api/authApi';
+
 
 // --- UI Components & Icons ---
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 // NEW: Import Eye and EyeOff icons for the password toggle
+import { useLoadUserQuery, useUpdateUserPasswordMutation } from '@/features/api/authApi';
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import ProfileSidebar from './ProfileSideBar';
 

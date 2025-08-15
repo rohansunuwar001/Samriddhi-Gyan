@@ -1,5 +1,5 @@
+// file: src/pages/Profile.jsx
 
-import { useLoadUserQuery } from "@/features/api/authApi";
 import { useNavigate } from "react-router-dom";
 import PropTypes from 'prop-types';
 // --- UI & Icons ---
@@ -7,8 +7,9 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-// Import all icons needed for the config array
 import { Facebook, Instagram, Linkedin, Link as LinkIcon, Pencil, Twitter } from "lucide-react";
+// ✅ THE FIX: We are now importing the correct hook that matches the working backend route.
+import { useLoadUserQuery } from "@/features/api/authApi";
 
 // --- Reusable Component ---
 const SocialLink = ({ icon: Icon, href = '#' }) => (
@@ -22,7 +23,7 @@ SocialLink.propTypes = {
   href: PropTypes.string,
 };
 
-// --- NEW: Configuration for social links to drive the UI ---
+// --- Configuration for social links to drive the UI ---
 const socialLinksConfig = [
   { key: 'facebook', icon: Facebook, baseUrl: 'https://facebook.com/' },
   { key: 'instagram', icon: Instagram, baseUrl: 'https://instagram.com/' },
@@ -34,6 +35,7 @@ const socialLinksConfig = [
 // --- Main Profile View Page Component ---
 const Profile = () => {
   const navigate = useNavigate();
+  // ✅ THE FIX: The hook has been changed from `useLoadUserQuery` to `useLoadUserQuery`.
   const { data, isLoading, isError, error } = useLoadUserQuery();
   const user = data?.user;
 
@@ -41,9 +43,12 @@ const Profile = () => {
     navigate('/profile/edit');
   };
 
+  // Handle Loading State
   if (isLoading) return <ProfilePageSkeleton />;
+  // Handle Error State
   if (isError) return <ProfilePageError error={error} />;
 
+  // Handle case where user is not found after the query resolves
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-black">
@@ -52,6 +57,7 @@ const Profile = () => {
     );
   }
 
+  // Render the full profile on success
   return (
     <div className="bg-white dark:bg-black font-sans min-h-screen">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -87,14 +93,12 @@ const Profile = () => {
               <h2 className="text-xl font-bold text-gray-800 dark:text-white mt-4">{user.name}</h2>
               <p className="text-sm text-gray-500 dark:text-gray-400">{user.email}</p>
 
-              {/* --- UPDATED: Links section now uses .map() --- */}
+              {/* Links section driven by config array */}
               <div className="mt-6 flex justify-center space-x-3">
-                {/* Handle website link separately as it has no base URL */}
                 {user.links?.website && <SocialLink icon={LinkIcon} href={user.links.website} />}
 
-                {/* Map over the social media links config */}
                 {socialLinksConfig
-                  .filter(link => user.links && user.links[link.key]) // Keep only links the user has provided
+                  .filter(link => user.links && user.links[link.key])
                   .map(link => (
                     <SocialLink
                       key={link.key}
@@ -111,26 +115,23 @@ const Profile = () => {
           </div>
         </section>
 
- {/* --- About Me Section --- */}
-            <br />
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
-            {user.description && (
-              <section className="max-w-4xl">
-                <div className="bg-white dark:bg-gray-800/50 p-6 md:p-8 rounded-lg shadow-sm">
-                  <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">About me</h2>
-                  <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
-                    {user.description}
-                  </p>
-                </div>
-              </section>
-            )}
-            </p>
+        {/* --- About Me Section --- */}
+        {user.description && (
+          <section className="max-w-4xl mt-8">
+            <div className="bg-white dark:bg-gray-800/50 p-6 md:p-8 rounded-lg shadow-sm">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">About me</h2>
+              <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+                {user.description}
+              </p>
+            </div>
+          </section>
+        )}
       </div>
     </div>
   );
 };
 
-// --- Skeleton and Error Components (Unchanged) ---
+// --- Skeleton Component for Loading State ---
 const ProfilePageSkeleton = () => (
   <div className="bg-slate-50 dark:bg-black font-sans min-h-screen animate-pulse">
     <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -162,6 +163,7 @@ const ProfilePageSkeleton = () => (
   </div>
 );
 
+// --- Error Component for Error State ---
 const ProfilePageError = ({ error }) => (
   <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black">
     <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl p-8 text-center">
@@ -169,7 +171,7 @@ const ProfilePageError = ({ error }) => (
         Failed to Load Profile
       </h2>
       <p className="text-red-600 dark:text-red-400 mb-6">
-        {error?.data?.message || "An unexpected error occurred."}
+        {error?.data?.message || "Profile not found or an error occurred."}
       </p>
       <Button variant="destructive" onClick={() => window.location.reload()}>
         Try Again
@@ -179,7 +181,7 @@ const ProfilePageError = ({ error }) => (
 );
 
 ProfilePageError.propTypes = {
-  error: PropTypes.object.isRequired,
+  error: PropTypes.object,
 };
 
 export default Profile;

@@ -1,6 +1,7 @@
 import express from "express";
-import isAuthenticated from "../middlewares/isAuthenticated.js";
+
 import { completePayment, fillEsewaForm, initializePayment } from "../controllers/esewa.controller.js";
+import { isAuthenticated } from "../middlewares/isAuthenticated.js";
 
 
 const router = express.Router();

@@ -25,6 +25,7 @@ import cartRouter from "./routes/cart.route.js";
 import wishlistRouter from "./routes/wishlist.route.js";
 import { configurePassport } from "./database/passport-config.js"; // adjust path as needed
 import recommendedRoutes from "./routes/recommended.route.js";
+import adminRouter from "./routes/admin.route.js";
 dotenv.config({});
 
 const app = express();
@@ -35,7 +36,7 @@ configurePassport();
 // 2. Set up session middleware (required for passport)
 app.use(
   session({
-    secret: process.env.SESSION_SECRET ,
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: { maxAge: 24 * 60 * 60 * 1000 },
@@ -79,4 +80,5 @@ app.use("/api/v1/wishlist", wishlistRouter);
 app.use("/api/v1/cart", cartRouter);
 app.use("/api/v1/notifications", notificationRouter);
 app.use("/api/v1/recommendations", recommendedRoutes);
+app.use("/api/v1/admin", adminRouter)
 export default app;

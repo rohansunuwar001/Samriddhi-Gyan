@@ -1,6 +1,7 @@
 import express from "express";
 import { addToWishlist, getWishlist, removeFromWishlist } from "../controllers/wishlist.controller.js";
-import isAuthenticated from "../middlewares/isAuthenticated.js";
+import { isAuthenticated } from "../middlewares/isAuthenticated.js";
+
 
 
 

@@ -1,12 +1,13 @@
 // routes/cartRoutes.js
 
 import { Router } from "express";
-import isAuthenticated from "../middlewares/isAuthenticated.js";
+
 import {
   addToCart,
   getCart,
   removeFromCart,
 } from "../controllers/cart.controller.js";
+import { isAuthenticated } from "../middlewares/isAuthenticated.js";
 
 const cartRouter = Router();
 

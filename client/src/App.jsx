@@ -7,7 +7,13 @@ import ScrollToTop from "./components/ScrollToTop";
 import MainLayout from "./layout/MainLayout";
 
 // --- AUTHENTICATION & ROUTE PROTECTION ---
-import { AdminRoute, AuthenticatedUser, InstructorRoute, ProtectedRoute, StudentRoute } from "./components/ProtectedRoutes";
+import {
+  AdminRoute,
+  AuthenticatedUser,
+  InstructorRoute,
+  ProtectedRoute,
+  StudentRoute,
+} from "./components/ProtectedRoutes";
 import PurchaseCourseProtectedRoute from "./components/PurchaseCourseProtectedRoute";
 
 // --- ALL PAGE COMPONENT IMPORTS ---
@@ -59,7 +65,12 @@ import Contact from "./pages/Contact/Contact";
 import CourseDetailPage from "./pages/Courses/CourseDetailPage";
 import WishList from "./pages/WishList/WishList";
 import InstructorProfilePage from "./pages/Profile/InstructorProfilePage";
-
+import SupAdmDashboard from "./pages/superAdmin/SupAdmDashboard";
+import SupAdmCourseAnalytics from "./pages/superAdmin/SupAdmCourseAnalytics";
+import SupAdmAllUser from "./pages/superAdmin/SupAdmAllUser";
+import SupAdmAllRevenueDetails from "./pages/superAdmin/SupAdmAllRevenueDetails";
+import HomeCms from "./pages/pageCms/HomeCms";
+import PaymentSuccess from "./pages/PaymentSuccess";
 
 // --- LAYOUT WRAPPER COMPONENT ---
 const MainLayoutWithScroll = () => (
@@ -77,74 +88,220 @@ const appRouter = createBrowserRouter([
     errorElement: <AnimatedErrorPage />, // Sets the error page for all child routes
     children: [
       // --- Public Routes (now student-only) ---
-      { path: "/", element: <StudentRoute><Home /></StudentRoute> },
-      { path: "/about", element: <StudentRoute><About /></StudentRoute> },
-      { path: "/contact", element: <StudentRoute><Contact /></StudentRoute> },
-      { path: "/blog", element: <StudentRoute><BlogPage /></StudentRoute> },
-       { path: "/wishlist", element: <StudentRoute><WishList /></StudentRoute> },
-      { path: "/blog/:slug", element: <StudentRoute><SingleBlogPage /></StudentRoute> },
-      { path: "/community", element: <StudentRoute><ForumPage /></StudentRoute> },
-      { path: "/how-it-works", element: <StudentRoute><HowItWorks /></StudentRoute> },
+      {
+        path: "/",
+        element: (
+          <StudentRoute>
+            <Home />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/about",
+        element: (
+          <StudentRoute>
+            <About />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/contact",
+        element: (
+          <StudentRoute>
+            <Contact />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/blog",
+        element: (
+          <StudentRoute>
+            <BlogPage />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/wishlist",
+        element: (
+          <StudentRoute>
+            <WishList />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/blog/:slug",
+        element: (
+          <StudentRoute>
+            <SingleBlogPage />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/community",
+        element: (
+          <StudentRoute>
+            <ForumPage />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/how-it-works",
+        element: (
+          <StudentRoute>
+            <HowItWorks />
+          </StudentRoute>
+        ),
+      },
 
       {
         path: "/ai-assistant",
         element: <AIAssistant />,
       },
-{
-  path: "/instructor-profile/:instructorId", // The path must match the Link
-  element: <InstructorProfilePage /> 
-},
+      {
+        path: "/instructor-profile/:instructorId", // The path must match the Link
+        element: <InstructorProfilePage />,
+      },
       {
         path: "/cart",
-        element: <ProtectedRoute><Cart /></ProtectedRoute>
+        element: (
+          <ProtectedRoute>
+            <Cart />
+          </ProtectedRoute>
+        ),
       },
 
-      { path: "login", element: <AuthenticatedUser><Login /></AuthenticatedUser> },
-      { path: "register", element: <AuthenticatedUser><Signup /></AuthenticatedUser> },
+      {
+        path: "login",
+        element: (
+          <AuthenticatedUser>
+            <Login />
+          </AuthenticatedUser>
+        ),
+      },
+      {
+        path: "register",
+        element: (
+          <AuthenticatedUser>
+            <Signup />
+          </AuthenticatedUser>
+        ),
+      },
       { path: "auth/google/success", element: <GoogleSuccess /> },
 
       // --- Protected Student Routes ---
-      { path: "courses", element: <ProtectedRoute><Courses /></ProtectedRoute> },
-      { path: "my-learning", element: <ProtectedRoute><MyLearning /></ProtectedRoute> },
-      { path: "profile", element: <ProtectedRoute><Profile /></ProtectedRoute> },
-      { path: "profile/edit", element: <ProtectedRoute><ProfileEdit /></ProtectedRoute> },
-      { path: "profile/photo", element: <ProtectedRoute><PhotoPage /></ProtectedRoute> },
-      { path: "profile/security", element: <ProtectedRoute><AccountSecurityPage /></ProtectedRoute> },
-      { path: "course/search", element: <ProtectedRoute><SearchPage /></ProtectedRoute> },
-
-      // NOTE: The main course detail page for students
-      { path: "course-detail/:courseId", element: <ProtectedRoute><CourseDetailPage /></ProtectedRoute> },
-
-      // NOTE: The course player/progress page for enrolled students
       {
-        path: "course-detail/:courseId/content",
-        element: <ProtectedRoute><PurchaseCourseProtectedRoute><CourseProgress /></PurchaseCourseProtectedRoute></ProtectedRoute>
-      },
-
-       {
         path: "courses",
         element: (
           <ProtectedRoute>
             <Courses />
-          </ProtectedRoute> 
+          </ProtectedRoute>
         ),
-      }
-,
+      },
+      {
+        path: "my-learning",
+        element: (
+          <ProtectedRoute>
+            <MyLearning />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/payment-success",
+        element: (
+          <ProtectedRoute>
+            <PaymentSuccess />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "profile",
+        element: (
+          <ProtectedRoute>
+            <Profile />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "profile/edit",
+        element: (
+          <ProtectedRoute>
+            <ProfileEdit />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "profile/photo",
+        element: (
+          <ProtectedRoute>
+            <PhotoPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "profile/security",
+        element: (
+          <ProtectedRoute>
+            <AccountSecurityPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "course/search",
+        element: (
+          <ProtectedRoute>
+            <SearchPage />
+          </ProtectedRoute>
+        ),
+      },
 
+      // NOTE: The main course detail page for students
+      {
+        path: "course-detail/:courseId",
+        element: (
+          <ProtectedRoute>
+            <CourseDetailPage />
+          </ProtectedRoute>
+        ),
+      },
+
+      // NOTE: The course player/progress page for enrolled students
+      {
+        path: "course-detail/:courseId/content",
+        element: (
+          <ProtectedRoute>
+            <PurchaseCourseProtectedRoute>
+              <CourseProgress />
+            </PurchaseCourseProtectedRoute>
+          </ProtectedRoute>
+        ),
+      },
+
+      {
+        path: "courses",
+        element: (
+          <ProtectedRoute>
+            <Courses />
+          </ProtectedRoute>
+        ),
+      },
       // ===================================
       // --- REVISED ADMIN/INSTRUCTOR ROUTES ---
       // ===================================
       {
         path: "instructor",
-        element: <InstructorRoute><Sidebar /></InstructorRoute>,
+        element: (
+          <InstructorRoute>
+            <Sidebar />
+          </InstructorRoute>
+        ),
         children: [
           // A. Default admin route and explicit dashboard route
           { path: "", element: <Dashboard /> },
           { path: "dashboard", element: <Dashboard /> },
 
           // B. Course management routes
-          { path: "course", element: <CourseTable /> },      // View all created courses
-          { path: "course/create", element: <AddCourse /> },    // Page to create a new course
+          { path: "course", element: <CourseTable /> }, // View all created courses
+          { path: "course/create", element: <AddCourse /> }, // Page to create a new course
           { path: "course/:courseId", element: <EditCourse /> }, // The new central hub for editing
 
           // C. Lecture management route (simplified and corrected)
@@ -154,40 +311,44 @@ const appRouter = createBrowserRouter([
           // The courseId is included so the component knows how to build the "Back to Curriculum" link.
           {
             path: "course/:courseId/lecture/:lectureId",
-            element: <EditLecture />
+            element: <EditLecture />,
           },
           {
-            path:`course/students`,
-            element: <CourseStudent />
+            path: `course/students`,
+            element: <CourseStudent />,
           },
           {
             path: `course/reviews`,
-            element: <CourseReviews />
+            element: <CourseReviews />,
           },
           {
             path: `course/payouts`,
-            element: <CoursePayout />
-
+            element: <CoursePayout />,
           },
           {
             path: "course/analytics",
-            element: <CourseAnalytics />
-          }
+            element: <CourseAnalytics />,
+          },
         ],
       },
       {
         path: "admin",
-        element: <AdminRoute><Sidebar /></AdminRoute>,
+        element: (
+          <AdminRoute>
+            <Sidebar />
+          </AdminRoute>
+        ),
         children: [
           // A. Default admin route and explicit dashboard route
-          // { path: "", element: <Dashboard /> },
-          // { path: "dashboard", element: <Dashboard /> },
-          // // B. Course management routes
-          // { path: "course", element: <CourseTable /> },
-          // { path: "course/create", element: <AddCourse /> },
-          // { path: "course/:courseId", element: <EditCourse /> },
-        ]
-      }
+          { path: "", element: <SupAdmDashboard /> },
+          { path: "dashboard", element: <SupAdmDashboard /> },
+          // B. Course management routes
+          { path: "analytics", element: <SupAdmCourseAnalytics /> },
+          { path: "users", element: <SupAdmAllUser /> },
+          { path: "revenue", element: <SupAdmAllRevenueDetails /> },
+          { path: "cms", element: <HomeCms /> },
+        ],
+      },
     ],
   },
 ]);

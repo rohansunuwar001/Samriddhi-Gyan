@@ -3,11 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { toast } from "sonner";
 import PropTypes from 'prop-types';
 // --- API Hooks ---
-import {
-  useLoadUserQuery,
-  useUpdateUserAvatarMutation,
-  useUpdateUserInfoMutation
-} from '@/features/api/authApi';
+
 
 // --- UI Components ---
 import { Button } from "@/components/ui/button";
@@ -16,6 +12,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
 import ProfileSidebar from './ProfileSideBar';
+import { useLoadUserQuery, useUpdateUserAvatarMutation, useUpdateUserInfoMutation } from '@/features/api/authApi';
+
 
 //================================================================================
 // 1. Reusable Sidebar Component

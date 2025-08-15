@@ -20,7 +20,7 @@ export const SocketProvider = ({ children }) => {
     if (user) {
       // Connect to the backend, passing the userId as a query parameter.
       // The backend will use this to map the user to their socket ID.
-      const newSocket = io("http://localhost:8080", { // IMPORTANT: Use your backend's URL
+      const newSocket = io("http://localhost:7777", { // IMPORTANT: Use your backend's URL
         query: {
           userId: user._id,
         },

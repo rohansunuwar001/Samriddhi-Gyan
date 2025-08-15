@@ -14,14 +14,21 @@ import {
 
 
 
-// ✅ CLEANED UP AND SIMPLIFIED
 export const createCourse = async (req, res) => {
   try {
+    // 1. Safety Check: Verify that the `isAuthenticated` middleware has run
+    // and successfully attached the user's ID to the request.
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized: You must be logged in to create a course."
+      });
+    }
+
     const {
       title,
       category,
       price,
-      // ... other fields from body
       language,
       level,
       subtitle,
@@ -29,18 +36,17 @@ export const createCourse = async (req, res) => {
       learnings,
     } = req.body;
 
-    if (!title || !category || !price || !price.original || !price.current) {
+    // 2. Perform validation on the incoming data.
+    if (!title || !category || !price?.original || !price?.current) {
       return res.status(400).json({
+        success: false,
         message:
           "Title, category, and a full price object (original, current) are required.",
       });
     }
 
-    // --- REMOVED MANUAL EMBEDDING ---
-    // The Mongoose 'pre-save' hook in your Course model now handles
-    // embedding generation automatically. This block is no longer needed.
-
-    const course = await Course.create({
+    // 3. Create the new course object.
+    const courseData = {
       title,
       category,
       language: language || "English",
@@ -49,57 +55,84 @@ export const createCourse = async (req, res) => {
       subtitle,
       description,
       learnings,
-      creator: req.id, // ensure your auth middleware sets req.id
-      // The 'embedding' field is also removed from here.
-    });
+      // ✅ THE FIX: Set the `creator` field using the correct path from your middleware.
+      creator: req.user._id,
+    };
+
+    const course = await Course.create(courseData);
 
     return res.status(201).json({
+      success: true,
       course,
       message: "Course created successfully. Embedding will be generated automatically.",
     });
+
   } catch (error) {
+    // This will catch Mongoose validation errors or any other exceptions.
     console.error("Failed to create course:", error);
-    return res.status(500).json({ message: "Failed to create course" });
+    return res.status(500).json({ success: false, message: "Server error during course creation." });
   }
 };
+
+
+
 
 // --- UPDATED FOR XENOVA/LOCAL MODEL ---
 export const getSearchResults = async (req, res) => {
   try {
     const { q } = req.query;
+    const userId = req.user?._id; // Get the user ID from your auth middleware
 
     if (!q || q.trim() === "") {
+      // Return empty results if the query is empty
       return res.status(200).json({ suggestions: [], courses: [] });
     }
 
-    // 1. Generate query embedding using our local Xenova model via the utility function
+    // 1. Generate query embedding
     const queryEmbedding = await createEmbeddingForText(q.trim());
 
     if (!queryEmbedding) {
       throw new Error("Failed to generate embedding for query");
     }
 
-    // 2. Fetch all published courses with embeddings (limit or paginate in real use)
-    // For production, you should use MongoDB's $vectorSearch for this query.
-    // This manual approach is fine for smaller datasets.
-    const allCourses = await Course.find({
+    // --- ⭐ NEW LOGIC: Build a dynamic query to exclude purchased courses ---
+    const findCriteria = {
       isPublished: true,
-      embedding: { $exists: true, $ne: [] },
-    }).select("_id title subtitle category thumbnail creator embedding");
+      embedding: { $exists: true, $ne: [] }, // Ensure the course has an embedding
+    };
 
-    // 3. Calculate similarity for each course
+    if (userId) {
+      // If a user is logged in, find their enrolled courses
+      const user = await User.findById(userId).select('enrolledCourses').lean();
+      const purchasedCourseIds = user?.enrolledCourses || [];
+
+      // If they have purchased courses, add a filter to the database query
+      if (purchasedCourseIds.length > 0) {
+        // Use the $nin ("not in") operator to exclude these course IDs
+        findCriteria._id = { $nin: purchasedCourseIds };
+      }
+    }
+    // --- End of new logic ---
+
+    // 2. Fetch all relevant courses using the new, smarter criteria
+    const allCourses = await Course.find(findCriteria).select(
+      "_id title subtitle category thumbnail creator embedding"
+    ).lean(); // Use lean() for better performance
+
+    // 3. Calculate similarity ONLY for the filtered courses
     const coursesWithSimilarity = allCourses
       .map((course) => ({
-        ...course.toObject(),
+        ...course,
+        // The cosineSimilarity function is called on a smaller, pre-filtered dataset
         similarity: cosineSimilarity(queryEmbedding, course.embedding),
       }))
       // 4. Sort descending by similarity and filter out low-similarity results
       .sort((a, b) => b.similarity - a.similarity)
-      .filter((course) => course.similarity > 0.3) // Optional: set a threshold
+      .filter((course) => course.similarity > 0.3) // Optional threshold
       // 5. Limit to top results
       .slice(0, 10);
 
-    // 6. Fetch suggestions (no changes here)
+    // 6. Fetch suggestions (no changes to this logic)
     const sanitizedQuery = q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     const searchRegex = new RegExp(sanitizedQuery, "i");
     const suggestionDocs = await SearchSuggestion.find({ term: searchRegex })
@@ -107,10 +140,11 @@ export const getSearchResults = async (req, res) => {
       .lean();
     const suggestions = suggestionDocs.map((s) => s.term);
 
+    // 7. Send the final response
     res.status(200).json({ suggestions, courses: coursesWithSimilarity });
   } catch (error) {
     console.error("Search controller error:", error);
-    res.status(500).json({ message: "Server error during search." });
+    res.status(500).json({ success: false, message: "Server error during search." });
   }
 };
 
@@ -185,9 +219,11 @@ export const editCourse = async (req, res) => {
 export const searchCourse = async (req, res) => {
   try {
     const { query = "", categories = [], sortByPrice = "" } = req.query;
+    const userId = req.user?._id; // Get the user ID from your authentication middleware (e.g., req.user)
 
     const searchCriteria = {
-      isPublished: true,
+      isPublished: true, // Only search for published courses
+      // Search in title, subtitle, or category for the query string, case-insensitive
       $or: [
         { title: { $regex: query, $options: "i" } },
         { subtitle: { $regex: query, $options: "i" } },
@@ -195,88 +231,115 @@ export const searchCourse = async (req, res) => {
       ],
     };
 
+    // --- Filter by Category ---
+    // If categories are provided, add them to the search criteria
     if (categories.length > 0) {
       searchCriteria.category = { $in: categories };
     }
 
+    // --- ⭐ NEW LOGIC: Exclude purchased courses for logged-in users ---
+    if (userId) {
+      // Find the user to get their list of enrolled courses
+      const user = await User.findById(userId).select('enrolledCourses').lean();
+
+      const purchasedCourseIds = user?.enrolledCourses || [];
+
+      // If the user has purchased any courses, add a condition to exclude them from the search
+      if (purchasedCourseIds.length > 0) {
+        // Add the $nin ("not in") operator to the criteria on the course's _id field
+        searchCriteria._id = { $nin: purchasedCourseIds };
+      }
+    }
+    // --- End of new logic ---
+
+    // --- Sort by Price ---
     const sortOptions = {};
     if (sortByPrice === "low") {
-      sortOptions["price.current"] = 1;
+      sortOptions["price.current"] = 1; // Sort from Low to High
     } else if (sortByPrice === "high") {
-      sortOptions["price.current"] = -1;
+      sortOptions["price.current"] = -1; // Sort from High to Low
     }
+    // You could add a default sort here if needed, e.g., sortOptions.createdAt = -1;
 
-    let courses = await Course.find(searchCriteria)
+    // --- Execute the final query ---
+    const courses = await Course.find(searchCriteria)
       .populate({ path: "creator", select: "name photoUrl" })
-      .sort(sortOptions);
+      .sort(sortOptions)
+      .lean(); // Use .lean() for faster, read-only operations
 
     return res.status(200).json({
       success: true,
-      courses: courses || [],
+      courses: courses, // It's safe to return `courses` directly now
     });
+
   } catch (error) {
     console.error("Search Course error:", error);
-    res.status(500).json({ message: "Failed to search courses." });
+    res.status(500).json({ success: false, message: "Failed to search courses." });
   }
 };
 
 
 async function getCourseProgressPercent(courseId, userId) {
-    // --- EXAMPLE LOGIC ---
-    // 1. Find the course and count its total lectures.
-    // const course = await Course.findById(courseId).select('sections');
-    // const totalLectures = await Lecture.countDocuments({ section: { $in: course.sections } });
-    // if (totalLectures === 0) return 0;
-    //
-    // 2. Find the user's progress for that course.
-    // const userProgress = await UserProgress.findOne({ userId, courseId });
-    // const completedLectures = userProgress?.completedLectures?.length || 0;
-    //
-    // 3. Calculate percentage.
-    // return Math.round((completedLectures / totalLectures) * 100);
+  // --- EXAMPLE LOGIC ---
+  // 1. Find the course and count its total lectures.
+  // const course = await Course.findById(courseId).select('sections');
+  // const totalLectures = await Lecture.countDocuments({ section: { $in: course.sections } });
+  // if (totalLectures === 0) return 0;
+  //
+  // 2. Find the user's progress for that course.
+  // const userProgress = await UserProgress.findOne({ userId, courseId });
+  // const completedLectures = userProgress?.completedLectures?.length || 0;
+  //
+  // 3. Calculate percentage.
+  // return Math.round((completedLectures / totalLectures) * 100);
 
-    // For now, returning a placeholder value:
-    return 0; // Replace with your actual progress calculation logic.
+  // For now, returning a placeholder value:
+  return 0; // Replace with your actual progress calculation logic.
 }
 
 
 export const getPublishedCourse = async (req, res) => {
   try {
-    const userId = req.id; // From your auth middleware
-
     let courses = await Course.find({ isPublished: true })
       .populate({ path: "creator", select: "name photoUrl" })
       .lean();
 
-    // ✅ CORE LOGIC CHANGE:
-    // We will now loop through all courses and add information, not filter them.
-    if (userId) {
+    // The 'loadUserIfAuthenticated' middleware might have attached a user.
+    // We check if it exists before trying to use it.
+    if (req.user && req.user._id) {
+      const userId = req.user._id;
+
+      // ---- This is your previous logic, now safely wrapped in a check ----
       const user = await User.findById(userId).select("enrolledCourses").lean();
       const enrolledCourseIds = new Set(
         user?.enrolledCourses?.map((id) => id.toString()) || []
       );
 
-      // Decorate each course with purchase status and progress.
       for (let course of courses) {
-        if (enrolledCourseIds.has(course._id.toString())) {
-          // If the course is purchased:
-          course.isPurchased = true;
-          // Fetch and add the user's progress for this specific course.
-          course.progress = await getCourseProgressPercent(course._id, userId);
-        } else {
-          // If not purchased, explicitly set to false.
-          course.isPurchased = false;
-          course.progress = 0;
-        }
+        course.isPurchased = enrolledCourseIds.has(course._id.toString());
+        // For performance, only calculate progress if the course is purchased
+        course.progress = course.isPurchased
+          ? await getCourseProgressPercent(course._id, userId)
+          : 0;
+      }
+      // -----------------------------------------------------------------
+
+    } else {
+      // ---- This runs for GUEST users ----
+      // Explicitly set purchase and progress info for a consistent API response.
+      for (let course of courses) {
+        course.isPurchased = false;
+        course.progress = 0;
       }
     }
 
-    // Return the full, decorated list of courses.
-    return res.status(200).json({ courses });
-    
+    // Return the full, decorated list of courses for everyone.
+    return res.status(200).json({ success: true, courses });
+
   } catch (error) {
     console.error("Error fetching published courses:", error);
     return res.status(500).json({
+      success: false,
       message: "Failed to get published courses",
     });
   }
@@ -284,7 +347,8 @@ export const getPublishedCourse = async (req, res) => {
 
 export const getCreatorCourses = async (req, res) => {
   try {
-    const userId = req.id;
+    const userId = req.user._id;
+    // console.log(userId);
     const courses = await Course.find({ creator: userId });
     if (!courses) {
       return res.status(404).json({
@@ -306,31 +370,28 @@ export const getCreatorCourses = async (req, res) => {
 export const getCourseById = async (req, res) => {
   try {
     const { courseId } = req.params;
-    const userId = req.id;
 
+    // First, find the course. This should happen for everyone.
     const course = await Course.findById(courseId)
-      .populate({
-        path: "sections",
-        populate: { path: "lectures" },
-      })
+      .populate({ path: "sections", populate: { path: "lectures" } })
       .populate("creator", "name headline photoUrl")
-      .populate({
-        path: "reviews",
-        populate: {
-          path: "user",
-          select: "name photoUrl",
-        },
-      });
+      .populate({ path: "reviews", populate: { path: "user", select: "name photoUrl" } })
+      .lean(); // Use .lean() for better performance as we will be modifying the object
 
     if (!course) {
-      return res.status(404).json({ message: "Course not found!" });
+      return res.status(404).json({ success: false, message: "Course not found!" });
     }
+
 
     let purchaseStatus = "not_purchased";
     let allowReview = false;
     let progress = 0;
 
-    if (userId) {
+
+    if (req.user && req.user._id) {
+      const userId = req.user._id; // Safely get the user's ID
+
+
       const purchase = await CoursePurchase.findOne({
         userId,
         "courses.courseId": courseId,
@@ -339,21 +400,29 @@ export const getCourseById = async (req, res) => {
 
       if (purchase) {
         purchaseStatus = "completed";
-        allowReview = true;
+        allowReview = true; // User can review if they have purchased.
       }
-      // progress = await getCourseProgressPercent(courseId, userId);
+
+      // Calculate progress if purchased (or if they are enrolled).
+      if (purchaseStatus === "completed") {
+        // progress = await getCourseProgressPercent(courseId, userId);
+      }
     }
+
+
+    course.purchaseStatus = purchaseStatus;
+    course.allowReview = allowReview;
+    course.progress = progress;
+
 
     return res.status(200).json({
       success: true,
-      course,
-      purchaseStatus,
-      allowReview,
-      progress,
+      course, // The entire enriched course object is sent back.
     });
+
   } catch (error) {
     console.error("Error in getCourseById:", error);
-    return res.status(500).json({ message: "Failed to get course by id" });
+    return res.status(500).json({ success: false, message: "Failed to get course by id" });
   }
 };
 
@@ -408,20 +477,32 @@ export const removeCourse = async (req, res) => {
 };
 
 
+// This is the updated getCoursesWithEnrolledStudents function
+
 export const getCoursesWithEnrolledStudents = async (req, res) => {
   try {
-    // Fetch all courses with enrolled students populated (select limited fields)
-    const courses = await Course.find()
+
+
+
+    if (!req.user || !req.user._id) {
+      console.log("2. FAILED: req.user or req.user._id is missing.");
+      return res.status(401).json({ message: "Unauthorized: You must be logged in to view this data." });
+    }
+
+    const instructorId = req.user._id;
+    console.log("2. SUCCESS: Logged-in instructor ID is:", instructorId);
+
+
+    const courses = await Course.find({ creator: instructorId })
       .populate("enrolledStudents", "name email photoUrl")
       .lean();
 
-    // Format the response
     const result = courses.map((course) => ({
       courseId: course._id,
       courseTitle: course.title,
       enrolledCount: course.enrolledStudents?.length || 0,
       students: course.enrolledStudents || [],
-      price: course.price, // { original, current }
+      price: course.price,
       ratings: course.ratings,
       numOfReviews: course.numOfReviews,
       thumbnail: course.thumbnail,
@@ -432,17 +513,25 @@ export const getCoursesWithEnrolledStudents = async (req, res) => {
 
     return res.status(200).json({ courses: result });
   } catch (error) {
-    console.error("Failed to fetch courses and students:", error);
+    console.error("Failed to fetch courses and enrolled students:", error);
     return res
       .status(500)
-      .json({ message: "Failed to fetch courses and students" });
+      .json({ message: "Server error while fetching courses and students" });
   }
 };
 
 export const getCoursesWithEnrolledStudentsAndReviews = async (req, res) => {
   try {
-    // Fetch courses with enrolled students and nested reviews populated with user info
-    const courses = await Course.find()
+
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: "Unauthorized: You must be logged in to view this data." });
+    }
+
+
+    const instructorId = req.user._id;
+
+
+    const courses = await Course.find({ creator: instructorId })
       .populate("enrolledStudents", "name email photoUrl")
       .populate({
         path: "reviews",
@@ -453,7 +542,6 @@ export const getCoursesWithEnrolledStudentsAndReviews = async (req, res) => {
       })
       .lean();
 
-    // Format the response
     const result = courses.map((course) => ({
       courseId: course._id,
       courseTitle: course.title,
@@ -470,7 +558,7 @@ export const getCoursesWithEnrolledStudentsAndReviews = async (req, res) => {
         reviewId: review._id,
         rating: review.rating,
         comment: review.comment,
-        user: review.user, // { name, email, photoUrl }
+        user: review.user,
       })),
     }));
 
@@ -479,25 +567,32 @@ export const getCoursesWithEnrolledStudentsAndReviews = async (req, res) => {
     console.error("Failed to fetch courses, students, and reviews:", error);
     return res
       .status(500)
-      .json({ message: "Failed to fetch courses, students, and reviews" });
+      .json({ message: "Server error while fetching courses, students, and reviews" });
   }
 };
-
 export const getPaidCoursesWithEnrolledStudentsAndPayments = async (
   req,
   res
 ) => {
   try {
-    // Find paid courses where current price is greater than 0
-    const courses = await Course.find({ "price.current": { $gt: 0 } })
+
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: "Unauthorized: You must be logged in to view this data." });
+    }
+
+
+    const instructorId = req.user._id;
+
+
+    const courses = await Course.find({
+      "price.current": { $gt: 0 },
+      creator: instructorId,
+    })
       .populate("enrolledStudents", "name email photoUrl")
       .lean();
 
-    // For each course, fetch related payments and course purchases
     const result = await Promise.all(
       courses.map(async (course) => {
-
-
         const coursePurchases = await CoursePurchase.find({
           "courses.courseId": course._id,
         })
@@ -522,7 +617,7 @@ export const getPaidCoursesWithEnrolledStudentsAndPayments = async (
             user: purchase.userId,
             status: purchase.status,
             purchasedAt: purchase.createdAt,
-            courses: purchase.courses, // Array of { courseId, ... }
+            courses: purchase.courses,
           })),
         };
       })
@@ -542,59 +637,67 @@ export const getPaidCoursesWithEnrolledStudentsAndPayments = async (
 
 export const getCourseAnalytics = async (req, res) => {
   try {
-    // Fetch courses and populate all necessary data in one go
-    const courses = await Course.find()
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized: User not found." });
+    }
+
+    const instructorId = req.user._id;
+
+    const courses = await Course.find({ creator: instructorId })
       .populate("enrolledStudents", "name email photoUrl")
       .populate({
-        path: "reviews", // Populate the 'reviews' array in the Course model
-        populate: {
-          path: "user", // Inside each review, populate the 'user' field
-          select: "name photoUrl", // Only get the user's name and photo
-        },
+        path: "reviews",
+        populate: { path: "user", select: "name photoUrl" },
       })
       .lean();
 
-    // For each course, fetch related purchases and compute analytics
-    const result = await Promise.all(
+    if (!courses || courses.length === 0) {
+      return res.status(200).json({
+        success: true,
+        message: "No course analytics to display yet.",
+        analytics: [],
+      });
+    }
+
+    const analytics = await Promise.all(
       courses.map(async (course) => {
         const coursePurchases = await CoursePurchase.find({
           "courses.courseId": course._id,
+          status: "completed",
         })
           .populate("userId", "name email photoUrl")
-          .populate("courses.courseId", "title")
+          .populate("courses.courseId", "title") // This populate causes the change in data structure
           .lean();
 
-        // Calculate total revenue and purchase count
+        // --- CORRECTED REVENUE CALCULATION ---
         const totalRevenue = coursePurchases.reduce((sum, purchase) => {
-          if (!Array.isArray(purchase.courses)) return sum;
-          return (
-            sum +
-            purchase.courses
-              .filter((c) => c.courseId && c.courseId._id && c.courseId._id.toString() === course._id.toString())
-              // ✅ FIXED LINE: Changed 'c.amount' to 'c.priceAtPurchase' to match your data model
-              .reduce((s, c) => s + (c.priceAtPurchase || 0), 0)
+
+          // The fix is here: we now look for `c.courseId._id` because courseId is a populated object.
+          const courseInPurchase = purchase.courses.find(
+            (c) => c.courseId?._id?.toString() === course._id.toString()
           );
-        }, 0);
+
+          // If the matching course is found in the purchase record, add its price to the total sum.
+          if (courseInPurchase) {
+            return sum + (courseInPurchase.priceAtPurchase || 0);
+          }
+
+          // Otherwise, continue with the current sum.
+          return sum;
+        }, 0); // Initial value for the sum is 0.
 
         const purchaseCount = coursePurchases.length;
 
-        // Calculate average rating from reviews. This still works perfectly
-        const ratings = (course.reviews || [])
-          .map((r) => r.rating)
-          .filter((r) => typeof r === "number");
-
-        const avgRating =
-          ratings.length > 0
-            ? (ratings.reduce((sum, r) => sum + r, 0) / ratings.length).toFixed(
-                2
-              )
-            : null;
+        const ratings = (course.reviews || []).map(r => r.rating).filter(r => typeof r === 'number');
+        const avgRating = ratings.length > 0
+          ? (ratings.reduce((sum, r) => sum + r, 0) / ratings.length).toFixed(1)
+          : null;
 
         return {
           courseId: course._id,
           courseTitle: course.title,
           enrolledCount: course.enrolledStudents?.length || 0,
-          totalRevenue,
+          totalRevenue, // This will now have the correct value
           purchaseCount,
           avgRating,
           ratings: course.ratings,
@@ -616,11 +719,9 @@ export const getCourseAnalytics = async (req, res) => {
       })
     );
 
-    return res.status(200).json({ analytics: result });
+    return res.status(200).json({ success: true, analytics });
   } catch (error) {
     console.error("Error in getCourseAnalytics:", error);
-    return res
-      .status(500)
-      .json({ message: "Failed to fetch course analytics" });
+    return res.status(500).json({ success: false, message: "Server error while fetching course analytics." });
   }
 };

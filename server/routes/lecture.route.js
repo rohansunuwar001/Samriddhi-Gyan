@@ -5,9 +5,10 @@ import {
     getLectureById,
     updateLecture
 } from '../controllers/lecture.controller.js';
-import isAuthenticated from '../middlewares/isAuthenticated.js';
+
 
 import upload from '../utils/multer.js';
+import { isAuthenticated } from '../middlewares/isAuthenticated.js';
 
 const lectureRouter = Router();
 

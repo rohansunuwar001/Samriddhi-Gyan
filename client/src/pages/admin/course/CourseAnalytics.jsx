@@ -1,130 +1,361 @@
-import { useGetCourseAnalyticsQuery } from '@/features/api/adminDataApi';
-import { Bar, BarChart, Cell, Legend, Pie, PieChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
+// src/pages/instructor/CourseAnalytics.jsx
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#A28EFF', '#FF6F91'];
+import { useMemo } from "react";
+import { useSelector } from "react-redux";
+import { useGetCourseAnalyticsQuery } from "@/features/api/instructorApi";
+
+// --- UI & CHARTING LIBRARIES ---
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Bar,
+  BarChart,
+  Cell,
+  Legend,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import CountUp from "react-countup";
+
+// --- ICONS ---
+import { DollarSign, Users, BookOpen, AlertCircle } from "lucide-react";
+
+// --- Reusable Components & Constants ---
+
+const COLORS = [
+  "#0088FE",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
+  "#A28EFF",
+  "#FF6F91",
+];
+
+const StatCard = ({ title, value, icon: Icon, prefix = "" }) => (
+  <Card>
+    <CardHeader className="flex flex-row items-center justify-between pb-2">
+      <CardTitle className="text-sm font-medium">{title}</CardTitle>
+      <Icon className="h-4 w-4 text-muted-foreground" />
+    </CardHeader>
+    <CardContent>
+      <div className="text-2xl font-bold">
+        <CountUp
+          start={0}
+          end={value}
+          duration={2}
+          separator=","
+          prefix={prefix}
+        />
+      </div>
+    </CardContent>
+  </Card>
+);
+
+const DashboardSkeleton = () => (
+  <div className="p-8 space-y-6">
+    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+      <Skeleton className="h-28" />
+      <Skeleton className="h-28" />
+      <Skeleton className="h-28" />
+    </div>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <Skeleton className="h-96" />
+      <Skeleton className="h-96" />
+    </div>
+    <Skeleton className="h-64" />
+  </div>
+);
+
+// --- Main Analytics Component ---
 
 const CourseAnalytics = () => {
-  const { data, isLoading, isError } = useGetCourseAnalyticsQuery();
+  const { isAuthenticated } = useSelector((state) => state.auth);
+  const { data, isLoading, isError, error } = useGetCourseAnalyticsQuery(
+    undefined,
+    { skip: !isAuthenticated }
+  );
 
-  if (isLoading) return <div>Loading analytics...</div>;
-  if (isError) return <div className="text-red-500">Failed to load analytics.</div>;
+  // --- ⭐ THE FIX IS HERE ⭐ ---
+  // The useMemo hook is made "crash-proof". It now always returns a valid object,
+  // even on the initial render when `data` is undefined.
+  const { barChartData, pieChartData } = useMemo(() => {
+    const analytics = data?.analytics || []; // Use optional chaining and a default empty array
 
-  const analytics = data?.analytics || [];
+    // This check now correctly handles both the initial loading state and the "no data" case.
+    if (analytics.length === 0) {
+      return { barChartData: [], pieChartData: [] };
+    }
+
+    // The original, efficient logic only runs when analytics data is present.
+    const revenueSorted = [...analytics].sort(
+      (a, b) => b.totalRevenue - a.totalRevenue
+    );
+    const topRevenueCourses = revenueSorted.slice(0, 10);
+    const otherRevenue = revenueSorted
+      .slice(10)
+      .reduce((acc, course) => acc + course.totalRevenue, 0);
+    const processedBarData = [...topRevenueCourses];
+    if (otherRevenue > 0) {
+      processedBarData.push({
+        courseTitle: "Other",
+        totalRevenue: otherRevenue,
+      });
+    }
+
+    const purchaseSorted = [...analytics].sort(
+      (a, b) => b.purchaseCount - a.purchaseCount
+    );
+    const topPurchaseCourses = purchaseSorted.slice(0, 5);
+    const otherPurchases = purchaseSorted
+      .slice(5)
+      .reduce((acc, course) => acc + course.purchaseCount, 0);
+    const processedPieData = [...topPurchaseCourses];
+    if (otherPurchases > 0) {
+      processedPieData.push({
+        courseTitle: "Other",
+        purchaseCount: otherPurchases,
+      });
+    }
+
+    return { barChartData: processedBarData, pieChartData: processedPieData };
+  }, [data?.analytics]); // Dependency on the nested data property
+
+  // --- Render Logic (State Handling) ---
+  if (!isAuthenticated)
+    return (
+      <div className="p-6 text-center text-muted-foreground">
+        Authenticating session...
+      </div>
+    );
+  if (isLoading) return <DashboardSkeleton />;
+  if (isError)
+    return (
+      <div className="p-8">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Error</AlertTitle>
+          <AlertDescription>
+            {error?.data?.message || "Failed to load analytics."}
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  if (!data?.analytics || data.analytics.length === 0)
+    return (
+      <div className="p-8 text-center text-muted-foreground">
+        {data?.message || "Create a course to see analytics."}
+      </div>
+    );
+
+  // Summary calculations are safe here because the checks above have already passed.
+  const summary = data.analytics.reduce(
+    (acc, course) => {
+      acc.totalRevenue += course.totalRevenue;
+      acc.totalStudents += course.enrolledCount;
+      return acc;
+    },
+    { totalRevenue: 0, totalStudents: 0 }
+  );
 
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-6">Course Analytics</h2>
-      
-      <div className="flex flex-wrap gap-8 mb-8">
-        {/* Bar Chart for Total Revenue */}
-        <div style={{ width: 400, height: 300 }}>
-          <h3 className="font-semibold mb-2">Total Revenue by Course</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <BarChart data={analytics}>
-              <XAxis dataKey="courseTitle" />
-              <YAxis />
-              <Tooltip formatter={(value) => `Rs${value}`} />
-              <Legend />
-              <Bar dataKey="totalRevenue" fill="#0088FE" name="Revenue" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-        {/* Pie Chart for Purchases */}
-        <div style={{ width: 400, height: 300 }}>
-          <h3 className="font-semibold mb-2">Purchases Distribution</h3>
-          <ResponsiveContainer width="100%" height={250}>
-            <PieChart>
-              <Pie
-                data={analytics}
-                dataKey="purchaseCount"
-                nameKey="courseTitle"
-                cx="50%"
-                cy="50%"
-                outerRadius={80}
-                label
+    <div className="flex-1 space-y-6 p-8 pt-6 bg-slate-50 min-h-screen">
+      <header>
+        <h2 className="text-3xl font-bold tracking-tight">Your Analytics</h2>
+        <p className="text-muted-foreground">
+          An overview of your performance as an instructor.
+        </p>
+      </header>
+
+      {/* --- Summary Stat Cards --- */}
+      {/* <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        <StatCard
+          title="Total Revenue"
+          value={summary.totalRevenue}
+          icon={DollarSign}
+          prefix="$"
+        />
+        <StatCard
+          title="Total Students"
+          value={summary.totalStudents}
+          icon={Users}
+        />
+        <StatCard
+          title="Total Courses"
+          value={data.analytics.length}
+          icon={BookOpen}
+        />
+      </div> */}
+
+      {/* --- Charts Grid --- */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Courses by Revenue</CardTitle>
+          </CardHeader>
+          <CardContent className="pl-0">
+            <ResponsiveContainer width="100%" height={350}>
+              <BarChart
+                data={barChartData}
+                layout="vertical"
+                margin={{ left: 10, right: 30 }}
               >
-                {analytics.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                ))}
-              </Pie>
-              <Tooltip />
-              <Legend />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+                <XAxis type="number" tickFormatter={(v) => `$${v / 1000}k`} />
+                <YAxis
+                  type="category"
+                  dataKey="courseTitle"
+                  width={100}
+                  tick={{ fontSize: 12 }}
+                />
+                <Tooltip
+                  cursor={{ fill: "#f1f5f9" }}
+                  formatter={(v) => [`$${v.toLocaleString()}`, "Revenue"]}
+                />
+                <Bar
+                  dataKey="totalRevenue"
+                  fill="#8884d8"
+                  name="Revenue"
+                  barSize={20}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>Top Courses by Sales</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <ResponsiveContainer width="100%" height={350}>
+              <PieChart>
+                <Pie
+                  data={pieChartData}
+                  dataKey="purchaseCount"
+                  nameKey="courseTitle"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={120}
+                  label
+                >
+                  {pieChartData.map((e, i) => (
+                    <Cell key={`cell-${i}`} fill={COLORS[i % COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip formatter={(v) => [`${v} Sales`, "Purchases"]} />
+                <Legend />
+              </PieChart>
+            </ResponsiveContainer>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Main Summary Table */}
-      <table className="min-w-full border mb-6">
-        <thead>
-          <tr className="bg-gray-100">
-            <th className="border px-4 py-2">Course Title</th>
-            <th className="border px-4 py-2">Enrolled Students</th>
-            <th className="border px-4 py-2">Purchases</th>
-            <th className="border px-4 py-2">Total Revenue</th>
-            <th className="border px-4 py-2">Avg. Rating</th>
-          </tr>
-        </thead>
-        <tbody>
-          {analytics.map(course => (
-            <tr key={course.courseId}>
-              <td className="border px-4 py-2">{course.courseTitle}</td>
-              <td className="border px-4 py-2">{course.enrolledCount}</td>
-              <td className="border px-4 py-2">{course.purchaseCount}</td>
-              {/* ✅ FIXED LINE: Use the pre-calculated totalRevenue field from the API */}
-              <td className="border px-4 py-2">Rs{course.totalRevenue}</td>
-              <td className="border px-4 py-2">{course.avgRating ?? 'N/A'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-
-      {/* Course Purchases Details Section (This section was already correct) */}
-      <div className="mt-10">
-        <h3 className="text-xl font-semibold mb-4">Course Purchases Details</h3>
-        {analytics.map(course => (
-            <div key={course.courseId} className="mb-8 p-4 border rounded-lg">
-              <h4 className="font-semibold text-lg mb-2">{course.courseTitle}</h4>
-              <table className="min-w-full border mb-4">
-                <thead>
-                  <tr className="bg-gray-100">
-                    <th className="border px-4 py-2">User Name</th>
-                    <th className="border px-4 py-2">Email</th>
-                    <th className="border px-4 py-2">Status</th>
-                    <th className="border px-4 py-2">Purchased At</th>
-                    <th className="border px-4 py-2">Courses Purchased in this Order</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {course.coursePurchases && course.coursePurchases.length > 0 ? (
-                    course.coursePurchases.map((purchase, idx) => (
-                      <tr key={purchase.purchaseId || idx}>
-                        <td className="border px-4 py-2">{purchase.user?.name || "N/A"}</td>
-                        <td className="border px-4 py-2">{purchase.user?.email || "N/A"}</td>
-                        <td className="border px-4 py-2">{purchase.status || "N/A"}</td>
-                        <td className="border px-4 py-2">{purchase.purchasedAt ? new Date(purchase.purchasedAt).toLocaleDateString() : "N/A"}</td>
-                        <td className="border px-4 py-2">
-                          {purchase.courses && purchase.courses.length > 0
-                            ? purchase.courses.map((c, i) => (
-                                <span key={i} className="inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700 mr-2">
-                                  {c.courseId?.title || c.courseId || "N/A"} (Rs{c.priceAtPurchase || 0})
-                                </span>
-                              ))
-                            : "N/A"}
-                        </td>
-                      </tr>
-                    ))
-                  ) : (
-                    <tr>
-                      <td className="border px-4 py-2 text-center" colSpan={5}>No purchases found for this course.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )
-        )}
-      </div>
+      {/* --- Tabbed Table View for Detailed Data --- */}
+      <Tabs defaultValue="summary">
+        <TabsList className="mb-4">
+          <TabsTrigger value="summary">All Courses Summary</TabsTrigger>
+          <TabsTrigger value="purchases">Detailed Purchases</TabsTrigger>
+        </TabsList>
+        <TabsContent value="summary">
+          <Card>
+            <CardContent className="pt-6">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Course</TableHead>
+                    <TableHead>Enrollments</TableHead>
+                    <TableHead>Sales</TableHead>
+                    <TableHead>Revenue</TableHead>
+                    <TableHead>Rating</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {data.analytics.map((course) => (
+                    <TableRow key={course.courseId}>
+                      <TableCell>
+                        <div className="font-medium">{course.courseTitle}</div>
+                      </TableCell>
+                      <TableCell>{course.enrolledCount}</TableCell>
+                      <TableCell>{course.purchaseCount}</TableCell>
+                      <TableCell>
+                        ${course.totalRevenue.toLocaleString()}
+                      </TableCell>
+                      <TableCell>
+                        {course.avgRating ? `${course.avgRating} ★` : "N/A"}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        <TabsContent value="purchases">
+          <div className="space-y-6">
+            {data.analytics.map((course) => (
+              <Card key={course.courseId}>
+                <CardHeader>
+                  <CardTitle>{course.courseTitle}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>User</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead className="text-right">Price Paid</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {course.coursePurchases &&
+                      course.coursePurchases.length > 0 ? (
+                        course.coursePurchases.map((p, i) => (
+                          <TableRow key={p.purchaseId || i}>
+                            <TableCell>{p.user?.name || "N/A"}</TableCell>
+                            <TableCell>{p.user?.email || "N/A"}</TableCell>
+                            <TableCell>
+                              {new Date(p.purchasedAt).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell className="text-right font-medium">
+                              $
+                              {p.courses
+                                .find(
+                                  (c) =>
+                                    c.courseId?._id.toString() ===
+                                    course.courseId.toString()
+                                )
+                                ?.priceAtPurchase.toLocaleString() || "N/A"}
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
+                        <TableRow>
+                          <TableCell colSpan={4} className="text-center h-24">
+                            No purchases for this course yet.
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

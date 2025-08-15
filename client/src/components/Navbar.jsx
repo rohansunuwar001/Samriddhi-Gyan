@@ -134,7 +134,7 @@ const Navbar = () => {
         setIsDropdownVisible(true);
         try {
           const response = await fetch(
-            `http://localhost:8080/api/v1/search?q=${encodeURIComponent(
+            `http://localhost:7777/api/v1/search?q=${encodeURIComponent(
               searchQuery
             )}`
           );
@@ -387,8 +387,7 @@ const Navbar = () => {
                   <ShoppingCart />
                 </Link>
 
-                {/* --- THIS IS THE ONLY CHANGE --- */}
-                {/* Replaced the old Bell Link with the new functional NotificationBell component */}
+           
                 <NotificationBell />
 
                 <UserAvatar user={user} onLogout={logoutHandler} t={t} />

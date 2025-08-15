@@ -1,35 +1,63 @@
- // Import the central apiSlice
+// file: src/features/api/adminDataApi.js
 
-import { apiSlice } from "./apiSlice";
+import { apiSlice } from './apiSlice'; // Import the central, configured apiSlice
 
-// Create a new API slice that injects its endpoints into the main apiSlice
+/**
+ * This file INJECTS its endpoints into the central apiSlice.
+ * It will automatically use the baseQuery from apiSlice, including the
+ * `prepareHeaders` logic that attaches the authentication token. This
+ * is the key fix for the '401 Unauthorized' errors.
+ */
 export const instructorApi = apiSlice.injectEndpoints({
-    // The endpoints configuration for this specific slice
-    endpoints: (builder) => ({
-        
-        /**
-         * @desc    Query to get the aggregated analytics data for the instructor's dashboard.
-         * @route   GET /api/v1/instructor/analytics/dashboard
-         */
-        getCreatorDashboardAnalytics: builder.query({
-            query: () => '/instructor/analytics/dashboard',
-
-            /**
-             * Provides a specific tag for this data.
-             * If another mutation (e.g., a new course purchase) invalidates this tag,
-             * RTK Query will automatically re-fetch this data to update the dashboard.
-             */
-            providesTags: ['DashboardAnalytics'], 
-        }),
-
-        // You could add other instructor-specific endpoints here in the future, for example:
-        // getPayoutHistory: builder.query({ ... }),
-        // requestPayout: builder.mutation({ ... }),
-
+  endpoints: (builder) => ({
+    
+    getCourseEnrolledStudents: builder.query({
+      query: (courseId) => `/course/${courseId}/enrolled-students`,
     }),
+    
+    getCoursesWithEnrolledStudents: builder.query({
+      query: () => "course/courses-with-students",
+    }),
+
+    getCoursesWithEnrolledStudentsAndReviews: builder.query({
+      query: () => "course/courses-with-students-reviews",
+    }),
+    
+    getPaidCoursesWithEnrolledStudentsAndPayments: builder.query({
+      query: () => "course/paid-courses-with-students-payments",
+    }),
+    
+    getCourseAnalytics: builder.query({
+      query: () => "course/analytics",
+      providesTags: [{ type: "Analytics", id: "LIST" }], // Good practice for caching
+    }),
+     replyToReview: builder.mutation({
+        query: ({ reviewId, reply }) => ({
+            url: `/reviews/${reviewId}/reply`,
+            method: 'PUT',
+            body: { reply },
+        }),
+        invalidatesTags: ['InstructorReviews'], // <-- This automatically refetches the review list!
+    }),
+
+    deleteReview: builder.mutation({
+        query: (reviewId) => ({
+            url: `/reviews/${reviewId}`,
+            method: 'DELETE',
+        }),
+        invalidatesTags: ['InstructorReviews'], // <-- This also refetches the list!
+    }),
+    
+  }),
 });
 
-// Export the auto-generated hook for use in your components
+// Export the auto-generated hooks. Their names do not change.
 export const {
-    useGetCreatorDashboardAnalyticsQuery
+  useGetCourseEnrolledStudentsQuery,
+  useGetCoursesWithEnrolledStudentsQuery,
+  useGetCoursesWithEnrolledStudentsAndReviewsQuery,
+  useGetPaidCoursesWithEnrolledStudentsAndPaymentsQuery,
+  useGetCourseAnalyticsQuery,
+  useReplyToReviewMutation, // <-- NEW
+  useDeleteReviewMutation, 
 } = instructorApi;

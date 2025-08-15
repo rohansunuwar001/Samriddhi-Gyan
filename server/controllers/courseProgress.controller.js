@@ -6,7 +6,7 @@ import { createNotification } from "../service/notification.service.js";
 export const getCourseProgress = async (req, res) => {
   try {
     const { courseId } = req.params;
-    const userId = req.id;
+    const userId = req.user._id;
 
     // step-1 fetch the user course progress
     let courseProgress = await CourseProgress.findOne({
@@ -57,7 +57,7 @@ export const getCourseProgress = async (req, res) => {
 export const updateLectureProgress = async (req, res) => {
   try {
     const { courseId, lectureId } = req.params;
-    const userId = req.id;
+    const userId = req.user._id;
 
     let courseProgress = await CourseProgress.findOne({ courseId, userId });
 
@@ -120,7 +120,7 @@ export const updateLectureProgress = async (req, res) => {
 export const markAsCompleted = async (req, res) => {
   try {
     const { courseId } = req.params;
-    const userId = req.id;
+    const userId = req.user._id;
 
     const courseProgress = await CourseProgress.findOne({ courseId, userId });
     if (!courseProgress)
@@ -140,7 +140,7 @@ export const markAsCompleted = async (req, res) => {
 export const markAsInCompleted = async (req, res) => {
     try {
       const { courseId } = req.params;
-      const userId = req.id;
+      const userId = req.user._id;
   
       const courseProgress = await CourseProgress.findOne({ courseId, userId });
       if (!courseProgress)
