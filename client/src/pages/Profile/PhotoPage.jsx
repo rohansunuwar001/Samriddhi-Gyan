@@ -14,8 +14,9 @@ import { Loader2, User as UserIcon } from "lucide-react";
 
 // --- Import the Shared Sidebar Component ---
 
-import { useLoadUserQuery, useUpdateUserAvatarMutation } from '@/features/api/authApi';
+
 import ProfileSidebar from './ProfileSideBar';
+import {  useLoadUserQuery, useUpdateUserAvatarMutation } from '@/features/api/authApi';
 
 // --- Main Photo Page Component ---
 const PhotoPage = () => {

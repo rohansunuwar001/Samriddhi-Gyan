@@ -138,7 +138,7 @@ export const fillEsewaForm = async (req, res, next) => {
           <input type="hidden" name="product_code" value="${process.env.ESEWA_PRODUCT_CODE}" />
           <input type="hidden" name="product_service_charge" value="0" />
           <input type="hidden" name="product_delivery_charge" value="0" />
-          <input type="hidden" name="success_url" value="http://localhost:8080/api/v1/buy/complete-payment" />
+          <input type="hidden" name="success_url" value="http://localhost:7777/api/v1/buy/complete-payment" />
           <input type="hidden" name="failure_url" value="https://developer.esewa.com.np/failure" />
           <input type="hidden" name="signed_field_names" value="total_amount,transaction_uuid,product_code" />
           <input type="hidden" name="signature" value="${paymentHash.signature}" />

@@ -1,38 +1,27 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+// file: src/features/api/apiSlice.js
+
 import { BASE_URL } from '@/app/constant';
+import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
 
-// The root URL of your backend API
-const API_V1_URL = `${BASE_URL}/api/v1`;
 
-/**
- * The single, central API slice for the entire application.
- * All other API definitions will inject their endpoints into this slice.
- * This is the only slice that needs to be added to the Redux store's reducer and middleware.
- */
 export const apiSlice = createApi({
-    // A single reducer path for managing all API state.
-    reducerPath: 'api', 
-    
-    // A comprehensive list of tag types for caching and automatic data re-fetching.
-    // These tags act as names for different pieces of data.
+    reducerPath: 'api',
+    // --- CHANGE: Added a tag type for the new analytics endpoint ---
     tagTypes: [
-        'User',         // For the logged-in user's data
-        'Course',       // For general lists of courses (e.g., creator's course list)
-        'CourseDetail', // For the detailed data of a single course
-        'Review',       // For review data
-        'CourseProgress',// For a user's progress in a course
-        'DashboardAnalytics', // For instructor dashboard stats
-        'Notifications', // For user notifications
-        'Wishlist',     // For the user's wishlist items
-        
+        'User', 'Course', 'Section', 'Lecture', 'Wishlist',
+        'Cart', 'Order', 'Purchase', 'AdminData', 'Instructor',
+        'Notification', 'CourseAnalytics','AdminStats' // <-- NEW TAG
     ],
-    
-    // The base query function that will be used for all API calls.
+
+    // --- CHANGE: Simplified baseQuery ---
+    // This is a much more standard and reliable way to handle authentication.
+    // It relies on the browser to automatically send the secure httpOnly cookie.
     baseQuery: fetchBaseQuery({
-        baseUrl: API_V1_URL,
-        credentials: 'include', // Ensures cookies and auth tokens are sent with requests
+        baseUrl: `${BASE_URL}/api/v1`,
+        // This is the key that tells the browser to send cookies with requests.
+        credentials: 'include', 
     }),
 
-    // The endpoints object starts empty. It will be populated by other files.
+    // Endpoints are injected by other files.
     endpoints: builder => ({}),
 });

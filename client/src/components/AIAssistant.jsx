@@ -34,7 +34,7 @@ const AIAssistant = () => {
       // Add user question to conversation
       setConversation(prev => [...prev, { role: 'user', content: userQuestion }]);
       
-      const res = await axios.post('http://localhost:8080/api/ai/ask', {
+      const res = await axios.post('http://localhost:7777/api/ai/ask', {
         prompt: userQuestion,
       });
       

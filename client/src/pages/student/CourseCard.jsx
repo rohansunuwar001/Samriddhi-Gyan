@@ -8,6 +8,8 @@ import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 
 const CourseCard = ({ course, showRecommendationBadge }) => {
+
+  console.log("Course Data:", course);
   // --- Data preparation for the "For Sale" view ---
   const hasDiscount =
     course.price?.original && course.price.original > course.price.current;
@@ -40,7 +42,7 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
       <Card className="overflow-hidden rounded-xl border bg-white shadow-lg h-full flex flex-col transition-transform duration-300 hover:-translate-y-1.5">
         {/* The Link now points to the user's specific learning page for this course */}
         <Link
-          to={`/my-learning/courses/${course._id}`}
+          to={`/course-detail/${course._id}/content`}
           className="group flex flex-col h-full"
         >
           <div className="relative">

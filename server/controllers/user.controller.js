@@ -4,6 +4,7 @@ import { deleteFromCloudinary, uploadMedia } from "../utils/cloudinary.js";
 import { generateToken } from "../utils/generateToken.js";
 import { createNotification } from "../service/notification.service.js";
 import { Course } from "../models/course.model.js";
+import { CourseProgress } from "../models/courseProgress.model.js";
 
 export const register = async (req, res) => {
   try {
@@ -87,7 +88,7 @@ export const logout = async (_, res) => {
 };
 export const getUserProfile = async (req, res) => {
   try {
-    const userId = req.id;
+    const userId = req.user._id;
     const user = await User.findById(userId)
       .select("-password")
       .populate("enrolledCourses");
@@ -111,7 +112,7 @@ export const getUserProfile = async (req, res) => {
 };
 export const checkUser = async (req, res) => {
   try {
-    const userId = req.id;
+    const userId = req.user._id;
     const user = await User.findById(userId)
       .select("-password")
       .populate("enrolledCourses");
@@ -133,7 +134,7 @@ export const checkUser = async (req, res) => {
 
 export const updateUserInfo = async (req, res) => {
   try {
-    const userId = req.id;
+    const userId = req.user._id;
     // Destructure the main fields and the entire 'links' object from the body
     const { name, headline, description, links } = req.body;
 
@@ -191,7 +192,7 @@ export const updateUserInfo = async (req, res) => {
 
 export const updateUserAvatar = async (req, res) => {
   try {
-    const userId = req.id;
+    const userId = req.user._id;
     const profilePhoto = req.file; // From multer middleware
 
     if (!profilePhoto) {
@@ -242,7 +243,7 @@ export const updateUserAvatar = async (req, res) => {
 
 export const updateUserPassword = async (req, res) => {
   try {
-    const userId = req.id;
+    const userId = req.user._id;
     const { currentPassword, newPassword } = req.body;
 
     if (!currentPassword || !newPassword) {
@@ -337,5 +338,104 @@ export const getPublicUserProfile = async (req, res) => {
 
     // Send a generic server error message to the client
     res.status(500).json({ message: "Server Error" });
+  }
+};
+
+// In user.controller.js
+
+export const loadUser = async (req, res) => {
+
+
+  try {
+    // The user object is ALREADY on the request, provided by the middleware.
+    const user = req.user;
+
+    // We no longer need to find the user in the database because it's already been done.
+    if (!user) {
+      // This is just a safety check.
+      // The isAuthenticated middleware should prevent this from ever being reached.
+      return res.status(404).json({ success: false, message: "User not found after token validation." });
+    }
+
+    // We also do NOT regenerate a token here. We are just loading the session.
+    // The existing token on the client is still valid.
+    return res.status(200).json({
+      success: true,
+      user, // Simply send the user object that the middleware fetched.
+    });
+
+  } catch (error) {
+    console.error("ERROR in the simplified loadUser controller:", error);
+    return res.status(500).json({ success: false, message: "Server error while loading user session." });
+  }
+};
+
+export const getMyLearningCourses = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // --- 1. Get user and their enrolled courses (your existing logic is good) ---
+    const user = await User.findById(userId)
+      .select('enrolledCourses')
+      .populate({
+        path: 'enrolledCourses',
+        model: 'Course',
+        select: 'title thumbnail sections creator', // Essential fields
+        populate: {
+          path: 'creator',
+          select: 'name photoUrl'
+        }
+      })
+      .lean();
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found." });
+    }
+
+    const enrolledCourses = user.enrolledCourses || [];
+    if (enrolledCourses.length === 0) {
+      return res.status(200).json({ success: true, courses: [] });
+    }
+
+    const courseIds = enrolledCourses.map(course => course._id);
+
+    // --- 2. Efficiently fetch all course progress documents at once ---
+    const progresses = await CourseProgress.find({
+      userId,
+      courseId: { $in: courseIds }
+    }).lean();
+
+    // --- 3. Create a map for easy lookup (courseId -> lectureProgress array) ---
+    const progressMap = progresses.reduce((map, prog) => {
+      map[prog.courseId.toString()] = prog.lectureProgress || [];
+      return map;
+    }, {});
+
+    // --- 4. Enrich the course data by calculating progress for each ---
+    const enrichedCourses = enrolledCourses.map(course => {
+      const lectureProgress = progressMap[course._id.toString()] || [];
+      const totalLectures = course.sections.reduce((count, section) => count + (section.lectures?.length || 0), 0);
+      const completedCount = lectureProgress.filter(lp => lp.viewed).length;
+      
+      const percentage = totalLectures > 0
+        ? Math.round((completedCount / totalLectures) * 100)
+        : 0;
+
+      // The frontend card expects a 'progress' property
+      return {
+        ...course,
+        isPurchased: true, // They are in this list, so they are purchased
+        progress: percentage, // This is the progress percentage for the UI bar
+      };
+    });
+
+    res.status(200).json({
+      success: true,
+      courses: enrichedCourses,
+    });
+
+  } catch (error) {
+    console.error("Error fetching 'My Learning' courses:", error);
+    res.status(500).json({ success: false, message: "Internal Server Error" });
   }
 };

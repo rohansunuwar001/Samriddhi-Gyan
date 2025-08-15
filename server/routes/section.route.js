@@ -4,7 +4,8 @@ import {
   updateSection,
   deleteSection,
 } from "../controllers/section.controller.js";
-import isAuthenticated from "../middlewares/isAuthenticated.js";
+import { isAuthenticated } from "../middlewares/isAuthenticated.js";
+
 // Assuming you have an auth middleware
 
 const sectionRouter = Router();

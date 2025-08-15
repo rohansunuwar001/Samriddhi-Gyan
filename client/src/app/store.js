@@ -1,7 +1,11 @@
+// file: src/app/store.js
+
 import { configureStore } from "@reduxjs/toolkit";
+
 import rootReducer from "./rootRedcuer";
 import { apiSlice } from "@/features/api/apiSlice";
 import { authApi } from "@/features/api/authApi";
+
 
 export const appStore = configureStore({
     reducer: rootReducer,
@@ -9,10 +13,12 @@ export const appStore = configureStore({
         defaultMiddleware().concat(apiSlice.middleware),
 });
 
-const initializeApp = async () => {
-    await appStore.dispatch(
-        authApi.endpoints.loadUser.initiate({}, { forceRefetch: true })
+
+const initializeApp = () => {
+    appStore.dispatch(
+        authApi.endpoints.loadUser.initiate() 
     );
 };
 
-initializeApp(); 
+// Execute the app initialization logic as soon as the store is configured.
+initializeApp();

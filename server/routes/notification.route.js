@@ -1,11 +1,12 @@
 import express from "express";
-import isAuthenticated from "../middlewares/isAuthenticated.js";
+
 import {
   clearAllNotifications,
   deleteNotification,
   getNotifications,
   markAsRead,
 } from "../controllers/notification.controller.js";
+import { isAuthenticated } from "../middlewares/isAuthenticated.js";
 // Adjust the path if necessary
 
 const notificationRouter = express.Router();

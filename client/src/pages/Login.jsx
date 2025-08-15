@@ -1,12 +1,14 @@
+// file: src/pages/LoginPage.jsx
+
 import { useEffect, useState } from "react";
-import { useLoginUserMutation } from "@/features/api/authApi"; // Your RTK Query hook
+import { useLoginUserMutation } from "@/features/api/authApi";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { FcGoogle } from "react-icons/fc";
 import { MdOutlineMail } from "react-icons/md";
 import { FiLoader } from "react-icons/fi";
-
-// The Google social login button remains.
+import PropTypes from "prop-types";
+// A reusable component for social login buttons
 const SocialButton = ({ icon, label, onClick }) => (
   <button
     type="button"
@@ -18,67 +20,63 @@ const SocialButton = ({ icon, label, onClick }) => (
   </button>
 );
 
+SocialButton.propTypes = {
+  icon: PropTypes.element.isRequired,
+  label: PropTypes.string.isRequired,
+  onClick: PropTypes.func.isRequired,
+};
+
 const LoginPage = () => {
   const [loginInput, setLoginInput] = useState({ email: "", password: "" });
 
   const [
     loginUser,
-    {
-      data: loginData,
-      error: loginError,
-      isLoading: loginIsLoading, // Use this for loading state
-      isSuccess: loginIsSuccess,
-    },
+    { data: loginData, error: loginError, isLoading, isSuccess },
   ] = useLoginUserMutation();
 
   const navigate = useNavigate();
 
-  // This handler updates the state for both email and password fields.
   const changeInputHandler = (e) => {
-    const { name, value } = e.target;
-    setLoginInput({ ...loginInput, [name]: value });
+    setLoginInput({ ...loginInput, [e.target.name]: e.target.value });
   };
 
-  // This function is called when the form is submitted.
   const handleLogin = async (e) => {
-    e.preventDefault(); // Prevent page reload
+    e.preventDefault();
     if (!loginInput.email || !loginInput.password) {
-      toast.error("Please enter both email and password.");
-      return;
+      return toast.error("Please enter both email and password.");
     }
+    // This just calls the API. No more manual dispatches.
     await loginUser(loginInput);
   };
 
-  // This effect runs when the API call status changes.
+  /**
+   * ✅ This is now the ONLY logic. It handles UI side-effects (toasts, navigation).
+   * It DOES NOT and MUST NOT dispatch any actions.
+   * The `extraReducers` in authSlice handle the state automatically.
+   */
   useEffect(() => {
-    if (loginIsSuccess && loginData) {
-      toast.success(loginData?.message || "Login successful.");
-      const role = loginData?.user?.role?.toLowerCase();
-      // Navigate based on user role
-      if (role === "instructor") {
-        navigate("/instructor/dashboard");
-      } else if (role === "admin") {
-        navigate("/admin/dashboard");
-      } else {
-        navigate("/");
-      }
+    if (isSuccess && loginData) {
+      toast.success(loginData.message || "Login successful!");
+
+      const role = loginData.user?.role?.toLowerCase();
+      if (role === "admin") navigate("/admin/dashboard");
+      else if (role === "instructor") navigate("/instructor/dashboard");
+      else navigate("/");
     }
     if (loginError) {
-      toast.error(loginError?.data?.message || "Login failed. Please check your credentials.");
+      toast.error(loginError.data?.message || "Login failed.");
     }
-  }, [loginIsSuccess, loginError, loginData, navigate]);
-
-  // Placeholder for Google login
+  }, [isSuccess, loginData, loginError, navigate]);
+  // Redirects to the backend to initiate the Google OAuth flow
   const handleGoogleLogin = () => {
-    // Replace with your actual backend URL
-    const backendUrl = import.meta.env.VITE_BASE_URL || "http://localhost:8080";
+    const backendUrl = import.meta.env.VITE_BASE_URL || "http://localhost:7777";
     window.location.href = `${backendUrl}/api/v1/user/google`;
   };
 
   return (
     <div className="bg-white min-h-screen flex items-center justify-center font-sans p-4">
       <div className="w-full max-w-5xl flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
-        {/* Left Side: Image */}
+        {/* Left Side Image */}
         <div className="w-full max-w-md md:w-1/2 hidden md:block">
           <img
             src="/loginimg.webp"
@@ -87,7 +85,7 @@ const LoginPage = () => {
           />
         </div>
 
-        {/* Right Side: Login Form */}
+        {/* Right Side Login Form */}
         <div className="w-full max-w-md md:w-1/2">
           <div className="w-full">
             <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center md:text-left">
@@ -97,12 +95,12 @@ const LoginPage = () => {
               <div>
                 <input
                   id="email"
-                  name="email" // 'name' attribute must match state key
+                  name="email"
                   type="email"
                   autoComplete="email"
                   required
-                  value={loginInput.email} // Controlled component
-                  onChange={changeInputHandler} // Use the combined handler
+                  value={loginInput.email}
+                  onChange={changeInputHandler}
                   placeholder="Email"
                   className="text-black w-full px-4 py-3 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
@@ -110,29 +108,27 @@ const LoginPage = () => {
               <div>
                 <input
                   id="password"
-                  name="password" // 'name' attribute must match state key
+                  name="password"
                   type="password"
                   autoComplete="current-password"
                   required
-                  value={loginInput.password} // Controlled component
-                  onChange={changeInputHandler} // Use the combined handler
+                  value={loginInput.password}
+                  onChange={changeInputHandler}
                   placeholder="Password"
                   className="text-black w-full px-4 py-3 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
-              {/* "Forgot password?" link has been removed */}
               <button
                 type="submit"
-                disabled={loginIsLoading} // Disable button when API is loading
+                disabled={isLoading}
                 className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white font-bold py-3 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-300 disabled:bg-indigo-400"
               >
-                {/* Conditionally render the spinner based on API loading state */}
-                {loginIsLoading ? (
+                {isLoading ? (
                   <FiLoader className="animate-spin h-5 w-5" />
                 ) : (
                   <MdOutlineMail className="h-5 w-5" />
                 )}
-                <span>{loginIsLoading ? "Logging in..." : "Log in"}</span>
+                <span>{isLoading ? "Logging in..." : "Log in"}</span>
               </button>
             </form>
             <div className="relative my-6">
@@ -148,7 +144,6 @@ const LoginPage = () => {
                 </span>
               </div>
             </div>
-            {/* Facebook and Apple buttons removed */}
             <div className="flex justify-center gap-4">
               <SocialButton
                 icon={<FcGoogle size={24} />}
@@ -158,9 +153,9 @@ const LoginPage = () => {
             </div>
             <div className="mt-8 text-center">
               <p className="text-sm text-gray-700">
-                Don't have an account?{" "}
+                Don`t have an account?{" "}
                 <Link
-                  to="/register" // Changed to React Router Link for better SPA navigation
+                  to="/register"
                   className="font-bold text-indigo-600 hover:underline"
                 >
                   Sign up

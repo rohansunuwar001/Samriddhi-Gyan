@@ -1,93 +1,84 @@
+// src/components/RecommendedCourse.jsx
+
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import { ExclamationTriangleIcon, RocketIcon } from "@radix-ui/react-icons";
-import { Sparkles } from "lucide-react";
-import CourseCard from "./CourseCard";
+import CourseCard from "./CourseCard"; // Assumes CourseCard is in the same directory
 import { useGetRecommendedCourseQuery } from "@/features/api/recommendedApi";
-
 
 const RecommendedCourse = () => {
   const { data, isLoading, isError, error, refetch } = useGetRecommendedCourseQuery();
 
-  console.log("recommended course data:", data);
-
   return (
-    <section className="bg-gray-50 dark:bg-[#141414] py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-12">
-          <div className="inline-flex items-center justify-center gap-3 mb-4">
-            <Sparkles className="h-8 w-8 text-yellow-500" />
-            <h2 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
-              Recommended For You
-            </h2>
-            <Sparkles className="h-8 w-8 text-yellow-500" />
-          </div>
-          <p className="mt-2 max-w-2xl text-lg text-gray-600 dark:text-gray-300 mx-auto">
-            Courses tailored to your learning preferences and history
-          </p>
-        </div>
-
-        {isError ? (
-          <div className="max-w-2xl mx-auto">
-            <Alert variant="destructive">
-              <ExclamationTriangleIcon className="h-4 w-4" />
-              <AlertTitle>Error loading recommendations</AlertTitle>
-              <AlertDescription>
-                {error?.data?.message || "Failed to fetch recommended courses"}
-                <div className="mt-4">
-                  <Button variant="outline" size="sm" onClick={refetch}>
-                    Try Again
-                  </Button>
-                </div>
-              </AlertDescription>
-            </Alert>
-          </div>
-        ) : isLoading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {Array.from({ length: 7 }).map((_, index) => (
-              <CourseSkeleton key={index} />
-            ))}
-          </div>
-        ) : data?.recommendedCourses?.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-            {data.recommendedCourses.map((course) => (
-              <CourseCard
-                key={course._id}
-                course={course}
-                showRecommendationBadge={!course.isPurchased} // Show badge only if NOT purchased
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="max-w-2xl mx-auto text-center">
-            <Alert>
-              <RocketIcon className="h-4 w-4" />
-              <AlertTitle>No recommendations yet</AlertTitle>
-              <AlertDescription>
-                Complete some courses or update your preferences to get
-                personalized recommendations
-                <div className="mt-4">
-                  <Button
-                    variant="outline"
-                    onClick={() => window.location.reload()}
-                  >
-                    Refresh Recommendations
-                  </Button>
-                </div>
-              </AlertDescription>
-            </Alert>
-          </div>
-        )}
+    // --- UI CHANGE: Adopted the layout from CourseMain ---
+    <div className="bg-white font-sans">
+      <div className="container max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
+        {/* You can add a header here if you like, e.g.,
+          <header className="mb-8">
+            <h2 className="text-3xl font-bold tracking-tight">Recommended For You</h2>
+          </header>
+        */}
+        <main>
+          {isLoading ? (
+            // --- KEPT: Using the better skeleton loader from the original RecommendedCourse ---
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {Array.from({ length: 3 }).map((_, index) => (
+                <CourseSkeleton key={index} />
+              ))}
+            </div>
+          ) : isError ? (
+            // --- KEPT: The existing error state ---
+            <div className="max-w-2xl mx-auto">
+              <Alert variant="destructive">
+                <ExclamationTriangleIcon className="h-4 w-4" />
+                <AlertTitle>Error loading recommendations</AlertTitle>
+                <AlertDescription>
+                  {error?.data?.message || "Failed to fetch recommended courses"}
+                  <div className="mt-4">
+                    <Button variant="outline" size="sm" onClick={refetch}>
+                      Try Again
+                    </Button>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            </div>
+          ) : data?.recommendedCourses?.length > 0 ? (
+            // --- UI CHANGE: Using the 3-column grid from CourseMain ---
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {data.recommendedCourses.map((course) => (
+                <CourseCard
+                  key={course._id}
+                  course={course}
+                  // Optional: You can still show a badge if you like
+                  showRecommendationBadge={!course.isPurchased} 
+                />
+              ))}
+            </div>
+          ) : (
+            
+            <div className="max-w-2xl mx-auto text-center">
+              <Alert>
+                <RocketIcon className="h-4 w-4" />
+                <AlertTitle>No recommendations yet</AlertTitle>
+                <AlertDescription>
+                  Complete some courses or update your preferences to get
+                  personalized recommendations.
+                </AlertDescription>
+              </Alert>
+            </div>
+          )}
+        </main>
       </div>
-    </section>
+    </div>
   );
 };
 
+// --- This is the same skeleton from your original file, now used in the new layout ---
 const CourseSkeleton = () => {
   return (
-    <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden border border-gray-200 dark:border-gray-700">
+    <div className="rounded-xl shadow-sm hover:shadow-md transition-shadow overflow-hidden border">
       <Skeleton className="w-full aspect-video rounded-t-xl" />
       <div className="p-5 space-y-4">
         <Skeleton className="h-6 w-full" />

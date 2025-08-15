@@ -10,7 +10,7 @@ import { User } from "../models/user.model.js";
  */
 export const addToWishlist = async (req, res) => {
     try {
-        const userId = req.id;
+        const userId = req.user._id;
         const { courseId } = req.body;
 
         if (!courseId) {
@@ -70,7 +70,7 @@ export const addToWishlist = async (req, res) => {
  */
 export const removeFromWishlist = async (req, res) => {
     try {
-        const userId = req.id;
+        const userId = req.user._id;
         const { courseId } = req.body;
 
         if (!courseId) {
@@ -121,7 +121,7 @@ export const removeFromWishlist = async (req, res) => {
  */
 export const getWishlist = async (req, res) => {
     try {
-        const userId = req.id;
+        const userId = req.user._id;
         const user = await User.findById(userId).populate('wishlist');
 
         if (!user) {

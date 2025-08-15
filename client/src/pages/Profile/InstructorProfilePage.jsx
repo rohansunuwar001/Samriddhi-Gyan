@@ -9,6 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Facebook, Instagram, Linkedin, Link as LinkIcon, Twitter } from "lucide-react";
 import { useGetInstructorProfileQuery } from '@/features/api/userApi';
 
+
 // --- SUGGESTION: You'll want to import your CourseCard component here ---
 // import CourseCard from '@/components/CourseCard';
 

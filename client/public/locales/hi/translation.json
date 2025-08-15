@@ -18,7 +18,8 @@
     "no_results": "\"{{query}}\" के लिए कोई परिणाम नहीं मिला",
     "courses_heading": "पाठ्यक्रम",
     "home": "होम",
-    "instructor_dashboard": "प्रशिक्षक डैशबोर्ड"
+    "instructor_dashboard": "प्रशिक्षक डैशबोर्ड",
+     "admin_dashboard": "व्यवस्थापक डैशबोर्ड"
   },
   "footer": {
     "about_section": {

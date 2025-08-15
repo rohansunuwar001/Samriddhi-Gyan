@@ -48,7 +48,8 @@
     "no_results": "No se encontraron resultados para \"{{query}}\"",
     "courses_heading": "Cursos",
     "home": "Inicio",
-    "instructor_dashboard": "Panel de Instructor"
+    "instructor_dashboard": "Panel de Instructor",
+     "admin_dashboard": "Panel de Administrador"
   },
   "language_switcher": {
     "choose_language": "Elige un idioma"

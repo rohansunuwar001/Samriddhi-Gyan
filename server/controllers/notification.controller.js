@@ -55,7 +55,7 @@ export const markAsRead = async (req, res) => {
 export const deleteNotification = async (req, res) => {
     try {
         const notificationId = req.params.id;
-        const userId = req.id;
+        const userId = req.user._id;
 
         const notification = await Notification.findById(notificationId);
 

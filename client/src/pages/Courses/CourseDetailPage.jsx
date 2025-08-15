@@ -3,25 +3,24 @@
 
 // --- (Import Mock Data) ---
 
-import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 
 
-import CourseHeader from './CourseHeader';
-import PurchaseCard from './PurchaseCard';
-import WhatYouWillLearn from './WhatYouWillLearn';
-import CourseIncludes from './CourseIncludes';
+import { useGetCourseDetailWithStatusQuery } from '@/features/api/purchaseApi';
 import CourseContent from './CourseContent';
-import Requirements from './Requirements';
-import InstructorProfile from './InstructorProfile';
-import ReviewsSection from '../Reviews/ReviewSection';
+import CourseHeader from './CourseHeader';
+import CourseIncludes from './CourseIncludes';
 import { Description } from './Description';
-import { useGetCourseByIdQuery } from '@/features/api/courseApi';
+import InstructorProfile from './InstructorProfile';
+import PurchaseCard from './PurchaseCard';
+import Requirements from './Requirements';
+import WhatYouWillLearn from './WhatYouWillLearn';
+import ReviewsSection from '../Reviews/ReviewSection';
 
 const CourseDetailPage = () => {
     const { courseId } = useParams();
-    const { data, isLoading, isError } = useGetCourseByIdQuery(courseId);
-
+    const { data, isLoading, isError } = useGetCourseDetailWithStatusQuery(courseId);
+console.log("Course detail data:", data);
 
     // Defensive: extract the actual course object
     const course = data?.course;

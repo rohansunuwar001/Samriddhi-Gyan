@@ -1,8 +1,8 @@
 import TrustedBySection from '@/components/home/TrustedBySction'
 import LmsShowcase from '@/components/LmsShowcase'
 import HomeCourse from './Home/HomeCourse'
+import HomeRecommendation from './Home/HomeRecommendation'
 import HeroSection from './student/HeroSection'
-import RecommendedCourse from './student/RecommendedCourse'
 
 const Home = () => {
   return (
@@ -10,7 +10,7 @@ const Home = () => {
        <HeroSection />
             <TrustedBySection />
             <HomeCourse />
-            <RecommendedCourse />
+            <HomeRecommendation />
             <LmsShowcase />
     </div>
   ) 

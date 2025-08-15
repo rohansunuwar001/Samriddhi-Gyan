@@ -1,3 +1,5 @@
+// file: src/pages/GoogleSuccess.jsx
+
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
@@ -9,47 +11,55 @@ const GoogleSuccess = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const token = urlParams.get("token");
-
-    if (!token) {
-      navigate("/login");
-      return;
-    } 
-
-    const fetchUserData = async () => {
+    const finalizeGoogleLogin = async () => {
       try {
-        const response = await fetch(`${BASE_URL}/api/v1/user/check`, {
+        const urlParams = new URLSearchParams(window.location.search);
+        const temporaryToken = urlParams.get("token");
+
+        if (!temporaryToken) {
+          throw new Error("Google auth token not found in URL.");
+        }
+        
+        const response = await fetch(`${BASE_URL}/api/v1/user/me`, {
           headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+            'Authorization': `Bearer ${temporaryToken}`,
           },
-          credentials: "include",
+          // This line is critical. It tells the browser to process the 'Set-Cookie'
+          // header from the backend, which allows the session to persist on reload.
+          credentials: 'include',
         });
 
-        if (!response.ok) throw new Error("Failed to fetch user data");
+        if (!response.ok) {
+          throw new Error("Failed to validate user session with the server.");
+        }
 
-        const data = await response.json();
+        const sessionData = await response.json(); // sessionData = { user, token }
 
-        localStorage.setItem("token", token);
+        // Manually dispatch the action to update the Redux state with the session data.
+        dispatch(userLoggedIn(sessionData));
 
-        dispatch(userLoggedIn({ user: data.user }));
-
+        // Navigate to the homepage. The user is now fully authenticated.
         navigate("/");
+
       } catch (error) {
-        console.error("Error fetching user data:", error);
+        console.error("Google login finalization failed:", error);
         navigate("/login");
       }
     };
 
-    fetchUserData();
+    finalizeGoogleLogin();
   }, [navigate, dispatch]);
 
   return (
-    <div className="flex items-center justify-center min-h-screen">
-      <div className="text-center">
-        <h2 className="text-2xl font-bold mb-4">Completing login...</h2>
-        <p>Please wait while we complete your Google login.</p>
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <div className="text-center p-8 bg-white rounded-lg shadow-md">
+        <h2 className="text-2xl font-bold mb-4 text-gray-800">
+          Finalizing Login...
+        </h2>
+        <p className="text-gray-600">Please wait while we securely set up your session.</p>
+        <div className="mt-6 flex justify-center">
+            <div className="w-8 h-8 border-4 border-dashed rounded-full animate-spin border-indigo-600"></div>
+        </div>
       </div>
     </div>
   );

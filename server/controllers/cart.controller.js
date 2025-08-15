@@ -12,7 +12,7 @@ import { User } from "../models/user.model.js";
  */
 export const getCart = async (req, res) => {
     try {
-        const userId = req.id;
+        const userId = req.user._id;
         const user = await User.findById(userId).populate({
             path: 'cart',
             model: 'Course' // Assuming your course model is named 'Course'
@@ -40,7 +40,7 @@ export const getCart = async (req, res) => {
  */
 export const addToCart = async (req, res) => {
     try {
-        const userId = req.id;
+        const userId = req.user._id;
         const { courseId } = req.body;
 
         if (!courseId) {
@@ -84,7 +84,7 @@ export const addToCart = async (req, res) => {
  */
 export const removeFromCart = async (req, res) => {
     try {
-        const userId = req.id;
+        const userId = req.user._id;
         const { courseId } = req.body;
 
         if (!courseId) {

@@ -1,18 +1,25 @@
-import { apiSlice } from "./apiSlice"; // Import the central apiSlice
+// file: src/features/api/courseApi.js
+
+import { apiSlice } from "./apiSlice";
+
+ // Import the central apiSlice
 
 export const courseApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
-    // ===== Course CRUD & Query Endpoints (Updated) =====
+    // --- NEW ENDPOINT ADDED ---
+    getCourseAnalytics: builder.query({
+      query: () => "/course/analytics", // The URL for your backend analytics route
+      // This gives us a way to cache and auto-refetch this data
+      providesTags: ["CourseAnalytics"],
+    }),
 
+    // ===== Existing Course CRUD & Query Endpoints (Unchanged) =====
     createCourse: builder.mutation({
-      // URL now points to a RESTful '/courses' endpoint
       query: (courseData) => ({
-        // Expects { title, category, price: { original, current } }
         url: "/course/create",
         method: "POST",
         body: courseData,
       }),
-      // Invalidates the list of courses, forcing the creator's course list to refetch
       invalidatesTags: [{ type: "Course", id: "LIST" }],
     }),
 
@@ -20,9 +27,8 @@ export const courseApi = apiSlice.injectEndpoints({
       query: ({ courseId, formData }) => ({
         url: `/course/${courseId}`,
         method: "PUT",
-        body: formData, // FormData for thumbnail support
+        body: formData,
       }),
-      // Refreshes both the general course list and the specific detail page
       invalidatesTags: (result, error, { courseId }) => [
         { type: "Course", id: "LIST" },
         { type: "CourseDetail", id: courseId },
@@ -30,23 +36,22 @@ export const courseApi = apiSlice.injectEndpoints({
     }),
 
     getCreatorCourse: builder.query({
-      query: () => "/course/creator", // Use a more descriptive, updated route
-      providesTags: [{ type: "Course", id: "LIST" }], // This "provides" the list
+      query: () => "/course/creator",
+      providesTags: [{ type: "Course", id: "LIST" }],
     }),
 
     getCourseById: builder.query({
       query: (courseId) => `/course/${courseId}`,
-      // Provides a specific tag for this course, allows targeted invalidation
       providesTags: (result, error, courseId) => [
         { type: "CourseDetail", id: courseId },
       ],
     }),
 
     getPublishedCourse: builder.query({
-      query: () => "/course/published", // A clearer endpoint name is better practice
+      query: () => "/course/published",
       providesTags: ["Courses"],
-      
     }),
+    
     getSearchCourse: builder.query({
       query: ({ searchQuery, categories, sortByPrice }) => {
         const params = new URLSearchParams();
@@ -80,8 +85,9 @@ export const courseApi = apiSlice.injectEndpoints({
   overrideExisting: false,
 });
 
-// Export all hooks, keeping your original names and adding the new ones
+// ✅ Export all hooks, including the new getCourseAnalytics hook
 export const {
+  useGetCourseAnalyticsQuery, // <-- NEW EXPORT
   useCreateCourseMutation,
   useEditCourseMutation,
   useGetCreatorCourseQuery,
