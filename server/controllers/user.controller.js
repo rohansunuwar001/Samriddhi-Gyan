@@ -374,68 +374,87 @@ export const getMyLearningCourses = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    // --- 1. Get user and their enrolled courses (your existing logic is good) ---
-    const user = await User.findById(userId)
-      .select('enrolledCourses')
-      .populate({
-        path: 'enrolledCourses',
-        model: 'Course',
-        select: 'title thumbnail sections creator', // Essential fields
-        populate: {
-          path: 'creator',
-          select: 'name photoUrl'
-        }
-      })
-      .lean();
-
+    // --- Step 1: Get the IDs of courses the user is enrolled in ---
+    const user = await User.findById(userId).select("enrolledCourses").lean();
     if (!user) {
-      return res.status(404).json({ success: false, message: "User not found." });
+      return res.status(404).json({ success: false, message: "User not found" });
     }
 
-    const enrolledCourses = user.enrolledCourses || [];
-    if (enrolledCourses.length === 0) {
+    const enrolledCourseIds = user.enrolledCourses;
+    if (enrolledCourseIds.length === 0) {
       return res.status(200).json({ success: true, courses: [] });
     }
 
-    const courseIds = enrolledCourses.map(course => course._id);
+    // --- Step 2: Fetch all required course details and progress documents in parallel for max efficiency ---
+    const [courses, userProgress] = await Promise.all([
+      // Query 1: Get full details for every enrolled course, populating deep to get lecture durations.
+      Course.find({ _id: { $in: enrolledCourseIds } })
+        .populate({
+          path: 'sections',
+          select: 'lectures',
+          populate: {
+            path: 'lectures',
+            select: 'durationInSeconds', // Critical field for calculation
+          },
+        })
+        .populate({ path: 'creator', select: 'name photoUrl' })
+        .lean(),
 
-    // --- 2. Efficiently fetch all course progress documents at once ---
-    const progresses = await CourseProgress.find({
-      userId,
-      courseId: { $in: courseIds }
-    }).lean();
+      // Query 2: Get only the relevant progress documents for this user and their courses.
+      CourseProgress.find({ userId, courseId: { $in: enrolledCourseIds } }).lean(),
+    ]);
 
-    // --- 3. Create a map for easy lookup (courseId -> lectureProgress array) ---
-    const progressMap = progresses.reduce((map, prog) => {
+    // --- Step 3: Create a Progress Map for highly efficient O(1) lookups ---
+    const progressMap = userProgress.reduce((map, prog) => {
       map[prog.courseId.toString()] = prog.lectureProgress || [];
       return map;
     }, {});
 
-    // --- 4. Enrich the course data by calculating progress for each ---
-    const enrichedCourses = enrolledCourses.map(course => {
+    // --- Step 4: Calculate progress for each course using the prepared data ---
+    const coursesWithProgress = courses.map((course) => {
       const lectureProgress = progressMap[course._id.toString()] || [];
-      const totalLectures = course.sections.reduce((count, section) => count + (section.lectures?.length || 0), 0);
-      const completedCount = lectureProgress.filter(lp => lp.viewed).length;
-      
-      const percentage = totalLectures > 0
-        ? Math.round((completedCount / totalLectures) * 100)
-        : 0;
 
-      // The frontend card expects a 'progress' property
+      let totalDuration = 0;
+      let watchedDuration = 0;
+
+      // Create a Set of viewed lecture IDs for instant lookups inside the loop
+      const viewedLectureIds = new Set(
+        lectureProgress
+          .filter(lp => lp.viewed)
+          .map(lp => lp.lectureId.toString())
+      );
+
+      // Calculate total and watched duration in a single pass
+      course.sections.forEach(section => {
+        section.lectures.forEach(lecture => {
+          const duration = lecture.durationInSeconds || 0;
+          totalDuration += duration;
+          if (viewedLectureIds.has(lecture._id.toString())) {
+            watchedDuration += duration;
+          }
+        });
+      });
+      
+      // Calculate the final percentage based on duration
+      const percent = totalDuration > 0
+          ? Math.round((watchedDuration / totalDuration) * 100)
+          : 0;
+      
       return {
         ...course,
-        isPurchased: true, // They are in this list, so they are purchased
-        progress: percentage, // This is the progress percentage for the UI bar
+        progress: Math.min(percent, 100), // Add progress, capping at 100
+        isPurchased: true, // User is enrolled, so it's considered purchased
       };
     });
-
-    res.status(200).json({
+    
+    // --- Step 5: Send the final enriched data to the frontend ---
+    return res.status(200).json({
       success: true,
-      courses: enrichedCourses,
+      courses: coursesWithProgress,
     });
 
   } catch (error) {
-    console.error("Error fetching 'My Learning' courses:", error);
-    res.status(500).json({ success: false, message: "Internal Server Error" });
+    console.error("Error fetching my learning courses:", error);
+    return res.status(500).json({ success: false, message: "Server Error" });
   }
 };

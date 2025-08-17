@@ -1,6 +1,7 @@
 import { CourseProgress } from "../models/courseProgress.model.js";
 import { Course } from "../models/course.model.js";
 import { createNotification } from "../service/notification.service.js";
+import { User } from "../models/user.model.js";
 
 
 export const getCourseProgress = async (req, res) => {
@@ -156,3 +157,90 @@ export const markAsInCompleted = async (req, res) => {
       console.log(error);
     }
   };
+
+
+  export const getMyLearningCourses = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    // --- Step 1: Get all IDs of courses the user is enrolled in ---
+    const user = await User.findById(userId).select("enrolledCourses").lean();
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+    const enrolledCourseIds = user.enrolledCourses;
+
+    // --- Step 2: Fetch all course details and all progress documents in parallel ---
+    const [courses, userProgress] = await Promise.all([
+      // Query 1: Get full details for every course the user is enrolled in.
+      Course.find({ _id: { $in: enrolledCourseIds } })
+        .populate({
+          path: 'sections',
+          select: 'lectures', // We only need the lectures array from sections
+          populate: {
+            path: 'lectures',
+            select: 'durationInSeconds', // We only need duration from lectures
+          },
+        })
+        .populate({ path: 'creator', select: 'name photoUrl' }) // For the course card
+        .lean(), // Use .lean() for better performance as we are only reading data.
+
+      // Query 2: Get all progress documents for this user.
+      CourseProgress.find({ userId }).lean(),
+    ]);
+
+    // --- Step 3: Map progress to each course in application memory (very fast) ---
+    const coursesWithProgress = courses.map((course) => {
+      // Find the corresponding progress document for the current course.
+      const progressDoc = userProgress.find(p => p.courseId.equals(course._id));
+
+      let totalDuration = 0;
+      let watchedDuration = 0;
+
+      // Calculate the total duration of the course
+      course.sections.forEach(section => {
+        section.lectures.forEach(lecture => {
+          totalDuration += lecture.durationInSeconds || 0;
+        });
+      });
+
+      // If a progress document exists, calculate the watched duration
+      if (progressDoc && progressDoc.lectureProgress) {
+        // Create a Set of viewed lecture IDs for fast lookups
+        const viewedLectureIds = new Set(
+          progressDoc.lectureProgress
+            .filter(lp => lp.viewed)
+            .map(lp => lp.lectureId.toString())
+        );
+
+        course.sections.forEach(section => {
+          section.lectures.forEach(lecture => {
+            if (viewedLectureIds.has(lecture._id.toString())) {
+              watchedDuration += lecture.durationInSeconds || 0;
+            }
+          });
+        });
+      }
+      
+      // Calculate the final percentage
+      const percent = totalDuration > 0
+          ? Math.round((watchedDuration / totalDuration) * 100)
+          : 0;
+      
+      return {
+        ...course,
+        progress: Math.min(percent, 100), // Add the calculated progress, capping at 100
+      };
+    });
+    
+    // --- Step 4: Send the complete data to the frontend ---
+    return res.status(200).json({
+      success: true,
+      courses: coursesWithProgress,
+    });
+
+  } catch (error) {
+    console.error("Error fetching my learning courses:", error);
+    return res.status(500).json({ success: false, message: "Server Error" });
+  }
+};

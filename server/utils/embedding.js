@@ -1,12 +1,9 @@
-// No longer need the openai import
-// import OpenAI from "openai"; 
 
-// Import your new Xenova-based embedding function and the Course model
 
 import { Course } from "../models/course.model.js";
 import { generateEmbedding } from "../service/embedding.service.js";
 
-// const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY }); // REMOVED
+
 
 /**
  * Cosine similarity function remains exactly the same. It's a pure math utility.
@@ -25,14 +22,7 @@ export function cosineSimilarity(a = [], b = []) {
   return dot / (Math.sqrt(magA) * Math.sqrt(magB));
 }
 
-/**
- * Request an embedding vector for a text string using the LOCAL Xenova model.
- * This is the primary function we are swapping out.
- * @param {string} text The text to embed
- * @returns {Promise<number[]>} The embedding vector
- */
 export async function createEmbeddingForText(text) {
-  // The logic is now simpler: just call our dedicated service.
   const embedding = await generateEmbedding(text);
   if (!embedding || !Array.isArray(embedding)) {
     throw new Error("Invalid embedding response from local model");
@@ -40,26 +30,11 @@ export async function createEmbeddingForText(text) {
   return embedding;
 }
 
-
-// ===================================================================
-// ALL THE FOLLOWING HELPER FUNCTIONS CAN REMAIN EXACTLY THE SAME!
-// They correctly call `createEmbeddingForText` and don't care about its
-// internal implementation (whether it's OpenAI or Xenova).
-// This is the beauty of good code abstraction.
-// ===================================================================
-
-/**
- * Get or create embedding for a course document.
- * Persists embedding in DB if newly created.
- */
 export async function getCourseEmbedding(courseDoc) {
-  // This function doesn't need to change.
   if (courseDoc.embedding && Array.isArray(courseDoc.embedding) && courseDoc.embedding.length > 0) {
     return courseDoc.embedding;
   }
 
-  // NOTE: You might want to update the text composition to match your schema better.
-  // The 'tags' property isn't in the schema you provided earlier.
   const textToEmbed = [
     courseDoc.title,
     courseDoc.subtitle,
@@ -71,10 +46,8 @@ export async function getCourseEmbedding(courseDoc) {
   const embedding = await createEmbeddingForText(textToEmbed);
 
   try {
-    // Note: Your schema doesn't have `embeddingUpdatedAt`. You can add it if you want.
     await Course.findByIdAndUpdate(courseDoc._id, {
       embedding,
-      // embeddingUpdatedAt: new Date(),
     }).catch((err) => {
       console.warn("Failed to persist embedding:", err.message);
     });
@@ -85,10 +58,6 @@ export async function getCourseEmbedding(courseDoc) {
   return embedding;
 }
 
-/**
- * Ensures that all given courses have embeddings.
- * For courses without embeddings, creates and persists them.
- */
 export async function ensureEmbeddingsForCourses(courses) {
   // This function doesn't need to change.
   const mapped = await Promise.all(

@@ -1,22 +1,21 @@
 // file: src/pages/MyLearning.jsx
-import PropTypes from "prop-types";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-// The crucial change: We import the new, dedicated hook for this page.
 import { useGetMyLearningCoursesQuery } from "@/features/api/authApi";
 import { BookOpen, Rocket } from "lucide-react";
+import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
-import CourseCard from "./CourseCard"; // Adjust the import path to your CourseCard component
+import CourseCard from "./CourseCard"; 
 
 const MyLearning = () => {
   const navigate = useNavigate();
-  // We call the dedicated hook, which fetches data from the correct '/user/my-learning' backend route.
   const { data, isLoading, isError } = useGetMyLearningCoursesQuery();
 
-  // The API response from the new endpoint is `{ success: true, courses: [...] }`.
-  // We safely extract the `courses` array, defaulting to an empty array.
+  // The API response from the endpoint `/user/my-learning` already contains
+  // a `progress` field for each course. We just need to use it.
   const myLearningCourses = data?.courses || [];
 
+  console.log("myLearningCourses", myLearningCourses);
   if (isError) {
     return <ErrorState />;
   }
@@ -43,9 +42,9 @@ const MyLearning = () => {
         <EmptyLearningState navigate={navigate} />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {/* We map directly over the courses from the API.
+              The CourseCard component is already designed to use the `course.progress` property. */}
           {myLearningCourses.map((course) => (
-            // The `course` object is now guaranteed to be fully populated by the backend,
-            // including all necessary fields for the CourseCard.
             <CourseCard key={course._id} course={course} />
           ))}
         </div>
