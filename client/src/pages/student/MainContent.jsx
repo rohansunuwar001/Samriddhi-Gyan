@@ -5,47 +5,33 @@ import React from "react";
 import { FaFacebookF, FaLink, FaLinkedinIn, FaStar } from "react-icons/fa";
 import ReviewsSection from "../Reviews/ReviewSection"; // This component now handles ALL review logic.
 
-// A memoized, reusable component for circular progress to prevent unnecessary re-renders.
-const CircularProgress = React.memo(function CircularProgress({ percent }) {
-  const radius = 40;
-  const stroke = 6;
-  const normalizedRadius = radius - stroke * 2;
-  const circumference = normalizedRadius * 2 * Math.PI;
-  const strokeDashoffset =
-    circumference - (Math.min(percent, 100) / 100) * circumference;
+// A memoized, reusable component for linear progress to prevent unnecessary re-renders.
+const LineProgress = React.memo(function LineProgress({ percent }) {
+  const roundedPercent = Math.round(percent);
 
   return (
-    <div className="flex flex-col items-center my-4">
-      <svg height={radius * 2} width={radius * 2}>
-        <circle
-          stroke="#e5e7eb"
-          fill="transparent"
-          strokeWidth={stroke}
-          r={normalizedRadius}
-          cx={radius}
-          cy={radius}
-        />
-        <circle
-          stroke="#22c55e"
-          fill="transparent"
-          strokeWidth={stroke}
-          strokeDasharray={`${circumference} ${circumference}`}
+    <div className="my-6">
+      <div className="flex justify-between mb-1">
+        <span className="text-base font-medium text-gray-700">
+          Course Progress
+        </span>
+        <span className="text-sm font-medium text-gray-700">
+          {roundedPercent}% Completed
+        </span>
+      </div>
+      <div className="w-full bg-gray-200 rounded-full h-2.5">
+        <div
+          className="bg-green-500 h-2.5 rounded-full"
           style={{
-            strokeDashoffset,
-            transition: "stroke-dashoffset 0.35s ease-out",
+            width: `${Math.min(roundedPercent, 100)}%`,
+            transition: "width 0.35s ease-out",
           }}
-          r={normalizedRadius}
-          cx={radius}
-          cy={radius}
-        />
-      </svg>
-      <div className="text-sm font-medium mt-2">
-        {Math.round(percent)}% completed
+        ></div>
       </div>
     </div>
   );
 });
-CircularProgress.propTypes = { percent: PropTypes.number.isRequired };
+LineProgress.propTypes = { percent: PropTypes.number.isRequired };
 
 const MainContent = ({
   courseData,
@@ -56,15 +42,52 @@ const MainContent = ({
   const [selectedTab, setSelectedTab] = React.useState("overview");
   const [questionText, setQuestionText] = React.useState("");
 
+  const course = courseData?.course;
+
+  // Recalculate total duration on the client to ensure consistency,
+  // preventing bugs if backend data is slightly out-of-sync.
+  const totalDuration = React.useMemo(() => {
+    if (!course) return 0;
+    return (course.sections || []).reduce(
+      (sectionSum, section) =>
+        sectionSum +
+        (section.lectures || []).reduce(
+          (lectureSum, lecture) =>
+            lectureSum + (lecture.durationInSeconds || 0),
+          0
+        ),
+      0
+    );
+  }, [course]);
+
+  const watchedDuration = React.useMemo(() => {
+    if (!course) return 0;
+    return (course.sections || []).reduce(
+      (sectionSum, section) =>
+        sectionSum +
+        (section.lectures || []).reduce((lectureSum, lecture) => {
+          const isViewed = progress.some(
+            (lp) => lp.lectureId === lecture._id && lp.viewed
+          );
+          return lectureSum + (isViewed ? lecture.durationInSeconds || 0 : 0);
+        }, 0),
+      0
+    );
+  }, [progress, course]);
+
+  const percent = React.useMemo(() => {
+    // Use the client-side calculated total duration for a reliable percentage.
+    if (totalDuration === 0) return 0;
+    // Cap percentage at 100 to prevent weird floating point issues.
+    return Math.min((watchedDuration / totalDuration) * 100, 100);
+  }, [watchedDuration, totalDuration]);
+
   // Production-grade safeguard: Do not render anything until the core course data is available.
-  if (!courseData?.course) {
+  if (!course) {
     return (
       <div className="p-10 text-center font-semibold">Loading Content...</div>
     );
   }
-
-  // Safely destructure after the safeguard check.
-  const { course } = courseData;
 
   // Destructure with safe fallbacks for all properties used in the template.
   const ratings = course.ratings || 0;
@@ -83,29 +106,6 @@ const MainContent = ({
     (sum, section) => sum + (section.lectures?.length || 0),
     0
   );
-
-  // Performance Optimization: Memoize complex calculations.
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const watchedDuration = React.useMemo(() => {
-    return (course.sections || []).reduce(
-      (sectionSum, section) =>
-        sectionSum +
-        (section.lectures || []).reduce((lectureSum, lecture) => {
-          const isViewed = progress.some(
-            (lp) => lp.lectureId === lecture._id && lp.viewed
-          );
-          return lectureSum + (isViewed ? lecture.durationInSeconds || 0 : 0);
-        }, 0),
-      0
-    );
-  }, [progress, course.sections]);
-
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const percent = React.useMemo(() => {
-    return course.totalDurationInSeconds > 0
-      ? (watchedDuration / course.totalDurationInSeconds) * 100
-      : 0;
-  }, [watchedDuration, course.totalDurationInSeconds]);
 
   const handleQuestionSubmit = (e) => {
     e.preventDefault();
@@ -156,7 +156,7 @@ const MainContent = ({
         </div>
       </div>
 
-      <CircularProgress percent={percent} />
+      <LineProgress percent={percent} />
 
       {/* Navigation Tabs */}
       <div className="mt-4 border-b border-gray-200">
@@ -233,7 +233,7 @@ const MainContent = ({
               </div>
               <div>
                 <span className="font-semibold">Total Duration:</span>{" "}
-                {formatDuration(course.totalDurationInSeconds)}
+                {formatDuration(totalDuration)}
               </div>
               <div>
                 <span className="font-semibold">Captions:</span> Yes
@@ -319,8 +319,8 @@ const MainContent = ({
 
         {selectedTab === "reviews" && (
           <section className="mt-8 max-w-4xl">
-            {/* CORRECT & FINAL: This is the only line needed for the reviews tab. */}
-            <ReviewsSection course={course} />
+            {/* FIX: Pass the accurate percentage to the reviews component */}
+            <ReviewsSection course={course} percentCompleted={percent} />
           </section>
         )}
       </div>

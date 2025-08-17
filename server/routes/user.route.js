@@ -14,7 +14,7 @@ import {
   register,
   updateUserAvatar,
   updateUserInfo,
-  updateUserPassword,
+  updateUserPassword
 } from "../controllers/user.controller.js";
 
 // --- Middleware Imports ---
@@ -22,7 +22,6 @@ import { isAuthenticated } from "../middlewares/isAuthenticated.js";
 // No authorizeRoles needed HERE, because these routes are for any authenticated user.
 // import { authorizeRoles } from '../middlewares/auth.middleware.js'; 
 import upload from "../utils/multer.js";
-
 const router = express.Router();
 
 
