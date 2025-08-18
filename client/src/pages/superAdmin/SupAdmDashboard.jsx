@@ -150,8 +150,6 @@ const SupAdmDashboard = () => {
     if (!data?.analytics) return <div className="p-8">No data to display.</div>;
 
     const { stats, activity, charts } = data.analytics;
-
-    // --- Prepare Chart Data (including mock previous week data) ---
     const chartData = charts.weeklyRevenue.map(item => ({
         ...item,
         date: new Date(item._id).toLocaleDateString('en-US', { weekday: 'short' }),
@@ -165,14 +163,11 @@ const SupAdmDashboard = () => {
             </div>
             
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* --- Main Revenue Chart --- */}
                 <MainRevenueChart currentWeekData={chartData} />
-
-                {/* --- Side Cards --- */}
                 <div className="space-y-6">
                     <RadialProgressCard 
                         title="New Users This Week" 
-                        percentage={76} // Placeholder - requires backend logic
+                        percentage={76} 
                         color="#ef4444" 
                         value={activity.recentUsers.length.toString()}
                         icon={Users}

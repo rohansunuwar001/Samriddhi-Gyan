@@ -1,5 +1,3 @@
-// file: src/pages/LoginPage.jsx
-
 import { useEffect, useState } from "react";
 import { useLoginUserMutation } from "@/features/api/authApi";
 import { Link, useNavigate } from "react-router-dom";
@@ -7,7 +5,9 @@ import { toast } from "sonner";
 import { FcGoogle } from "react-icons/fc";
 import { MdOutlineMail } from "react-icons/md";
 import { FiLoader } from "react-icons/fi";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 import PropTypes from "prop-types";
+
 // A reusable component for social login buttons
 const SocialButton = ({ icon, label, onClick }) => (
   <button
@@ -28,6 +28,7 @@ SocialButton.propTypes = {
 
 const LoginPage = () => {
   const [loginInput, setLoginInput] = useState({ email: "", password: "" });
+  const [showPassword, setShowPassword] = useState(false);
 
   const [
     loginUser,
@@ -45,15 +46,9 @@ const LoginPage = () => {
     if (!loginInput.email || !loginInput.password) {
       return toast.error("Please enter both email and password.");
     }
-    // This just calls the API. No more manual dispatches.
     await loginUser(loginInput);
   };
 
-  /**
-   * ✅ This is now the ONLY logic. It handles UI side-effects (toasts, navigation).
-   * It DOES NOT and MUST NOT dispatch any actions.
-   * The `extraReducers` in authSlice handle the state automatically.
-   */
   useEffect(() => {
     if (isSuccess && loginData) {
       toast.success(loginData.message || "Login successful!");
@@ -67,7 +62,7 @@ const LoginPage = () => {
       toast.error(loginError.data?.message || "Login failed.");
     }
   }, [isSuccess, loginData, loginError, navigate]);
-  // Redirects to the backend to initiate the Google OAuth flow
+
   const handleGoogleLogin = () => {
     const backendUrl = import.meta.env.VITE_BASE_URL || "http://localhost:7777";
     window.location.href = `${backendUrl}/api/v1/user/google`;
@@ -76,7 +71,6 @@ const LoginPage = () => {
   return (
     <div className="bg-white min-h-screen flex items-center justify-center font-sans p-4">
       <div className="w-full max-w-5xl flex flex-col md:flex-row items-center justify-center gap-8 md:gap-16">
-        {/* Left Side Image */}
         <div className="w-full max-w-md md:w-1/2 hidden md:block">
           <img
             src="/loginimg.webp"
@@ -85,7 +79,6 @@ const LoginPage = () => {
           />
         </div>
 
-        {/* Right Side Login Form */}
         <div className="w-full max-w-md md:w-1/2">
           <div className="w-full">
             <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center md:text-left">
@@ -105,11 +98,11 @@ const LoginPage = () => {
                   className="text-black w-full px-4 py-3 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
               </div>
-              <div>
+              <div className="relative">
                 <input
                   id="password"
                   name="password"
-                  type="password"
+                  type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   required
                   value={loginInput.password}
@@ -117,6 +110,13 @@ const LoginPage = () => {
                   placeholder="Password"
                   className="text-black w-full px-4 py-3 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute inset-y-0 right-0 px-3 flex items-center text-gray-600"
+                >
+                  {showPassword ? <FaEyeSlash /> : <FaEye />}
+                </button>
               </div>
               <button
                 type="submit"

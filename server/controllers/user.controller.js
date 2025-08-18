@@ -6,6 +6,7 @@ import { createNotification } from "../service/notification.service.js";
 import { Course } from "../models/course.model.js";
 import { CourseProgress } from "../models/courseProgress.model.js";
 
+
 export const register = async (req, res) => {
   try {
     const { name, email, password } = req.body; //
@@ -40,6 +41,22 @@ export const register = async (req, res) => {
     });
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -72,6 +89,31 @@ export const login = async (req, res) => {
     });
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 export const logout = async (_, res) => {
   try {
     return res.status(200).cookie("token", "", { maxAge: 0 }).json({
