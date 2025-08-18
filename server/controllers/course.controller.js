@@ -16,15 +16,12 @@ import {
 
 export const createCourse = async (req, res) => {
   try {
-    // 1. Safety Check: Verify that the `isAuthenticated` middleware has run
-    // and successfully attached the user's ID to the request.
     if (!req.user || !req.user._id) {
       return res.status(401).json({
         success: false,
         message: "Unauthorized: You must be logged in to create a course."
       });
     }
-
     const {
       title,
       category,
@@ -36,7 +33,6 @@ export const createCourse = async (req, res) => {
       learnings,
     } = req.body;
 
-    // 2. Perform validation on the incoming data.
     if (!title || !category || !price?.original || !price?.current) {
       return res.status(400).json({
         success: false,
@@ -44,8 +40,6 @@ export const createCourse = async (req, res) => {
           "Title, category, and a full price object (original, current) are required.",
       });
     }
-
-    // 3. Create the new course object.
     const courseData = {
       title,
       category,
@@ -55,12 +49,9 @@ export const createCourse = async (req, res) => {
       subtitle,
       description,
       learnings,
-      // ✅ THE FIX: Set the `creator` field using the correct path from your middleware.
       creator: req.user._id,
     };
-
     const course = await Course.create(courseData);
-
     return res.status(201).json({
       success: true,
       course,
@@ -68,7 +59,6 @@ export const createCourse = async (req, res) => {
     });
 
   } catch (error) {
-    // This will catch Mongoose validation errors or any other exceptions.
     console.error("Failed to create course:", error);
     return res.status(500).json({ success: false, message: "Server error during course creation." });
   }
@@ -149,7 +139,6 @@ export const getSearchResults = async (req, res) => {
 };
 
 
-// ✅ CLEANED UP AND SIMPLIFIED
 export const editCourse = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -165,25 +154,13 @@ export const editCourse = async (req, res) => {
       requirements,
       includes,
     } = req.body;
-    const thumbnailFile = req.file;
 
-    let course = await Course.findById(courseId);
-    if (!course) {
-      return res.status(404).json({ message: "Course not found!" });
-    }
-
-    // --- Handle Thumbnail Upload ---
-    if (thumbnailFile) {
-      if (course.thumbnail) {
-        const publicId = course.thumbnail.split("/").pop().split(".")[0];
-        await deleteFromCloudinary(publicId);
-      }
+    const thumbnailFile = req.file; let course = await Course.findById(courseId);
+    if (!course) { return res.status(404).json({ message: "Course not found!" }); }
+    if (thumbnailFile) {if (course.thumbnail) { const publicId = course.thumbnail.split("/").pop().split(".")[0]; await deleteFromCloudinary(publicId);}
       const newThumbnail = await uploadMedia(thumbnailFile.path);
       course.thumbnail = newThumbnail.secure_url;
     }
-
-    // --- Update Fields ---
-    // Using a loop to avoid repetitive `|| course.title` lines
     const fieldsToUpdate = { title, subtitle, description, category, language, level, learnings, requirements, includes };
     for (const key in fieldsToUpdate) {
       if (fieldsToUpdate[key] !== undefined) {
@@ -194,13 +171,7 @@ export const editCourse = async (req, res) => {
       course.price.original = price.original || course.price.original;
       course.price.current = price.current || course.price.current;
     }
-
-    // --- REMOVED MANUAL EMBEDDING ---
-    // The Mongoose 'pre-save' hook will automatically detect the changes
-    // above and regenerate the embedding when we call `course.save()`.
-
     const updatedCourse = await course.save();
-
     return res.status(200).json({
       course: updatedCourse,
       message: "Course updated successfully.",
