@@ -46,7 +46,7 @@ export const authApi = apiSlice.injectEndpoints({
 
         // --- User Profile Mutations (Unchanged) ---
         updateUserInfo: builder.mutation({
-            query: (userInfo) => ({ url: '/user/profile/update-info', method: 'PATCH', body: userInfo }),
+            query: (userInfo) => ({ url: '/user/profile', method: 'PATCH', body: userInfo }),
             invalidatesTags: ['User'],
         }),
         updateUserAvatar: builder.mutation({

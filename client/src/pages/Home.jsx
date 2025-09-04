@@ -12,6 +12,7 @@ const Home = () => {
             <HomeCourse />
             <HomeRecommendation />
             <LmsShowcase />
+            
     </div>
   ) 
 }

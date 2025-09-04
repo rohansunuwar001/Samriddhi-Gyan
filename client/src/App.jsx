@@ -63,14 +63,16 @@ import EditLecture from "./pages/admin/lecture/EditLecture"; // Only EditLecture
 import Cart from "./pages/cart/Cart";
 import Contact from "./pages/Contact/Contact";
 import CourseDetailPage from "./pages/Courses/CourseDetailPage";
-import WishList from "./pages/WishList/WishList";
-import InstructorProfilePage from "./pages/Profile/InstructorProfilePage";
-import SupAdmDashboard from "./pages/superAdmin/SupAdmDashboard";
-import SupAdmCourseAnalytics from "./pages/superAdmin/SupAdmCourseAnalytics";
-import SupAdmAllUser from "./pages/superAdmin/SupAdmAllUser";
-import SupAdmAllRevenueDetails from "./pages/superAdmin/SupAdmAllRevenueDetails";
 import HomeCms from "./pages/pageCms/HomeCms";
 import PaymentSuccess from "./pages/PaymentSuccess";
+import InstructorProfilePage from "./pages/Profile/InstructorProfilePage";
+import SupAdmAllRevenueDetails from "./pages/superAdmin/SupAdmAllRevenueDetails";
+import SupAdmAllUser from "./pages/superAdmin/SupAdmAllUser";
+import SupAdmCourseAnalytics from "./pages/superAdmin/SupAdmCourseAnalytics";
+import SupAdmDashboard from "./pages/superAdmin/SupAdmDashboard";
+import WishList from "./pages/WishList/WishList";
+import ChatBot from "./pages/Chatbot/ChatBot";
+
 
 // --- LAYOUT WRAPPER COMPONENT ---
 const MainLayoutWithScroll = () => (
@@ -361,6 +363,7 @@ function App() {
     <main>
       {/* <ScrollToTop /> */}
       <RouterProvider router={appRouter} />
+    <ChatBot />
     </main>
   );
 }

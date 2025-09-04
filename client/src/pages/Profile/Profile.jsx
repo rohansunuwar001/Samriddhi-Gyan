@@ -37,6 +37,7 @@ const Profile = () => {
   const navigate = useNavigate();
   // ✅ THE FIX: The hook has been changed from `useLoadUserQuery` to `useLoadUserQuery`.
   const { data, isLoading, isError, error } = useLoadUserQuery();
+  console.log("Profile data:",data);
   const user = data?.user;
 
   const handleNavigateToEdit = () => {
