@@ -32,6 +32,7 @@ const PhotoPage = () => {
   const [updateUserAvatar, { isLoading: isAvatarUpdating }] = useUpdateUserAvatarMutation();
 
   const user = data?.user;
+  console.log("User Data:", user);
 
   // Effect to set the initial preview image from the user's current photo
   useEffect(() => {
