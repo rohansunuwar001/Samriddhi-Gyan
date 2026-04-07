@@ -11,11 +11,11 @@ import { isAuthenticated } from "../middlewares/isAuthenticated.js";
 
 const router = express.Router();
 
-router.post(
-  "/webhook",
-  express.raw({ type: "application/json" }),
-  stripeWebhook
-);
+// router.post(
+//   "/webhook",
+//   express.raw({ type: "application/json" }),
+//   stripeWebhook
+// );
 
 // All other routes below (these will use express.json() if set globally)
 router.route("/esewa").post(isAuthenticated, initializePayment);

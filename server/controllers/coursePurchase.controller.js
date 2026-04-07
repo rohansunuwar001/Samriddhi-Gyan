@@ -11,12 +11,9 @@ import { CourseProgress } from "../models/courseProgress.model.js";
 dotenv.config();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-/**
- * Creates a Stripe Checkout Session for purchasing courses.
- */
 export const createCheckoutSession = async (req, res) => {
   try {
-    const userId = req.user._id; // Assumes isAuthenticated middleware ran
+    const userId = req.user._id;
     const { courseIds } = req.body;
 
     if (!Array.isArray(courseIds) || courseIds.length === 0) {
@@ -29,8 +26,6 @@ export const createCheckoutSession = async (req, res) => {
         .status(404)
         .json({ message: "One or more courses not found!" });
     }
-
-    // Prepare Stripe line items and our internal purchase details
     const line_items = [];
     const purchaseCourses = [];
     let totalAmount = 0;
@@ -50,11 +45,7 @@ export const createCheckoutSession = async (req, res) => {
       });
       totalAmount += course.price.current;
     });
-
-    // Generate a unique orderId for your system
     const orderId = `LMS-ORD-${uuidv4().split("-")[0].toUpperCase()}`;
-
-    // Create the Stripe session
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items,
@@ -62,7 +53,6 @@ export const createCheckoutSession = async (req, res) => {
      success_url: `${process.env.FRONTEND_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
     cancel_url: `${process.env.FRONTEND_URL}/cart`,
 
-      // --- CRITICAL FIX: Convert all ObjectIds to strings for Stripe metadata ---
       metadata: {
         orderId,
         userId: userId.toString(), // <-- THE FIX
@@ -72,14 +62,11 @@ export const createCheckoutSession = async (req, res) => {
         allowed_countries: ["NP"],
       },
     });
-
     if (!session || !session.id) {
       return res
         .status(500)
         .json({ success: false, message: "Could not create Stripe session." });
     }
-
-    // Save a 'pending' purchase record to your database
     await CoursePurchase.create({
       orderId,
       userId,
@@ -97,9 +84,6 @@ export const createCheckoutSession = async (req, res) => {
   }
 };
 
-/**
- * Listens for events from Stripe. This is the endpoint that Stripe will call.
- */
 export const stripeWebhook = async (req, res) => {
   const signature = req.headers["stripe-signature"];
   const secret = process.env.STRIPE_WEBHOOK_SECRET;
@@ -111,8 +95,6 @@ export const stripeWebhook = async (req, res) => {
     console.error("Webhook signature verification failed.", error.message);
     return res.status(400).send(`Webhook error: ${error.message}`);
   }
-
-  // Handle the 'checkout.session.completed' event
   if (event.type === "checkout.session.completed") {
     const session = event.data.object;
     try {
@@ -120,22 +102,19 @@ export const stripeWebhook = async (req, res) => {
         "paymentDetails.stripeSessionId": session.id,
       });
 
-      // --- IMPROVED LOGIC ---
+      
       if (!purchase) {
-        // If we can't find the purchase, log it as an issue but don't tell Stripe to retry.
-        // This could happen if there was a DB write error during session creation.
         console.error(
           `Webhook handler could not find purchase for session ID: ${session.id}`
         );
       } else if (purchase.status !== "completed") {
-        // Only process if the order is still pending to prevent double-processing.
         purchase.totalAmount = session.amount_total / 100;
         purchase.status = "completed";
         await purchase.save();
 
         const courseIds = purchase.courses.map((c) => c.courseId);
 
-        // Enroll user in courses
+       
         await User.findByIdAndUpdate(purchase.userId, {
           $addToSet: { enrolledCourses: { $each: courseIds } },
           $pull: { cart: { $in: courseIds }, wishlist: { $in: courseIds } }, // Also clear cart/wishlist

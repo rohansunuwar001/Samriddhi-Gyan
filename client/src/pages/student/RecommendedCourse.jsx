@@ -10,6 +10,7 @@ import { useGetRecommendedCourseQuery } from "@/features/api/recommendedApi";
 
 const RecommendedCourse = () => {
   const { data, isLoading, isError, error, refetch } = useGetRecommendedCourseQuery();
+  console.log("Recommended Courses:", data);
 
   return (
     // --- UI CHANGE: Adopted the layout from CourseMain ---
@@ -52,7 +53,7 @@ const RecommendedCourse = () => {
                   key={course._id}
                   course={course}
                   // Optional: You can still show a badge if you like
-                  showRecommendationBadge={!course.isPurchased} 
+                  showRecommendationBadge={course.showRecommendationBadge} 
                 />
               ))}
             </div>

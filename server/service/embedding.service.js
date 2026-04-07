@@ -1,6 +1,6 @@
 import { pipeline } from '@xenova/transformers';
 
-// Singleton to ensure the model is loaded only once.
+
 class EmbeddingPipeline {
   static instance = null;
 
@@ -12,11 +12,7 @@ class EmbeddingPipeline {
   }
 }
 
-/**
- * Generates an embedding for a given text using a local Transformers.js model.
- * @param {string} text The text to generate an embedding for.
- * @returns {Promise<number[]>} A promise that resolves to the embedding vector.
- */
+
 export async function generateEmbedding(text) {
   const extractor = await EmbeddingPipeline.getInstance();
 
