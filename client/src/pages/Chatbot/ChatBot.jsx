@@ -8,33 +8,27 @@ import ChatbotForm from "./ChatbotForm";
 import { companyInfo } from "./companyInfo";
 import { useLoadUserQuery } from "@/features/api/authApi";
 
-// Import the necessary hook from your authApi.js
 
-/**
- * Custom hook to get the current user's role.
- * It uses RTK Query's useLoadUserQuery to fetch user data.
- */
 const useUserRole = () => {
   const { data: userData, isLoading, isError } = useLoadUserQuery();
 
-  // If data is loading, or there's an error, or no user data, assume no specific role or default to a non-student.
-  // We'll return null or undefined initially and update once data is available.
+ 
   if (isLoading) {
-    return null; // Or 'loading', depending on how you want to handle it
+    return null; 
   }
 
   if (isError || !userData?.user) {
-    return 'guest'; // Or null, 'unauthenticated', etc. - any non-'student' role
+    return 'guest';
   }
 
-  // Once data is successfully loaded and user exists, return the role.
+
   return userData.user.role;
 };
 
 const ChatBot = () => {
   const userRole = useUserRole(); // Get the current user's role
 
-  // Add a console.log here to see the role in action
+
   useEffect(() => {
     console.log("ChatBot component rendered. User Role:", userRole);
   }, [userRole]);
@@ -71,10 +65,10 @@ const ChatBot = () => {
   ];
 
   useEffect(() => {
-    // Only proceed if userRole is not null (i.e., data has loaded or error handled)
+   
     if (userRole === null) {
       console.log("User role is still loading...");
-      return; // Do nothing until role is determined
+      return;
     }
 
     if (userRole === "student") {
@@ -219,7 +213,7 @@ const ChatBot = () => {
 
     try {
       const response = await fetch(
-        "https://generativelanguage.googleapis.com/v1/models/gemini-2.0-flash:generateContent?key=AIzaSyB1zOYUTQvjTkLba_mlApSyeFjmmS5oz_8",
+        "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=AIzaSyBA6SkGM3eewb2Dwen4GOHMltnYvngwybQ",
         requestOptions
       );
       const data = await response.json();

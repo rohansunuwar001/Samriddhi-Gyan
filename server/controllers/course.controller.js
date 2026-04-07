@@ -4,7 +4,7 @@ import { SearchSuggestion } from "../models/searchSuggestion.js";
 import { User } from "../models/user.model.js";
 import { deleteFromCloudinary, uploadMedia } from "../utils/cloudinary.js";
 
-// --- UPDATED IMPORTS ---
+
 // We now only need createEmbeddingForText (which uses Xenova) and cosineSimilarity.
 import {
   cosineSimilarity,
@@ -67,7 +67,6 @@ export const createCourse = async (req, res) => {
 
 
 
-// --- UPDATED FOR XENOVA/LOCAL MODEL ---
 export const getSearchResults = async (req, res) => {
   try {
     const { q } = req.query;

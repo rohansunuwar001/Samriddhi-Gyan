@@ -8,14 +8,13 @@ import { useSelector } from 'react-redux';
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
-import CourseCard from "./CourseCard";
 import PropTypes from "prop-types";
+import CourseCard from "./CourseCard";
 // --- ⭐ NEW: Import your custom header component ---
 
 import { Skeleton } from "@/components/ui/skeleton";
-import { Link } from "react-router-dom";
 import { CheckCircle2, ShoppingBasket } from "lucide-react";
-import TitleandHeader from "@/components/common/TitleandHeader";
+import { Link } from "react-router-dom";
 
 // ... (The NoCoursesAvailable and CourseCardSkeleton sub-components remain unchanged)
 const NoCoursesAvailable = ({ isLoggedIn }) => (
@@ -90,14 +89,6 @@ const CourseMain = () => {
   return (
     <div className="bg-white font-sans">
       <div className="container max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
-        
-        {/* --- ⭐ NEW: Added your TitleandHeader component here --- */}
-        {/* <TitleandHeader 
-          first="Explore Our Courses"
-          second="Browse our full catalog of expert-led courses and find your next learning adventure."
-        /> */}
-
-        {/* --- Added margin-top for spacing below the new header --- */}
         <main className="mt-12">
           {isLoading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

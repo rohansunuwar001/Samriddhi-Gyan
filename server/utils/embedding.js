@@ -3,11 +3,6 @@
 import { Course } from "../models/course.model.js";
 import { generateEmbedding } from "../service/embedding.service.js";
 
-
-
-/**
- * Cosine similarity function remains exactly the same. It's a pure math utility.
- */
 export function cosineSimilarity(a = [], b = []) {
   if (!a || !b || a.length === 0 || b.length === 0 || a.length !== b.length) return 0;
   let dot = 0;
@@ -59,7 +54,6 @@ export async function getCourseEmbedding(courseDoc) {
 }
 
 export async function ensureEmbeddingsForCourses(courses) {
-  // This function doesn't need to change.
   const mapped = await Promise.all(
     courses.map(async (course) => {
       if (course.embedding && Array.isArray(course.embedding) && course.embedding.length > 0) return course;
@@ -75,13 +69,9 @@ export async function ensureEmbeddingsForCourses(courses) {
   return mapped;
 }
 
-/**
- * Batch precompute embeddings for all courses.
- * Useful for admin scripts or migration jobs.
- */
+
 export async function populateAllCourseEmbeddings(batchSize = 50) {
-  // This function doesn't need to change.
-  const total = await Course.countDocuments({ isPublished: true }); // Example filter
+  const total = await Course.countDocuments({ isPublished: true }); 
   let processed = 0;
 
   console.log(`Starting embedding population for ${total} courses...`);
@@ -114,11 +104,8 @@ export async function populateAllCourseEmbeddings(batchSize = 50) {
   console.log("Embedding population complete.");
 }
 
-/**
- * Build a single user profile vector by averaging enrolled courses' embeddings.
- */
+
 export async function buildUserVectorFromEnrolled(enrolledCourses) {
-  // This function doesn't need to change.
   if (!enrolledCourses || enrolledCourses.length === 0) return null;
 
   const enrolledWithEmb = await ensureEmbeddingsForCourses(enrolledCourses);

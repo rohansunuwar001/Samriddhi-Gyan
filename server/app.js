@@ -5,27 +5,28 @@ import express from "express";
 import session from "express-session";
 import morgan from "morgan";
 import passport from "passport";
+import { stripeWebhook } from "./controllers/coursePurchase.controller.js";
+import { configurePassport } from "./database/passport-config.js"; // adjust path as needed
+import adminRouter from "./routes/admin.route.js";
 import aiRoutes from "./routes/ai.route.js";
 import articleRouter from "./routes/article.route.js";
 import authorRouter from "./routes/author.route.js";
+import cartRouter from "./routes/cart.route.js";
 import categoryRoutes from "./routes/category.route.js";
 import courseRoute from "./routes/course.route.js";
 import courseProgressRoute from "./routes/courseProgress.route.js";
 import esewaRoute from "./routes/esewa.route.js";
+import dashboardRouter from "./routes/instructor.dashboard.js";
 import lectureRouter from "./routes/lecture.route.js";
 import mediaRoute from "./routes/media.route.js";
 import notificationRouter from "./routes/notification.route.js";
 import purchaseCourseRoutes from "./routes/purchaseCourse.route.js";
+import recommendedRoutes from "./routes/recommended.route.js";
 import reviewRouter from "./routes/review.route.js";
 import searchRouter from "./routes/searchSug.routes.js";
 import sectionRouter from "./routes/section.route.js";
 import userRoute from "./routes/user.route.js";
-import dashboardRouter from "./routes/instructor.dashboard.js";
-import cartRouter from "./routes/cart.route.js";
 import wishlistRouter from "./routes/wishlist.route.js";
-import { configurePassport } from "./database/passport-config.js"; // adjust path as needed
-import recommendedRoutes from "./routes/recommended.route.js";
-import adminRouter from "./routes/admin.route.js";
 dotenv.config({});
 
 const app = express();
@@ -44,7 +45,7 @@ app.use(
 );
 
 // --- Mount the webhook route BEFORE express.json() ---
-app.use("/api/v1/purchase/webhook", express.raw({ type: "application/json" }), purchaseCourseRoutes);
+app.use("/api/v1/purchase/webhook", express.raw({ type: "application/json" }), stripeWebhook);
 
 // --- Default middleware ---
 app.use(express.json());

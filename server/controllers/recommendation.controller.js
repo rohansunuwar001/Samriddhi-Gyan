@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { Course } from "../models/course.model.js";
 import { User } from "../models/user.model.js";
-import { CourseProgress } from "../models/courseProgress.model.js"; // IMPORT THIS
+import { CourseProgress } from "../models/courseProgress.model.js";
 
 export const getRecommendedCourses = async (req, res) => {
   try {
@@ -43,7 +43,6 @@ export const getRecommendedCourses = async (req, res) => {
 
       // No enrolled courses → show popular
       if (enrolledCourses.length === 0) {
-        // ... (this section for new users is fine as is, no progress to calculate)
         const popular = await Course.find({ isPublished: true }).sort({ enrolledStudents: -1 }).limit(5).populate(populateCreator).lean();
         const popularWithBadge = popular.map((course) => ({ ...course, showRecommendationBadge: (course.enrolledStudents?.length || 0) > 0 || course.rating >= 4.5 || course.isRecommended === true, }));
         return res.json({ message: "You haven't enrolled in any courses yet. Here are some popular ones.", recommendedCourses: popularWithBadge, });
@@ -75,7 +74,7 @@ export const getRecommendedCourses = async (req, res) => {
 
       let collaborativeCourses = [];
       if (collaborativeCourseIds.length > 0) {
-        // UPDATED: Also add populateProgressData to the collaborative query
+        // Also add populateProgressData to the collaborative query
         collaborativeCourses = await Course.find({ _id: { $in: collaborativeCourseIds }, isPublished: true, }).populate(populateCreator).populate(populateProgressData).lean();
       }
 
@@ -95,26 +94,23 @@ export const getRecommendedCourses = async (req, res) => {
         score += ((course.enrolledStudents?.length || 0) / 10000) * 0.2;
         return { ...course, score };
       });
-      
 
-      // --- NEW, EFFICIENT ENRICHMENT PROCESS ---
-
-      // 1. Get IDs of all candidate courses to fetch their progress at once.
+      //  Get IDs of all candidate courses to fetch their progress at once.
       const candidateCourseIds = scored.map(c => c._id);
 
-      // 2. Fetch all relevant progress documents in a single, efficient query.
+      //  Fetch all relevant progress documents in a single, efficient query.
       const progressDocs = await CourseProgress.find({
         userId,
         courseId: { $in: candidateCourseIds }
       }).lean();
       
-      // 3. Create a Map for instant O(1) progress lookups.
+      // Create a Map for instant O(1) progress lookups.
       const progressMap = progressDocs.reduce((map, prog) => {
         map[prog.courseId.toString()] = prog.lectureProgress || [];
         return map;
       }, {});
 
-      // 4. Enrich the scored courses with progress and other info using the fast lookup map.
+      // Enrich the scored courses with progress and other info using the fast lookup map.
       const enriched = scored.map(course => {
         const lectureProgress = progressMap[course._id.toString()] || [];
         const viewedLectureIds = new Set(lectureProgress.filter(lp => lp.viewed).map(lp => lp.lectureId.toString()));
@@ -141,13 +137,9 @@ export const getRecommendedCourses = async (req, res) => {
           showRecommendationBadge: (course.enrolledStudents?.length || 0) > 1 || (course.rating || 0) >= 4.5 || course.isRecommended === true,
         };
       });
-      // --- END OF EFFICIENT ENRICHMENT PROCESS ---
-
-
       const ranked = enriched.sort((a, b) => b.score - a.score).slice(0, 5);
 
       if (!ranked || ranked.length === 0) {
-        // Fallback popular courses don't need progress data, so this is fine.
         const popular = await Course.find({ isPublished: true, _id: { $nin: enrolledCourseIds }, }).sort({ enrolledStudents: -1 }).limit(5).populate(populateCreator).lean();
         const popularWithBadge = popular.map((course) => ({ ...course, showRecommendationBadge: (course.enrolledStudents?.length || 0) > 0 || course.rating >= 4.5 || course.isRecommended === true, }));
         return res.json({ message: "No personalized recommendations found; here are popular courses.", recommendedCourses: popularWithBadge, });
@@ -156,7 +148,7 @@ export const getRecommendedCourses = async (req, res) => {
       return res.json({ message: "Personalized recommendations (category/tag + collaborative)", recommendedCourses: ranked, });
     }
 
-    // Guest user → show popular (This part is fine as is)
+    // Guest user => show popular (This part is fine as is)
     const popular = await Course.find({ isPublished: true }).sort({ enrolledStudents: -1 }).limit(5).populate(populateCreator).lean();
     const popularWithBadge = popular.map((course) => ({ ...course, showRecommendationBadge: (course.enrolledStudents?.length || 0) > 0 || course.rating >= 4.5 || course.isRecommended === true, }));
     return res.json({ message: "Here are some popular courses you may like.", recommendedCourses: popularWithBadge, });
