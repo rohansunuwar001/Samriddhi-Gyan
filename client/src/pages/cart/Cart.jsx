@@ -137,7 +137,7 @@ const Cart = () => {
               </div>
               <div className="space-y-3">
                 <p className="text-center text-sm font-medium text-gray-600">Choose a payment method:</p>
-                <Button
+                {/* <Button
                   className="w-full bg-green-600 hover:bg-green-700 text-white"
                   size="lg"
                   onClick={() => handleProceedToCheckout('eSewa')}
@@ -145,7 +145,7 @@ const Cart = () => {
                 >
                   {loadingMethod === 'eSewa' ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
                   Pay with eSewa
-                </Button>
+                </Button> */}
                 <Button
                   className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
                   size="lg"
