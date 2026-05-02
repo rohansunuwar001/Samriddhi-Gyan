@@ -8,7 +8,7 @@ import app from "./app.js";
 dotenv.config({});
 
 connectDB();
-
+// this is testing.
 const server = http.createServer(app);
 
 export const io = new Server(server, {
