@@ -134,7 +134,7 @@ const Navbar = () => {
         setIsDropdownVisible(true);
         try {
           const response = await fetch(
-            `http://localhost:7777/api/v1/search?q=${encodeURIComponent(
+            `http://localhost:10000/api/v1/search?q=${encodeURIComponent(
               searchQuery
             )}`
           );
