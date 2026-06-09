@@ -17,7 +17,7 @@ export const io = new Server(server, {
   },
 });
 
-const PORT = process.env.PORT || 7777;
+const PORT = process.env.PORT || 10000;
 
 // Socket.IO logic
 export const userSocketMap = {};
