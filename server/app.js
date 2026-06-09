@@ -61,6 +61,15 @@ app.use(
 );
 app.use(morgan("dev"));
 
+// --- Root route ---
+app.get("/", (req, res) => {
+  res.json({ 
+    message: "Samriddhi Gyan API is running",
+    version: "v1",
+    endpoints: "/api/v1/*"
+  });
+});
+
 // --- Mount all other routes ---
 app.use("/api/v1/media", mediaRoute);
 app.use("/api/v1/user", userRoute);
