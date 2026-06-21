@@ -16,15 +16,25 @@ import PurchaseCard from './PurchaseCard';
 import Requirements from './Requirements';
 import WhatYouWillLearn from './WhatYouWillLearn';
 import ReviewsSection from '../Reviews/ReviewSection';
+import { useTrackCourseViewMutation } from '@/features/api/authApi';
+import { useEffect } from 'react';
+
 
 const CourseDetailPage = () => {
     const { courseId } = useParams();
     const { data, isLoading, isError } = useGetCourseDetailWithStatusQuery(courseId);
 console.log("Course detail data:", data);
+const [trackCourseView] = useTrackCourseViewMutation();
 
     // Defensive: extract the actual course object
     const course = data?.course;
     console.log("Course data:", course);
+
+useEffect(() => {
+  if (courseId) {
+    trackCourseView(courseId);
+  }
+}, [courseId]);
 
     if (isLoading) {
         return <div className="text-center py-10">Loading...</div>;

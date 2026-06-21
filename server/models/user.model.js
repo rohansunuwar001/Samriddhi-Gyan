@@ -59,6 +59,21 @@ const userSchema = new mongoose.Schema({
         linkedin: { type: String, default: "" },
         // You can add more links here in the future (e.g., twitter, linkedin)
     },
+    occupation: {
+        type: String,
+        default: ""
+    },
+    interests: [
+        {
+            type: String
+        }
+    ],
+    viewHistory: [
+      {
+        course: { type: mongoose.Schema.Types.ObjectId, ref: 'Course' },
+        viewedAt: { type: Date, default: Date.now },
+      }
+    ],
 }, {timestamps: true});
 
 export const User = mongoose.model("User", userSchema);

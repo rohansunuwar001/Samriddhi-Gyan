@@ -12,6 +12,7 @@ import {
   login,
   logout,
   register,
+  trackCourseView,
   updateUserAvatar,
   updateUserInfo,
   updateUserPassword
@@ -31,6 +32,8 @@ router.route("/logout").get(isAuthenticated, logout);
 router.route("/check").get(isAuthenticated, checkUser);
 router.route("/me").get(isAuthenticated, loadUser);
 
+
+router.route("/view-history/:courseId").post(isAuthenticated, trackCourseView);
 
 router.route("/profile")
   .get(isAuthenticated, getUserProfile)
