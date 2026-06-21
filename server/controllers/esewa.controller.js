@@ -104,7 +104,7 @@ export const completePayment = async (req, res, next) => {
       $addToSet: { enrolledCourses: { $each: courseIds } },
     });
 
-    res.redirect(`http://localhost:5173/my-learning`);
+    res.redirect(`${process.env.FRONTEND_URL}/my-learning`);
   } catch (error) {
     res.status(400).json({
       success: false,
@@ -137,7 +137,7 @@ export const fillEsewaForm = async (req, res, next) => {
           <input type="hidden" name="product_code" value="${process.env.ESEWA_PRODUCT_CODE}" />
           <input type="hidden" name="product_service_charge" value="0" />
           <input type="hidden" name="product_delivery_charge" value="0" />
-          <input type="hidden" name="success_url" value="http://localhost:10000/api/v1/buy/complete-payment" />
+          <input type="hidden" name="success_url" value="${process.env.BACKEND_URI}/api/v1/buy/complete-payment" />
           <input type="hidden" name="failure_url" value="https://developer.esewa.com.np/failure" />
           <input type="hidden" name="signed_field_names" value="total_amount,transaction_uuid,product_code" />
           <input type="hidden" name="signature" value="${paymentHash.signature}" />
