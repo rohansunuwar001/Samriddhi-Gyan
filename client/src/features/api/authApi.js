@@ -56,6 +56,9 @@ export const authApi = apiSlice.injectEndpoints({
         updateUserPassword: builder.mutation({
             query: (passwordData) => ({ url: '/user/profile/update-password', method: 'PATCH', body: passwordData }),
         }),
+        trackCourseView: builder.mutation({
+            query: (courseId) => ({ url: `/user/view-history/${courseId}`, method: 'POST' }),
+        }),
 
     }),
 });
@@ -66,6 +69,7 @@ export const {
     useLoginUserMutation,
     useLogoutUserMutation,
     useLoadUserQuery,
+    useTrackCourseViewMutation,
     useGetMyLearningCoursesQuery, // <-- EXPORT THE NEW HOOK
     useUpdateUserInfoMutation,
     useUpdateUserAvatarMutation,

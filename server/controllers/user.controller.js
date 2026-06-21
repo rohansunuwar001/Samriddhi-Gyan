@@ -43,20 +43,6 @@ export const register = async (req, res) => {
 };
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
@@ -89,29 +75,6 @@ export const login = async (req, res) => {
     });
   }
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 export const logout = async (_, res) => {
@@ -177,44 +140,35 @@ export const checkUser = async (req, res) => {
 export const updateUserInfo = async (req, res) => {
   try {
     const userId = req.user._id;
-    // Destructure the main fields and the entire 'links' object from the body
-    const { name, headline, description, links } = req.body;
+    const { name, headline, description, links, occupation, interests } = req.body;
 
     const user = await User.findById(userId);
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Build an object with only the fields that are provided in the request
     const updateData = {};
     if (name) updateData.name = name;
     if (headline) updateData.headline = headline;
     if (description) updateData.description = description;
+    if (occupation !== undefined) updateData.occupation = occupation;
+    if (interests !== undefined) updateData.interests = interests;
 
-    // --- NEW: Logic to handle the nested 'links' object ---
     if (links && typeof links === "object") {
-      // Use dot notation to specify fields within the nested object for update
-      if (links.website !== undefined)
-        updateData["links.website"] = links.website;
-      if (links.facebook !== undefined)
-        updateData["links.facebook"] = links.facebook;
-      if (links.instagram !== undefined)
-        updateData["links.instagram"] = links.instagram;
-      if (links.twitter !== undefined)
-        updateData["links.twitter"] = links.twitter;
-      if (links.linkedin !== undefined)
-        updateData["links.linkedin"] = links.linkedin;
+      if (links.website !== undefined) updateData["links.website"] = links.website;
+      if (links.facebook !== undefined) updateData["links.facebook"] = links.facebook;
+      if (links.instagram !== undefined) updateData["links.instagram"] = links.instagram;
+      if (links.twitter !== undefined) updateData["links.twitter"] = links.twitter;
+      if (links.linkedin !== undefined) updateData["links.linkedin"] = links.linkedin;
     }
 
     if (Object.keys(updateData).length === 0) {
-      return res
-        .status(400)
-        .json({ message: "No update information provided." });
+      return res.status(400).json({ message: "No update information provided." });
     }
 
     const updatedUser = await User.findByIdAndUpdate(
       userId,
-      { $set: updateData }, // Use $set to update only the specified fields
+      { $set: updateData },
       { new: true, runValidators: true }
     ).select("-password");
 
@@ -231,6 +185,45 @@ export const updateUserInfo = async (req, res) => {
     });
   }
 };
+
+
+
+export const trackCourseView = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { courseId } = req.params;
+
+    if (!courseId) {
+      return res.status(400).json({ success: false, message: "Course id is required." });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found." });
+    }
+
+    // Drop any existing entry for this course so re-viewing moves it back to the front
+    user.viewHistory = user.viewHistory.filter(
+      (entry) => entry.course.toString() !== courseId
+    );
+
+    user.viewHistory.unshift({ course: courseId, viewedAt: new Date() });
+    user.viewHistory = user.viewHistory.slice(0, 20); // cap history length
+
+    await user.save();
+
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    console.error("Error tracking course view:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error while tracking view.",
+    });
+  }
+};
+
+
+
 
 export const updateUserAvatar = async (req, res) => {
   try {

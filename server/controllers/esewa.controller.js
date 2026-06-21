@@ -8,7 +8,7 @@ import { v4 as uuidv4 } from "uuid";
 
 export const initializePayment = async (req, res) => {
   try {
-    const userId = req.id;
+    const userId = req.user._id;
     const { courseIds } = req.body; // Accepts array of courseIds
 
     if (!Array.isArray(courseIds) || courseIds.length === 0) {
@@ -98,14 +98,13 @@ export const completePayment = async (req, res, next) => {
       );
     }
 
-     await User.findByIdAndUpdate(CoursePurchase.userId, {
-      $addToSet: {
-        enrolledCourses: CoursePurchase.courses.courseId,
-      },
+    // Also add courses to the user's enrolledCourses list
+    const courseIds = purchase.courses.map((c) => c.courseId);
+    await User.findByIdAndUpdate(purchase.userId, {
+      $addToSet: { enrolledCourses: { $each: courseIds } },
     });
 
     res.redirect(`http://localhost:5173/my-learning`);
-    // Optionally, send email notification here
   } catch (error) {
     res.status(400).json({
       success: false,
