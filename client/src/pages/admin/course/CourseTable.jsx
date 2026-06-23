@@ -26,6 +26,7 @@ let CourseTable = () => {
     if (isError) return <div className="text-center text-red-500 py-10">Failed to load courses. Please try again.</div>
 
     const courses = data?.courses || [];
+    console.log(courses);
 
     // Remove handler with SweetAlert2
     const handleRemove = async (courseId) => {

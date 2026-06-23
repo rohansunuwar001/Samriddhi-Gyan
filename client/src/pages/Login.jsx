@@ -64,7 +64,7 @@ const LoginPage = () => {
   }, [isSuccess, loginData, loginError, navigate]);
 
   const handleGoogleLogin = () => {
-    const backendUrl = import.meta.env.VITE_BASE_URL || "http://localhost:10000";
+    const backendUrl = import.meta.env.VITE_BASE_URL;
     window.location.href = `${backendUrl}/api/v1/user/google`;
   };
 

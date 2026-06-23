@@ -1,62 +1,42 @@
-// src/components/MainContent.js
-
 import PropTypes from "prop-types";
 import React from "react";
 import { FaFacebookF, FaLink, FaLinkedinIn, FaStar } from "react-icons/fa";
-import ReviewsSection from "../Reviews/ReviewSection"; // This component now handles ALL review logic.
+import ReviewsSection from "../Reviews/ReviewSection";
+import BolaVideoPlayer from "../admin/lecture/BolaVideoPlayer";
 
-// A memoized, reusable component for linear progress to prevent unnecessary re-renders.
+
 const LineProgress = React.memo(function LineProgress({ percent }) {
   const roundedPercent = Math.round(percent);
-
   return (
     <div className="my-6">
       <div className="flex justify-between mb-1">
-        <span className="text-base font-medium text-gray-700">
-          Course Progress
-        </span>
-        <span className="text-sm font-medium text-gray-700">
-          {roundedPercent}% Completed
-        </span>
+        <span className="text-base font-medium text-gray-700">Course Progress</span>
+        <span className="text-sm font-medium text-gray-700">{roundedPercent}% Completed</span>
       </div>
       <div className="w-full bg-gray-200 rounded-full h-2.5">
         <div
           className="bg-green-500 h-2.5 rounded-full"
-          style={{
-            width: `${Math.min(roundedPercent, 100)}%`,
-            transition: "width 0.35s ease-out",
-          }}
-        ></div>
+          style={{ width: `${Math.min(roundedPercent, 100)}%`, transition: "width 0.35s ease-out" }}
+        />
       </div>
     </div>
   );
 });
 LineProgress.propTypes = { percent: PropTypes.number.isRequired };
 
-const MainContent = ({
-  courseData,
-  selectedLecture,
-  progress = [],
-  onLectureViewed,
-}) => {
+const MainContent = ({ courseData, selectedLecture, progress = [], onLectureViewed }) => {
   const [selectedTab, setSelectedTab] = React.useState("overview");
   const [questionText, setQuestionText] = React.useState("");
 
   const course = courseData?.course;
 
-  // Recalculate total duration on the client to ensure consistency,
-  // preventing bugs if backend data is slightly out-of-sync.
   const totalDuration = React.useMemo(() => {
     if (!course) return 0;
     return (course.sections || []).reduce(
       (sectionSum, section) =>
-        sectionSum +
-        (section.lectures || []).reduce(
-          (lectureSum, lecture) =>
-            lectureSum + (lecture.durationInSeconds || 0),
-          0
-        ),
-      0
+        sectionSum + (section.lectures || []).reduce(
+          (lectureSum, lecture) => lectureSum + (lecture.durationInSeconds || 0), 0
+        ), 0
     );
   }, [course]);
 
@@ -64,32 +44,22 @@ const MainContent = ({
     if (!course) return 0;
     return (course.sections || []).reduce(
       (sectionSum, section) =>
-        sectionSum +
-        (section.lectures || []).reduce((lectureSum, lecture) => {
-          const isViewed = progress.some(
-            (lp) => lp.lectureId === lecture._id && lp.viewed
-          );
+        sectionSum + (section.lectures || []).reduce((lectureSum, lecture) => {
+          const isViewed = progress.some((lp) => lp.lectureId === lecture._id && lp.viewed);
           return lectureSum + (isViewed ? lecture.durationInSeconds || 0 : 0);
-        }, 0),
-      0
+        }, 0), 0
     );
   }, [progress, course]);
 
   const percent = React.useMemo(() => {
-    // Use the client-side calculated total duration for a reliable percentage.
     if (totalDuration === 0) return 0;
-    // Cap percentage at 100 to prevent weird floating point issues.
     return Math.min((watchedDuration / totalDuration) * 100, 100);
   }, [watchedDuration, totalDuration]);
 
-  // Production-grade safeguard: Do not render anything until the core course data is available.
   if (!course) {
-    return (
-      <div className="p-10 text-center font-semibold">Loading Content...</div>
-    );
+    return <div className="p-10 text-center font-semibold">Loading Content...</div>;
   }
 
-  // Destructure with safe fallbacks for all properties used in the template.
   const ratings = course.ratings || 0;
   const numOfReviews = course.numOfReviews || 0;
   const studentCount = course.enrolledStudents?.length || 0;
@@ -98,18 +68,16 @@ const MainContent = ({
   const instructor = course.creator || {};
   const instructorName = instructor.name || "Unknown Instructor";
   const instructorHeadline = instructor.headline || "";
-  const instructorPhoto =
-    instructor.photoUrl || "https://via.placeholder.com/100";
+  const instructorPhoto = instructor.photoUrl || "https://via.placeholder.com/100";
   const instructorLinks = instructor.links || {};
 
   const totalLectures = (course.sections || []).reduce(
-    (sum, section) => sum + (section.lectures?.length || 0),
-    0
+    (sum, section) => sum + (section.lectures?.length || 0), 0
   );
 
   const handleQuestionSubmit = (e) => {
     e.preventDefault();
-    console.log("Submitting question:", questionText); // Replace with actual mutation call
+    console.log("Submitting question:", questionText);
     setQuestionText("");
   };
 
@@ -124,120 +92,80 @@ const MainContent = ({
 
   return (
     <main className="flex-grow bg-white p-6 md:p-10">
-      {/* Video Player */}
-      <div
-        className="relative bg-black w-full"
-        style={{ paddingTop: "56.25%" }}
-      >
-        <div className="absolute inset-0 flex flex-col items-center justify-center">
-          {selectedLecture?.videoUrl ? (
-            <video
-              key={selectedLecture._id}
-              src={selectedLecture.videoUrl}
-              controls
-              autoPlay
-              className="w-full h-full bg-black"
-              onPlay={() => onLectureViewed(selectedLecture._id)}
-            >
-              Your browser does not support the video tag.
-            </video>
-          ) : (
-            <div className="flex flex-col items-center justify-center text-white text-center w-full h-full p-4 bg-gray-900">
-              <img
-                src={course.thumbnail}
-                alt={course.title}
-                className="max-h-32 opacity-60 rounded"
-              />
-              <div className="mt-4 font-semibold text-lg">
-                {selectedLecture?.title || "Select a lecture from the sidebar"}
-              </div>
+
+      {/* ── Video Player ── */}
+      {selectedLecture?.videoUrl ? (
+        // HLS lecture — use BOLA adaptive bitrate player
+        // onPlay fires when playback starts, marking the lecture as viewed
+        <BolaVideoPlayer
+          key={selectedLecture._id}
+          src={selectedLecture.videoUrl}
+          onPlay={() => onLectureViewed(selectedLecture._id)}
+        />
+      ) : (
+        // No video yet — show course thumbnail placeholder
+        <div
+          className="relative bg-black w-full"
+          style={{ paddingTop: "56.25%" }}
+        >
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 text-white text-center p-4">
+            <img
+              src={course.thumbnail}
+              alt={course.title}
+              className="max-h-32 opacity-60 rounded"
+            />
+            <div className="mt-4 font-semibold text-lg">
+              {selectedLecture?.title || "Select a lecture from the sidebar"}
             </div>
-          )}
+          </div>
         </div>
-      </div>
+      )}
 
       <LineProgress percent={percent} />
 
-      {/* Navigation Tabs */}
+      {/* ── Tabs ── */}
       <div className="mt-4 border-b border-gray-200">
         <nav className="flex space-x-8 -mb-px">
-          <button
-            className={`py-4 px-1 border-b-2 text-sm font-semibold transition-colors duration-200 ${
-              selectedTab === "overview"
-                ? "border-black text-gray-900"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            }`}
-            onClick={() => setSelectedTab("overview")}
-          >
-            Overview
-          </button>
-          <button
-            className={`py-4 px-1 border-b-2 text-sm font-semibold transition-colors duration-200 ${
-              selectedTab === "qna"
-                ? "border-black text-gray-900"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            }`}
-            onClick={() => setSelectedTab("qna")}
-          >
-            Q&amp;A
-          </button>
-          <button
-            className={`py-4 px-1 border-b-2 text-sm font-semibold transition-colors duration-200 ${
-              selectedTab === "reviews"
-                ? "border-black text-gray-900"
-                : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-            }`}
-            onClick={() => setSelectedTab("reviews")}
-          >
-            Reviews
-          </button>
+          {["overview", "qna", "reviews"].map((tab) => (
+            <button
+              key={tab}
+              className={`py-4 px-1 border-b-2 text-sm font-semibold transition-colors duration-200 ${
+                selectedTab === tab
+                  ? "border-black text-gray-900"
+                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
+              }`}
+              onClick={() => setSelectedTab(tab)}
+            >
+              {tab === "qna" ? "Q&A" : tab.charAt(0).toUpperCase() + tab.slice(1)}
+            </button>
+          ))}
         </nav>
       </div>
 
-      {/* Tab Content */}
+      {/* ── Tab Content ── */}
       <div className="mt-8">
+
         {selectedTab === "overview" && (
           <article className="mt-8 max-w-4xl">
             <h1 className="text-3xl font-bold">{course.title}</h1>
             <p className="text-lg mt-2 text-gray-700">{course.subtitles}</p>
-
             <div className="flex items-center space-x-4 mt-3 text-sm">
               <div className="flex items-center">
-                <span className="font-bold text-orange-500 mr-1">
-                  {ratings.toFixed(1)}
-                </span>
+                <span className="font-bold text-orange-500 mr-1">{ratings.toFixed(1)}</span>
                 <FaStar className="text-orange-400" />
               </div>
-              <span className="text-blue-600 underline">
-                {numOfReviews} ratings
-              </span>
+              <span className="text-blue-600 underline">{numOfReviews} ratings</span>
               <span>{studentCount} students</span>
             </div>
-            <p className="mt-2 text-sm">
-              Language: {language} | Level: {level}
-            </p>
+            <p className="mt-2 text-sm">Language: {language} | Level: {level}</p>
 
             <div className="mt-8 grid grid-cols-2 gap-x-8 gap-y-4 text-sm">
-              <div>
-                <span className="font-semibold">Skill Level:</span> {level}
-              </div>
-              <div>
-                <span className="font-semibold">Students:</span> {studentCount}
-              </div>
-              <div>
-                <span className="font-semibold">Languages:</span> {language}
-              </div>
-              <div>
-                <span className="font-semibold">Video:</span> {totalLectures}{" "}
-                lectures
-              </div>
-              <div>
-                <span className="font-semibold">Total Duration:</span>{" "}
-                {formatDuration(totalDuration)}
-              </div>
-              <div>
-                <span className="font-semibold">Captions:</span> Yes
-              </div>
+              <div><span className="font-semibold">Skill Level:</span> {level}</div>
+              <div><span className="font-semibold">Students:</span> {studentCount}</div>
+              <div><span className="font-semibold">Languages:</span> {language}</div>
+              <div><span className="font-semibold">Video:</span> {totalLectures} lectures</div>
+              <div><span className="font-semibold">Total Duration:</span> {formatDuration(totalDuration)}</div>
+              <div><span className="font-semibold">Captions:</span> Yes</div>
             </div>
 
             <div className="mt-10 prose max-w-none">
@@ -248,46 +176,19 @@ const MainContent = ({
             <div className="mt-12">
               <h2 className="text-2xl font-bold mb-4">Instructor</h2>
               <div className="flex items-start">
-                <img
-                  src={instructorPhoto}
-                  alt={instructorName}
-                  className="rounded-full w-24 h-24"
-                />
+                <img src={instructorPhoto} alt={instructorName} className="rounded-full w-24 h-24" />
                 <div className="ml-5">
-                  <h3 className="text-lg font-bold text-blue-600 underline">
-                    {instructorName}
-                  </h3>
+                  <h3 className="text-lg font-bold text-blue-600 underline">{instructorName}</h3>
                   <p className="text-sm text-gray-600">{instructorHeadline}</p>
                   <div className="flex space-x-3 mt-2">
                     {instructorLinks.facebook && (
-                      <a
-                        href={instructorLinks.facebook}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 border rounded-full hover:bg-gray-100"
-                      >
-                        <FaFacebookF />
-                      </a>
+                      <a href={instructorLinks.facebook} target="_blank" rel="noopener noreferrer" className="p-2 border rounded-full hover:bg-gray-100"><FaFacebookF /></a>
                     )}
                     {instructorLinks.linkedin && (
-                      <a
-                        href={instructorLinks.linkedin}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 border rounded-full hover:bg-gray-100"
-                      >
-                        <FaLinkedinIn />
-                      </a>
+                      <a href={instructorLinks.linkedin} target="_blank" rel="noopener noreferrer" className="p-2 border rounded-full hover:bg-gray-100"><FaLinkedinIn /></a>
                     )}
                     {instructorLinks.website && (
-                      <a
-                        href={instructorLinks.website}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="p-2 border rounded-full hover:bg-gray-100"
-                      >
-                        <FaLink />
-                      </a>
+                      <a href={instructorLinks.website} target="_blank" rel="noopener noreferrer" className="p-2 border rounded-full hover:bg-gray-100"><FaLink /></a>
                     )}
                   </div>
                 </div>
@@ -307,10 +208,7 @@ const MainContent = ({
                 value={questionText}
                 onChange={(e) => setQuestionText(e.target.value)}
               />
-              <button
-                type="submit"
-                className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700"
-              >
+              <button type="submit" className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
                 Submit Question
               </button>
             </form>
@@ -319,10 +217,10 @@ const MainContent = ({
 
         {selectedTab === "reviews" && (
           <section className="mt-8 max-w-4xl">
-            {/* FIX: Pass the accurate percentage to the reviews component */}
             <ReviewsSection course={course} percentCompleted={percent} />
           </section>
         )}
+
       </div>
     </main>
   );

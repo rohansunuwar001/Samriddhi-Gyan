@@ -1,4 +1,3 @@
-// import { sendMail } from "../lib/email-sender/sendOrderMail.js";
 import crypto from "crypto";
 import { User } from "../models/user.model.js";
 import { getEsewaPaymentHash, verifyEsewaPayment } from "../utils/esewa.js";
@@ -9,19 +8,17 @@ import { v4 as uuidv4 } from "uuid";
 export const initializePayment = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { courseIds } = req.body; // Accepts array of courseIds
+    const { courseIds } = req.body;
 
     if (!Array.isArray(courseIds) || courseIds.length === 0) {
       return res.status(400).json({ message: "No courses selected!" });
     }
 
-    // Fetch all courses
     const courses = await Course.find({ _id: { $in: courseIds } });
     if (courses.length !== courseIds.length) {
       return res.status(404).json({ message: "One or more courses not found!" });
     }
 
-    // Prepare purchase details
     const purchaseCourses = [];
     let totalAmount = 0;
 
@@ -33,10 +30,8 @@ export const initializePayment = async (req, res) => {
       totalAmount += course.price.current;
     });
 
-    // Generate unique orderId
     const orderId = `LMS-ORD-${uuidv4().split("-")[0].toUpperCase()}`;
 
-    // Create a new course purchase record
     const newPurchase = new CoursePurchase({
       orderId,
       userId,
@@ -48,7 +43,6 @@ export const initializePayment = async (req, res) => {
     });
     await newPurchase.save();
 
-    // Generate eSewa payment hash
     const paymentInitiate = await getEsewaPaymentHash({
       amount: totalAmount,
       transaction_uuid: newPurchase._id,
@@ -57,74 +51,63 @@ export const initializePayment = async (req, res) => {
     res.status(200).json({
       success: true,
       message: "Payment initiated successfully",
-      paymentInitiate: paymentInitiate,
+      paymentInitiate,
       payment_url: `${process.env.BACKEND_URI}/api/v1/buy/generate-esewa-form?amount=${totalAmount}&transaction_uuid=${newPurchase._id}`,
     });
   } catch (error) {
     console.log(error);
-    res.status(500).json({
-      success: false,
-      error: error.message,
-    });
+    res.status(500).json({ success: false, error: error.message });
   }
 };
 
-export const completePayment = async (req, res, next) => {
+export const completePayment = async (req, res) => {
   const { data } = req.query;
   try {
     const paymentInfo = await verifyEsewaPayment(data);
     const purchaseId = paymentInfo.decodedData.transaction_uuid;
-    const refId = paymentInfo.decodedData.transaction_code;
+    const refId      = paymentInfo.decodedData.transaction_code;
 
     const purchase = await CoursePurchase.findById(purchaseId);
     if (!purchase) {
-      return res.status(500).json({
-        success: false,
-        message: "Order not found",
-      });
+      return res.status(500).json({ success: false, message: "Order not found" });
     }
 
-    // Update purchase status and store eSewa refId
+    // Update purchase status
     purchase.status = "completed";
     purchase.paymentDetails.eSewaRefId = refId;
     await purchase.save();
 
-    // Enroll user in all purchased courses
-    for (const courseObj of purchase.courses) {
+    const courseIds = purchase.courses.map((c) => c.courseId);
+
+    // Add user to each course's enrolledStudents
+    for (const courseId of courseIds) {
       await Course.findByIdAndUpdate(
-        courseObj.courseId,
+        courseId,
         { $addToSet: { enrolledStudents: purchase.userId } },
         { new: true }
       );
     }
 
-    // Also add courses to the user's enrolledCourses list
-    const courseIds = purchase.courses.map((c) => c.courseId);
+    // Add courses to user's enrolledCourses
+    // FIX: $addToSet does NOT support $each — use $push with $each instead
     await User.findByIdAndUpdate(purchase.userId, {
-      $addToSet: { enrolledCourses: { $each: courseIds } },
+      $push: { enrolledCourses: { $each: courseIds } },
     });
 
     res.redirect(`${process.env.FRONTEND_URL}/my-learning`);
   } catch (error) {
-    res.status(400).json({
-      success: false,
-      message: error.message,
-    });
+    res.status(400).json({ success: false, message: error.message });
   }
 };
 
-export const fillEsewaForm = async (req, res, next) => {
-  const amount = req.query.amount;
+export const fillEsewaForm = async (req, res) => {
+  const amount           = req.query.amount;
   const transaction_uuid = req.query.transaction_uuid;
 
   const paymentHash = await getEsewaPaymentHash({ amount, transaction_uuid });
-
   const nonce = crypto.randomBytes(16).toString("base64");
 
-  res.setHeader(
-    "Content-Security-Policy",
-    `script-src 'self' 'nonce-${nonce}'`
-  );
+  res.setHeader("Content-Security-Policy", `script-src 'self' 'nonce-${nonce}'`);
 
   res.send(`
     <html>

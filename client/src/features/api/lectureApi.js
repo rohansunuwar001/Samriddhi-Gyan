@@ -2,34 +2,37 @@ import { apiSlice } from "./apiSlice";
 
 export const lectureApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
+
+    // ── Create a lecture entry (no video yet) ────────────────────────────────
     createLecture: builder.mutation({
-      query: ({ sectionId, title, courseId }) => ({
+      query: ({ sectionId, title }) => ({
         url: `/sections/${sectionId}/lectures`,
         method: "POST",
         body: { title },
       }),
-      // Any lecture change refreshes the whole course page
       invalidatesTags: (result, error, { courseId }) => [
         { type: "CourseDetail", id: courseId },
       ],
     }),
 
-    // This endpoint is no longer needed, lectures are fetched with the course
-    // getCourseLecture: builder.query(...) // REMOVED
-
+    // ── Update title / isPreview ─────────────────────────────────────────────
+    // NOTE: PATCH not PUT — body is JSON { title, isPreview }, not FormData.
+    // Video upload is handled separately via XHR (see EditLectureForm) because
+    // RTK Query has no upload progress support.
     updateLecture: builder.mutation({
-      query: ({ lectureId, formData }) => ({
+      query: ({ lectureId, title, isPreview }) => ({
         url: `/lectures/${lectureId}`,
-        method: "PUT",
-        body: formData,
+        method: "PATCH",
+        body: { title, isPreview },
       }),
       invalidatesTags: (result, error, { courseId }) => [
         { type: "CourseDetail", id: courseId },
       ],
     }),
 
+    // ── Delete lecture + HLS files ────────────────────────────────────────────
     deleteLecture: builder.mutation({
-      query: ({ lectureId, courseId }) => ({
+      query: ({ lectureId }) => ({
         url: `/lectures/${lectureId}`,
         method: "DELETE",
       }),
@@ -38,52 +41,26 @@ export const lectureApi = apiSlice.injectEndpoints({
       ],
     }),
 
+    // ── Get single lecture (used by student player) ───────────────────────────
     getLectureById: builder.query({
       query: (lectureId) => `/lectures/${lectureId}`,
     }),
-    // ... you can inject other course-related endpoints here
+
+    // ── Poll transcoding status ───────────────────────────────────────────────
+    // EditLectureForm polls this every 3s after uploading a video.
+    // Returns: { status, progress, phase, videoUrl }
+    // status values: 'transcoding' | 'ready' | 'failed' | 'pending'
+    getLectureStatus: builder.query({
+      query: (lectureId) => `/lectures/${lectureId}/status`,
+    }),
+
   }),
 });
 
-// Export the auto-generated hook for the endpoint
 export const {
-  // Updated lecture hooks
-   useCreateLectureMutation,
-    useUpdateLectureMutation,
-    useDeleteLectureMutation,
-    useGetLectureByIdQuery,
+  useCreateLectureMutation,
+  useUpdateLectureMutation,
+  useDeleteLectureMutation,
+  useGetLectureByIdQuery,
+  useGetLectureStatusQuery,
 } = lectureApi;
-
-// ===== Lecture CRUD Endpoints (UPDATED for new architecture) =====
-
-// createLecture: builder.mutation({
-//     query: ({ sectionId, title, courseId }) => ({
-//         url: `/sections/${sectionId}/lectures`,
-//         method: 'POST',
-//         body: { title },
-//     }),
-//     // Any lecture change refreshes the whole course page
-//     invalidatesTags: (result, error, { courseId }) => [{ type: 'CourseDetail', id: courseId }],
-// }),
-
-// updateLecture: builder.mutation({
-//     query: ({ lectureId, formData }) => ({
-//         url: `/lectures/${lectureId}`,
-//         method: 'PUT',
-//         body: formData,
-//     }),
-//     invalidatesTags: (result, error, { courseId }) => [{ type: 'CourseDetail', id: courseId }],
-// }),
-
-// deleteLecture: builder.mutation({
-//     query: ({ lectureId, courseId }) => ({
-//         url: `/lectures/${lectureId}`,
-//         method: 'DELETE',
-//     }),
-//     invalidatesTags: (result, error, { courseId }) => [{ type: 'CourseDetail', id: courseId }],
-// }),
-
-// getLectureById: builder.query({
-//     query: (lectureId) => `/lectures/${lectureId}`,
-//     // Lectures don't really need tags as they are almost always fetched as part of a course.
-// }),

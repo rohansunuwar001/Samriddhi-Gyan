@@ -4,22 +4,18 @@ import { SearchSuggestion } from "../models/searchSuggestion.js";
 import { User } from "../models/user.model.js";
 import { deleteFromCloudinary, uploadMedia } from "../utils/cloudinary.js";
 
-
 // We now only need createEmbeddingForText (which uses Xenova) and cosineSimilarity.
 import {
   cosineSimilarity,
   createEmbeddingForText,
 } from "../utils/embedding.js";
 
-
-
-
 export const createCourse = async (req, res) => {
   try {
     if (!req.user || !req.user._id) {
       return res.status(401).json({
         success: false,
-        message: "Unauthorized: You must be logged in to create a course."
+        message: "Unauthorized: You must be logged in to create a course.",
       });
     }
     const {
@@ -55,17 +51,17 @@ export const createCourse = async (req, res) => {
     return res.status(201).json({
       success: true,
       course,
-      message: "Course created successfully. Embedding will be generated automatically.",
+      message:
+        "Course created successfully. Embedding will be generated automatically.",
     });
-
   } catch (error) {
     console.error("Failed to create course:", error);
-    return res.status(500).json({ success: false, message: "Server error during course creation." });
+    return res.status(500).json({
+      success: false,
+      message: "Server error during course creation.",
+    });
   }
 };
-
-
-
 
 export const getSearchResults = async (req, res) => {
   try {
@@ -92,7 +88,7 @@ export const getSearchResults = async (req, res) => {
 
     if (userId) {
       // If a user is logged in, find their enrolled courses
-      const user = await User.findById(userId).select('enrolledCourses').lean();
+      const user = await User.findById(userId).select("enrolledCourses").lean();
       const purchasedCourseIds = user?.enrolledCourses || [];
 
       // If they have purchased courses, add a filter to the database query
@@ -104,9 +100,9 @@ export const getSearchResults = async (req, res) => {
     // --- End of new logic ---
 
     // 2. Fetch all relevant courses using the new, smarter criteria
-    const allCourses = await Course.find(findCriteria).select(
-      "_id title subtitle category thumbnail creator embedding"
-    ).lean(); // Use lean() for better performance
+    const allCourses = await Course.find(findCriteria)
+      .select("_id title subtitle category thumbnail creator embedding")
+      .lean(); // Use lean() for better performance
 
     // 3. Calculate similarity ONLY for the filtered courses
     const coursesWithSimilarity = allCourses
@@ -133,10 +129,11 @@ export const getSearchResults = async (req, res) => {
     res.status(200).json({ suggestions, courses: coursesWithSimilarity });
   } catch (error) {
     console.error("Search controller error:", error);
-    res.status(500).json({ success: false, message: "Server error during search." });
+    res
+      .status(500)
+      .json({ success: false, message: "Server error during search." });
   }
 };
-
 
 export const editCourse = async (req, res) => {
   try {
@@ -154,13 +151,30 @@ export const editCourse = async (req, res) => {
       includes,
     } = req.body;
 
-    const thumbnailFile = req.file; let course = await Course.findById(courseId);
-    if (!course) { return res.status(404).json({ message: "Course not found!" }); }
-    if (thumbnailFile) {if (course.thumbnail) { const publicId = course.thumbnail.split("/").pop().split(".")[0]; await deleteFromCloudinary(publicId);}
+    const thumbnailFile = req.file;
+    let course = await Course.findById(courseId);
+    if (!course) {
+      return res.status(404).json({ message: "Course not found!" });
+    }
+    if (thumbnailFile) {
+      if (course.thumbnail) {
+        const publicId = course.thumbnail.split("/").pop().split(".")[0];
+        await deleteFromCloudinary(publicId);
+      }
       const newThumbnail = await uploadMedia(thumbnailFile.path);
       course.thumbnail = newThumbnail.secure_url;
     }
-    const fieldsToUpdate = { title, subtitle, description, category, language, level, learnings, requirements, includes };
+    const fieldsToUpdate = {
+      title,
+      subtitle,
+      description,
+      category,
+      language,
+      level,
+      learnings,
+      requirements,
+      includes,
+    };
     for (const key in fieldsToUpdate) {
       if (fieldsToUpdate[key] !== undefined) {
         course[key] = fieldsToUpdate[key];
@@ -180,7 +194,6 @@ export const editCourse = async (req, res) => {
     return res.status(500).json({ message: "Failed to update course" });
   }
 };
-
 
 // ===================================================================================
 // NO CHANGES NEEDED FOR THE FOLLOWING CONTROLLERS as they don't handle embedding logic
@@ -210,7 +223,7 @@ export const searchCourse = async (req, res) => {
     // --- ⭐ NEW LOGIC: Exclude purchased courses for logged-in users ---
     if (userId) {
       // Find the user to get their list of enrolled courses
-      const user = await User.findById(userId).select('enrolledCourses').lean();
+      const user = await User.findById(userId).select("enrolledCourses").lean();
 
       const purchasedCourseIds = user?.enrolledCourses || [];
 
@@ -241,13 +254,13 @@ export const searchCourse = async (req, res) => {
       success: true,
       courses: courses, // It's safe to return `courses` directly now
     });
-
   } catch (error) {
     console.error("Search Course error:", error);
-    res.status(500).json({ success: false, message: "Failed to search courses." });
+    res
+      .status(500)
+      .json({ success: false, message: "Failed to search courses." });
   }
 };
-
 
 async function getCourseProgressPercent(courseId, userId) {
   // --- EXAMPLE LOGIC ---
@@ -267,7 +280,6 @@ async function getCourseProgressPercent(courseId, userId) {
   return 0; // Replace with your actual progress calculation logic.
 }
 
-
 export const getPublishedCourse = async (req, res) => {
   try {
     let courses = await Course.find({ isPublished: true })
@@ -282,7 +294,7 @@ export const getPublishedCourse = async (req, res) => {
       // ---- This is your previous logic, now safely wrapped in a check ----
       const user = await User.findById(userId).select("enrolledCourses").lean();
       const enrolledCourseIds = new Set(
-        user?.enrolledCourses?.map((id) => id.toString()) || []
+        user?.enrolledCourses?.map((id) => id.toString()) || [],
       );
 
       for (let course of courses) {
@@ -293,7 +305,6 @@ export const getPublishedCourse = async (req, res) => {
           : 0;
       }
       // -----------------------------------------------------------------
-
     } else {
       // ---- This runs for GUEST users ----
       // Explicitly set purchase and progress info for a consistent API response.
@@ -305,7 +316,6 @@ export const getPublishedCourse = async (req, res) => {
 
     // Return the full, decorated list of courses for everyone.
     return res.status(200).json({ success: true, courses });
-
   } catch (error) {
     console.error("Error fetching published courses:", error);
     return res.status(500).json({
@@ -345,22 +355,42 @@ export const getCourseById = async (req, res) => {
     const course = await Course.findById(courseId)
       .populate({ path: "sections", populate: { path: "lectures" } })
       .populate("creator", "name headline photoUrl")
-      .populate({ path: "reviews", populate: { path: "user", select: "name photoUrl" } })
+      .populate({
+        path: "reviews",
+        populate: { path: "user", select: "name photoUrl" },
+      })
       .lean(); // Use .lean() for better performance as we will be modifying the object
 
     if (!course) {
-      return res.status(404).json({ success: false, message: "Course not found!" });
+      return res
+        .status(404)
+        .json({ success: false, message: "Course not found!" });
     }
+    // for calculating total duration and lecture count
+    let calculatedCourseDuration = 0;
+    let calculatedLectureCount = 0;
 
+    course.sections.forEach((section) => {
+      const sectionDuration = section.lectures.reduce(
+        (sum, lecture) => sum + (lecture.durationInSeconds || 0),
+        0,
+      );
 
+      section.totalDurationInSeconds = sectionDuration;
+
+      calculatedCourseDuration += sectionDuration;
+      calculatedLectureCount += section.lectures.length;
+    });
+
+    course.totalDurationInSeconds = calculatedCourseDuration;
+    course.totalLectures = calculatedLectureCount;
+    // for purchase status, review eligibility, and progress
     let purchaseStatus = "not_purchased";
     let allowReview = false;
     let progress = 0;
 
-
     if (req.user && req.user._id) {
       const userId = req.user._id; // Safely get the user's ID
-
 
       const purchase = await CoursePurchase.findOne({
         userId,
@@ -379,20 +409,19 @@ export const getCourseById = async (req, res) => {
       }
     }
 
-
     course.purchaseStatus = purchaseStatus;
     course.allowReview = allowReview;
     course.progress = progress;
-
 
     return res.status(200).json({
       success: true,
       course, // The entire enriched course object is sent back.
     });
-
   } catch (error) {
     console.error("Error in getCourseById:", error);
-    return res.status(500).json({ success: false, message: "Failed to get course by id" });
+    return res
+      .status(500)
+      .json({ success: false, message: "Failed to get course by id" });
   }
 };
 
@@ -446,22 +475,19 @@ export const removeCourse = async (req, res) => {
   }
 };
 
-
 // This is the updated getCoursesWithEnrolledStudents function
 
 export const getCoursesWithEnrolledStudents = async (req, res) => {
   try {
-
-
-
     if (!req.user || !req.user._id) {
       console.log("2. FAILED: req.user or req.user._id is missing.");
-      return res.status(401).json({ message: "Unauthorized: You must be logged in to view this data." });
+      return res.status(401).json({
+        message: "Unauthorized: You must be logged in to view this data.",
+      });
     }
 
     const instructorId = req.user._id;
     console.log("2. SUCCESS: Logged-in instructor ID is:", instructorId);
-
 
     const courses = await Course.find({ creator: instructorId })
       .populate("enrolledStudents", "name email photoUrl")
@@ -492,14 +518,13 @@ export const getCoursesWithEnrolledStudents = async (req, res) => {
 
 export const getCoursesWithEnrolledStudentsAndReviews = async (req, res) => {
   try {
-
     if (!req.user || !req.user._id) {
-      return res.status(401).json({ message: "Unauthorized: You must be logged in to view this data." });
+      return res.status(401).json({
+        message: "Unauthorized: You must be logged in to view this data.",
+      });
     }
 
-
     const instructorId = req.user._id;
-
 
     const courses = await Course.find({ creator: instructorId })
       .populate("enrolledStudents", "name email photoUrl")
@@ -535,24 +560,23 @@ export const getCoursesWithEnrolledStudentsAndReviews = async (req, res) => {
     return res.status(200).json({ courses: result });
   } catch (error) {
     console.error("Failed to fetch courses, students, and reviews:", error);
-    return res
-      .status(500)
-      .json({ message: "Server error while fetching courses, students, and reviews" });
+    return res.status(500).json({
+      message: "Server error while fetching courses, students, and reviews",
+    });
   }
 };
 export const getPaidCoursesWithEnrolledStudentsAndPayments = async (
   req,
-  res
+  res,
 ) => {
   try {
-
     if (!req.user || !req.user._id) {
-      return res.status(401).json({ message: "Unauthorized: You must be logged in to view this data." });
+      return res.status(401).json({
+        message: "Unauthorized: You must be logged in to view this data.",
+      });
     }
 
-
     const instructorId = req.user._id;
-
 
     const courses = await Course.find({
       "price.current": { $gt: 0 },
@@ -590,14 +614,14 @@ export const getPaidCoursesWithEnrolledStudentsAndPayments = async (
             courses: purchase.courses,
           })),
         };
-      })
+      }),
     );
 
     return res.status(200).json({ courses: result });
   } catch (error) {
     console.error(
       "Error in getPaidCoursesWithEnrolledStudentsAndPayments:",
-      error
+      error,
     );
     return res
       .status(500)
@@ -641,10 +665,9 @@ export const getCourseAnalytics = async (req, res) => {
 
         // --- CORRECTED REVENUE CALCULATION ---
         const totalRevenue = coursePurchases.reduce((sum, purchase) => {
-
           // The fix is here: we now look for `c.courseId._id` because courseId is a populated object.
           const courseInPurchase = purchase.courses.find(
-            (c) => c.courseId?._id?.toString() === course._id.toString()
+            (c) => c.courseId?._id?.toString() === course._id.toString(),
           );
 
           // If the matching course is found in the purchase record, add its price to the total sum.
@@ -658,10 +681,15 @@ export const getCourseAnalytics = async (req, res) => {
 
         const purchaseCount = coursePurchases.length;
 
-        const ratings = (course.reviews || []).map(r => r.rating).filter(r => typeof r === 'number');
-        const avgRating = ratings.length > 0
-          ? (ratings.reduce((sum, r) => sum + r, 0) / ratings.length).toFixed(1)
-          : null;
+        const ratings = (course.reviews || [])
+          .map((r) => r.rating)
+          .filter((r) => typeof r === "number");
+        const avgRating =
+          ratings.length > 0
+            ? (ratings.reduce((sum, r) => sum + r, 0) / ratings.length).toFixed(
+                1,
+              )
+            : null;
 
         return {
           courseId: course._id,
@@ -686,12 +714,15 @@ export const getCourseAnalytics = async (req, res) => {
             courses: purchase.courses,
           })),
         };
-      })
+      }),
     );
 
     return res.status(200).json({ success: true, analytics });
   } catch (error) {
     console.error("Error in getCourseAnalytics:", error);
-    return res.status(500).json({ success: false, message: "Server error while fetching course analytics." });
+    return res.status(500).json({
+      success: false,
+      message: "Server error while fetching course analytics.",
+    });
   }
 };
