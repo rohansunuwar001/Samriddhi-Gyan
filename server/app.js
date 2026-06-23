@@ -27,6 +27,8 @@ import searchRouter from "./routes/searchSug.routes.js";
 import sectionRouter from "./routes/section.route.js";
 import userRoute from "./routes/user.route.js";
 import wishlistRouter from "./routes/wishlist.route.js";
+import path from 'path';
+import { fileURLToPath } from 'url';
 dotenv.config({});
 
 const app = express();
@@ -43,6 +45,15 @@ app.use(
     cookie: { maxAge: 24 * 60 * 60 * 1000 },
   })
 );
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+
+// Serve HLS segments as static files — add this near your other middleware
+app.use('/hls', (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD');
+  next();
+}, express.static(path.join(__dirname, 'public', 'hls')));
 
 // --- Mount the webhook route BEFORE express.json() ---
 app.use("/api/v1/purchase/webhook", express.raw({ type: "application/json" }), stripeWebhook);

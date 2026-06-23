@@ -20,6 +20,7 @@ const CourseCurriculumTab = () => {
     const { data: courseData, isLoading: isLoadingCourse, isError } = useGetCourseByIdQuery(courseId);
     const [createSection, { isLoading: isCreatingSection }] = useCreateSectionMutation();
 
+    console.log("Course datacourseCirccuulum:", courseData);
     const handleAddSection = async (e) => { 
         e.preventDefault();
         if (!newSectionTitle.trim()) {

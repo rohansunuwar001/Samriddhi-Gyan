@@ -60,24 +60,29 @@ router.route("/google").get(
 // This is the callback route that Google redirects to after successful login
 router.route("/google/callback").get(
   passport.authenticate("google", {
-    failureRedirect: `${process.env.FRONTEND_URL}/login?error=true`, // Redirect on failure
-    session: false, // We are using JWT
+    failureRedirect: `${process.env.FRONTEND_URL}/login?error=true`, 
+    session: false, 
   }),
   (req, res) => {
+    try {
+      const payload = {
+        userId: req.user._id,
+        role: req.user.role
+      };
 
-    const payload = {
-      userId: req.user._id,
-      role: req.user.role
-    };
+      const token = jwt.sign(payload, process.env.SECRET_KEY, {
+        expiresIn: "1d",
+      });
 
-    const token = jwt.sign(payload, process.env.SECRET_KEY, {
-      expiresIn: "1d",
-    });
-
-
-    res.redirect(
-      `${process.env.FRONTEND_URL}/auth/google/success?token=${token}`
-    );
+      // Strip any trailing slash from FRONTEND_URL to prevent broken double-slashes
+      const baseUrl = process.env.FRONTEND_URL.replace(/\/$/, "");
+      
+      // Redirect cleanly to the exact route path configured in App.jsx
+      return res.redirect(`${baseUrl}/auth/google/success?token=${token}`);
+    } catch (error) {
+      console.error("Google Auth Token Callback generation error:", error);
+      return res.redirect(`${process.env.FRONTEND_URL}/login?error=true`);
+    }
   }
 );
 

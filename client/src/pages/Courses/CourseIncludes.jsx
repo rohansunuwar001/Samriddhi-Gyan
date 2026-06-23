@@ -9,13 +9,15 @@ const CourseIncludes = ({ includes }) => (
         {Array.isArray(includes) && includes.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
                 {includes.map((item, idx) => {
-                    if (typeof item === "string") {
+                    // Handle plain string entries
+                    if (typeof item === 'string') {
                         return (
                             <div key={item || idx} className="flex items-center gap-3">
                                 <span>{item}</span>
                             </div>
                         );
                     }
+                    // Handle { icon, text } object entries
                     const Icon = icons[item.icon];
                     return (
                         <div key={item.text || idx} className="flex items-center gap-3">
@@ -31,12 +33,16 @@ const CourseIncludes = ({ includes }) => (
     </div>
 );
 
+// Accept both plain strings and { icon, text } objects
 CourseIncludes.propTypes = {
     includes: PropTypes.arrayOf(
-        PropTypes.shape({
-            icon: PropTypes.string,
-            text: PropTypes.string.isRequired,
-        })
+        PropTypes.oneOfType([
+            PropTypes.string,
+            PropTypes.shape({
+                icon: PropTypes.string,
+                text: PropTypes.string.isRequired,
+            }),
+        ])
     ),
 };
 

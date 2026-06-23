@@ -8,11 +8,11 @@ import MainLayout from "./layout/MainLayout";
 
 // --- AUTHENTICATION & ROUTE PROTECTION ---
 import {
-  AdminRoute,
-  AuthenticatedUser,
-  InstructorRoute,
-  ProtectedRoute,
-  StudentRoute,
+    AdminRoute,
+    AuthenticatedUser,
+    InstructorRoute,
+    ProtectedRoute,
+    StudentRoute,
 } from "./components/ProtectedRoutes";
 import PurchaseCourseProtectedRoute from "./components/PurchaseCourseProtectedRoute";
 
@@ -71,7 +71,6 @@ import SupAdmAllUser from "./pages/superAdmin/SupAdmAllUser";
 import SupAdmCourseAnalytics from "./pages/superAdmin/SupAdmCourseAnalytics";
 import SupAdmDashboard from "./pages/superAdmin/SupAdmDashboard";
 import WishList from "./pages/WishList/WishList";
-import ChatBot from "./pages/Chatbot/ChatBot";
 
 
 // --- LAYOUT WRAPPER COMPONENT ---
@@ -188,7 +187,7 @@ const appRouter = createBrowserRouter([
           </AuthenticatedUser>
         ),
       },
-      { path: "auth/google/success", element: <GoogleSuccess /> },
+      { path: "/auth/google/success", element: <GoogleSuccess /> },
 
       // --- Protected Student Routes ---
       {
@@ -363,7 +362,7 @@ function App() {
     <main>
       {/* <ScrollToTop /> */}
       <RouterProvider router={appRouter} />
-    <ChatBot />
+    {/* <ChatBot /> */}
     </main>
   );
 }
