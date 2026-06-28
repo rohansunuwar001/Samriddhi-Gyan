@@ -14,12 +14,13 @@ import {
   searchCourse,
   togglePublishCourse
 } from "../controllers/course.controller.js";
-import { getCoursePurchases } from "../controllers/coursePurchase.controller.js";
+
 import { getRecommendedCourses } from "../controllers/recommendation.controller.js";
 
 import upload from "../utils/multer.js";
 import { authorizeRoles, isAuthenticated } from "../middlewares/isAuthenticated.js";
 import loadUserIfAuthenticated from "../middlewares/loadUserIfAuthenticated.js";
+import { getAllPurchasedCourse } from "../controllers/coursePurchase.controller.js";
 
 const router = express.Router();
 
@@ -52,7 +53,7 @@ router.get(
 router.get("/analytics",isAuthenticated,authorizeRoles("instructor"), getCourseAnalytics);
 
 // Course purchase related
-router.get("/course-purchases", getCoursePurchases);
+router.get("/course-purchases", getAllPurchasedCourse);
 
 // Get single course by id (public)
 router.route('/:courseId').get(

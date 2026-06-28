@@ -1,90 +1,88 @@
+// server/routes/user.route.js
+
 import express from "express";
 import jwt from "jsonwebtoken";
 import passport from "passport";
 
-// --- Controller Imports ---
+import { isAuthenticated } from "../middlewares/isAuthenticated.js";
+import upload from "../utils/multer.js";
+
+// ── Controller imports ──────────────────────────────────────────────────────
+// These names match the refactored user.controller.js exports exactly.
+// The "Controller" suffix on some names avoids clashes with service function
+// names that are the same (e.g. getUserProfile exists in both controller and service).
 import {
-  checkUser,
-  getMyLearningCourses,
-  getPublicUserProfile,
-  getUserProfile,
-  loadUser,
+  register,
   login,
   logout,
-  register,
-  trackCourseView,
-  updateUserAvatar,
-  updateUserInfo,
-  updateUserPassword
+  checkUser,
+  loadUser,
+  getUserProfileController , 
+  updateUserInfoController , 
+  updateUserAvatarController , 
+  updateUserPasswordController, 
+  getPublicUserProfile,
+  getMyLearningCoursesController,
+  trackCourseViewController , 
 } from "../controllers/user.controller.js";
 
-// --- Middleware Imports ---
-import { isAuthenticated } from "../middlewares/isAuthenticated.js";
-// No authorizeRoles needed HERE, because these routes are for any authenticated user.
-// import { authorizeRoles } from '../middlewares/auth.middleware.js'; 
-import upload from "../utils/multer.js";
 const router = express.Router();
 
-
+// ── Auth routes ─────────────────────────────────────────────────────────────
 router.route("/register").post(register);
 router.route("/login").post(login);
 router.route("/logout").get(isAuthenticated, logout);
 router.route("/check").get(isAuthenticated, checkUser);
 router.route("/me").get(isAuthenticated, loadUser);
 
+// ── Profile routes ───────────────────────────────────────────────────────────
+router
+  .route("/profile")
+  .get(isAuthenticated, getUserProfileController)
+  .patch(isAuthenticated, updateUserInfoController);
 
-router.route("/view-history/:courseId").post(isAuthenticated, trackCourseView);
+router
+  .route("/profile/update-password")
+  .patch(isAuthenticated, updateUserPasswordController);
 
-router.route("/profile")
-  .get(isAuthenticated, getUserProfile)
-  .patch(isAuthenticated, updateUserInfo);
+router
+  .route("/profile/update-avatar")
+  .patch(isAuthenticated, upload.single("profilePhoto"), updateUserAvatarController);
 
-router.route("/profile/update-password").patch(isAuthenticated, updateUserPassword);
+// ── Learning routes ──────────────────────────────────────────────────────────
+router.route("/view-history/:courseId").post(isAuthenticated, trackCourseViewController);
+router.route("/my-learning").get(isAuthenticated, getMyLearningCoursesController);
 
-router.route("/profile/update-avatar").patch(
-  isAuthenticated,
-  upload.single("profilePhoto"),
-  updateUserAvatar
-);
+// ── Public routes ────────────────────────────────────────────────────────────
+router
+  .route("/instructor-profile/:id")
+  .get(isAuthenticated, getPublicUserProfile);
 
+// ── Google OAuth routes ──────────────────────────────────────────────────────
+router
+  .route("/google")
+  .get(passport.authenticate("google", { scope: ["profile", "email"] }));
 
-router.route("/instructor-profile/:id").get(isAuthenticated, getPublicUserProfile);
-router.route('/my-learning').get(isAuthenticated, getMyLearningCourses);
-
-
-// Google OAuth Authentication Routes 
-router.route("/google").get(
-  passport.authenticate("google", { scope: ["profile", "email"] })
-);
-
-// This is the callback route that Google redirects to after successful login
 router.route("/google/callback").get(
   passport.authenticate("google", {
-    failureRedirect: `${process.env.FRONTEND_URL}/login?error=true`, 
-    session: false, 
+    failureRedirect: `${process.env.FRONTEND_URL}/login?error=true`,
+    session: false,
   }),
   (req, res) => {
     try {
-      const payload = {
-        userId: req.user._id,
-        role: req.user.role
-      };
+      const payload = { userId: req.user._id, role: req.user.role };
 
       const token = jwt.sign(payload, process.env.SECRET_KEY, {
         expiresIn: "1d",
       });
 
-      // Strip any trailing slash from FRONTEND_URL to prevent broken double-slashes
       const baseUrl = process.env.FRONTEND_URL.replace(/\/$/, "");
-      
-      // Redirect cleanly to the exact route path configured in App.jsx
       return res.redirect(`${baseUrl}/auth/google/success?token=${token}`);
     } catch (error) {
-      console.error("Google Auth Token Callback generation error:", error);
+      console.error("Google Auth callback error:", error);
       return res.redirect(`${process.env.FRONTEND_URL}/login?error=true`);
     }
-  }
+  },
 );
-
 
 export default router;

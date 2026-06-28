@@ -1,266 +1,196 @@
-import bcrypt from "bcryptjs";
-import { User } from "../models/user.model.js";
-import { deleteFromCloudinary, uploadMedia } from "../utils/cloudinary.js";
-import { generateToken } from "../utils/generateToken.js";
-import { createNotification } from "../service/notification.service.js";
-import { Course } from "../models/course.model.js";
-import { CourseProgress } from "../models/courseProgress.model.js";
+// server/controllers/user.controller.js
+//
+// RULE: Controllers only do 3 things:
+//   1. Read from req (body, params, user, file)
+//   2. Call the service function
+//   3. Send the HTTP response
+//
+// No model imports. No bcrypt. No Cloudinary. All of that lives in user.service.js.
 
+import { generateToken } from "../utils/generateToken.js";
+// import { validateRequiredFields, validatePassword, validateEmail } from "../helpers/validate.helper.js";
+import {
+  registerUser,
+  loginUser,
+  getUserProfile,
+  getPublicProfile,
+  updateUserInfo,
+  updateUserAvatar,
+  updateUserPassword,
+  trackCourseView,
+  getMyLearningCourses,
+  
+} from "../service/user.service.js";
+import { validateEmail, validatePassword, validateRequiredFields } from "../helpers/validate.helper.js";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AUTH
+// ─────────────────────────────────────────────────────────────────────────────
 
 export const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body; //
-    if (!name || !email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required.",
-      });
-    }
-    const user = await User.findOne({ email });
-    if (user) {
-      return res.status(400).json({
-        success: false,
-        message: "User already exist with this email.",
-      });
-    }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    await User.create({
-      name,
-      email,
-      password: hashedPassword,
-    });
+    const { name, email, password } = req.body;
+
+    // validate.helper.js replaces the repeated `if (!name || !email...)` pattern
+    validateRequiredFields({ name, email, password });
+    validateEmail(email);
+    validatePassword(password);
+
+    await registerUser({ name, email, password }); // ← service
+
     return res.status(201).json({
       success: true,
       message: "Account created successfully.",
     });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({
+    console.error("register error:", error.message);
+    return res.status(error.statusCode || 500).json({
       success: false,
-      message: "Failed to register",
+      message: error.message || "Failed to register.",
     });
   }
 };
-
 
 export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({
-        success: false,
-        message: "All fields are required.",
-      });
-    }
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: "Incorrect email or password",
-      });
-    }
-    const isPasswordMatch = await bcrypt.compare(password, user.password);
-    if (!isPasswordMatch) {
-      return res.status(400).json({
-        success: false,
-        message: "Incorrect email or password",
-      });
-    }
-    generateToken(res, user, `Welcome back ${user.name}`);
+
+    validateRequiredFields({ email, password });
+
+    const user = await loginUser({ email, password }); // ← service
+
+    // generateToken lives in utils/ — it's generic (sets cookie + returns JSON)
+    return generateToken(res, user, `Welcome back ${user.name}`);
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({
+    console.error("login error:", error.message);
+    return res.status(error.statusCode || 500).json({
       success: false,
-      message: "Failed to login",
+      message: error.message || "Failed to login.",
     });
   }
 };
 
+export const logout = (_, res) => {
+  // No async needed — just clear the cookie
+  return res
+    .status(200)
+    .cookie("token", "", { maxAge: 0 })
+    .json({ success: true, message: "Logged out successfully." });
+};
 
-export const logout = async (_, res) => {
+// ─────────────────────────────────────────────────────────────────────────────
+// PROFILE
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * GET /profile
+ * Returns the logged-in user's own full profile.
+ * FIX: The original had getUserProfile AND checkUser doing the same DB query.
+ *      checkUser also regenerated the token on every call which is unnecessary.
+ *      One clean function now handles both use cases.
+ */
+export const getUserProfileController = async (req, res) => {
   try {
-    return res.status(200).cookie("token", "", { maxAge: 0 }).json({
-      message: "Logged out successfully.",
-      success: true,
-    });
+    const user = await getUserProfile(req.user._id); // ← service
+    return res.status(200).json({ success: true, user });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({
+    console.error("getUserProfile error:", error.message);
+    return res.status(error.statusCode || 500).json({
       success: false,
-      message: "Failed to logout",
+      message: error.message || "Failed to load profile.",
     });
   }
 };
-export const getUserProfile = async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const user = await User.findById(userId)
-      .select("-password")
-      .populate("enrolledCourses");
-    if (!user) {
-      return res.status(404).json({
-        message: "Profile not found",
-        success: false,
-      });
-    }
-    return res.status(200).json({
-      success: true,
-      user,
-    });
-  } catch (error) {
-    console.log(error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to load user",
-    });
+
+/**
+ * GET /me
+ * Lightweight — just returns the user already attached by isAuthenticated middleware.
+ * No extra DB call needed. Used for session checks on the frontend.
+ */
+export const loadUser = (req, res) => {
+  if (!req.user) {
+    return res.status(404).json({ success: false, message: "User not found." });
   }
+  return res.status(200).json({ success: true, user: req.user });
 };
+
+/**
+ * GET /profile/check
+ * Refreshes the auth token. Kept separate from loadUser because it
+ * explicitly issues a new token (e.g. after role changes or on app start).
+ */
 export const checkUser = async (req, res) => {
   try {
-    const userId = req.user._id;
-    const user = await User.findById(userId)
-      .select("-password")
-      .populate("enrolledCourses");
-    if (!user) {
-      return res.status(404).json({
-        message: "Profile not found",
-        success: false,
-      });
-    }
-    generateToken(res, user, `Welcome back ${user.name}`);
+    const user = await getUserProfile(req.user._id); // ← service (fresh from DB)
+    return generateToken(res, user, `Welcome back ${user.name}`);
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({
+    console.error("checkUser error:", error.message);
+    return res.status(error.statusCode || 500).json({
       success: false,
-      message: "Failed to load user",
+      message: error.message || "Failed to load user.",
     });
   }
 };
 
-export const updateUserInfo = async (req, res) => {
+/**
+ * GET /instructor/:id
+ * Returns a public instructor profile + their published courses.
+ */
+export const getPublicUserProfile = async (req, res) => {
   try {
-    const userId = req.user._id;
-    const { name, headline, description, links, occupation, interests } = req.body;
+    const { id } = req.params;
+    validateRequiredFields({ id });
 
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    const { user, courses } = await getPublicProfile(id); // ← service
 
-    const updateData = {};
-    if (name) updateData.name = name;
-    if (headline) updateData.headline = headline;
-    if (description) updateData.description = description;
-    if (occupation !== undefined) updateData.occupation = occupation;
-    if (interests !== undefined) updateData.interests = interests;
+    return res.status(200).json({ success: true, user, courses });
+  } catch (error) {
+    console.error("getPublicUserProfile error:", error.message);
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "Server Error",
+    });
+  }
+};
 
-    if (links && typeof links === "object") {
-      if (links.website !== undefined) updateData["links.website"] = links.website;
-      if (links.facebook !== undefined) updateData["links.facebook"] = links.facebook;
-      if (links.instagram !== undefined) updateData["links.instagram"] = links.instagram;
-      if (links.twitter !== undefined) updateData["links.twitter"] = links.twitter;
-      if (links.linkedin !== undefined) updateData["links.linkedin"] = links.linkedin;
-    }
+// ─────────────────────────────────────────────────────────────────────────────
+// PROFILE UPDATES
+// ─────────────────────────────────────────────────────────────────────────────
 
-    if (Object.keys(updateData).length === 0) {
-      return res.status(400).json({ message: "No update information provided." });
-    }
-
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { $set: updateData },
-      { new: true, runValidators: true }
-    ).select("-password");
-
+/**
+ * PUT /profile
+ * Updates text fields: name, headline, description, links, occupation, interests.
+ */
+export const updateUserInfoController = async (req, res) => {
+  try {
+    const updatedUser = await updateUserInfo(req.user._id, req.body); // ← service
     return res.status(200).json({
       success: true,
       user: updatedUser,
-      message: "Profile information updated successfully.",
+      message: "Profile updated successfully.",
     });
   } catch (error) {
-    console.error("Error updating user info:", error);
-    return res.status(500).json({
+    console.error("updateUserInfo error:", error.message);
+    return res.status(error.statusCode || 500).json({
       success: false,
-      message: "Server error while updating profile information.",
+      message: error.message || "Failed to update profile.",
     });
   }
 };
 
-
-
-export const trackCourseView = async (req, res) => {
+/**
+ * PUT /profile/avatar
+ * Replaces the user's avatar on Cloudinary and updates the DB.
+ * Requires multer middleware on the route to provide req.file.
+ */
+export const updateUserAvatarController = async (req, res) => {
   try {
-    const userId = req.user._id;
-    const { courseId } = req.params;
-
-    if (!courseId) {
-      return res.status(400).json({ success: false, message: "Course id is required." });
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No image file provided." });
     }
 
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ success: false, message: "User not found." });
-    }
-
-    // Drop any existing entry for this course so re-viewing moves it back to the front
-    user.viewHistory = user.viewHistory.filter(
-      (entry) => entry.course.toString() !== courseId
-    );
-
-    user.viewHistory.unshift({ course: courseId, viewedAt: new Date() });
-    user.viewHistory = user.viewHistory.slice(0, 20); // cap history length
-
-    await user.save();
-
-    return res.status(200).json({ success: true });
-  } catch (error) {
-    console.error("Error tracking course view:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Server error while tracking view.",
-    });
-  }
-};
-
-
-
-
-export const updateUserAvatar = async (req, res) => {
-  try {
-    const userId = req.user._id;
-    const profilePhoto = req.file; // From multer middleware
-
-    if (!profilePhoto) {
-      return res.status(400).json({ message: "No image file provided." });
-    }
-
-    const user = await User.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    // 1. Delete the old avatar from Cloudinary if it exists
-    if (user.photoUrl) {
-      try {
-        // Extracts the public_id from a URL like: http://res.cloudinary.com/demo/image/upload/v1312461204/sample.jpg
-        const publicId = user.photoUrl.split("/").pop().split(".")[0];
-        await deleteFromCloudinary(publicId);
-      } catch (deleteError) {
-        // Log the error but don't block the upload of the new avatar
-        console.error(
-          "Failed to delete old avatar, continuing with upload:",
-          deleteError
-        );
-      }
-    }
-
-    // 2. Upload the new avatar to Cloudinary
-    const cloudResponse = await uploadMedia(profilePhoto.path);
-    const newPhotoUrl = cloudResponse.secure_url;
-
-    // 3. Update the user document with the new photo URL
-    user.photoUrl = newPhotoUrl;
-    await user.save();
+    // req.file.path is the local temp file path written by multer
+    const newPhotoUrl = await updateUserAvatar(req.user._id, req.file.path); // ← service
 
     return res.status(200).json({
       success: true,
@@ -268,228 +198,78 @@ export const updateUserAvatar = async (req, res) => {
       message: "Avatar updated successfully.",
     });
   } catch (error) {
-    console.error("Error updating avatar:", error);
-    return res.status(500).json({
+    console.error("updateUserAvatar error:", error.message);
+    return res.status(error.statusCode || 500).json({
       success: false,
-      message: "Server error while updating avatar.",
+      message: error.message || "Failed to update avatar.",
     });
   }
 };
 
-export const updateUserPassword = async (req, res) => {
+/**
+ * PUT /profile/password
+ * Validates current password, hashes new one, saves, sends notification.
+ */
+export const updateUserPasswordController = async (req, res) => {
   try {
-    const userId = req.user._id;
     const { currentPassword, newPassword } = req.body;
 
-    if (!currentPassword || !newPassword) {
-      return res
-        .status(400)
-        .json({ message: "Please provide both current and new passwords." });
-    }
+    validateRequiredFields({ currentPassword, newPassword });
+    validatePassword(newPassword); // ensure new password meets requirements
 
-    const user = await User.findById(userId).select("+password");
+    await updateUserPassword(req.user._id, { currentPassword, newPassword }); // ← service
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found." });
-    }
-
-    if (!user.password) {
-      return res.status(400).json({
-        message:
-          "Password cannot be changed for Google-authenticated accounts.",
-      });
-    }
-
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: "Incorrect current password." });
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    user.password = await bcrypt.hash(newPassword, salt);
-
-    // Save the user with the new password
-    await user.save();
-
-    // --- 2. TRIGGER THE NOTIFICATION ---
-    // This happens *after* the password is confirmed to be saved successfully
-    // and *before* we send the final response to the user.
-    await createNotification(
-      userId, // The ID of the user to notify
-      "Your password was successfully changed.", // The message to display
-      "/profile/security", // The link for the notification
-      "password_update" // The type of notification
-    );
-
-    // Now, send the final success response
     return res.status(200).json({
       success: true,
       message: "Password updated successfully.",
     });
   } catch (error) {
-    console.error("Error updating password:", error);
-    return res.status(500).json({
+    console.error("updateUserPassword error:", error.message);
+    return res.status(error.statusCode || 500).json({
       success: false,
-      message: "Server error while updating password.",
+      message: error.message || "Failed to update password.",
     });
   }
 };
 
-export const getPublicUserProfile = async (req, res) => {
+// ─────────────────────────────────────────────────────────────────────────────
+// LEARNING
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * GET /my-learning
+ * Returns all enrolled courses with progress percentages.
+ */
+export const getMyLearningCoursesController = async (req, res) => {
   try {
-    const { id } = req.params;
-
-    if (!id) {
-      return res.status(400).json({ message: "Instructor ID is required." });
-    }
-
-    // --- Step 1: Find the instructor's public profile ---
-    // We select only the fields that are safe to be public.
-    const user = await User.findById(id).select(
-      "name headline photoUrl description links role"
-    );
-
-    if (!user) {
-      return res.status(404).json({ message: "Instructor not found." });
-    }
-
-    // --- Step 2: Find all published courses created by this instructor ---
-    // IMPORTANT: Verify that your Course model uses the field name "creator".
-    // If it's "instructor" or another name, you must change it in the query below.
-    const courses = await Course.find({
-      creator: id,
-      isPublished: true,
-    }).select("courseTitle courseThumbnail coursePrice ratings numOfReviews");
-
-    // --- Step 3: Send the combined data as a successful response ---
-    res.status(200).json({
-      success: true,
-      user,
-      courses, // Send the courses along with the profile data
-    });
+    const courses = await getMyLearningCourses(req.user._id); // ← service
+    return res.status(200).json({ success: true, courses });
   } catch (error) {
-    // This will print the detailed error to your backend console for easier debugging
-    console.error("--- ERROR IN getPublicUserProfile ---", error);
-
-    // Send a generic server error message to the client
-    res.status(500).json({ message: "Server Error" });
+    console.error("getMyLearningCourses error:", error.message);
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "Server Error",
+    });
   }
 };
 
-// In user.controller.js
-
-export const loadUser = async (req, res) => {
-
-
+/**
+ * POST /view/:courseId
+ * Records that the user viewed a course (for recommendation history).
+ */
+export const trackCourseViewController = async (req, res) => {
   try {
-    // The user object is ALREADY on the request, provided by the middleware.
-    const user = req.user;
+    const { courseId } = req.params;
+    validateRequiredFields({ courseId });
 
-    // We no longer need to find the user in the database because it's already been done.
-    if (!user) {
-      // This is just a safety check.
-      // The isAuthenticated middleware should prevent this from ever being reached.
-      return res.status(404).json({ success: false, message: "User not found after token validation." });
-    }
+    await trackCourseView(req.user._id, courseId); // ← service
 
-    // We also do NOT regenerate a token here. We are just loading the session.
-    // The existing token on the client is still valid.
-    return res.status(200).json({
-      success: true,
-      user, // Simply send the user object that the middleware fetched.
-    });
-
+    return res.status(200).json({ success: true });
   } catch (error) {
-    console.error("ERROR in the simplified loadUser controller:", error);
-    return res.status(500).json({ success: false, message: "Server error while loading user session." });
-  }
-};
-
-export const getMyLearningCourses = async (req, res) => {
-  try {
-    const userId = req.user._id;
-
-    // --- Step 1: Get the IDs of courses the user is enrolled in ---
-    const user = await User.findById(userId).select("enrolledCourses").lean();
-    if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
-    }
-
-    const enrolledCourseIds = user.enrolledCourses;
-    if (enrolledCourseIds.length === 0) {
-      return res.status(200).json({ success: true, courses: [] });
-    }
-
-    // --- Step 2: Fetch all required course details and progress documents in parallel for max efficiency ---
-    const [courses, userProgress] = await Promise.all([
-      // Query 1: Get full details for every enrolled course, populating deep to get lecture durations.
-      Course.find({ _id: { $in: enrolledCourseIds } })
-        .populate({
-          path: 'sections',
-          select: 'lectures',
-          populate: {
-            path: 'lectures',
-            select: 'durationInSeconds', // Critical field for calculation
-          },
-        })
-        .populate({ path: 'creator', select: 'name photoUrl' })
-        .lean(),
-
-      // Query 2: Get only the relevant progress documents for this user and their courses.
-      CourseProgress.find({ userId, courseId: { $in: enrolledCourseIds } }).lean(),
-    ]);
-
-    // --- Step 3: Create a Progress Map for highly efficient O(1) lookups ---
-    const progressMap = userProgress.reduce((map, prog) => {
-      map[prog.courseId.toString()] = prog.lectureProgress || [];
-      return map;
-    }, {});
-
-    // --- Step 4: Calculate progress for each course using the prepared data ---
-    const coursesWithProgress = courses.map((course) => {
-      const lectureProgress = progressMap[course._id.toString()] || [];
-
-      let totalDuration = 0;
-      let watchedDuration = 0;
-
-      // Create a Set of viewed lecture IDs for instant lookups inside the loop
-      const viewedLectureIds = new Set(
-        lectureProgress
-          .filter(lp => lp.viewed)
-          .map(lp => lp.lectureId.toString())
-      );
-
-      // Calculate total and watched duration in a single pass
-      course.sections.forEach(section => {
-        section.lectures.forEach(lecture => {
-          const duration = lecture.durationInSeconds || 0;
-          totalDuration += duration;
-          if (viewedLectureIds.has(lecture._id.toString())) {
-            watchedDuration += duration;
-          }
-        });
-      });
-      
-      // Calculate the final percentage based on duration
-      const percent = totalDuration > 0
-          ? Math.round((watchedDuration / totalDuration) * 100)
-          : 0;
-      
-      return {
-        ...course,
-        progress: Math.min(percent, 100), // Add progress, capping at 100
-        isPurchased: true, // User is enrolled, so it's considered purchased
-      };
+    console.error("trackCourseView error:", error.message);
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "Failed to track view.",
     });
-    
-    // --- Step 5: Send the final enriched data to the frontend ---
-    return res.status(200).json({
-      success: true,
-      courses: coursesWithProgress,
-    });
-
-  } catch (error) {
-    console.error("Error fetching my learning courses:", error);
-    return res.status(500).json({ success: false, message: "Server Error" });
   }
 };

@@ -43,7 +43,7 @@ export const purchaseApi = apiSlice.injectEndpoints({
       providesTags: [{ type: "Course", id: "PURCHASED_LIST" }],
     }),
 
-     addReview: builder.mutation({
+    addReview: builder.mutation({
       query: ({ courseId, reviewData }) => ({
         url: `/reviews/${courseId}`,
         method: "POST",
@@ -58,8 +58,10 @@ export const purchaseApi = apiSlice.injectEndpoints({
     getPurchaseCoursenew: builder.query({
       query: () => "/course/course-purchases",
       providesTags: [{ type: "Course", id: "PURCHASED_LIST" }],
-    })
-
+    }),
+    getPaymentStatus: builder.query({
+      query: (orderId) => `/purchase/payment-status/${orderId}`,
+    }),
 
     /**
      * @desc Stripe webhook (for server use, not client).
@@ -76,5 +78,6 @@ export const {
   useGetCourseDetailWithStatusQuery,
   useGetPurchasedCoursesQuery,
   useAddReviewMutation,
-  useGetPurchaseCoursenewQuery
+  useGetPurchaseCoursenewQuery,
+  useGetPaymentStatusQuery,
 } = purchaseApi;

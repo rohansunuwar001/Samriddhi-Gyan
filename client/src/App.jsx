@@ -8,11 +8,11 @@ import MainLayout from "./layout/MainLayout";
 
 // --- AUTHENTICATION & ROUTE PROTECTION ---
 import {
-    AdminRoute,
-    AuthenticatedUser,
-    InstructorRoute,
-    ProtectedRoute,
-    StudentRoute,
+  AdminRoute,
+  AuthenticatedUser,
+  InstructorRoute,
+  ProtectedRoute,
+  StudentRoute,
 } from "./components/ProtectedRoutes";
 import PurchaseCourseProtectedRoute from "./components/PurchaseCourseProtectedRoute";
 
@@ -71,7 +71,7 @@ import SupAdmAllUser from "./pages/superAdmin/SupAdmAllUser";
 import SupAdmCourseAnalytics from "./pages/superAdmin/SupAdmCourseAnalytics";
 import SupAdmDashboard from "./pages/superAdmin/SupAdmDashboard";
 import WishList from "./pages/WishList/WishList";
-
+import PaymentFailed from "./pages/PaymentFailed";
 
 // --- LAYOUT WRAPPER COMPONENT ---
 const MainLayoutWithScroll = () => (
@@ -211,6 +211,15 @@ const appRouter = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <PaymentSuccess />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/payment-failed",
+
+        element: (
+          <ProtectedRoute>
+            <PaymentFailed />
           </ProtectedRoute>
         ),
       },
@@ -362,7 +371,7 @@ function App() {
     <main>
       {/* <ScrollToTop /> */}
       <RouterProvider router={appRouter} />
-    {/* <ChatBot /> */}
+      {/* <ChatBot /> */}
     </main>
   );
 }

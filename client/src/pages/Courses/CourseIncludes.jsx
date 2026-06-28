@@ -9,10 +9,12 @@ const CourseIncludes = ({ includes }) => (
         {Array.isArray(includes) && includes.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
                 {includes.map((item, idx) => {
-                    // Handle plain string entries
+                    // FIX: Always use idx as key — never the value itself.
+                    // Using the value (e.g. "123") as a key breaks when the array
+                    // has duplicates, causing React's "two children with same key" warning.
                     if (typeof item === 'string') {
                         return (
-                            <div key={item || idx} className="flex items-center gap-3">
+                            <div key={idx} className="flex items-center gap-3">
                                 <span>{item}</span>
                             </div>
                         );
@@ -20,7 +22,7 @@ const CourseIncludes = ({ includes }) => (
                     // Handle { icon, text } object entries
                     const Icon = icons[item.icon];
                     return (
-                        <div key={item.text || idx} className="flex items-center gap-3">
+                        <div key={idx} className="flex items-center gap-3">
                             {Icon && <Icon className="h-5 w-5 text-gray-700" />}
                             <span>{item.text}</span>
                         </div>
@@ -33,7 +35,6 @@ const CourseIncludes = ({ includes }) => (
     </div>
 );
 
-// Accept both plain strings and { icon, text } objects
 CourseIncludes.propTypes = {
     includes: PropTypes.arrayOf(
         PropTypes.oneOfType([

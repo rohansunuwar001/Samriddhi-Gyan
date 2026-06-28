@@ -3,7 +3,8 @@ import fs from "fs";
 import path from "path";
 import { Lecture } from "../models/lecture.model.js";
 import { Section } from "../models/section.model.js";
-import { updateCourseStats } from "../helpers/courseStats.js";
+import { updateCourseStats } from "../helpers/courseStats.helper.js";
+
 
 /**
  * In-memory transcoding job tracker.

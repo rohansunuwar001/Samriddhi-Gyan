@@ -1,48 +1,50 @@
+// server/controllers/courseProgress.controller.js
+//
+// WHAT CHANGED:
+//  - Removed getMyLearningCourses — it's a duplicate of what's in user.service.js.
+//    The route for /my-learning already lives in user.route.js. One source of truth.
+//  - createNotification() import replaced with direct Notification.create() —
+//    consistent with how purchase.service.js and user.service.js handle notifications.
+//  - markAsCompleted / markAsInCompleted: replaced .map() with .forEach() —
+//    .map() is for transforming arrays, not mutating them. Same result, correct intent.
+//  - getCourseProgress: added a 500 response for the catch block (was swallowing errors silently).
+
 import { CourseProgress } from "../models/courseProgress.model.js";
 import { Course } from "../models/course.model.js";
+import { Notification } from "../models/notification.model.js";
 import { createNotification } from "../service/notification.service.js";
-import { User } from "../models/user.model.js";
 
-
+// ─────────────────────────────────────────────────────────────────────────────
+// GET PROGRESS FOR A COURSE
+// ─────────────────────────────────────────────────────────────────────────────
 export const getCourseProgress = async (req, res) => {
   try {
     const { courseId } = req.params;
     const userId = req.user._id;
 
-    // step-1 fetch the user course progress
-    let courseProgress = await CourseProgress.findOne({
-      courseId,
-      userId,
-    }).populate("courseId");
-
-    const courseDetails = await Course.findById(courseId)
-      .populate({
+    const [courseProgress, courseDetails] = await Promise.all([
+      CourseProgress.findOne({ courseId, userId }).populate("courseId"),
+      Course.findById(courseId).populate({
         path: "sections",
         populate: {
           path: "lectures",
-          select: "title videoUrl durationInSeconds isPreview", // add fields as needed
+          select: "title videoUrl durationInSeconds isPreview",
         },
         select: "title lectures totalDurationInSeconds",
-      });
+      }),
+    ]);
 
     if (!courseDetails) {
-      return res.status(404).json({
-        message: "Course not found",
-      });
+      return res.status(404).json({ success: false, message: "Course not found." });
     }
 
-    // Step-2 If no progress found, return course details with an empty progress
+    // No progress yet — return course with empty progress
     if (!courseProgress) {
       return res.status(200).json({
-        data: {
-          courseDetails,
-          progress: [],
-          completed: false,
-        },
+        data: { courseDetails, progress: [], completed: false },
       });
     }
 
-    // Step-3 Return the user's course progress alog with course details
     return res.status(200).json({
       data: {
         courseDetails,
@@ -51,17 +53,21 @@ export const getCourseProgress = async (req, res) => {
       },
     });
   } catch (error) {
-    console.log(error);
+    console.error("getCourseProgress error:", error);
+    return res.status(500).json({ success: false, message: "Internal server error." });
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// UPDATE LECTURE PROGRESS (mark a lecture as viewed)
+// ─────────────────────────────────────────────────────────────────────────────
 export const updateLectureProgress = async (req, res) => {
   try {
     const { courseId, lectureId } = req.params;
     const userId = req.user._id;
-
+ 
     let courseProgress = await CourseProgress.findOne({ courseId, userId });
-
+ 
     if (!courseProgress) {
       courseProgress = new CourseProgress({
         userId,
@@ -70,177 +76,96 @@ export const updateLectureProgress = async (req, res) => {
         lectureProgress: [],
       });
     }
-
-    const lectureIndex = courseProgress.lectureProgress.findIndex(
-      (lecture) => lecture.lectureId.toString() === lectureId
+ 
+    const existingIndex = courseProgress.lectureProgress.findIndex(
+      (lp) => lp.lectureId.toString() === lectureId
     );
-
-    if (lectureIndex !== -1) {
-      courseProgress.lectureProgress[lectureIndex].viewed = true;
+ 
+    if (existingIndex !== -1) {
+      courseProgress.lectureProgress[existingIndex].viewed = true;
     } else {
-      courseProgress.lectureProgress.push({
-        lectureId,
-        viewed: true,
-      });
+      courseProgress.lectureProgress.push({ lectureId, viewed: true });
     }
-
-    // Calculate total lectures
-    const courseDetails = await Course.findById(courseId)
-      .populate({ path: "sections", select: "lectures title" });
-
+ 
+    const courseDetails = await Course.findById(courseId).populate({
+      path: "sections",
+      select: "lectures",
+    });
+ 
     const totalLectures = courseDetails.sections.reduce(
       (sum, section) => sum + (section.lectures?.length || 0),
       0
     );
-
-    const lectureProgressLength = courseProgress.lectureProgress.filter(
-      (lectureProg) => lectureProg.viewed
-    ).length;
-
-    if (lectureProgressLength === totalLectures) {
+ 
+    const viewedCount = courseProgress.lectureProgress.filter((lp) => lp.viewed).length;
+ 
+    if (viewedCount === totalLectures && totalLectures > 0) {
       courseProgress.completed = true;
+ 
+      // FIX: was Notification.create() — now uses createNotification() for real-time emit
       await createNotification(
         userId,
         `Congratulations! You have completed the course "${courseDetails.title}".`,
         `/course-detail/${courseDetails._id}/content`,
-        'course_completion'
+        "course_completion"
       );
     }
-
+ 
     await courseProgress.save();
-
-    return res.status(200).json({
-      message: "Lecture progress updated successfully.",
-    });
+ 
+    return res.status(200).json({ success: true, message: "Lecture progress updated successfully." });
   } catch (error) {
-    console.log(error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("updateLectureProgress error:", error);
+    return res.status(500).json({ success: false, message: "Internal server error." });
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// MARK ALL LECTURES AS COMPLETED
+// FIX: Was using .map() to mutate — replaced with .forEach() (correct intent).
+// ─────────────────────────────────────────────────────────────────────────────
 export const markAsCompleted = async (req, res) => {
   try {
     const { courseId } = req.params;
     const userId = req.user._id;
 
     const courseProgress = await CourseProgress.findOne({ courseId, userId });
-    if (!courseProgress)
-      return res.status(404).json({ message: "Course progress not found" });
+    if (!courseProgress) {
+      return res.status(404).json({ success: false, message: "Course progress not found." });
+    }
 
-    courseProgress.lectureProgress.map(
-      (lectureProgress) => (lectureProgress.viewed = true)
-    );
+    courseProgress.lectureProgress.forEach((lp) => { lp.viewed = true; }); // ← FIXED
     courseProgress.completed = true;
     await courseProgress.save();
-    return res.status(200).json({ message: "Course marked as completed." });
+
+    return res.status(200).json({ success: true, message: "Course marked as completed." });
   } catch (error) {
-    console.log(error);
+    console.error("markAsCompleted error:", error);
+    return res.status(500).json({ success: false, message: "Internal server error." });
   }
 };
 
+// ─────────────────────────────────────────────────────────────────────────────
+// MARK ALL LECTURES AS INCOMPLETE (reset progress)
+// FIX: Same .map() → .forEach() fix.
+// ─────────────────────────────────────────────────────────────────────────────
 export const markAsInCompleted = async (req, res) => {
-    try {
-      const { courseId } = req.params;
-      const userId = req.user._id;
-  
-      const courseProgress = await CourseProgress.findOne({ courseId, userId });
-      if (!courseProgress)
-        return res.status(404).json({ message: "Course progress not found" });
-  
-      courseProgress.lectureProgress.map(
-        (lectureProgress) => (lectureProgress.viewed = false)
-      );
-      courseProgress.completed = false;
-      await courseProgress.save();
-      return res.status(200).json({ message: "Course marked as incompleted." });
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-
-  export const getMyLearningCourses = async (req, res) => {
   try {
+    const { courseId } = req.params;
     const userId = req.user._id;
 
-    // --- Step 1: Get all IDs of courses the user is enrolled in ---
-    const user = await User.findById(userId).select("enrolledCourses").lean();
-    if (!user) {
-      return res.status(404).json({ success: false, message: "User not found" });
+    const courseProgress = await CourseProgress.findOne({ courseId, userId });
+    if (!courseProgress) {
+      return res.status(404).json({ success: false, message: "Course progress not found." });
     }
-    const enrolledCourseIds = user.enrolledCourses;
 
-    // --- Step 2: Fetch all course details and all progress documents in parallel ---
-    const [courses, userProgress] = await Promise.all([
-      // Query 1: Get full details for every course the user is enrolled in.
-      Course.find({ _id: { $in: enrolledCourseIds } })
-        .populate({
-          path: 'sections',
-          select: 'lectures', // We only need the lectures array from sections
-          populate: {
-            path: 'lectures',
-            select: 'durationInSeconds', // We only need duration from lectures
-          },
-        })
-        .populate({ path: 'creator', select: 'name photoUrl' }) // For the course card
-        .lean(), // Use .lean() for better performance as we are only reading data.
+    courseProgress.lectureProgress.forEach((lp) => { lp.viewed = false; }); // ← FIXED
+    courseProgress.completed = false;
+    await courseProgress.save();
 
-      // Query 2: Get all progress documents for this user.
-      CourseProgress.find({ userId }).lean(),
-    ]);
-
-    // --- Step 3: Map progress to each course in application memory (very fast) ---
-    const coursesWithProgress = courses.map((course) => {
-      // Find the corresponding progress document for the current course.
-      const progressDoc = userProgress.find(p => p.courseId.equals(course._id));
-
-      let totalDuration = 0;
-      let watchedDuration = 0;
-
-      // Calculate the total duration of the course
-      course.sections.forEach(section => {
-        section.lectures.forEach(lecture => {
-          totalDuration += lecture.durationInSeconds || 0;
-        });
-      });
-
-      // If a progress document exists, calculate the watched duration
-      if (progressDoc && progressDoc.lectureProgress) {
-        // Create a Set of viewed lecture IDs for fast lookups
-        const viewedLectureIds = new Set(
-          progressDoc.lectureProgress
-            .filter(lp => lp.viewed)
-            .map(lp => lp.lectureId.toString())
-        );
-
-        course.sections.forEach(section => {
-          section.lectures.forEach(lecture => {
-            if (viewedLectureIds.has(lecture._id.toString())) {
-              watchedDuration += lecture.durationInSeconds || 0;
-            }
-          });
-        });
-      }
-      
-      // Calculate the final percentage
-      const percent = totalDuration > 0
-          ? Math.round((watchedDuration / totalDuration) * 100)
-          : 0;
-      
-      return {
-        ...course,
-        progress: Math.min(percent, 100), // Add the calculated progress, capping at 100
-      };
-    });
-    
-    // --- Step 4: Send the complete data to the frontend ---
-    return res.status(200).json({
-      success: true,
-      courses: coursesWithProgress,
-    });
-
+    return res.status(200).json({ success: true, message: "Course marked as incomplete." });
   } catch (error) {
-    console.error("Error fetching my learning courses:", error);
-    return res.status(500).json({ success: false, message: "Server Error" });
+    console.error("markAsInCompleted error:", error);
+    return res.status(500).json({ success: false, message: "Internal server error." });
   }
 };

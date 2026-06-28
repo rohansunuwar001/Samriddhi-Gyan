@@ -22,61 +22,57 @@ const updateCourseRating = async (courseId) => {
 };
 
 export const createReview = async (req, res) => {
-    const { rating, comment } = req.body;
-    const { courseId } = req.params;
-    const userId = req.user._id;
-
-    try {
-        const course = await Course.findById(courseId);
-
-        if (!course) {
-            return res.status(404).json({ message: "Course not found." });
-        }
-
-        const isEnrolled = course.enrolledStudents.includes(userId);
-        if (!isEnrolled) {
-            return res.status(403).json({ message: "You must be enrolled in this course to leave a review." });
-        }
-
-        const existingReview = await Review.findOne({ course: courseId, user: userId });
-        if (existingReview) {
-            return res.status(400).json({ message: "You have already reviewed this course." });
-        }
-
-        const review = await Review.create({
-            rating,
-            comment,
-            user: userId,
-            course: courseId,
-        });
-
-        course.reviews.push(review._id);
-        await course.save();
-        await updateCourseRating(courseId);
-
-        // --- 2. TRIGGER THE INSTRUCTOR NOTIFICATION HERE ---
-        const student = await User.findById(userId);
-        if (course.creator && student) {
-            await createNotification(
-                course.creator, // The ID of the course instructor
-                `${student.name} left a ${rating}-star review on your course "${course.courseTitle}".`,
-                `/instructor/course/${courseId}`, // Example link to instructor course manager
-                'new_review'
-            );
-        }
-
-        res.status(201).json({
-            success: true,
-            message: "Review submitted successfully.",
-            review,
-        });
-
-    } catch (error) {
-        console.error("Error creating review:", error);
-        res.status(500).json({ message: "Server error while creating review." });
+  const { rating, comment } = req.body;
+  const { courseId } = req.params;
+  const userId = req.user._id;
+ 
+  try {
+    const course = await Course.findById(courseId);
+ 
+    if (!course) {
+      return res.status(404).json({ message: "Course not found." });
     }
+ 
+    const isEnrolled = course.enrolledStudents.includes(userId);
+    if (!isEnrolled) {
+      return res.status(403).json({ message: "You must be enrolled in this course to leave a review." });
+    }
+ 
+    const existingReview = await Review.findOne({ course: courseId, user: userId });
+    if (existingReview) {
+      return res.status(400).json({ message: "You have already reviewed this course." });
+    }
+ 
+    const review = await Review.create({ rating, comment, user: userId, course: courseId });
+ 
+    course.reviews.push(review._id);
+    await course.save();
+    await updateCourseRating(courseId);
+ 
+    // Notify the instructor about the new review
+    const student = await User.findById(userId).select("name");
+    if (course.creator && student) {
+      await createNotification(
+        course.creator,
+        // FIX: was course.courseTitle — your model field is course.title
+        `${student.name} left a ${rating}-star review on your course "${course.title}".`,
+        `/instructor/course/${courseId}`,
+        "new_review"
+      );
+    }
+ 
+    return res.status(201).json({
+      success: true,
+      message: "Review submitted successfully.",
+      review,
+    });
+ 
+  } catch (error) {
+    console.error("createReview error:", error);
+    return res.status(500).json({ message: "Server error while creating review." });
+  }
 };
-
+ 
 export const replyToReview = async (req, res) => {
     try {
         const { reviewId } = req.params;
