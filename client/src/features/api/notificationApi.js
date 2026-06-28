@@ -1,45 +1,46 @@
+// src/features/api/notificationApi.js
+//
+// FIX: Added keepUnusedDataFor: 0 to getNotifications so RTK Query never
+// serves stale cached data. This fixes the 304 problem where the bell
+// showed "You're all caught up!" even though a notification was saved in DB.
+
 import { apiSlice } from './apiSlice';
 
 export const notificationApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
+
     getNotifications: builder.query({
       query: () => '/notifications',
       providesTags: ['Notifications'],
+      // CRITICAL FIX: Don't cache notification data at all.
+      // Notifications must always be fresh — a 5-second stale window
+      // means the user sees "You're all caught up!" right after purchase.
+      keepUnusedDataFor: 0,
     }),
 
     markAsRead: builder.mutation({
-      query: () => ({
-        url: '/notifications/read',
-        method: 'POST',
-      }),
+      query: () => ({ url: '/notifications/read', method: 'POST' }),
       invalidatesTags: ['Notifications'],
     }),
 
-    // --- ADD THIS NEW MUTATION ---
     deleteNotification: builder.mutation({
       query: (notificationId) => ({
         url: `/notifications/${notificationId}`,
         method: 'DELETE',
       }),
-      // When successful, refetch the notification list automatically
       invalidatesTags: ['Notifications'],
     }),
 
-    // --- ADD THIS SECOND NEW MUTATION ---
     clearAllNotifications: builder.mutation({
-        query: () => ({
-            url: '/notifications',
-            method: 'DELETE',
-        }),
-        invalidatesTags: ['Notifications'],
+      query: () => ({ url: '/notifications', method: 'DELETE' }),
+      invalidatesTags: ['Notifications'],
     }),
   }),
 });
 
-// --- EXPORT THE NEW HOOKS ---
 export const {
-    useGetNotificationsQuery,
-    useMarkAsReadMutation,
-    useDeleteNotificationMutation, // <-- New
-    useClearAllNotificationsMutation, // <-- New
+  useGetNotificationsQuery,
+  useMarkAsReadMutation,
+  useDeleteNotificationMutation,
+  useClearAllNotificationsMutation,
 } = notificationApi;

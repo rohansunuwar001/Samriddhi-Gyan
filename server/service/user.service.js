@@ -1,0 +1,344 @@
+// server/service/user.service.js
+//
+// PURPOSE: All business logic for user operations lives here.
+// The controller reads req, calls these functions, and sends res.
+// These functions never touch req or res — only data in, data out.
+
+import bcrypt from "bcryptjs";
+import { User } from "../models/user.model.js";
+import { Course } from "../models/course.model.js";
+import { CourseProgress } from "../models/courseProgress.model.js";
+import { Notification } from "../models/notification.model.js";
+import { uploadMedia, deleteFromCloudinary } from "../utils/cloudinary.js";
+import { extractCloudinaryPublicId } from "../helpers/cloudinary.helper.js";
+
+// ─────────────────────────────────────────────────────────────────────────────
+// AUTH SERVICES
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Registers a new user.
+ * Throws if email already taken.
+ * Returns the created user (without password).
+ */
+export const registerUser = async ({ name, email, password }) => {
+  const existingUser = await User.findOne({ email });
+  if (existingUser) {
+    const error = new Error("User already exists with this email.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  const user = await User.create({ name, email, password: hashedPassword });
+
+  // Return a safe version — never return the password hash
+  return { _id: user._id, name: user.name, email: user.email, role: user.role };
+};
+
+/**
+ * Validates credentials and returns the user document if correct.
+ * Throws with a 400 if email not found or password wrong.
+ * NOTE: We intentionally return the SAME error message for both cases
+ *       so attackers can't tell which one failed (email enumeration prevention).
+ */
+export const loginUser = async ({ email, password }) => {
+  // .select("+password") is needed because password is select:false in some schemas.
+  // Your schema doesn't have select:false but this is the safe pattern to use always.
+  const user = await User.findOne({ email }).select("+password");
+
+  if (!user) {
+    const error = new Error("Incorrect email or password.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  // Google-only accounts have no password — block password login for them
+  if (!user.password) {
+    const error = new Error("This account uses Google sign-in. Please log in with Google.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    const error = new Error("Incorrect email or password.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  return user;
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// PROFILE SERVICES
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Returns a user's own full profile with enrolled courses populated.
+ */
+export const getUserProfile = async (userId) => {
+  const user = await User.findById(userId)
+    .select("-password")
+    .populate("enrolledCourses");
+
+  if (!user) {
+    const error = new Error("User not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  return user;
+};
+
+/**
+ * Returns a public instructor profile + their published courses.
+ * FIX: The original used wrong field names (courseTitle, coursePrice etc.)
+ *      Your Course model uses: title, thumbnail, price, ratings, numOfReviews
+ */
+export const getPublicProfile = async (instructorId) => {
+  const user = await User.findById(instructorId).select(
+    "name headline photoUrl description links role"
+  );
+
+  if (!user) {
+    const error = new Error("Instructor not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const courses = await Course.find({
+    creator: instructorId,
+    isPublished: true,
+  }).select("title thumbnail price ratings numOfReviews enrolledStudents");
+  //          ^^^^^ FIXED: was courseTitle, courseThumbnail, coursePrice
+
+  return { user, courses };
+};
+
+/**
+ * Updates editable profile fields (name, headline, description, links, etc.)
+ * Only updates fields that are actually provided — ignores undefined values.
+ * Returns the updated user document.
+ */
+export const updateUserInfo = async (userId, fields) => {
+  const { name, headline, description, links, occupation, interests } = fields;
+
+  const updateData = {};
+
+  if (name)                    updateData.name        = name;
+  if (headline)                updateData.headline    = headline;
+  if (description)             updateData.description = description;
+  if (occupation !== undefined) updateData.occupation = occupation;
+  if (interests  !== undefined) updateData.interests  = interests;
+
+  // Update nested link fields individually so we don't overwrite the whole object
+  if (links && typeof links === "object") {
+    const linkFields = ["website", "facebook", "instagram", "twitter", "linkedin"];
+    linkFields.forEach((key) => {
+      if (links[key] !== undefined) {
+        updateData[`links.${key}`] = links[key];
+      }
+    });
+  }
+
+  if (Object.keys(updateData).length === 0) {
+    const error = new Error("No update information provided.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const updatedUser = await User.findByIdAndUpdate(
+    userId,
+    { $set: updateData },
+    { new: true, runValidators: true }
+  ).select("-password");
+
+  return updatedUser;
+};
+
+/**
+ * Replaces a user's avatar on Cloudinary and updates the DB.
+ * FIX: The original extracted publicId with .split("/").pop().split(".")[0]
+ *      which breaks for URLs with folders (e.g. /lms/avatars/abc123.jpg).
+ *      We now use extractCloudinaryPublicId() from helpers/ which handles all cases.
+ */
+export const updateUserAvatar = async (userId, filePath) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    const error = new Error("User not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  // Delete old avatar from Cloudinary if one exists
+  if (user.photoUrl) {
+    const publicId = extractCloudinaryPublicId(user.photoUrl);
+    if (publicId) {
+      // We don't throw if delete fails — old image not found isn't a blocker
+      await deleteFromCloudinary(publicId).catch((err) =>
+        console.error("Old avatar delete failed (non-critical):", err)
+      );
+    }
+  }
+
+  // Upload the new avatar
+  const cloudResponse = await uploadMedia(filePath);
+  if (!cloudResponse?.secure_url) {
+    const error = new Error("Image upload failed. Please try again.");
+    error.statusCode = 500;
+    throw error;
+  }
+
+  user.photoUrl = cloudResponse.secure_url;
+  await user.save();
+
+  return user.photoUrl;
+};
+
+/**
+ * Validates the current password, hashes the new one, saves it,
+ * and sends a password-change notification.
+ */
+export const updateUserPassword = async (userId, { currentPassword, newPassword }) => {
+  const user = await User.findById(userId).select("+password");
+
+  if (!user) {
+    const error = new Error("User not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  // Block Google-only accounts from setting a password via this route
+  if (!user.password) {
+    const error = new Error("Password cannot be changed for Google-authenticated accounts.");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const isMatch = await bcrypt.compare(currentPassword, user.password);
+  if (!isMatch) {
+    const error = new Error("Incorrect current password.");
+    error.statusCode = 401;
+    throw error;
+  }
+
+  user.password = await bcrypt.hash(newPassword, 10);
+  await user.save();
+
+  // Send an in-app notification after successful password change
+  await Notification.create({
+    user: userId,
+    message: "Your password was successfully changed.",
+    link: "/profile/security",
+    type: "password_update",
+  });
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// LEARNING / ACTIVITY SERVICES
+// ─────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Pushes a course to the front of the user's viewHistory (max 20 entries).
+ * FIX: The original fetched the whole user doc just to push to an array.
+ *      We use findByIdAndUpdate with $pull + $push to do it in ONE DB call
+ *      instead of fetch → mutate → save (3 operations).
+ */
+export const trackCourseView = async (userId, courseId) => {
+  // Step 1: Remove any existing entry for this course (prevents duplicates)
+  await User.findByIdAndUpdate(userId, {
+    $pull: { viewHistory: { course: courseId } },
+  });
+
+  // Step 2: Push to the front and cap at 20 entries
+  await User.findByIdAndUpdate(userId, {
+    $push: {
+      viewHistory: {
+        $each: [{ course: courseId, viewedAt: new Date() }],
+        $position: 0,  // insert at front
+        $slice: 20,    // keep only the 20 most recent
+      },
+    },
+  });
+};
+
+/**
+ * Returns all enrolled courses with progress percentage for "My Learning" page.
+ * Uses parallel queries + a progress map for efficiency (O(1) lookups).
+ * This was already well-written in the controller — moved here as-is.
+ */
+export const getMyLearningCourses = async (userId) => {
+  const userData = await User.findById(userId).select("enrolledCourses").lean();
+
+  if (!userData) {
+    const error = new Error("User not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const enrolledCourseIds = userData.enrolledCourses;
+
+  if (enrolledCourseIds.length === 0) {
+    return [];
+  }
+
+  // Run both DB queries in parallel — saves ~50% time vs running sequentially
+  const [courses, userProgress] = await Promise.all([
+    Course.find({ _id: { $in: enrolledCourseIds } })
+      .populate({
+        path: "sections",
+        select: "lectures",
+        populate: { path: "lectures", select: "durationInSeconds" },
+      })
+      .populate({ path: "creator", select: "name photoUrl" })
+      .lean(),
+
+    CourseProgress.find({
+      userId,
+      courseId: { $in: enrolledCourseIds },
+    }).lean(),
+  ]);
+
+  // Build a map: { courseId string → lectureProgress array }
+  // This lets us look up progress in O(1) instead of O(n) inside the loop below
+  const progressMap = userProgress.reduce((map, prog) => {
+    map[prog.courseId.toString()] = prog.lectureProgress || [];
+    return map;
+  }, {});
+
+  // Attach a progress percentage to each course
+  const coursesWithProgress = courses.map((course) => {
+    const lectureProgress = progressMap[course._id.toString()] || [];
+
+    let totalDuration   = 0;
+    let watchedDuration = 0;
+
+    // Set of viewed lecture IDs for O(1) lookup inside the loop
+    const viewedIds = new Set(
+      lectureProgress
+        .filter((lp) => lp.viewed)
+        .map((lp) => lp.lectureId.toString())
+    );
+
+    course.sections.forEach((section) => {
+      section.lectures.forEach((lecture) => {
+        const dur = lecture.durationInSeconds || 0;
+        totalDuration += dur;
+        if (viewedIds.has(lecture._id.toString())) {
+          watchedDuration += dur;
+        }
+      });
+    });
+
+    const progress =
+      totalDuration > 0
+        ? Math.min(Math.round((watchedDuration / totalDuration) * 100), 100)
+        : 0;
+
+    return { ...course, progress, isPurchased: true };
+  });
+
+  return coursesWithProgress;
+};

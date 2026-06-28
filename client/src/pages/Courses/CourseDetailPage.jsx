@@ -1,12 +1,11 @@
-// --- (Import Child Components) ---
-
-
-// --- (Import Mock Data) ---
+// src/pages/Courses/CourseDetailPage.jsx
 
 import { useParams } from 'react-router-dom';
-
-
+import { useEffect } from 'react';
 import { useGetCourseDetailWithStatusQuery } from '@/features/api/purchaseApi';
+import { useTrackCourseViewMutation } from '@/features/api/authApi';
+
+
 import CourseContent from './CourseContent';
 import CourseHeader from './CourseHeader';
 import CourseIncludes from './CourseIncludes';
@@ -16,28 +15,25 @@ import PurchaseCard from './PurchaseCard';
 import Requirements from './Requirements';
 import WhatYouWillLearn from './WhatYouWillLearn';
 import ReviewsSection from '../Reviews/ReviewSection';
-import { useTrackCourseViewMutation } from '@/features/api/authApi';
-import { useEffect } from 'react';
-
+import { CourseDetailSkeleton } from '@/components/ui/skeletons';
 
 const CourseDetailPage = () => {
     const { courseId } = useParams();
     const { data, isLoading, isError } = useGetCourseDetailWithStatusQuery(courseId);
-console.log("Course detail data:", data);
-const [trackCourseView] = useTrackCourseViewMutation();
+    const [trackCourseView] = useTrackCourseViewMutation();
 
-    // Defensive: extract the actual course object
     const course = data?.course;
-    console.log("Course data:", course);
 
-useEffect(() => {
-  if (courseId) {
-    trackCourseView(courseId);
-  }
-}, [courseId]);
+    useEffect(() => {
+        if (courseId) {
+            trackCourseView(courseId);
+        }
+    }, [courseId]);
 
+    // BEFORE: return <div className="text-center py-10">Loading...</div>
+    // AFTER:  return the skeleton that matches the exact page layout
     if (isLoading) {
-        return <div className="text-center py-10">Loading...</div>;
+        return <CourseDetailSkeleton />;
     }
 
     if (isError || !course) {
@@ -46,22 +42,15 @@ useEffect(() => {
 
     return (
         <div className="bg-white text-gray-800">
-            {/* Dark themed header section */}
             <CourseHeader course={course} />
-
-            {/* Main content and sticky purchase card */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="lg:flex lg:flex-row-reverse lg:gap-8">
-
-                    {/* --- Right Column (Sticky Purchase Card) --- */}
                     <div className="lg:w-1/3 w-full mb-8 lg:mb-0">
                         <PurchaseCard course={course} />
                     </div>
-
-                    {/* --- Left Column (Main Content) --- */}
                     <div className="lg:w-2/3 w-full">
                         <main className="space-y-8">
-                            <WhatYouWillLearn learnings={course.learnings} /> 
+                            <WhatYouWillLearn learnings={course.learnings} />
                             <CourseIncludes includes={course.includes} />
                             <CourseContent sections={course.sections} totalLectures={course.totalLectures} totalLength={course.totalDurationInSeconds} />
                             <Requirements requirements={course.requirements} />
@@ -70,7 +59,6 @@ useEffect(() => {
                             <ReviewsSection course={course} />
                         </main>
                     </div>
-
                 </div>
             </div>
         </div>

@@ -3,6 +3,7 @@ import { Server } from "socket.io";
 import dotenv from "dotenv";
 import connectDB from "./database/db.js";
 import app from "./app.js";
+import { scheduleOrderCleanup } from "./scripts/cleanupPendingOrders.script.js";
 
 
 dotenv.config({});
@@ -44,6 +45,7 @@ io.on("connection", (socket) => {
 const startServer = async () => {
   try {
     await connectDB();
+    scheduleOrderCleanup();
     server.listen(PORT, () => {
       console.log(`Server listening at port ${PORT}`);
     });

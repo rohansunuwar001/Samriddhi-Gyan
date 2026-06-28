@@ -1,3 +1,15 @@
+// src/components/NotificationBell.jsx
+//
+// FIXES:
+// 1. Added refetchOnMountOrArgChange: true to always fetch fresh on mount.
+//    This means when the user returns from eSewa payment and the page loads,
+//    the bell immediately fetches new notifications from the server.
+//
+// 2. Added socket 'connect' event listener — when the socket reconnects
+//    after the eSewa redirect, we immediately refetch notifications.
+//    This catches the case where the notification was saved to DB during
+//    the payment but couldn't be emitted because the socket was disconnected.
+
 import { Button } from "@/components/ui/button";
 import { Bell, BellRing, Loader2, Trash2, X } from "lucide-react";
 import { useEffect, useRef, useState } from 'react';
@@ -11,11 +23,6 @@ import {
     useMarkAsReadMutation
 } from '../features/api/notificationApi';
 
-/**
- * A utility function to format a date into a human-readable "time ago" string.
- * @param {string | Date} date - The date to format.
- * @returns {string} The formatted time ago string.
- */
 const timeAgo = (date) => {
     const seconds = Math.floor((new Date() - new Date(date)) / 1000);
     let interval = seconds / 31536000;
@@ -32,41 +39,56 @@ const timeAgo = (date) => {
 };
 
 const NotificationBell = () => {
-    // Hooks for API interaction
-    const { data: notifications = [], refetch, isLoading: isFetching } = useGetNotificationsQuery();
+    // FIX 1: refetchOnMountOrArgChange: true — always fetch fresh on mount.
+    // This means every time the navbar renders (e.g. after returning from eSewa),
+    // the bell fetches the latest notifications from the server instead of
+    // returning the 304 cached empty response.
+    const {
+        data: notifications = [],
+        refetch,
+        isLoading: isFetching
+    } = useGetNotificationsQuery(undefined, {
+        refetchOnMountOrArgChange: true,
+    });
+
     const [markAsRead] = useMarkAsReadMutation();
     const [deleteNotification, { isLoading: isDeleting }] = useDeleteNotificationMutation();
     const [clearAllNotifications, { isLoading: isClearing }] = useClearAllNotificationsMutation();
 
-    // State for UI and real-time connection
     const socket = useSocket();
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef(null);
 
-    // Effect for listening to real-time notifications from the server
     useEffect(() => {
         if (!socket) return;
 
-        const handleNewNotification = (notification) => {
-            console.log("Real-time notification received:", notification);
-            toast.info(notification.message, {
-                description: `Received just now. Click to view.`,
-                duration: 5000,
-            });
-            // Automatically refetch the notification list to include the new one
+        // FIX 2: Listen for socket reconnect.
+        // When the user returns from eSewa payment, a new socket connection
+        // is established. At that point we immediately refetch notifications
+        // so the bell shows any notification that was saved to DB during payment.
+        const handleConnect = () => {
+            console.log("[NotificationBell] Socket reconnected — refetching notifications");
             refetch();
         };
 
-        socket.on('new_notification', handleNewNotification);
-        console.log("Socket is connected. Listening for 'new_notification' event.");
+        const handleNewNotification = (notification) => {
+            console.log("[NotificationBell] Real-time notification received:", notification);
+            toast.info(notification.message, {
+                description: "Click the bell to view.",
+                duration: 5000,
+            });
+            refetch();
+        };
 
-        // Cleanup: remove the event listener when the component unmounts
+        socket.on('connect', handleConnect);
+        socket.on('new_notification', handleNewNotification);
+
         return () => {
+            socket.off('connect', handleConnect);
             socket.off('new_notification', handleNewNotification);
         };
     }, [socket, refetch]);
 
-    // Effect for handling clicks outside the dropdown to close it
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -82,22 +104,21 @@ const NotificationBell = () => {
     const handleToggleDropdown = () => {
         const newIsOpenState = !isOpen;
         setIsOpen(newIsOpenState);
-        // If opening the dropdown and there are unread items, mark them as read
         if (newIsOpenState && unreadCount > 0) {
             markAsRead();
         }
     };
 
     const handleDelete = async (e, notificationId) => {
-        e.preventDefault();   // Prevent link navigation
-        e.stopPropagation();  // Prevent dropdown from closing
+        e.preventDefault();
+        e.stopPropagation();
         await deleteNotification(notificationId);
         toast.success("Notification removed.");
     };
 
     const handleClearAll = async (e) => {
         e.stopPropagation();
-        if (window.confirm("Are you sure you want to clear all notifications? This cannot be undone.")) {
+        if (window.confirm("Are you sure you want to clear all notifications?")) {
             await clearAllNotifications();
             toast.success("All notifications cleared.");
         }
@@ -121,14 +142,14 @@ const NotificationBell = () => {
             </Button>
 
             {isOpen && (
-                <div className="absolute right-0 mt-2 w-80 sm:w-96 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50">
+                <div className="absolute right-0 mt-2 w-80 sm:w-96 origin-top-right rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5 z-50">
                     <div className="flex items-center justify-between p-3 border-b">
                         <h3 className="font-semibold text-gray-800">Notifications</h3>
                         {notifications.length > 0 && (
                             <Button
                                 variant="ghost"
                                 size="sm"
-                                className="text-xs text-blue-600 hover:bg-blue-50 hover:text-blue-700"
+                                className="text-xs text-blue-600 hover:bg-blue-50"
                                 onClick={handleClearAll}
                                 disabled={isClearing}
                             >
@@ -148,7 +169,7 @@ const NotificationBell = () => {
                                     <button
                                         onClick={(e) => handleDelete(e, n._id)}
                                         disabled={isDeleting}
-                                        className="absolute top-1/2 right-2 -translate-y-1/2 p-1 rounded-full text-gray-400 hover:bg-red-100 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+                                        className="absolute top-1/2 right-2 -translate-y-1/2 p-1 rounded-full text-gray-400 hover:bg-red-100 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity"
                                         aria-label="Delete notification"
                                     >
                                         <X className="h-4 w-4" />
