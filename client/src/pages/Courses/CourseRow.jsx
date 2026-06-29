@@ -1,4 +1,5 @@
 // src/components/Courses/CourseRow.jsx
+// eslint-disable-next-line no-unused-vars
 import React, { useRef, useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { ChevronLeft, ChevronRight } from "lucide-react";

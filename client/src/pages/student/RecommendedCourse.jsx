@@ -11,6 +11,7 @@ import CourseRow from "../Courses/CourseRow";
 
 const RecommendedCourse = () => {
   const { data, isLoading, isError, error, refetch } = useGetRecommendedCourseQuery();
+  console.log("Recommendation",data);
   
   const courses = data?.recommendedCourses || [];
 
