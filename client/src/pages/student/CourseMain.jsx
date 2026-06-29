@@ -1,16 +1,13 @@
 // src/components/CourseMain.jsx
 
-
 import React from "react";
-import { useSelector } from 'react-redux';
+import { useSelector } from "react-redux";
 
 // --- UI COMPONENTS & ICONS ---
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { ExclamationTriangleIcon } from "@radix-ui/react-icons";
 import PropTypes from "prop-types";
-
-
 
 import { Skeleton } from "@/components/ui/skeleton";
 import { CheckCircle2, ShoppingBasket } from "lucide-react";
@@ -21,73 +18,90 @@ import { useGetPublishedCourseQuery } from "@/features/api/courseApi";
 import { useGetTrendingCourseQuery } from "@/features/api/recommendedApi";
 
 const NoCoursesAvailable = ({ isLoggedIn }) => (
-    <div className="flex items-center justify-center min-h-[400px]">
-        <Alert className="max-w-md text-center">
-            {isLoggedIn ? (
-                <CheckCircle2 className="h-4 w-4" />
-            ) : (
-                <ShoppingBasket className="h-4 w-4" />
-            )}
-            <AlertTitle className="font-bold">
-                {isLoggedIn ? "You're All Caught Up!" : "No Courses Available"}
-            </AlertTitle>
-            <AlertDescription>
-                {isLoggedIn 
-                    ? "It looks like you've already enrolled in all of our available courses. Fantastic job!"
-                    : "There are currently no courses to display. Please check back later."
-                }
-                 {isLoggedIn && (
-                    <div className="mt-4">
-                        <Button asChild>
-                            <Link to="/my-learning">Go to My Learning</Link>
-                        </Button>
-                    </div>
-                 )}
-            </AlertDescription>
-        </Alert>
-    </div>
+  <div className="flex items-center justify-center min-h-[400px]">
+    <Alert className="max-w-md text-center">
+      {isLoggedIn ? (
+        <CheckCircle2 className="h-4 w-4" />
+      ) : (
+        <ShoppingBasket className="h-4 w-4" />
+      )}
+      <AlertTitle className="font-bold">
+        {isLoggedIn ? "You're All Caught Up!" : "No Courses Available"}
+      </AlertTitle>
+      <AlertDescription>
+        {isLoggedIn
+          ? "It looks like you've already enrolled in all of our available courses. Fantastic job!"
+          : "There are currently no courses to display. Please check back later."}
+        {isLoggedIn && (
+          <div className="mt-4">
+            <Button asChild>
+              <Link to="/my-learning">Go to My Learning</Link>
+            </Button>
+          </div>
+        )}
+      </AlertDescription>
+    </Alert>
+  </div>
 );
 
 NoCoursesAvailable.propTypes = {
-    isLoggedIn: PropTypes.bool.isRequired,
+  isLoggedIn: PropTypes.bool.isRequired,
 };
 
 /**
  * A skeleton loader that mimics a row of horizontally-scrolling course cards.
  */
 const CourseRowSkeleton = () => (
-    <div className="mb-12">
-        <Skeleton className="h-7 w-72 mb-4" />
-        <div className="flex gap-5 overflow-hidden">
-            {Array.from({ length: 5 }).map((_, index) => (
-                <div key={index} className="flex-shrink-0 w-64 space-y-2">
-                    <Skeleton className="w-64 h-36 rounded-md" />
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-3 w-1/2" />
-                    <Skeleton className="h-4 w-24" />
-                </div>
-            ))}
+  <div className="mb-12">
+    <Skeleton className="h-7 w-72 mb-4" />
+    <div className="flex gap-5 overflow-hidden">
+      {Array.from({ length: 5 }).map((_, index) => (
+        <div key={index} className="flex-shrink-0 w-64 space-y-2">
+          <Skeleton className="w-64 h-36 rounded-md" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-3 w-1/2" />
+          <Skeleton className="h-4 w-24" />
         </div>
+      ))}
     </div>
+  </div>
 );
 
 const CourseMain = () => {
-  const { data, isLoading, isError, error, refetch } = useGetPublishedCourseQuery();
+  const { data, isLoading, isError, error, refetch } =
+    useGetPublishedCourseQuery();
   const { data: trendingData } = useGetTrendingCourseQuery();
   const { user } = useSelector((state) => state.auth);
 
+  console.log("get published course", data);
+  console.log("get trending course", trendingData);
+
+  console.log("User enrolledCourses:", user?.enrolledCourses);
+  console.log("First enrolled item type:", typeof user?.enrolledCourses?.[0]);
+  console.log("First enrolled item:", user?.enrolledCourses?.[0]);
   const trendingRow = React.useMemo(() => {
     if (!trendingData?.trendingCourses) return [];
-    const enrolledIds = new Set(user?.enrolledCourses || []);
+    const enrolledIds = new Set(
+      (user?.enrolledCourses || []).map((course) =>
+        typeof course === "string" ? course : course._id,
+      ),
+    );
     return trendingData.trendingCourses.filter((c) => !enrolledIds.has(c._id));
   }, [trendingData, user]);
 
   const filteredCourses = React.useMemo(() => {
     if (!data?.courses) return [];
+
     if (user && data.courses.length > 0) {
-      const enrolledIds = new Set(user.enrolledCourses || []);
-      return data.courses.filter(course => !enrolledIds.has(course._id));
+      const enrolledIds = new Set(
+        (user.enrolledCourses || []).map((course) =>
+          typeof course === "string" ? course : course._id,
+        ),
+      );
+
+      return data.courses.filter((course) => !enrolledIds.has(course._id));
     }
+
     return data.courses;
   }, [data, user]);
 
@@ -155,12 +169,16 @@ const CourseMain = () => {
   // item added) and show other courses from the same category.
   // Handles user.wishlist being either an array of ids or populated course objects.
   const wishlistRow = React.useMemo(() => {
-    if (!user?.wishlist || user.wishlist.length === 0 || filteredCourses.length === 0) {
+    if (
+      !user?.wishlist ||
+      user.wishlist.length === 0 ||
+      filteredCourses.length === 0
+    ) {
       return { pivot: null, courses: [] };
     }
 
     const wishlistIds = user.wishlist.map((item) =>
-      typeof item === "string" ? item : item._id
+      typeof item === "string" ? item : item._id,
     );
     const pivotId = wishlistIds[wishlistIds.length - 1];
 
@@ -171,7 +189,7 @@ const CourseMain = () => {
     if (!pivot) return { pivot: null, courses: [] };
 
     const related = filteredCourses.filter(
-      (c) => c._id !== pivot._id && c.category && c.category === pivot.category
+      (c) => c._id !== pivot._id && c.category && c.category === pivot.category,
     );
 
     if (related.length === 0) return { pivot: null, courses: [] };
@@ -188,7 +206,11 @@ const CourseMain = () => {
   // since trackCourseView unshifts onto the front) and show same-category courses.
   // Handles entry.course being either an id string or a populated course object.
   const viewedRow = React.useMemo(() => {
-    if (!user?.viewHistory || user.viewHistory.length === 0 || filteredCourses.length === 0) {
+    if (
+      !user?.viewHistory ||
+      user.viewHistory.length === 0 ||
+      filteredCourses.length === 0
+    ) {
       return { pivot: null, courses: [] };
     }
 
@@ -205,7 +227,7 @@ const CourseMain = () => {
     if (!pivot) return { pivot: null, courses: [] };
 
     const related = filteredCourses.filter(
-      (c) => c._id !== pivot._id && c.category && c.category === pivot.category
+      (c) => c._id !== pivot._id && c.category && c.category === pivot.category,
     );
 
     if (related.length === 0) return { pivot: null, courses: [] };
@@ -234,8 +256,13 @@ const CourseMain = () => {
               <ExclamationTriangleIcon className="h-4 w-4" />
               <AlertTitle>Error loading courses</AlertTitle>
               <AlertDescription>
-                {error?.data?.message || 'Failed to fetch courses. Please try again.'}
-                <div className="mt-4"><Button variant="outline" onClick={refetch}>Retry</Button></div>
+                {error?.data?.message ||
+                  "Failed to fetch courses. Please try again."}
+                <div className="mt-4">
+                  <Button variant="outline" onClick={refetch}>
+                    Retry
+                  </Button>
+                </div>
               </AlertDescription>
             </Alert>
           ) : isEmpty ? (
@@ -273,14 +300,14 @@ const CourseMain = () => {
                 <CourseRow
                   heading={
                     <>
-                      Because you viewed "
+                      Because you viewed &quot;
                       <Link
                         to={`/course-detail/${viewedRow.pivot._id}`}
                         className="text-violet-600 underline underline-offset-2 hover:text-violet-700"
                       >
                         {viewedRow.pivot.title}
                       </Link>
-                      "
+                      &quot;
                     </>
                   }
                   courses={viewedRow.courses}
@@ -291,14 +318,14 @@ const CourseMain = () => {
                 <CourseRow
                   heading={
                     <>
-                      Because you wishlisted "
+                      Because you wishlisted &quot;
                       <Link
                         to={`/course-detail/${wishlistRow.pivot._id}`}
                         className="text-violet-600 underline underline-offset-2 hover:text-violet-700"
                       >
                         {wishlistRow.pivot.title}
                       </Link>
-                      "
+                      &quot;
                     </>
                   }
                   courses={wishlistRow.courses}

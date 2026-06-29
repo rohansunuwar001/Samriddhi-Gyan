@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 
 const CourseCard = ({ course, showRecommendationBadge }) => {
 
-  console.log("Course Data:", course);
+  // console.log("Course Data:", course);
   // --- Data preparation for the "For Sale" view ---
   const hasDiscount =
     course.price?.original && course.price.original > course.price.current;
