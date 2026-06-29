@@ -169,32 +169,32 @@ export const togglePublishCourse = async (courseId, publish) => {
 // 5. GET PUBLISHED COURSES (with optional auth context)
 // FIX: getCourseProgressPercent was a dead stub — now actually calculates progress.
 // ─────────────────────────────────────────────────────────────────────────────
-export const getPublishedCourses = async (userId = null) => {
-  const courses = await Course.find({ isPublished: true })
+export const getPublishedCourses = async (userId = null, enrolledIds = []) => {
+  // Build the DB filter — exclude purchased courses at query time
+  const filter = {
+    isPublished: true,
+    ...(enrolledIds.length > 0 && { _id: { $nin: enrolledIds } }),
+  };
+ 
+  const courses = await Course.find(filter)
     .populate({ path: "creator", select: "name photoUrl" })
     .lean();
-
+ 
   if (!userId) {
-    // Guest users — no purchase or progress info
+    // Guest users — no progress info needed
     return courses.map((c) => ({ ...c, isPurchased: false, progress: 0 }));
   }
-
-  const user = await User.findById(userId).select("enrolledCourses").lean();
-  const enrolledIds = new Set(
-    (user?.enrolledCourses || []).map((id) => id.toString())
-  );
-
-  // Add isPurchased + real progress for logged-in users
+ 
+  // Logged-in users: attach real progress.
+  // isPurchased is always false here because enrolled courses were filtered out above,
+  // but we keep the field so the API shape stays consistent.
   const enriched = await Promise.all(
     courses.map(async (course) => {
-      const isPurchased = enrolledIds.has(course._id.toString());
-      const progress = isPurchased
-        ? await getCourseProgressPercent(course._id, userId)
-        : 0;
-      return { ...course, isPurchased, progress };
+      const progress = await getCourseProgressPercent(course._id, userId);
+      return { ...course, isPurchased: false, progress };
     })
   );
-
+ 
   return enriched;
 };
 

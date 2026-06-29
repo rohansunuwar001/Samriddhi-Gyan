@@ -3,6 +3,7 @@
 // Controllers only: read req → call service → send res.
 // No model imports. No Cloudinary. No bcrypt. All logic is in course.service.js.
 
+import { getEnrolledIds } from "../helpers/courseFilter.helper.js";
 import { validateRequiredFields } from "../helpers/validate.helper.js";
 import {
   createCourse       as createCourseService,
@@ -84,8 +85,9 @@ export const togglePublishCourse = async (req, res) => {
 // ─────────────────────────────────────────────────────────────────────────────
 export const getPublishedCourse = async (req, res) => {
   try {
-    const userId = req.user?._id || null;
-    const courses = await getPublishedCourses(userId);
+    const userId      = req.user?._id ?? null;
+    const enrolledIds = await getEnrolledIds(req);     // ← resolve purchased IDs
+    const courses     = await getPublishedCourses(userId, enrolledIds);  // ← pass them down
     return res.status(200).json({ success: true, courses });
   } catch (error) {
     console.error("getPublishedCourse error:", error.message);

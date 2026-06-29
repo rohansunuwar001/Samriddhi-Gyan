@@ -14,7 +14,6 @@ import { Notification } from "../models/notification.model.js";
 import { generateOrderId } from "../helpers/Generateorderid.helper.js";
 import { createNotification } from "./notification.service.js";
 
-
 /**
  * Creates a new pending order OR reuses an existing one if the user
  * already has a recent pending order for the same courses.
@@ -22,10 +21,14 @@ import { createNotification } from "./notification.service.js";
  * Returns: { order, courses, totalAmount, purchaseCourses, reused }
  *   - reused: true if an existing pending order was returned instead of creating a new one
  */
-export const createPendingOrder = async ({ userId, courseIds, paymentMethod }) => {
+export const createPendingOrder = async ({
+  userId,
+  courseIds,
+  paymentMethod,
+}) => {
   // Fetch course data to lock prices
   const courses = await Course.find({ _id: { $in: courseIds } }).select(
-    "title thumbnail price"
+    "title thumbnail price",
   );
 
   if (courses.length !== courseIds.length) {
@@ -41,7 +44,7 @@ export const createPendingOrder = async ({ userId, courseIds, paymentMethod }) =
 
   const totalAmount = purchaseCourses.reduce(
     (sum, item) => sum + item.priceAtPurchase,
-    0
+    0,
   );
 
   // ── Check for an existing recent pending order for the same user + courses ──
@@ -59,7 +62,7 @@ export const createPendingOrder = async ({ userId, courseIds, paymentMethod }) =
 
   if (existingPendingOrder) {
     console.log(
-      `[createPendingOrder] Reusing existing pending order ${existingPendingOrder.orderId} for user ${userId}`
+      `[createPendingOrder] Reusing existing pending order ${existingPendingOrder.orderId} for user ${userId}`,
     );
     return {
       order: existingPendingOrder,
@@ -103,26 +106,36 @@ export const completeOrder = async (purchase) => {
  
   const courseIds = purchase.courses.map((c) => c.courseId);
  
-  // Add courses to user's enrolledCourses, remove from cart + wishlist
+  // Fetch titles from DB — courseId is a plain ObjectId, not populated
+  const courseDetails = await Course.find({ _id: { $in: courseIds } })
+    .select("title")
+    .lean();
+  const courseTitles = courseDetails.map((c) => c.title).join('", "');
+ 
   await User.findByIdAndUpdate(purchase.userId, {
     $addToSet: { enrolledCourses: { $each: courseIds } },
     $pull: {
-      cart:     { $in: courseIds },
+      cart: { $in: courseIds },
       wishlist: { $in: courseIds },
     },
   });
+
+  const updatedUser = await User.findById(purchase.userId)
+  .select("enrolledCourses")
+  .lean();
+
+console.log("Updated User:", updatedUser);
  
-  // Add user to each course's enrolledStudents
   await Course.updateMany(
     { _id: { $in: courseIds } },
     { $addToSet: { enrolledStudents: purchase.userId } }
   );
  
-  // FIX: Use createNotification() instead of Notification.create()
-  // This saves to DB AND sends real-time socket event to the user
   await createNotification(
     purchase.userId,
-    `Your purchase was successful! You are now enrolled in ${courseIds.length} course(s).`,
+    courseDetails.length === 1
+      ? `Your purchase was successful! You are now enrolled in "${courseTitles}".`
+      : `Your purchase was successful! You are now enrolled in: "${courseTitles}".`,
     "/my-learning",
     "course_enrollment"
   );
@@ -142,7 +155,7 @@ export const failOrder = async (purchaseId) => {
   const order = await CoursePurchase.findByIdAndUpdate(
     purchaseId,
     { status: "failed" },
-    { new: true }
+    { new: true },
   );
   return order;
 };

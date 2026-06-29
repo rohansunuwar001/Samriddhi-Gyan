@@ -1,28 +1,24 @@
+// server/controllers/recommendation.controller.js
+//
+// CHANGES FROM ORIGINAL:
+//   1. Removed the inline getEnrolledIds() function (lines 13-22 in original).
+//      It was a duplicate of courseFilter.helper.js and read JWT manually instead
+//      of using req.user — which only works if loadUserIfAuthenticated middleware
+//      is on the route (see recommended.route.js change).
+//   2. Imported getEnrolledIds from the shared helper instead.
+//   3. No logic changes to getTrendingCourses, getFeaturedCourses, or
+//      getRecommendedCourses — they already had the correct $nin filtering.
+
 import { Course } from "../models/course.model.js";
 import { User } from "../models/user.model.js";
 import { CoursePurchase } from "../models/coursePurchase.model.js";
-import jwt from "jsonwebtoken";
 import { buildUserVectorFromEnrolled, cosineSimilarity } from "../utils/embedding.js";
+import { getEnrolledIds } from "../helpers/courseFilter.helper.js";
+
+
+// jwt import removed — no longer needed here since the helper handles token resolution
 
 const populateCreator = { path: "creator", select: "name email photoUrl" };
-
-/**
- * Extract the enrolled course ID strings for the requesting user.
- * Used by trending and featured controllers to filter out purchased courses.
- * Returns an empty array for guests or on token errors.
- */
-async function getEnrolledIds(req) {
-  const token = req.cookies?.token || req.headers?.authorization?.split?.(" ")?.[1];
-  if (!token) return [];
-  try {
-    const decoded = jwt.verify(token, process.env.SECRET_KEY);
-    if (!decoded?.userId) return [];
-    const u = await User.findById(decoded.userId).select("enrolledCourses").lean();
-    return (u?.enrolledCourses || []).map((id) => id.toString());
-  } catch (_) {
-    return []; // guest or expired token — no filtering
-  }
-}
 
 /**
  * Returns the most popular published courses, sorted by actual enrollment count.
@@ -66,13 +62,14 @@ export const getFeaturedCourses = async (req, res) => {
     const tab = req.query.tab || "popular";
     const limit = 5;
 
-    // Filter out courses the requesting user already purchased
+    // Uses shared helper — reads req.user (set by loadUserIfAuthenticated middleware)
+    // Returns [] for guests so the $nin filter is skipped cleanly
     const enrolledCourseIds = await getEnrolledIds(req);
 
     if (tab === "new") {
       const courses = await Course.find({
         isPublished: true,
-        _id: { $nin: enrolledCourseIds },   // ← enrolled filter
+        _id: { $nin: enrolledCourseIds },
       })
         .sort({ createdAt: -1 })
         .limit(limit)
@@ -110,7 +107,7 @@ export const getFeaturedCourses = async (req, res) => {
       const courses = await Course.find({
         isPublished: true,
         level: { $in: ["Intermediate", "Advanced"] },
-        _id: { $nin: enrolledCourseIds },   // ← enrolled filter
+        _id: { $nin: enrolledCourseIds },
       })
         .sort({ ratings: -1 })
         .limit(limit)
@@ -122,7 +119,7 @@ export const getFeaturedCourses = async (req, res) => {
 
     // default: "popular"
     const popular = await getPopularCourses(
-      { isPublished: true, _id: { $nin: enrolledCourseIds } },   // ← enrolled filter
+      { isPublished: true, _id: { $nin: enrolledCourseIds } },
       limit
     );
     return res.json({ message: "Most popular courses", featuredCourses: popular });
@@ -140,7 +137,7 @@ export const getTrendingCourses = async (req, res) => {
     const limit = 8;
     const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-    // Filter out courses the requesting user already purchased
+    // Uses shared helper — reads req.user (set by loadUserIfAuthenticated middleware)
     const enrolledCourseIds = await getEnrolledIds(req);
 
     // --- Primary signal: recent completed purchases ---
@@ -149,7 +146,7 @@ export const getTrendingCourses = async (req, res) => {
       { $unwind: "$courses" },
       { $group: { _id: "$courses.courseId", count: { $sum: 1 } } },
       { $sort: { count: -1 } },
-      { $limit: limit * 2 }, // fetch extra to have room after filtering enrolled
+      { $limit: limit * 2 },
     ]);
 
     // Remove courses the user already owns from trending
@@ -222,6 +219,8 @@ export const getTrendingCourses = async (req, res) => {
 };
 
 // ─── Recommended Courses ──────────────────────────────────────────────────────
+// No changes below this line — getRecommendedCourses reads its own JWT directly
+// because it needs userId for the personalization logic, not just enrollment filtering.
 
 export const getRecommendedCourses = async (req, res) => {
   try {
@@ -230,6 +229,7 @@ export const getRecommendedCourses = async (req, res) => {
 
     if (token) {
       try {
+        const { default: jwt } = await import("jsonwebtoken");
         const decoded = jwt.verify(token, process.env.SECRET_KEY);
         userId = decoded?.userId;
       } catch (err) {
@@ -253,8 +253,8 @@ export const getRecommendedCourses = async (req, res) => {
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const enrolledCourses    = user.enrolledCourses || [];
-    const enrolledCourseIds  = enrolledCourses.map((c) => c._id.toString());
+    const enrolledCourses   = user.enrolledCourses || [];
+    const enrolledCourseIds = enrolledCourses.map((c) => c._id.toString());
 
     // No enrolled courses → show popular
     if (enrolledCourses.length === 0) {
@@ -321,7 +321,7 @@ export const getRecommendedCourses = async (req, res) => {
     allCandidates.forEach((c) => uniqueById.set(c._id.toString(), c));
     const uniqueCandidates = Array.from(uniqueById.values());
 
-    const userVector    = await buildUserVectorFromEnrolled(enrolledCourses);
+    const userVector     = await buildUserVectorFromEnrolled(enrolledCourses);
     const enrolledTagSet = new Set(enrolledTags.map((t) => String(t)));
 
     const scored = uniqueCandidates.map((course) => {

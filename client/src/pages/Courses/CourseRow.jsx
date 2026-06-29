@@ -1,190 +1,155 @@
-// src/components/CourseRow.jsx
+// src/components/Courses/CourseRow.jsx
+import React, { useRef, useState, useEffect } from "react";
+import PropTypes from "prop-types";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import CourseCard from "../student/CourseCard";
+ // Adjust this path to match your actual Course Card component
 
-import { useRef } from "react";
-import { Link } from "react-router-dom";
-import { Star, Users, Clock, BookOpen, ChevronRight } from "lucide-react";
+const CourseRow = ({ heading, subheading, courses, sectionTag, actionLabel, onActionClick }) => {
+  const scrollContainerRef = useRef(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
 
-/**
- * Horizontally-scrolling row of course cards (rich style: discount ribbon,
- * level badge, recommended tag, rating, students, duration, lessons, price,
- * instructor avatar).
- *
- * Props:
- *  - heading: string for the row's title (e.g. "Recommended to you based on ratings")
- *  - subheading: optional smaller gray line under the heading
- *  - sectionTag: optional small pill next to the heading (e.g. "New")
- *  - actionLabel: optional link text shown at the right of the heading (e.g. "Edit occupation")
- *  - onActionClick: handler for actionLabel
- *  - courses: array of course objects to display
- *  - badgeText: text for the corner "Recommended" style tag (set to "" to hide it)
- */
-const CourseRow = ({
-  heading,
-  subheading = "",
-  sectionTag = "",
-  actionLabel = "",
-  onActionClick,
-  courses = [],
-  badgeText = "Recommended",
-}) => {
-  const scrollRef = useRef(null);
-
-  const scrollByCard = () => {
-    if (!scrollRef.current) return;
-    scrollRef.current.scrollBy({ left: 300, behavior: "smooth" });
+  // Check scroll position to dynamically show/hide navigation arrows
+  const checkScrollPosition = () => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      const { scrollLeft, scrollWidth, clientWidth } = container;
+      setShowLeftArrow(scrollLeft > 5);
+      // Give a tiny pixel buffer for rounding errors on high-DPI screens
+      setShowRightArrow(scrollLeft + clientWidth < scrollWidth - 5);
+    }
   };
 
-  if (!courses || courses.length === 0) return null;
+  useEffect(() => {
+    const container = scrollContainerRef.current;
+    if (container) {
+      checkScrollPosition();
+      container.addEventListener("scroll", checkScrollPosition);
+      window.addEventListener("resize", checkScrollPosition);
+    }
 
-  const formatDuration = (seconds = 0) => {
-    const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    return `${h}h ${m}m`;
-  };
+    return () => {
+      if (container) {
+        container.removeEventListener("scroll", checkScrollPosition);
+      }
+      window.removeEventListener("resize", checkScrollPosition);
+    };
+  }, [courses]);
+
+  // Handle manual clicking of the arrows
+  const handleScroll = (direction) => {
+  const container = scrollContainerRef.current;
+  if (container) {
+    // 1. Find the very first course card in the row
+    const firstItem = container.querySelector(":scope > *");
+    
+    if (firstItem) {
+      // 2. Get the card's exact width (including padding/borders)
+      const itemWidth = firstItem.offsetWidth;
+      
+      // 3. Grab the spacing gap between cards (defaults to 24px if gap-6 is used)
+      const gap = parseInt(window.getComputedStyle(container).gap) || 24;
+      
+      // 4. Scroll by exactly one card unit
+      const scrollAmount = itemWidth + gap;
+
+      container.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
+    } else {
+      // Fallback if no children exist yet
+      const fallbackAmount = 280; 
+      container.scrollBy({
+        left: direction === "left" ? -fallbackAmount : fallbackAmount,
+        behavior: "smooth",
+      });
+    }
+  }
+};
 
   return (
-    <section className="mb-12">
-      <div className="flex items-center justify-between flex-wrap gap-2">
-        <div className="flex items-center gap-3">
-          <h2 className="text-2xl font-bold text-slate-800">{heading}</h2>
-          {sectionTag && (
-            <span className="text-xs font-semibold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded">
-              {sectionTag}
-            </span>
-          )}
+    <div className="mb-12 relative group/row">
+      {/* Header section with optional tags or action buttons */}
+      <div className="flex items-center justify-between mb-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold text-gray-900 md:text-2xl">{heading}</h2>
+            {sectionTag && (
+              <span className="bg-violet-100 text-violet-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+                {sectionTag}
+              </span>
+            )}
+          </div>
+          {subheading && <p className="text-sm text-gray-500 mt-1">{subheading}</p>}
         </div>
-        {actionLabel && (
-          <button
-            onClick={onActionClick}
-            className="text-violet-600 text-sm font-medium hover:underline"
-          >
+        
+        {actionLabel && onActionClick && (
+          <Button variant="ghost" size="sm" onClick={onActionClick} className="text-violet-600 hover:text-violet-700">
             {actionLabel}
-          </button>
+          </Button>
         )}
       </div>
-      {subheading && (
-        <p className="text-sm text-slate-500 mt-1">{subheading}</p>
-      )}
 
-      <div className="relative mt-5">
+      {/* Carousel Wrapper */}
+      <div className="relative mx-[-16px] px-[16px]">
+        {/* Left Arrow Button */}
+        {showLeftArrow && (
+          <div className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden group-hover/row:block transition-all">
+            <Button
+              variant="secondary"
+              size="icon"
+              className="h-10 w-10 rounded-full shadow-lg border border-gray-200 opacity-90 hover:opacity-100"
+              onClick={() => handleScroll("left")}
+              aria-label="Scroll left"
+            >
+              <ChevronLeft className="h-6 w-6 text-gray-700" />
+            </Button>
+          </div>
+        )}
+
+        {/* Right Arrow Button */}
+        {showRightArrow && (
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hidden group-hover/row:block transition-all">
+            <Button
+              variant="secondary"
+              size="icon"
+              className="h-10 w-10 rounded-full shadow-lg border border-gray-200 opacity-90 hover:opacity-100"
+              onClick={() => handleScroll("right")}
+              aria-label="Scroll right"
+            >
+              <ChevronRight className="h-6 w-6 text-gray-700" />
+            </Button>
+          </div>
+        )}
+
+        {/* Scrollable Container */}
         <div
-          ref={scrollRef}
-          className="flex gap-6 overflow-x-auto pb-2 scroll-smooth [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          ref={scrollContainerRef}
+          className="flex gap-5 overflow-x-auto scrollbar-none scroll-smooth pb-4 snap-x snap-mandatory"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
-          {courses.map((course) => {
-            const current = course.price?.current ?? 0;
-            const original = course.price?.original;
-            const hasDiscount = original && original > current;
-            const discountPct = hasDiscount
-              ? Math.round(100 - (current / original) * 100)
-              : null;
-
-            // Matches the real Course schema (level, ratings, numOfReviews,
-            // enrolledStudents, totalLectures, totalDurationInSeconds, creator)
-            const level = course.level || "All Levels";
-            const rating = course.ratings ?? 0;
-            const numRatings = course.numOfReviews ?? 0;
-            const students = course.enrolledStudents?.length ?? 0;
-            const duration = formatDuration(course.totalDurationInSeconds);
-            const lessons = course.totalLectures ?? 0;
-            const avatar = course.creator?.photoUrl;
-
-            return (
-              <Link
-                key={course._id}
-                to={`/course-detail/${course._id}`}
-                className="flex-shrink-0 w-72 bg-white border rounded-xl shadow-sm overflow-hidden hover:shadow-md transition-shadow"
-              >
-                {/* Thumbnail with overlay badges */}
-                <div className="relative w-full h-40">
-                  <img
-                    src={course.thumbnail || "/placeholder.jpg"}
-                    alt={course.title}
-                    className="w-full h-full object-cover"
-                  />
-                  {hasDiscount && (
-                    <span className="absolute top-3 left-3 bg-red-500 text-white text-xs font-bold px-2 py-1 rounded">
-                      {discountPct}% OFF
-                    </span>
-                  )}
-                  <span className="absolute top-3 right-3 bg-blue-600 text-white text-xs font-semibold px-2 py-1 rounded">
-                    {level}
-                  </span>
-                  {badgeText && (
-                    <span className="absolute bottom-3 right-3 bg-violet-600 text-white text-xs font-semibold px-2 py-1 rounded">
-                      {badgeText}
-                    </span>
-                  )}
-                </div>
-
-                {/* Content */}
-                <div className="p-4">
-                  <h3 className="font-bold text-lg leading-snug line-clamp-1">
-                    {course.title}
-                  </h3>
-
-                  <div className="flex items-center gap-4 mt-2 text-sm text-gray-600">
-                    <span className="flex items-center gap-1">
-                      <Star className="h-4 w-4 fill-amber-500 text-amber-500" />
-                      <span className="font-semibold">{rating.toFixed(1)}</span>
-                      <span className="text-gray-400">({numRatings})</span>
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <Users className="h-4 w-4" />
-                      {students} student{students !== 1 ? "s" : ""}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center gap-4 mt-1.5 text-sm text-gray-500">
-                    <span className="flex items-center gap-1">
-                      <Clock className="h-4 w-4" />
-                      {duration}
-                    </span>
-                    <span className="flex items-center gap-1">
-                      <BookOpen className="h-4 w-4" />
-                      {lessons} lesson{lessons !== 1 ? "s" : ""}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between mt-3">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-blue-700 font-bold text-xl">
-                        Rs{current}
-                      </span>
-                      {hasDiscount && (
-                        <span className="text-gray-400 text-sm line-through">
-                          Rs{original}
-                        </span>
-                      )}
-                    </div>
-                    {avatar ? (
-                      <img
-                        src={avatar}
-                        alt={course.creator?.name || "Instructor"}
-                        className="h-9 w-9 rounded-full object-cover border"
-                      />
-                    ) : (
-                      <div className="h-9 w-9 rounded-full bg-gray-200" />
-                    )}
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
+          {courses.map((course) => (
+            <div key={course._id} className="flex-shrink-0 w-64 snap-start">
+              {/* Substitute this with your actual individual item component */}
+              <CourseCard course={course} />
+            </div>
+          ))}
         </div>
-
-        {courses.length > 3 && (
-          <button
-            onClick={scrollByCard}
-            aria-label="Scroll for more courses"
-            className="hidden md:flex items-center justify-center absolute right-0 top-1/3 -translate-y-1/2 translate-x-1/2 h-9 w-9 rounded-full bg-white border shadow-md hover:bg-gray-50"
-          >
-            <ChevronRight className="h-5 w-5 text-gray-700" />
-          </button>
-        )}
       </div>
-    </section>
+    </div>
   );
+};
+
+CourseRow.propTypes = {
+  heading: PropTypes.node.isRequired,
+  subheading: PropTypes.string,
+  courses: PropTypes.array.isRequired,
+  sectionTag: PropTypes.string,
+  actionLabel: PropTypes.string,
+  onActionClick: PropTypes.func,
 };
 
 export default CourseRow;
