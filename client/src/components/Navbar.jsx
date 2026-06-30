@@ -75,7 +75,7 @@ const UserAvatar = ({ user, onLogout, t }) => {
           {user?.role === "student" && (
             <DropdownMenuItem asChild>
               <Link
-                to="/my-learning"
+                to="/home/my-courses/learning"
                 className="w-full flex items-center gap-2 cursor-pointer"
               >
                 {t("navbar.my_learning")}
@@ -380,7 +380,7 @@ const Navbar = () => {
               <UserAvatar user={user} onLogout={logoutHandler} t={t} />
             ) : !isInstructorOrAdmin && user ? (
               <div className="flex items-center gap-4">
-                <Link to="/wishlist" className="text-2xl text-gray-700 hover:text-purple-600" aria-label={t("navbar.wishlist")}>
+                <Link to="/home/my-courses/wishlist" className="text-2xl text-gray-700 hover:text-purple-600" aria-label={t("navbar.wishlist")}>
                   <Heart />
                 </Link>
                 <Link to="/cart" className="text-2xl text-gray-700 hover:text-purple-600" aria-label={t("navbar.cart")}>
@@ -426,7 +426,7 @@ const Navbar = () => {
                   <BookOpen size={16} /> {t("navbar.courses_heading")}
                 </Link>
                 {user?.role === "student" && (
-                  <Link to="/my-learning" className="flex items-center gap-3 rounded-lg px-3 py-2 text-base font-medium hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
+                  <Link to="/home/my-courses/learning" className="flex items-center gap-3 rounded-lg px-3 py-2 text-base font-medium hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
                     <BookOpen size={16} /> {t("navbar.my_learning")}
                   </Link>
                 )}

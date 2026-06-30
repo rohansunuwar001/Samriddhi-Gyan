@@ -55,6 +55,7 @@ const EditLectureForm = () => {
   const navigate = useNavigate();
 
   const [title, setTitle]       = useState("");
+  const [description, setDescription] = useState("");
   const [isPreview, setIsPreview] = useState(false);
   const [selectedFile, setSelectedFile]     = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
@@ -74,6 +75,7 @@ const EditLectureForm = () => {
   useEffect(() => {
     if (lectureData?.lecture) {
       setTitle(lectureData.lecture.title || "");
+      setDescription(lectureData.lecture.description || "");
       setIsPreview(lectureData.lecture.isPreview || false);
       setProcessingStatus(lectureData.lecture.status || "pending");
     }
@@ -169,7 +171,13 @@ const EditLectureForm = () => {
     e.preventDefault();
     if (!title.trim()) { toast.error("Title is required"); return; }
     try {
-      const res = await updateLecture({ lectureId, title: title.trim(), isPreview, courseId }).unwrap();
+      const res = await updateLecture({
+        lectureId,
+        title: title.trim(),
+        description: description.trim(),
+        isPreview,
+        courseId,
+      }).unwrap();
       toast.success(res.message || "Lecture updated!");
     } catch (err) {
       toast.error(err?.data?.message || "Update failed.");
@@ -226,6 +234,21 @@ const EditLectureForm = () => {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               placeholder="Enter lecture title"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="description">
+              Lecture Description
+            </Label>
+
+            <textarea
+              id="description"
+              rows={6}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="Enter lecture description..."
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
 

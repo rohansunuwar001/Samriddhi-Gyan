@@ -31,9 +31,7 @@ export const authApi = apiSlice.injectEndpoints({
         
         // --- ADD THIS NEW DEDICATED ENDPOINT ---
         getMyLearningCourses: builder.query({
-            query: () => '/user/my-learning', // This calls your new dedicated backend route
-            // The API for this route should return `{ success: true, courses: [...] }`
-            // This tag helps RTK Query auto-refetch data when a course is purchased or changed.
+            query: () => '/user/my-learning', 
             providesTags: (result) =>
                 result?.courses
                     ? [
@@ -41,6 +39,24 @@ export const authApi = apiSlice.injectEndpoints({
                           { type: 'Course', id: 'MY_LEARNING_LIST' },
                       ]
                     : [{ type: 'Course', id: 'MY_LEARNING_LIST' }],
+        }),
+        getArchivedCourses: builder.query({
+            query: () => '/user/archived',
+            providesTags: (result) =>
+                result?.courses
+                    ? [
+                          ...result.courses.map(({ _id }) => ({ type: 'Course', id: _id })),
+                          { type: 'Course', id: 'ARCHIVED_LIST' },
+                      ]
+                    : [{ type: 'Course', id: 'ARCHIVED_LIST' }],
+        }),
+        archiveCourse: builder.mutation({
+            query: (courseId) => ({ url: `/user/archive/${courseId}`, method: 'POST' }),
+            invalidatesTags: [{ type: 'Course', id: 'MY_LEARNING_LIST' }, { type: 'Course', id: 'ARCHIVED_LIST' }],
+        }),
+        unarchiveCourse: builder.mutation({
+            query: (courseId) => ({ url: `/user/unarchive/${courseId}`, method: 'POST' }),
+            invalidatesTags: [{ type: 'Course', id: 'MY_LEARNING_LIST' }, { type: 'Course', id: 'ARCHIVED_LIST' }],
         }),
         // ------------------------------------
 
@@ -70,7 +86,10 @@ export const {
     useLogoutUserMutation,
     useLoadUserQuery,
     useTrackCourseViewMutation,
-    useGetMyLearningCoursesQuery, // <-- EXPORT THE NEW HOOK
+    useGetMyLearningCoursesQuery,
+    useGetArchivedCoursesQuery,
+    useArchiveCourseMutation,
+    useUnarchiveCourseMutation,
     useUpdateUserInfoMutation,
     useUpdateUserAvatarMutation,
     useUpdateUserPasswordMutation,

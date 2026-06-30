@@ -19,7 +19,9 @@ import {
   updateUserPassword,
   trackCourseView,
   getMyLearningCourses,
-  
+  archiveCourse,
+  unarchiveCourse,
+  getArchivedCourses,
 } from "../service/user.service.js";
 import { validateEmail, validatePassword, validateRequiredFields } from "../helpers/validate.helper.js";
 
@@ -270,6 +272,50 @@ export const trackCourseViewController = async (req, res) => {
     return res.status(error.statusCode || 500).json({
       success: false,
       message: error.message || "Failed to track view.",
+    });
+  }
+};
+
+// Archive course
+export const archiveCourseController = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    await archiveCourse(req.user._id, courseId);
+    return res.status(200).json({ success: true, message: "Course archived successfully." });
+  } catch (error) {
+    console.error("archiveCourse error:", error.message);
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "Failed to archive course.",
+    });
+  }
+};
+
+// Unarchive course
+export const unarchiveCourseController = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+    await unarchiveCourse(req.user._id, courseId);
+    return res.status(200).json({ success: true, message: "Course unarchived successfully." });
+  } catch (error) {
+    console.error("unarchiveCourse error:", error.message);
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "Failed to unarchive course.",
+    });
+  }
+};
+
+// Get archived courses
+export const getArchivedCoursesController = async (req, res) => {
+  try {
+    const courses = await getArchivedCourses(req.user._id);
+    return res.status(200).json({ success: true, courses });
+  } catch (error) {
+    console.error("getArchivedCourses error:", error.message);
+    return res.status(error.statusCode || 500).json({
+      success: false,
+      message: error.message || "Failed to load archived courses.",
     });
   }
 };

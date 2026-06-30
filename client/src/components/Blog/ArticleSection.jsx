@@ -1,11 +1,10 @@
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import ArticleCard from './ArticleCard'; // Ensure this path is correct
+import ArticleCard from './ArticleCard';
 import { ChevronRight } from 'lucide-react';
 
-const ArticleSection = ({ title, articles }) => {
+const ArticleSection = ({ title, categorySlug, articles }) => {
     if (articles.length === 0) return null;
-    const categorySlug = title.replace(' Articles', '').toLowerCase().replace(/ & /g, '-').replace(/ /g, '-');
 
     return (
         <section className="container mx-auto px-6 py-16">
@@ -18,7 +17,7 @@ const ArticleSection = ({ title, articles }) => {
             {/* The individual ArticleCard components will animate themselves */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 items-stretch">
                 {articles.slice(0, 4).map(article => (
-                    <div key={article.id} className="lg:col-span-1">
+                    <div key={article._id} className="lg:col-span-1">
                         <ArticleCard article={article} />
                     </div>
                 ))}
@@ -36,6 +35,7 @@ const ArticleSection = ({ title, articles }) => {
 
 ArticleSection.propTypes = {
     title: PropTypes.string.isRequired,
+    categorySlug: PropTypes.string.isRequired,
     articles: PropTypes.arrayOf(PropTypes.object).isRequired,
 };
 

@@ -1,63 +1,121 @@
 import PropTypes from "prop-types";
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { FaFacebookF, FaLink, FaLinkedinIn, FaStar } from "react-icons/fa";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Search,
+  MessageSquare,
+  ThumbsUp,
+  Trash2,
+  Calendar,
+  Clock,
+  Plus,
+  Loader2,
+  Sparkles,
+  ArrowLeft,
+  Bot
+} from "lucide-react";
 import ReviewsSection from "../Reviews/ReviewSection";
 import BolaVideoPlayer from "../admin/lecture/BolaVideoPlayer";
+import {
+  useGetCourseQuestionsQuery,
+  useCreateQuestionMutation,
+  useToggleUpvoteMutation,
+  useAddAnswerMutation
+} from "@/features/api/questionApi";
+import {
+  useGetUserRemindersQuery,
+  useCreateReminderMutation,
+  useDeleteReminderMutation
+} from "@/features/api/reminderApi";
+import { toast } from "sonner";
+import axios from "axios";
+import { BASE_URL } from "@/app/constant";
 
-
-const LineProgress = React.memo(function LineProgress({ percent }) {
-  const roundedPercent = Math.round(percent);
-  return (
-    <div className="my-6">
-      <div className="flex justify-between mb-1">
-        <span className="text-base font-medium text-gray-700">Course Progress</span>
-        <span className="text-sm font-medium text-gray-700">{roundedPercent}% Completed</span>
-      </div>
-      <div className="w-full bg-gray-200 rounded-full h-2.5">
-        <div
-          className="bg-green-500 h-2.5 rounded-full"
-          style={{ width: `${Math.min(roundedPercent, 100)}%`, transition: "width 0.35s ease-out" }}
-        />
-      </div>
-    </div>
-  );
-});
-LineProgress.propTypes = { percent: PropTypes.number.isRequired };
-
-const MainContent = ({ courseData, selectedLecture, progress = [], onLectureViewed }) => {
-  const [selectedTab, setSelectedTab] = React.useState("overview");
-  const [questionText, setQuestionText] = React.useState("");
+const MainContent = ({
+  courseData,
+  selectedLecture,
+  progress = [],
+  onLectureViewed,
+  prevLecture,
+  nextLecture,
+  onPrevLecture,
+  onNextLecture,
+  isSidebarOpen,
+  setIsSidebarOpen,
+}) => {
+  const [selectedTab, setSelectedTab] = useState("overview");
 
   const course = courseData?.course;
+  const courseId = course?._id;
 
-  const totalDuration = React.useMemo(() => {
+  // Q&A queries & states
+  const { data: qnaData, isLoading: qnaLoading } = useGetCourseQuestionsQuery(courseId, { skip: !courseId });
+  const [createQuestion] = useCreateQuestionMutation();
+  const [toggleUpvote] = useToggleUpvoteMutation();
+  const [addAnswer] = useAddAnswerMutation();
+
+  const [searchQuery, setSearchQuery] = useState("");
+  const [lectureFilter, setLectureFilter] = useState("all");
+  const [sortBy, setSortBy] = useState("recommended");
+
+  const [isAsking, setIsAsking] = useState(false);
+  const [newTitle, setNewTitle] = useState("");
+  const [newContent, setNewContent] = useState("");
+  
+  const [selectedQuestion, setSelectedQuestion] = useState(null);
+  const [newAnswerText, setNewAnswerText] = useState("");
+
+  // AI assistant dialog within Q&A
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiResponse, setAiResponse] = useState("");
+  const [aiLoading, setAiLoading] = useState(false);
+  const [showAiModal, setShowAiModal] = useState(false);
+
+  // Reminders queries & states
+  const { data: reminderData } = useGetUserRemindersQuery(courseId, { skip: !courseId });
+  const [createReminder] = useCreateReminderMutation();
+  const [deleteReminder] = useDeleteReminderMutation();
+
+  const [isAddingReminder, setIsAddingReminder] = useState(false);
+  const [reminderTime, setReminderTime] = useState("09:00");
+  const [reminderDays, setReminderDays] = useState(["Monday"]);
+  const [reminderFrequency, setReminderFrequency] = useState("Weekly");
+
+  const totalDuration = useMemo(() => {
     if (!course) return 0;
     return (course.sections || []).reduce(
       (sectionSum, section) =>
-        sectionSum + (section.lectures || []).reduce(
-          (lectureSum, lecture) => lectureSum + (lecture.durationInSeconds || 0), 0
-        ), 0
+        sectionSum +
+        (section.lectures || []).reduce(
+          (lectureSum, lecture) => lectureSum + (lecture.durationInSeconds || 0),
+          0
+        ),
+      0
     );
   }, [course]);
 
-  const watchedDuration = React.useMemo(() => {
+  const watchedDuration = useMemo(() => {
     if (!course) return 0;
     return (course.sections || []).reduce(
       (sectionSum, section) =>
-        sectionSum + (section.lectures || []).reduce((lectureSum, lecture) => {
+        sectionSum +
+        (section.lectures || []).reduce((lectureSum, lecture) => {
           const isViewed = progress.some((lp) => lp.lectureId === lecture._id && lp.viewed);
           return lectureSum + (isViewed ? lecture.durationInSeconds || 0 : 0);
-        }, 0), 0
+        }, 0),
+      0
     );
   }, [progress, course]);
 
-  const percent = React.useMemo(() => {
+  const percent = useMemo(() => {
     if (totalDuration === 0) return 0;
     return Math.min((watchedDuration / totalDuration) * 100, 100);
   }, [watchedDuration, totalDuration]);
 
   if (!course) {
-    return <div className="p-10 text-center font-semibold">Loading Content...</div>;
+    return <div className="p-10 text-center font-normal">Loading Content...</div>;
   }
 
   const ratings = course.ratings || 0;
@@ -72,155 +130,824 @@ const MainContent = ({ courseData, selectedLecture, progress = [], onLectureView
   const instructorLinks = instructor.links || {};
 
   const totalLectures = (course.sections || []).reduce(
-    (sum, section) => sum + (section.lectures?.length || 0), 0
+    (sum, section) => sum + (section.lectures?.length || 0),
+    0
   );
 
-  const handleQuestionSubmit = (e) => {
-    e.preventDefault();
-    console.log("Submitting question:", questionText);
-    setQuestionText("");
-  };
-
-  const formatDuration = (seconds = 0) => {
+  const formatDurationString = (seconds = 0) => {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
-    const s = Math.floor(seconds % 60);
-    return h > 0
-      ? `${h}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`
-      : `${m}:${s.toString().padStart(2, "0")}`;
+    return h > 0 ? `${h}h ${m}m` : `${m}m`;
   };
 
+  // Q&A Submissions
+  const handleAskSubmit = async (e) => {
+    e.preventDefault();
+    if (!newTitle.trim() || !newContent.trim()) {
+      toast.error("Please fill in both the title and details.");
+      return;
+    }
+    try {
+      await createQuestion({
+        courseId,
+        lectureId: selectedLecture?._id,
+        title: newTitle,
+        content: newContent
+      }).unwrap();
+      toast.success("Question posted successfully!");
+      setNewTitle("");
+      setNewContent("");
+      setIsAsking(false);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to post question.");
+    }
+  };
+
+  const handleAnswerSubmit = async (e) => {
+    e.preventDefault();
+    if (!newAnswerText.trim()) return;
+    try {
+      const res = await addAnswer({
+        questionId: selectedQuestion._id,
+        content: newAnswerText
+      }).unwrap();
+      setSelectedQuestion(res.question);
+      setNewAnswerText("");
+      toast.success("Answer posted successfully!");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to post answer.");
+    }
+  };
+
+  const handleUpvoteClick = async (questionId, e) => {
+    e.stopPropagation();
+    try {
+      await toggleUpvote(questionId).unwrap();
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  // Q&A Filters
+  const filteredQuestions = useMemo(() => {
+    const list = qnaData?.questions || [];
+    return list.filter((q) => {
+      const matchesSearch =
+        !searchQuery.trim() ||
+        q.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        q.content?.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const matchesLecture =
+        lectureFilter === "all" ||
+        (q.lectureId?._id === selectedLecture?._id);
+
+      return matchesSearch && matchesLecture;
+    }).sort((a, b) => {
+      if (sortBy === "recommended") {
+        return (b.upvotes?.length || 0) - (a.upvotes?.length || 0);
+      }
+      return new Date(b.createdAt) - new Date(a.createdAt);
+    });
+  }, [qnaData, searchQuery, lectureFilter, sortBy, selectedLecture]);
+
+  // AI assistant direct ask Q&A
+  const handleAiAsk = async (e) => {
+    e.preventDefault();
+    if (!aiPrompt.trim()) return;
+    setAiLoading(true);
+    setAiResponse("");
+    try {
+      const host = BASE_URL || import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
+      const res = await axios.post(`${host}/api/v1/ai/ask`, {
+        prompt: aiPrompt,
+      });
+      setAiResponse(res.data.answer);
+    } catch (err) {
+      console.error(err);
+      setAiResponse("I was unable to retrieve a response at this time. Please try again.");
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
+  // Reminders Actions
+  const handleAddReminder = async (e) => {
+    e.preventDefault();
+    if (!reminderDays.length) {
+      toast.error("Please select at least one day.");
+      return;
+    }
+    try {
+      await createReminder({
+        courseId,
+        time: reminderTime,
+        days: reminderDays,
+        frequency: reminderFrequency
+      }).unwrap();
+      toast.success("Learning reminder saved successfully!");
+      setIsAddingReminder(false);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to add learning reminder.");
+    }
+  };
+
+  const handleReminderDelete = async (reminderId) => {
+    try {
+      await deleteReminder(reminderId).unwrap();
+      toast.success("Reminder deleted.");
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const toggleDaySelection = (day) => {
+    setReminderDays((prev) =>
+      prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day]
+    );
+  };
+
+  const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+  const tabs = [
+    { id: "overview", label: "Overview" },
+    { id: "qna", label: "Q&A" },
+    { id: "notes", label: "Notes" },
+    { id: "announcements", label: "Announcements" },
+    { id: "reviews", label: "Reviews" },
+    { id: "tools", label: "Learning tools" },
+  ];
+
   return (
-    <main className="flex-grow bg-white p-6 md:p-10">
-
-      {/* ── Video Player ── */}
-      {selectedLecture?.videoUrl ? (
-        // HLS lecture — use BOLA adaptive bitrate player
-        // onPlay fires when playback starts, marking the lecture as viewed
-        <BolaVideoPlayer
-          key={selectedLecture._id}
-          src={selectedLecture.videoUrl}
-          onPlay={() => onLectureViewed(selectedLecture._id)}
-        />
-      ) : (
-        // No video yet — show course thumbnail placeholder
-        <div
-          className="relative bg-black w-full"
-          style={{ paddingTop: "56.25%" }}
-        >
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-900 text-white text-center p-4">
-            <img
-              src={course.thumbnail}
-              alt={course.title}
-              className="max-h-32 opacity-60 rounded"
+    <main className="flex-grow bg-white flex flex-col h-full overflow-y-auto select-none relative">
+      {/* ── Video Player Area with Dark Background ── */}
+      <div className="relative bg-[#1c1d1f] w-full flex items-center justify-center group/player">
+        <div className="w-full max-w-[1200px] relative aspect-video">
+          {selectedLecture?.videoUrl ? (
+            <BolaVideoPlayer
+              key={selectedLecture._id}
+              src={selectedLecture.videoUrl}
+              onEnded={() => onLectureViewed(selectedLecture._id)}
             />
-            <div className="mt-4 font-semibold text-lg">
-              {selectedLecture?.title || "Select a lecture from the sidebar"}
+          ) : (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#1c1d1f] text-white text-center p-4">
+              <img
+                src={course.thumbnail}
+                alt={course.title}
+                className="max-h-32 opacity-40 rounded mb-4"
+              />
+              <div className="font-normal text-base text-gray-300">
+                {selectedLecture?.title || "Select a lecture from the sidebar"}
+              </div>
             </div>
-          </div>
+          )}
         </div>
-      )}
 
-      <LineProgress percent={percent} />
+        {/* Previous Lecture Skip Overlay Control */}
+        {prevLecture && (
+          <button
+            onClick={onPrevLecture}
+            className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/90 text-white h-11 w-11 rounded-full flex items-center justify-center opacity-0 group-hover/player:opacity-100 transition-opacity duration-200 z-20"
+            title={`Previous: ${prevLecture.title}`}
+          >
+            <ChevronLeft className="h-6 w-6" />
+          </button>
+        )}
 
-      {/* ── Tabs ── */}
-      <div className="mt-4 border-b border-gray-200">
-        <nav className="flex space-x-8 -mb-px">
-          {["overview", "qna", "reviews"].map((tab) => (
-            <button
-              key={tab}
-              className={`py-4 px-1 border-b-2 text-sm font-semibold transition-colors duration-200 ${
-                selectedTab === tab
-                  ? "border-black text-gray-900"
-                  : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
-              }`}
-              onClick={() => setSelectedTab(tab)}
-            >
-              {tab === "qna" ? "Q&A" : tab.charAt(0).toUpperCase() + tab.slice(1)}
-            </button>
-          ))}
-        </nav>
+        {/* Next Lecture Skip Overlay Control */}
+        {nextLecture && (
+          <button
+            onClick={onNextLecture}
+            className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/90 text-white h-11 w-11 rounded-full flex items-center justify-center opacity-0 group-hover/player:opacity-100 transition-opacity duration-200 z-20"
+            title={`Next: ${nextLecture.title}`}
+          >
+            <ChevronRight className="h-6 w-6" />
+          </button>
+        )}
+
+        {/* Float Chevron to Slide-out/Toggle Sidebar if closed */}
+        {!isSidebarOpen && (
+          <button
+            onClick={() => setIsSidebarOpen(true)}
+            className="absolute right-0 top-1/2 -translate-y-1/2 bg-[#1c1d1f] hover:bg-black border-l border-y border-gray-600 text-white h-12 w-6 flex items-center justify-center rounded-l-md shadow-md z-30"
+            title="Open course content sidebar"
+          >
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+        )}
       </div>
 
-      {/* ── Tab Content ── */}
-      <div className="mt-8">
+      {/* Tabs and Details Area */}
+      <div className="px-6 md:px-12 py-6 flex-1 bg-white">
+        {/* Tab switch bar */}
+        <div className="border-b border-[#d1d7dc]">
+          <nav className="flex space-x-6 overflow-x-auto scrollbar-none -mb-px">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                className={`py-3 px-1 border-b-2 text-xs font-bold transition-all whitespace-nowrap ${
+                  selectedTab === tab.id
+                    ? "border-[#2d2f31] text-[#2d2f31]"
+                    : "border-transparent text-[#6a6f73] hover:text-[#2d2f31]"
+                }`}
+                onClick={() => setSelectedTab(tab.id)}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </nav>
+        </div>
 
-        {selectedTab === "overview" && (
-          <article className="mt-8 max-w-4xl">
-            <h1 className="text-3xl font-bold">{course.title}</h1>
-            <p className="text-lg mt-2 text-gray-700">{course.subtitles}</p>
-            <div className="flex items-center space-x-4 mt-3 text-sm">
-              <div className="flex items-center">
-                <span className="font-bold text-orange-500 mr-1">{ratings.toFixed(1)}</span>
-                <FaStar className="text-orange-400" />
+        {/* Tab Panels */}
+        <div className="mt-6 max-w-4xl">
+          {selectedTab === "overview" && (
+            <article className="space-y-6">
+              <div>
+                <h1 className="text-xl font-normal text-[#2d2f31] leading-tight">
+                  About this course
+                </h1>
+                <p className="text-sm mt-2 text-[#6a6f73] font-normal leading-relaxed">
+                  {course.subtitles || "Master this subject step-by-step."}
+                </p>
               </div>
-              <span className="text-blue-600 underline">{numOfReviews} ratings</span>
-              <span>{studentCount} students</span>
-            </div>
-            <p className="mt-2 text-sm">Language: {language} | Level: {level}</p>
 
-            <div className="mt-8 grid grid-cols-2 gap-x-8 gap-y-4 text-sm">
-              <div><span className="font-semibold">Skill Level:</span> {level}</div>
-              <div><span className="font-semibold">Students:</span> {studentCount}</div>
-              <div><span className="font-semibold">Languages:</span> {language}</div>
-              <div><span className="font-semibold">Video:</span> {totalLectures} lectures</div>
-              <div><span className="font-semibold">Total Duration:</span> {formatDuration(totalDuration)}</div>
-              <div><span className="font-semibold">Captions:</span> Yes</div>
-            </div>
+              {/* Course Meta Info row */}
+              <div className="flex items-center gap-x-6 gap-y-2 flex-wrap text-xs text-[#2d2f31]">
+                <div className="flex items-center gap-1">
+                  <span className="font-extrabold text-[#b4690e]">{ratings.toFixed(1)}</span>
+                  <div className="flex items-center text-[#b4690e]">
+                    <FaStar className="h-3 w-3 fill-current" />
+                  </div>
+                  <span className="text-[#5624d0] hover:underline cursor-pointer">
+                    {numOfReviews} ratings
+                  </span>
+                </div>
+                <div>
+                  <span className="font-bold">{studentCount}</span> students
+                </div>
+                <div>
+                  <span className="font-bold">{formatDurationString(totalDuration)}</span> total
+                </div>
+              </div>
 
-            <div className="mt-10 prose max-w-none">
-              <h2 className="text-2xl font-bold mb-4">Description</h2>
-              <div dangerouslySetInnerHTML={{ __html: course.description }} />
-            </div>
+              <div className="h-px bg-[#d1d7dc]" />
 
-            <div className="mt-12">
-              <h2 className="text-2xl font-bold mb-4">Instructor</h2>
-              <div className="flex items-start">
-                <img src={instructorPhoto} alt={instructorName} className="rounded-full w-24 h-24" />
-                <div className="ml-5">
-                  <h3 className="text-lg font-bold text-blue-600 underline">{instructorName}</h3>
-                  <p className="text-sm text-gray-600">{instructorHeadline}</p>
-                  <div className="flex space-x-3 mt-2">
-                    {instructorLinks.facebook && (
-                      <a href={instructorLinks.facebook} target="_blank" rel="noopener noreferrer" className="p-2 border rounded-full hover:bg-gray-100"><FaFacebookF /></a>
-                    )}
-                    {instructorLinks.linkedin && (
-                      <a href={instructorLinks.linkedin} target="_blank" rel="noopener noreferrer" className="p-2 border rounded-full hover:bg-gray-100"><FaLinkedinIn /></a>
-                    )}
-                    {instructorLinks.website && (
-                      <a href={instructorLinks.website} target="_blank" rel="noopener noreferrer" className="p-2 border rounded-full hover:bg-gray-100"><FaLink /></a>
-                    )}
+              {/* Detailed specs */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8 text-xs text-[#2d2f31]">
+                <div className="space-y-1">
+                  <span className="text-[#6a6f73] block">By the numbers</span>
+                  <p>Skill level: {level}</p>
+                  <p>Students: {studentCount}</p>
+                  <p>Languages: {language}</p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[#6a6f73] block">Features</span>
+                  <p>Lectures: {totalLectures}</p>
+                  <p>Video: {formatDurationString(totalDuration)}</p>
+                </div>
+                <div className="space-y-1">
+                  <span className="text-[#6a6f73] block">Certificates</span>
+                  <p>Get Udemy certificate by completing entire course</p>
+                </div>
+              </div>
+
+              <div className="h-px bg-[#d1d7dc]" />
+
+              {/* Description */}
+              <div className="space-y-3">
+                <h2 className="text-base font-normal text-[#2d2f31]">Description</h2>
+                <div
+                  className="text-xs text-[#2d2f31] leading-relaxed prose max-w-none"
+                  dangerouslySetInnerHTML={{ __html: course.description }}
+                />
+              </div>
+
+              <div className="h-px bg-[#d1d7dc]" />
+
+              {/* Instructor Section */}
+              <div className="space-y-4">
+                <h2 className="text-base font-normal text-[#2d2f31]">Instructor</h2>
+                <div className="flex items-start gap-4">
+                  <img
+                    src={instructorPhoto}
+                    alt={instructorName}
+                    className="rounded-full w-14 h-14 object-cover border border-gray-200"
+                  />
+                  <div className="space-y-1">
+                    <h3 className="text-xs font-bold text-[#5624d0] hover:underline cursor-pointer">
+                      {instructorName}
+                    </h3>
+                    <p className="text-[11px] text-[#6a6f73]">{instructorHeadline}</p>
+                    <div className="flex space-x-3 pt-2">
+                      {instructorLinks.facebook && (
+                        <a
+                          href={instructorLinks.facebook}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-500 hover:text-blue-600 transition-colors"
+                        >
+                          <FaFacebookF className="h-3.5 w-3.5" />
+                        </a>
+                      )}
+                      {instructorLinks.linkedin && (
+                        <a
+                          href={instructorLinks.linkedin}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-500 hover:text-blue-700 transition-colors"
+                        >
+                          <FaLinkedinIn className="h-3.5 w-3.5" />
+                        </a>
+                      )}
+                      {instructorLinks.website && (
+                        <a
+                          href={instructorLinks.website}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-gray-500 hover:text-gray-800 transition-colors"
+                        >
+                          <FaLink className="h-3.5 w-3.5" />
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
+            </article>
+          )}
+
+          {/* ────────────────── Q&A Tab (Picture 3) ────────────────── */}
+          {selectedTab === "qna" && (
+            <div className="space-y-6 text-[#2d2f31] bg-white py-2">
+              {selectedQuestion ? (
+                /* Detail Thread screen */
+                <div className="space-y-5">
+                  <button
+                    onClick={() => setSelectedQuestion(null)}
+                    className="flex items-center gap-2 text-xs font-bold text-[#5624d0] hover:underline"
+                  >
+                    <ArrowLeft className="h-4 w-4" /> Back to all questions
+                  </button>
+
+                  <div className="border border-[#d1d7dc] p-5 space-y-4">
+                    <div className="flex items-start gap-3">
+                      <div className="h-9 w-9 rounded-full bg-[#2d2f31] text-white flex items-center justify-center font-bold text-xs">
+                        {selectedQuestion.userId?.name?.slice(0, 2).toUpperCase() || "ST"}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-sm font-bold">{selectedQuestion.title}</h3>
+                        <p className="text-xs text-gray-500">
+                          Asked by {selectedQuestion.userId?.name || "Student"}{" "}
+                          {selectedQuestion.lectureId && `• ${selectedQuestion.lectureId.title}`}
+                        </p>
+                        <p className="text-xs pt-3 leading-relaxed whitespace-pre-wrap">{selectedQuestion.content}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Answers thread */}
+                  <div className="space-y-4 pl-6 border-l-2 border-[#d1d7dc]">
+                    <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                      Replies ({selectedQuestion.answers?.length || 0})
+                    </h4>
+
+                    {selectedQuestion.answers?.map((ans, idx) => (
+                      <div key={idx} className="bg-gray-50 p-4 border border-[#e4e8eb] flex gap-3">
+                        <div className="h-8 w-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-bold text-xs">
+                          {ans.userId?.name?.slice(0, 2).toUpperCase() || "ST"}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-bold text-[#2d2f31]">
+                            {ans.userId?.name || "Student"}
+                          </p>
+                          <p className="text-xs text-gray-500 text-[10px]">
+                            {new Date(ans.createdAt).toLocaleDateString()}
+                          </p>
+                          <p className="text-xs pt-2 leading-relaxed whitespace-pre-wrap">{ans.content}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Reply Form */}
+                  <form onSubmit={handleAnswerSubmit} className="space-y-2">
+                    <textarea
+                      placeholder="Write your answer..."
+                      value={newAnswerText}
+                      onChange={(e) => setNewAnswerText(e.target.value)}
+                      rows={3}
+                      className="w-full border border-[#d1d7dc] p-3 text-xs outline-none focus:border-[#2d2f31]"
+                    />
+                    <button
+                      type="submit"
+                      className="bg-[#2d2f31] hover:bg-black text-white px-4 py-2.5 text-xs font-bold transition-colors"
+                    >
+                      Post Answer
+                    </button>
+                  </form>
+                </div>
+              ) : isAsking ? (
+                /* Ask Question Screen */
+                <form onSubmit={handleAskSubmit} className="space-y-4">
+                  <h3 className="text-base font-bold">Ask a new question</h3>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold block text-gray-600">Question Title</label>
+                    <input
+                      type="text"
+                      placeholder="Be specific. e.g. Why does my state hook trigger twice?"
+                      value={newTitle}
+                      onChange={(e) => setNewTitle(e.target.value)}
+                      className="w-full border border-[#d1d7dc] px-3.5 py-2.5 text-xs outline-none focus:border-[#2d2f31]"
+                    />
+                  </div>
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold block text-gray-600">Details</label>
+                    <textarea
+                      rows={5}
+                      placeholder="Describe what you tried, what went wrong, and include any error logs or code snippets..."
+                      value={newContent}
+                      onChange={(e) => setNewContent(e.target.value)}
+                      className="w-full border border-[#d1d7dc] p-3.5 text-xs outline-none focus:border-[#2d2f31]"
+                    />
+                  </div>
+                  <div className="flex gap-3">
+                    <button
+                      type="submit"
+                      className="bg-[#a435f0] hover:bg-[#8710d8] text-white px-5 py-2.5 text-xs font-bold"
+                    >
+                      Publish Question
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsAsking(false)}
+                      className="border border-[#d1d7dc] text-[#2d2f31] hover:bg-gray-100 px-5 py-2.5 text-xs font-bold"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                /* Main Question List Screen */
+                <div className="space-y-6">
+                  {/* Purple Banner trigger helper */}
+                  <div className="bg-[#f3ebfc] border border-[#ecebfa] p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div className="space-y-1">
+                      <h4 className="text-sm font-bold flex items-center gap-1.5 text-[#2d2f31]">
+                        <Sparkles className="h-4 w-4 text-[#a435f0] fill-current" />
+                        Get an instant answer from the assistant
+                      </h4>
+                      <p className="text-xs text-[#6a6f73] font-normal leading-relaxed">
+                        Our AI uses context from the course to help answer most questions immediately.
+                      </p>
+                    </div>
+                    <button
+                      onClick={() => setShowAiModal(true)}
+                      className="bg-[#a435f0] hover:bg-[#8710d8] text-white px-4 py-2.5 text-xs font-bold transition-colors flex items-center gap-1.5 shrink-0"
+                    >
+                      <Sparkles className="h-3.5 w-3.5" /> Get an instant answer
+                    </button>
+                  </div>
+
+                  {/* Search and Filters row */}
+                  <div className="space-y-4">
+                    <div className="flex items-center max-w-full">
+                      <input
+                        type="text"
+                        placeholder="Search all course questions"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="flex-grow border border-[#d1d7dc] px-3.5 py-2.5 text-xs outline-none focus:border-[#2d2f31] bg-white h-10 min-w-0"
+                      />
+                      <button className="h-10 w-10 bg-[#5624d0] hover:bg-[#3b1990] text-white flex items-center justify-center shrink-0">
+                        <Search className="h-4 w-4" />
+                      </button>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-4">
+                      {/* Filter by lecture */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-gray-500">Filters:</span>
+                        <select
+                          value={lectureFilter}
+                          onChange={(e) => setLectureFilter(e.target.value)}
+                          className="border border-[#d1d7dc] px-3.5 py-2 text-xs outline-none bg-white h-10 cursor-pointer"
+                        >
+                          <option value="all">All lectures</option>
+                          <option value="current">Current lecture</option>
+                        </select>
+                      </div>
+
+                      {/* Sort by */}
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-gray-500">Sort by:</span>
+                        <select
+                          value={sortBy}
+                          onChange={(e) => setSortBy(e.target.value)}
+                          className="border border-[#d1d7dc] px-3.5 py-2 text-xs outline-none bg-white h-10 cursor-pointer"
+                        >
+                          <option value="recommended">Sort by recommended</option>
+                          <option value="recent">Sort by recent</option>
+                        </select>
+                      </div>
+
+                      <button className="border border-[#d1d7dc] hover:bg-gray-50 px-4 h-10 text-xs font-bold transition-colors">
+                        Filter questions
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* List items block */}
+                  <div className="space-y-4 pt-2">
+                    <h3 className="text-base font-bold">
+                      All questions in this course ({filteredQuestions.length})
+                    </h3>
+
+                    {qnaLoading ? (
+                      <div className="flex justify-center py-10">
+                        <Loader2 className="h-6 w-6 animate-spin text-[#a435f0]" />
+                      </div>
+                    ) : filteredQuestions.length === 0 ? (
+                      <p className="py-8 text-center text-xs text-gray-500 font-normal">
+                        No questions found. Be the first to start a conversation!
+                      </p>
+                    ) : (
+                      <div className="divide-y divide-[#d1d7dc]">
+                        {filteredQuestions.map((q) => {
+                          const initial = q.userId?.name ? q.userId.name.slice(0, 2).toUpperCase() : "ST";
+                          const hasUpvoted = q.upvotes?.includes(courseData?.userId); // placeholder check
+
+                          return (
+                            <div
+                              key={q._id}
+                              onClick={() => setSelectedQuestion(q)}
+                              className="py-5 flex items-start gap-4 cursor-pointer hover:bg-gray-50/50 transition-all"
+                            >
+                              {/* Avatar */}
+                              <div className="h-10 w-10 rounded-full bg-[#2d2f31] text-white flex items-center justify-center font-bold text-xs shrink-0">
+                                {initial}
+                              </div>
+
+                              {/* Details */}
+                              <div className="flex-grow min-w-0 pr-4 space-y-1">
+                                <h4 className="text-xs font-bold text-[#2d2f31] line-clamp-1 hover:text-[#5624d0]">
+                                  {q.title}
+                                </h4>
+                                <p className="text-[11px] text-gray-500 line-clamp-1 font-normal">
+                                  {q.userId?.name || "Student"}{" "}
+                                  {q.lectureId && (
+                                    <span className="text-[#5624d0]">
+                                      {" "}• {q.lectureId.title}
+                                    </span>
+                                  )}{" "}
+                                  • {new Date(q.createdAt).toLocaleDateString()}
+                                </p>
+                              </div>
+
+                              {/* Stats counts */}
+                              <div className="flex items-center gap-4 shrink-0 text-xs text-[#2d2f31]">
+                                <button
+                                  onClick={(e) => handleUpvoteClick(q._id, e)}
+                                  className={`flex flex-col items-center gap-0.5 hover:text-[#a435f0] ${
+                                    hasUpvoted ? "text-[#a435f0]" : ""
+                                  }`}
+                                >
+                                  <span className="font-bold">{q.upvotes?.length || 0}</span>
+                                  <ThumbsUp className="h-3.5 w-3.5" />
+                                </button>
+                                <div className="flex flex-col items-center gap-0.5">
+                                  <span className="font-bold">{q.answers?.length || 0}</span>
+                                  <MessageSquare className="h-3.5 w-3.5" />
+                                </div>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Bottom Action buttons */}
+                  <div className="flex gap-4 pt-4">
+                    <button
+                      onClick={() => setShowAiModal(true)}
+                      className="bg-[#a435f0] hover:bg-[#8710d8] text-white px-5 py-2.5 text-xs font-bold transition-all flex items-center gap-1.5"
+                    >
+                      <Sparkles className="h-3.5 w-3.5" /> Get an instant answer
+                    </button>
+                    <button
+                      onClick={() => setIsAsking(true)}
+                      className="border border-[#2d2f31] text-[#2d2f31] hover:bg-gray-100 px-5 py-2.5 text-xs font-bold transition-all"
+                    >
+                      Ask a new question
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* AI assistant instant reply Modal */}
+              {showAiModal && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                  <div className="bg-white max-w-lg w-full p-6 space-y-4 rounded-none border border-[#d1d7dc] shadow-2xl">
+                    <div className="flex justify-between items-center">
+                      <h3 className="text-sm font-bold flex items-center gap-1.5 text-[#a435f0]">
+                        <Bot className="h-4.5 w-4.5" /> Ask AI Learning Assistant
+                      </h3>
+                      <button
+                        onClick={() => {
+                          setShowAiModal(false);
+                          setAiPrompt("");
+                          setAiResponse("");
+                        }}
+                        className="text-gray-400 hover:text-[#2d2f31] text-lg font-bold"
+                      >
+                        ✕
+                      </button>
+                    </div>
+
+                    <form onSubmit={handleAiAsk} className="space-y-3">
+                      <p className="text-xs text-[#6a6f73] leading-relaxed font-normal">
+                        Type any question regarding this course, lectures, or full-stack technologies to get a response.
+                      </p>
+                      <input
+                        type="text"
+                        placeholder="e.g. Can you explain the difference between REST and GraphQL?"
+                        value={aiPrompt}
+                        onChange={(e) => setAiPrompt(e.target.value)}
+                        className="w-full border border-[#d1d7dc] px-3 py-2 text-xs outline-none focus:border-[#2d2f31]"
+                      />
+                      <button
+                        type="submit"
+                        disabled={aiLoading || !aiPrompt.trim()}
+                        className="w-full bg-[#a435f0] hover:bg-[#8710d8] text-white py-2 text-xs font-bold disabled:opacity-50"
+                      >
+                        {aiLoading ? "Thinking..." : "Generate Answer"}
+                      </button>
+                    </form>
+
+                    {aiResponse && (
+                      <div className="mt-3 p-4 bg-gray-50 border border-[#d1d7dc] text-xs leading-relaxed max-h-60 overflow-y-auto whitespace-pre-wrap">
+                        <span className="font-bold block mb-1 text-[#a435f0]">AI Answer:</span>
+                        {aiResponse}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
-          </article>
-        )}
+          )}
 
-        {selectedTab === "qna" && (
-          <section className="mt-8 max-w-2xl">
-            <h2 className="text-xl font-bold mb-4">Ask a Question</h2>
-            <form onSubmit={handleQuestionSubmit}>
-              <textarea
-                className="w-full border rounded p-2 mb-2"
-                rows={3}
-                placeholder="Type your question here..."
-                value={questionText}
-                onChange={(e) => setQuestionText(e.target.value)}
-              />
-              <button type="submit" className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700">
-                Submit Question
-              </button>
-            </form>
-          </section>
-        )}
+          {selectedTab === "notes" && (
+            <div className="p-4 bg-gray-50 border border-dashed border-gray-300 text-center text-xs text-gray-500">
+              Create and manage study notes to keep track of key concepts during lectures.
+            </div>
+          )}
 
-        {selectedTab === "reviews" && (
-          <section className="mt-8 max-w-4xl">
-            <ReviewsSection course={course} percentCompleted={percent} />
-          </section>
-        )}
+          {selectedTab === "announcements" && (
+            <div className="p-4 bg-gray-50 border border-dashed border-gray-300 text-center text-xs text-gray-500">
+              No course announcements posted yet. Check back later for updates from the instructor.
+            </div>
+          )}
 
+          {selectedTab === "reviews" && (
+            <section className="max-w-4xl">
+              <ReviewsSection course={course} percentCompleted={percent} />
+            </section>
+          )}
+
+          {/* ────────────────── Learning Tools Tab (Picture 5) ────────────────── */}
+          {selectedTab === "tools" && (
+            <div className="space-y-6 text-[#2d2f31] bg-white py-2">
+              {isAddingReminder ? (
+                /* Add Reminder Form */
+                <form onSubmit={handleAddReminder} className="border border-[#d1d7dc] p-5 space-y-4 max-w-md">
+                  <h3 className="text-sm font-bold">Add a learning reminder</h3>
+
+                  {/* Time picker */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold block text-gray-600">Select Time</label>
+                    <div className="flex items-center gap-2 border border-[#d1d7dc] px-3.5 py-2">
+                      <Clock className="h-4 w-4 text-gray-400" />
+                      <input
+                        type="time"
+                        value={reminderTime}
+                        onChange={(e) => setReminderTime(e.target.value)}
+                        className="text-xs outline-none bg-transparent w-full"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Day Picker */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold block text-gray-600">Select Days</label>
+                    <div className="flex flex-wrap gap-2 pt-1">
+                      {daysOfWeek.map((day) => {
+                        const selected = reminderDays.includes(day);
+                        return (
+                          <button
+                            type="button"
+                            key={day}
+                            onClick={() => toggleDaySelection(day)}
+                            className={`px-3 py-1.5 text-xs font-normal border transition-all ${
+                              selected
+                                ? "bg-[#2d2f31] border-[#2d2f31] text-white font-semibold"
+                                : "border-[#d1d7dc] text-gray-600 hover:bg-gray-100"
+                            }`}
+                          >
+                            {day.slice(0, 3)}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* Frequency selection */}
+                  <div className="space-y-1">
+                    <label className="text-xs font-bold block text-gray-600">Frequency</label>
+                    <select
+                      value={reminderFrequency}
+                      onChange={(e) => setReminderFrequency(e.target.value)}
+                      className="w-full border border-[#d1d7dc] px-3.5 py-2.5 text-xs outline-none bg-white font-normal"
+                    >
+                      <option value="Daily">Daily</option>
+                      <option value="Weekly">Weekly</option>
+                    </select>
+                  </div>
+
+                  {/* Buttons */}
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      type="submit"
+                      className="bg-[#5624d0] hover:bg-[#3b1990] text-white px-4 py-2.5 text-xs font-bold"
+                    >
+                      Save reminder
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsAddingReminder(false)}
+                      className="border border-[#d1d7dc] text-gray-700 hover:bg-gray-100 px-4 py-2.5 text-xs font-bold"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                /* Main Tools view matching Picture 5 */
+                <div className="space-y-6">
+                  <div className="space-y-1.5">
+                    <h3 className="text-lg font-bold">Learning reminders</h3>
+                    <p className="text-xs text-[#6a6f73] font-normal leading-relaxed">
+                      Set up push notifications or calendar events to stay on track for your learning goals.
+                    </p>
+                  </div>
+
+                  {/* Display saved reminders list */}
+                  {reminderData?.reminders && reminderData.reminders.length > 0 && (
+                    <div className="space-y-3 max-w-md pt-2">
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-gray-500">
+                        Active Reminders
+                      </h4>
+                      <div className="divide-y divide-[#d1d7dc]">
+                        {reminderData.reminders.map((rem) => (
+                          <div key={rem._id} className="py-3 flex items-center justify-between gap-4">
+                            <div className="flex items-start gap-3">
+                              <Calendar className="h-4.5 w-4.5 text-[#5624d0] mt-0.5" />
+                              <div className="space-y-0.5">
+                                <p className="text-xs font-bold text-[#2d2f31]">
+                                  {rem.days.map((d) => d.slice(0, 3)).join(", ")} at {rem.time}
+                                </p>
+                                <p className="text-[10px] text-gray-500 font-normal">
+                                  {rem.frequency} Reminder
+                                </p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => handleReminderDelete(rem._id)}
+                              className="text-gray-400 hover:text-red-600 transition-colors"
+                              title="Delete reminder"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="pt-2">
+                    <button
+                      onClick={() => setIsAddingReminder(true)}
+                      className="bg-[#5624d0] hover:bg-[#3b1990] text-white px-5 py-3 text-xs font-bold transition-all flex items-center gap-1.5"
+                    >
+                      <Plus className="h-4 w-4" /> Add a learning reminder
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
       </div>
     </main>
   );
@@ -231,6 +958,12 @@ MainContent.propTypes = {
   selectedLecture: PropTypes.object,
   progress: PropTypes.array,
   onLectureViewed: PropTypes.func.isRequired,
+  prevLecture: PropTypes.object,
+  nextLecture: PropTypes.object,
+  onPrevLecture: PropTypes.func.isRequired,
+  onNextLecture: PropTypes.func.isRequired,
+  isSidebarOpen: PropTypes.bool.isRequired,
+  setIsSidebarOpen: PropTypes.func.isRequired,
 };
 
 export default MainContent;

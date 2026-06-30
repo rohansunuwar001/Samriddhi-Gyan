@@ -1,5 +1,5 @@
 import { useSelector } from "react-redux";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
 
 // --- CORE LAYOUT & UTILITY IMPORTS ---
 import AnimatedErrorPage from "./AnimatedErrorPage";
@@ -8,11 +8,11 @@ import MainLayout from "./layout/MainLayout";
 
 // --- AUTHENTICATION & ROUTE PROTECTION ---
 import {
-  AdminRoute,
-  AuthenticatedUser,
-  InstructorRoute,
-  ProtectedRoute,
-  StudentRoute,
+    AdminRoute,
+    AuthenticatedUser,
+    InstructorRoute,
+    ProtectedRoute,
+    StudentRoute,
 } from "./components/ProtectedRoutes";
 import PurchaseCourseProtectedRoute from "./components/PurchaseCourseProtectedRoute";
 
@@ -38,7 +38,14 @@ import ProfileEdit from "./pages/Profile/ProfileEdit";
 // Student-Facing Course Pages
 import CourseProgress from "./pages/student/CourseProgress";
 import Courses from "./pages/student/Courses";
-import MyLearning from "./pages/student/MyLearning";
+// import MyLearning from "./pages/student/MyLearning";
+import Archived from "./pages/student/my-courses/Archived";
+import Certifications from "./pages/student/my-courses/Certifications";
+import Learning from "./pages/student/my-courses/Learning";
+import LearningTools from "./pages/student/my-courses/LearningTools";
+import Lists from "./pages/student/my-courses/Lists";
+import MyCoursesLayout from "./pages/student/my-courses/MyCoursesLayout";
+import Wishlist from "./pages/student/my-courses/Wishlist";
 import SearchPage from "./pages/student/SearchPage";
 
 // --- UPDATED ADMIN/INSTRUCTOR PAGE IMPORTS ---
@@ -61,6 +68,7 @@ import CourseReviews from "./pages/admin/course/CourseReviews";
 import CourseStudent from "./pages/admin/course/CourseStudent";
 import EditLecture from "./pages/admin/lecture/EditLecture"; // Only EditLecture is needed
 import Cart from "./pages/cart/Cart";
+import Checkout from "./pages/cart/Checkout";
 import Contact from "./pages/Contact/Contact";
 import CourseDetailPage from "./pages/Courses/CourseDetailPage";
 import HomeCms from "./pages/pageCms/HomeCms";
@@ -70,8 +78,12 @@ import SupAdmAllRevenueDetails from "./pages/superAdmin/SupAdmAllRevenueDetails"
 import SupAdmAllUser from "./pages/superAdmin/SupAdmAllUser";
 import SupAdmCourseAnalytics from "./pages/superAdmin/SupAdmCourseAnalytics";
 import SupAdmDashboard from "./pages/superAdmin/SupAdmDashboard";
-import WishList from "./pages/WishList/WishList";
+// import WishList from "./pages/WishList/WishList";
+import CategoryManager from "./pages/admin/CategoryManager";
+import TopicSearchResultsPage from "./pages/Courses/TopicSearchResultsPage";
 import PaymentFailed from "./pages/PaymentFailed";
+// import CategoryManager from "./pages/admin/Categories/CategoryManager";
+// import TopicSearchResultsPage from "./pages/Topics/TopicSearchResultsPage";
 
 // --- LAYOUT WRAPPER COMPONENT ---
 const MainLayoutWithScroll = () => (
@@ -123,11 +135,7 @@ const appRouter = createBrowserRouter([
       },
       {
         path: "/wishlist",
-        element: (
-          <StudentRoute>
-            <WishList />
-          </StudentRoute>
-        ),
+        element: <Navigate to="/home/my-courses/wishlist" replace />,
       },
       {
         path: "/blog/:slug",
@@ -142,6 +150,14 @@ const appRouter = createBrowserRouter([
         element: (
           <StudentRoute>
             <ForumPage />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/topics/:topic",
+        element: (
+          <StudentRoute>
+            <TopicSearchResultsPage />
           </StudentRoute>
         ),
       },
@@ -200,11 +216,45 @@ const appRouter = createBrowserRouter([
       },
       {
         path: "my-learning",
+        element: <Navigate to="/home/my-courses/learning" replace />,
+      },
+      {
+        path: "/home/my-courses",
         element: (
           <ProtectedRoute>
-            <MyLearning />
+            <MyCoursesLayout />
           </ProtectedRoute>
         ),
+        children: [
+          {
+            path: "",
+            element: <Navigate to="learning" replace />,
+          },
+          {
+            path: "learning",
+            element: <Learning />,
+          },
+          {
+            path: "lists",
+            element: <Lists />,
+          },
+          {
+            path: "wishlist",
+            element: <Wishlist />,
+          },
+          {
+            path: "certifications",
+            element: <Certifications />,
+          },
+          {
+            path: "archived",
+            element: <Archived />,
+          },
+          {
+            path: "learning-tools",
+            element: <LearningTools />,
+          },
+        ],
       },
       {
         path: "/payment-success",
@@ -274,17 +324,6 @@ const appRouter = createBrowserRouter([
         ),
       },
 
-      // NOTE: The course player/progress page for enrolled students
-      {
-        path: "course-detail/:courseId/content",
-        element: (
-          <ProtectedRoute>
-            <PurchaseCourseProtectedRoute>
-              <CourseProgress />
-            </PurchaseCourseProtectedRoute>
-          </ProtectedRoute>
-        ),
-      },
 
       {
         path: "courses",
@@ -356,15 +395,37 @@ const appRouter = createBrowserRouter([
           { path: "analytics", element: <SupAdmCourseAnalytics /> },
           { path: "users", element: <SupAdmAllUser /> },
           { path: "revenue", element: <SupAdmAllRevenueDetails /> },
+          { path: "categories", element: <CategoryManager /> },
           { path: "cms", element: <HomeCms /> },
         ],
       },
     ],
   },
+  {
+    path: "/checkout",
+    element: (
+      <ProtectedRoute>
+        <ScrollToTop />
+        <Checkout />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/course-detail/:courseId/content",
+    element: (
+      <ProtectedRoute>
+        <PurchaseCourseProtectedRoute>
+          <ScrollToTop />
+          <CourseProgress />
+        </PurchaseCourseProtectedRoute>
+      </ProtectedRoute>
+    ),
+  },
 ]);
 
 function App() {
   const { user } = useSelector((store) => store.auth);
+  // eslint-disable-next-line no-unused-vars
   const isInstructor = user?.role === "instructor";
 
   return (

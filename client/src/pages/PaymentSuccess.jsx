@@ -33,7 +33,7 @@ const PaymentSuccess = () => {
                 Thank you for your purchase. Your new courses are now available in your learning dashboard.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-                <Link to="/my-learning">
+                <Link to="/home/my-courses/learning">
                     <Button size="lg" className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700">
                         Go to My Learning
                     </Button>

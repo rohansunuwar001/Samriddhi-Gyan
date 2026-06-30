@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useLayoutEffect, useMemo, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 
 // --- Animation Libraries ---
@@ -11,8 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChevronRight, Share2 } from 'lucide-react';
 
-// --- Shared Data Source ---
-import { blogArticles } from '@/data/mockData';
+// --- Real Data Source ---
+import { useGetArticleBySlugQuery, useGetAllArticlesQuery } from '@/features/api/articleApi';
 
 //================================================================================
 // 1. Reusable Sub-Components with PropTypes
@@ -22,19 +22,23 @@ const Breadcrumbs = ({ category, title }) => (
   <nav className="flex items-center text-sm text-gray-500 dark:text-gray-400">
     <Link to="/blog" className="hover:underline">Blog Home</Link>
     <ChevronRight className="h-4 w-4 mx-1" />
-    <Link to={`/blog/category/${category?.toLowerCase().replace(/ & /g, '-').replace(/ /g, '-')}`} className="hover:underline">{category}</Link>
-    <ChevronRight className="h-4 w-4 mx-1" />
+    {category?.slug && (
+      <>
+        <Link to={`/blog/category/${category.slug}`} className="hover:underline">{category.name}</Link>
+        <ChevronRight className="h-4 w-4 mx-1" />
+      </>
+    )}
     <span className="truncate max-w-[200px]">{title}</span>
   </nav>
 );
 Breadcrumbs.propTypes = {
-  category: PropTypes.string.isRequired,
+  category: PropTypes.shape({ name: PropTypes.string, slug: PropTypes.string }),
   title: PropTypes.string.isRequired,
 };
 
 const ArticleHeader = ({ category, title, lastUpdated }) => (
   <header className="mt-6">
-    <p className="text-indigo-600 dark:text-indigo-400 font-semibold">{category}</p>
+    <p className="text-indigo-600 dark:text-indigo-400 font-semibold">{category?.name}</p>
     <h1 className="mt-2 text-4xl md:text-5xl font-bold font-serif text-gray-900 dark:text-white leading-tight">
       {title}
     </h1>
@@ -44,7 +48,7 @@ const ArticleHeader = ({ category, title, lastUpdated }) => (
   </header>
 );
 ArticleHeader.propTypes = {
-  category: PropTypes.string.isRequired,
+  category: PropTypes.shape({ name: PropTypes.string }),
   title: PropTypes.string.isRequired,
   lastUpdated: PropTypes.string,
 };
@@ -90,23 +94,25 @@ ArticleBody.propTypes = {
   })).isRequired,
 };
 
-const AuthorBio = ({ author }) => (
+const AuthorBio = ({ author, recentArticles }) => (
   <div className="mt-16 pt-8 border-t border-gray-200 dark:border-gray-700">
     <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-6 flex flex-col sm:flex-row items-center gap-6">
       <img src={author.avatar} alt={author.name} className="w-20 h-20 rounded-full flex-shrink-0" />
       <div>
         <h4 className="font-bold text-lg text-gray-900 dark:text-white">{author.name}</h4>
         <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{author.bio}</p>
-        <div className="mt-4">
-          <h5 className="font-semibold text-sm text-gray-800 dark:text-gray-200 mb-2">Recent Articles by {author.name}</h5>
-          <ul className="list-disc list-inside space-y-1">
-            {author.recentArticles?.map(article => (
-              <li key={article.id}>
-                <Link to={`/blog/${article.slug}`} className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">{article.title}</Link>
-              </li>
-            ))}
-          </ul>
-        </div>
+        {recentArticles.length > 0 && (
+          <div className="mt-4">
+            <h5 className="font-semibold text-sm text-gray-800 dark:text-gray-200 mb-2">Recent Articles by {author.name}</h5>
+            <ul className="list-disc list-inside space-y-1">
+              {recentArticles.map(article => (
+                <li key={article._id}>
+                  <Link to={`/blog/${article.slug}`} className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">{article.title}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
       </div>
     </div>
   </div>
@@ -116,12 +122,15 @@ AuthorBio.propTypes = {
     name: PropTypes.string.isRequired,
     avatar: PropTypes.string.isRequired,
     bio: PropTypes.string,
-    recentArticles: PropTypes.arrayOf(PropTypes.shape({
-      id: PropTypes.number.isRequired,
-      slug: PropTypes.string.isRequired,
-      title: PropTypes.string.isRequired,
-    })),
   }).isRequired,
+  recentArticles: PropTypes.arrayOf(PropTypes.shape({
+    _id: PropTypes.string.isRequired,
+    slug: PropTypes.string.isRequired,
+    title: PropTypes.string.isRequired,
+  })),
+};
+AuthorBio.defaultProps = {
+  recentArticles: [],
 };
 
 //================================================================================
@@ -129,18 +138,21 @@ AuthorBio.propTypes = {
 //================================================================================
 const SingleBlogPage = () => {
   const { slug } = useParams();
-  const [article, setArticle] = useState(null);
-  const [loading, setLoading] = useState(true);
   const componentRef = useRef(null);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const foundArticle = blogArticles.find(a => a.slug === slug);
-      setArticle(foundArticle);
-      setLoading(false);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [slug]);
+  const { data, isLoading, isError } = useGetArticleBySlugQuery(slug);
+  const article = data?.article;
+
+  // Pull the full article list (cached/deduped by RTK Query if BlogPage already
+  // fetched it) just to compute "recent articles by this author".
+  const { data: allArticlesData } = useGetAllArticlesQuery();
+
+  const recentByAuthor = useMemo(() => {
+    if (!article?.author?._id || !allArticlesData?.articles) return [];
+    return allArticlesData.articles
+      .filter((a) => a.author?._id === article.author._id && a._id !== article._id)
+      .slice(0, 5);
+  }, [article, allArticlesData]);
 
   useLayoutEffect(() => {
     if (article) {
@@ -158,21 +170,25 @@ const SingleBlogPage = () => {
     }
   }, [article]);
 
-  if (loading) {
+  if (isLoading) {
     return <SingleBlogSkeleton />;
   }
 
-  if (!article) {
+  if (isError || !article) {
     return (
       <div className="text-center py-20 min-h-screen flex flex-col items-center justify-center">
         <h1 className="text-4xl font-bold">404 - Article Not Found</h1>
-        <p className="mt-4 text-gray-600">Sorry, we couldn`t find the article you were looking for.</p>
+        <p className="mt-4 text-gray-600">Sorry, we couldn&apos;t find the article you were looking for.</p>
         <Button asChild className="mt-6">
           <Link to="/blog">Back to Blog Home</Link>
         </Button>
       </div>
     );
   }
+
+  const lastUpdated = article.updatedAt
+    ? new Date(article.updatedAt).toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+    : '';
 
   return (
     <motion.div
@@ -188,7 +204,7 @@ const SingleBlogPage = () => {
             <Breadcrumbs category={article.category} title={article.title} />
           </div>
           <div className="animate-header">
-            <ArticleHeader category={article.category} title={article.title} lastUpdated={article.lastUpdated} />
+            <ArticleHeader category={article.category} title={article.title} lastUpdated={lastUpdated} />
           </div>
           <div className="animate-author-info">
             <AuthorInfo author={article.author} />
@@ -199,7 +215,7 @@ const SingleBlogPage = () => {
             </article>
             <aside className="md:col-span-1 animate-aside">
               <div className="sticky top-24">
-                <motion.img 
+                <motion.img
                   src={article.featuredImage}
                   alt={article.title}
                   className="rounded-lg shadow-lg w-full"
@@ -210,7 +226,7 @@ const SingleBlogPage = () => {
             </aside>
           </div>
           <div className="animate-author-bio">
-            <AuthorBio author={article.author} />
+            <AuthorBio author={article.author} recentArticles={recentByAuthor} />
           </div>
         </div>
       </div>

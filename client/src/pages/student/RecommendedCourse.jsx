@@ -44,8 +44,8 @@ const RecommendedCourse = () => {
           ) : courses.length > 0 ? (
             /* Swapping grid for the dynamic CourseRow slider track */
             <CourseRow
-              // heading="Recommended For You"
-              // subheading="Personalized classes based on your preferences"
+              heading="Recommended For You"
+              subheading="Personalized classes based on your preferences"
               courses={courses}
             />
           ) : (

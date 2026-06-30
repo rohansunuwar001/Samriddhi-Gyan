@@ -4,7 +4,8 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "seed:blog": "node seed/seedBlog.js"
   },
   "keywords": [],
   "author": "",

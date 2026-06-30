@@ -5,7 +5,6 @@ import { useEffect } from 'react';
 import { useGetCourseDetailWithStatusQuery } from '@/features/api/purchaseApi';
 import { useTrackCourseViewMutation } from '@/features/api/authApi';
 
-
 import CourseContent from './CourseContent';
 import CourseHeader from './CourseHeader';
 import CourseIncludes from './CourseIncludes';
@@ -13,6 +12,8 @@ import { Description } from './Description';
 import InstructorProfile from './InstructorProfile';
 import PurchaseCard from './PurchaseCard';
 import Requirements from './Requirements';
+import WhoThisCourseIsFor from './WhoThisCourseIsFor';
+import ExploreRelatedTopics from './ExploreRelatedTopics';
 import WhatYouWillLearn from './WhatYouWillLearn';
 import ReviewsSection from '../Reviews/ReviewSection';
 import { CourseDetailSkeleton } from '@/components/ui/skeletons';
@@ -28,10 +29,8 @@ const CourseDetailPage = () => {
         if (courseId) {
             trackCourseView(courseId);
         }
-    }, [courseId]);
+    }, [courseId, trackCourseView]);
 
-    // BEFORE: return <div className="text-center py-10">Loading...</div>
-    // AFTER:  return the skeleton that matches the exact page layout
     if (isLoading) {
         return <CourseDetailSkeleton />;
     }
@@ -41,23 +40,28 @@ const CourseDetailPage = () => {
     }
 
     return (
-        <div className="bg-white text-gray-800">
-            <CourseHeader course={course} />
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="lg:flex lg:flex-row-reverse lg:gap-8">
-                    <div className="lg:w-1/3 w-full mb-8 lg:mb-0">
+        <div className="bg-white text-[#2d2f31]">
+            <CourseHeader course={course} purchasePanel={<PurchaseCard course={course} />} />
+
+            <div className="mx-auto grid max-w-[1500px] gap-12 px-6 pb-16 pt-16 sm:px-8 lg:grid-cols-[minmax(0,1fr)_440px] lg:px-10 lg:pt-20 xl:px-16">
+                <main className="min-w-0 space-y-8">
+                    <WhatYouWillLearn learnings={course.learnings} />
+                    <CourseIncludes course={course} />
+                    <CourseContent
+                        sections={course.sections}
+                        totalLectures={course.totalLectures}
+                        totalLength={course.totalDurationInSeconds}
+                    />
+                    <Requirements requirements={course.requirements} />
+                    <Description descriptionHtml={course.description} />
+                    <WhoThisCourseIsFor audience={course.whoIsThisFor} />
+                    <InstructorProfile instructor={course.creator} />
+                    <ExploreRelatedTopics topics={course.topics} />
+                    <ReviewsSection course={course} />
+                </main>
+                <div className="hidden lg:block relative">
+                    <div className="sticky top-[90px] -mt-[370px] z-30">
                         <PurchaseCard course={course} />
-                    </div>
-                    <div className="lg:w-2/3 w-full">
-                        <main className="space-y-8">
-                            <WhatYouWillLearn learnings={course.learnings} />
-                            <CourseIncludes includes={course.includes} />
-                            <CourseContent sections={course.sections} totalLectures={course.totalLectures} totalLength={course.totalDurationInSeconds} />
-                            <Requirements requirements={course.requirements} />
-                            <Description descriptionHtml={course.description} />
-                            <InstructorProfile instructor={course.creator} />
-                            <ReviewsSection course={course} />
-                        </main>
                     </div>
                 </div>
             </div>

@@ -13,6 +13,7 @@ import articleRouter from "./routes/article.route.js";
 import authorRouter from "./routes/author.route.js";
 import cartRouter from "./routes/cart.route.js";
 import categoryRoutes from "./routes/category.route.js";
+ // ← ADDED
 import courseRoute from "./routes/course.route.js";
 import courseProgressRoute from "./routes/courseProgress.route.js";
 import esewaRoute from "./routes/esewa.route.js";
@@ -29,6 +30,7 @@ import userRoute from "./routes/user.route.js";
 import wishlistRouter from "./routes/wishlist.route.js";
 import path from 'path';
 import { fileURLToPath } from 'url';
+import combinedSearchRouter from "./routes/combinedsearch.route.js";
 dotenv.config({});
 
 const app = express();
@@ -82,6 +84,7 @@ app.get("/", (req, res) => {
 });
 
 // --- Mount all other routes ---
+
 app.use("/api/v1/media", mediaRoute);
 app.use("/api/v1/user", userRoute);
 app.use("/api/v1/course", courseRoute);
@@ -90,6 +93,7 @@ app.use("/api/v1/buy", esewaRoute);
 app.use("/api/v1/progress", courseProgressRoute);
 app.use("/api/v1/ai", aiRoutes);
 app.use("/api/v1/search", searchRouter);
+app.use("/api/v1/search-by-topic", combinedSearchRouter); // ← ADDED: GET /api/v1/search-by-topic?topic=Node.js
 app.use("/api/v1/authors", authorRouter);
 app.use("/api/v1/categories", categoryRoutes);
 app.use("/api/v1/articles", articleRouter);

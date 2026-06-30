@@ -20,10 +20,19 @@ export const lectureApi = apiSlice.injectEndpoints({
     // Video upload is handled separately via XHR (see EditLectureForm) because
     // RTK Query has no upload progress support.
     updateLecture: builder.mutation({
-      query: ({ lectureId, title, isPreview }) => ({
+      query: ({
+        lectureId,
+        title,
+        description,
+        isPreview,
+      }) => ({
         url: `/lectures/${lectureId}`,
         method: "PATCH",
-        body: { title, isPreview },
+        body: {
+          title,
+          description,
+          isPreview,
+        },
       }),
       invalidatesTags: (result, error, { courseId }) => [
         { type: "CourseDetail", id: courseId },

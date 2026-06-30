@@ -1,24 +1,18 @@
-// src/components/Reviews/ReviewsSection.jsx
-
-import React from "react";
+import React, { useState, useMemo } from "react";
 import PropTypes from "prop-types";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { FaStar } from "react-icons/fa";
+import { Star, Search, ThumbsUp, ThumbsDown } from "lucide-react";
 import AddReviewForm from "./AddReviewform";
-import StarRating from "./StarRating"; // Assuming you have this component
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"; // Import Avatar for replies
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-/**
- * A self-contained component for displaying and managing course reviews,
- * including showing instructor replies.
- */
-const ReviewsSection = ({ course }) => {
-  // Safeguard: Do not render if the course object isn't available yet.
+const ReviewsSection = ({ course, percentCompleted }) => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [ratingFilter, setRatingFilter] = useState("all");
+  const [helpfulReviews, setHelpfulReviews] = useState({}); // { reviewId: 'up' | 'down' }
+
   if (!course) {
     return null;
   }
-console.log("Course review data:", course);
-  // Safely destructure all properties from the 'course' object.
+
   const {
     reviews = [],
     _id: courseId,
@@ -26,107 +20,268 @@ console.log("Course review data:", course);
     isEnrolled = false,
     numOfReviews = 0,
     ratings = 0,
-    creator, // Destructure the creator for use in replies
   } = course;
 
-  return (
-    <section aria-labelledby="reviews-heading">
-      <h2
-        id="reviews-heading"
-        className="text-2xl font-bold tracking-tight text-gray-900 mb-6"
-      >
-        Student Feedback
-      </h2>
+  // Calculate rating breakdown
+  const breakdown = useMemo(() => {
+    if (reviews.length > 0) {
+      const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+      reviews.forEach((r) => {
+        const val = Math.round(r.rating || 5);
+        if (counts[val] !== undefined) {
+          counts[val]++;
+        }
+      });
+      const total = reviews.length;
+      return {
+        5: Math.round((counts[5] / total) * 100),
+        4: Math.round((counts[4] / total) * 100),
+        3: Math.round((counts[3] / total) * 100),
+        2: Math.round((counts[2] / total) * 100),
+        1: Math.round((counts[1] / total) * 100),
+      };
+    }
+    return { 5: 68, 4: 19, 3: 7, 2: 2, 1: 4 };
+  }, [reviews]);
 
-      {/* --- Add Review Form Box --- */}
-      <div className="mb-8 p-4 bg-slate-50 rounded-md">
+  const handleHelpfulClick = (reviewId, type) => {
+    setHelpfulReviews((prev) => {
+      const current = prev[reviewId];
+      if (current === type) {
+        // Toggle off
+        const copy = { ...prev };
+        delete copy[reviewId];
+        return copy;
+      }
+      return { ...prev, [reviewId]: type };
+    });
+  };
+
+  // Filter reviews
+  const filteredReviews = useMemo(() => {
+    return reviews.filter((r) => {
+      const matchesSearch =
+        !searchQuery.trim() ||
+        r.comment?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        r.user?.name?.toLowerCase().includes(searchQuery.toLowerCase());
+      
+      const matchesRating =
+        ratingFilter === "all" ||
+        Math.round(r.rating) === parseInt(ratingFilter, 10);
+
+      return matchesSearch && matchesRating;
+    });
+  }, [reviews, searchQuery, ratingFilter]);
+
+  const renderStars = (ratingValue) => {
+    return (
+      <div className="flex items-center gap-0.5">
+        {[1, 2, 3, 4, 5].map((star) => {
+          const filled = star <= ratingValue;
+          const half = !filled && star - 0.5 <= ratingValue;
+          return (
+            <Star
+              key={star}
+              className={`h-3.5 w-3.5 ${
+                filled
+                  ? "fill-[#b4690e] text-[#b4690e]"
+                  : half
+                  ? "fill-[#b4690e] text-[#b4690e] opacity-70"
+                  : "text-gray-300 fill-transparent"
+              }`}
+            />
+          );
+        })}
+      </div>
+    );
+  };
+
+  return (
+    <section className="space-y-8 select-none bg-white py-2 text-[#2d2f31]">
+      <div>
+        <h2 className="text-xl font-bold tracking-tight mb-5">Student feedback</h2>
+
+        {/* Rating Grid Breakdown */}
+        <div className="flex flex-col md:flex-row items-start md:items-center gap-8 bg-white pb-6">
+          {/* Large Average Score */}
+          <div className="text-center md:text-left shrink-0">
+            <div className="text-[64px] font-extrabold text-[#b4690e] leading-none mb-1">
+              {ratings ? ratings.toFixed(1) : "0.0"}
+            </div>
+            <div className="flex justify-center md:justify-start mb-2">
+              {renderStars(ratings)}
+            </div>
+            <div className="text-xs font-bold text-[#b4690e] uppercase tracking-wider">
+              Course Rating
+            </div>
+          </div>
+
+          {/* Rating distribution progress bars */}
+          <div className="flex-1 w-full max-w-lg space-y-2">
+            {[5, 4, 3, 2, 1].map((rating) => {
+              const pct = breakdown[rating] || 0;
+              return (
+                <div key={rating} className="flex items-center gap-3 text-xs">
+                  {/* Progress Bar Line */}
+                  <div className="flex-1 bg-gray-200 h-2 rounded-none overflow-hidden relative">
+                    <div
+                      className="bg-[#6a6f73] h-full transition-all duration-500 ease-out"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  {/* Rating stars visualization */}
+                  <div className="w-24 shrink-0 flex items-center justify-start gap-1">
+                    {renderStars(rating)}
+                  </div>
+                  {/* Percentage label link */}
+                  <button
+                    onClick={() => setRatingFilter(rating.toString())}
+                    className="w-10 text-left text-[#5624d0] hover:text-[#3b1990] hover:underline font-normal shrink-0"
+                  >
+                    {pct}%
+                  </button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </div>
+
+      {/* Write a Review Block */}
+      <div className="p-5 border border-[#d1d7dc] bg-[#f7f9fa] rounded-none">
         {allowReview ? (
           <AddReviewForm courseId={courseId} />
         ) : isEnrolled ? (
-          <p className="text-center text-gray-700">
-            Please complete at least 80% of the course to leave a review.
+          <p className="text-center text-xs text-[#6a6f73] font-normal leading-relaxed">
+            Please complete at least 80% of the course to leave a review. (Currently at {percentCompleted.toFixed(0)}%)
           </p>
         ) : (
-          <p className="text-center text-gray-700">
+          <p className="text-center text-xs text-[#6a6f73] font-normal leading-relaxed">
             You must be enrolled in this course to leave a review.
           </p>
         )}
       </div>
 
-      {/* --- Display Existing Reviews and Replies --- */}
-      {reviews.length === 0 ? (
-        <p className="mt-4 text-center text-gray-500">
-          No reviews yet. Be the first to share your thoughts!
-        </p>
-      ) : (
-        <>
-          <div className="flex items-center gap-2 mb-6">
-            <span className="text-2xl font-bold text-gray-800">
-              {ratings.toFixed(1)}
-            </span>
-            <FaStar className="text-yellow-500 text-xl" />
-            <span className="text-lg text-gray-600">
-              Course Rating ({numOfReviews} reviews)
-            </span>
+      {/* Reviews Search & Filtration controls */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-bold">Reviews</h3>
+
+        <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
+          {/* Search Reviews Input bar */}
+          <div className="flex items-center max-w-md flex-grow">
+            <input
+              type="text"
+              placeholder="Search reviews"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="flex-grow border border-[#d1d7dc] px-3.5 py-2.5 text-xs outline-none focus:border-[#2d2f31] bg-white text-[#2d2f31] placeholder-gray-400 rounded-none h-10 min-w-0"
+            />
+            <button className="h-10 w-10 shrink-0 bg-[#2d2f31] hover:bg-black text-white flex items-center justify-center transition-colors">
+              <Search className="h-4 w-4" />
+            </button>
           </div>
 
-          <div className="space-y-6">
-            {reviews.map((review) => (
-              <Card key={review._id} className="border">
-                {/* --- Student's Review Part --- */}
-                <CardHeader className="flex flex-row items-center gap-4 space-y-0 p-4">
-                  <Avatar>
-                    <AvatarImage src={review.user?.photoUrl} />
-                    <AvatarFallback>
-                      {review.user?.name.slice(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <p className="font-semibold">{review.user?.name}</p>
-                    <StarRating rating={review.rating} />
+          {/* Filter ratings dropdown selection */}
+          <div className="flex items-center gap-3">
+            <span className="text-xs font-bold text-[#2d2f31] whitespace-nowrap">Filter ratings</span>
+            <select
+              value={ratingFilter}
+              onChange={(e) => setRatingFilter(e.target.value)}
+              className="border border-[#d1d7dc] px-3.5 py-2 text-xs outline-none focus:border-[#2d2f31] bg-white text-[#2d2f31] rounded-none h-10 min-w-[120px] font-normal cursor-pointer"
+            >
+              <option value="all">All ratings</option>
+              <option value="5">5 stars</option>
+              <option value="4">4 stars</option>
+              <option value="3">3 stars</option>
+              <option value="2">2 stars</option>
+              <option value="1">1 star</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      {/* Reviews feed list */}
+      <div className="divide-y divide-[#d1d7dc] border-t border-[#d1d7dc]">
+        {filteredReviews.length === 0 ? (
+          <p className="py-8 text-center text-xs text-gray-500 font-normal">
+            No reviews match your filter parameters.
+          </p>
+        ) : (
+          filteredReviews.map((review) => {
+            const initial = review.user?.name ? review.user.name.slice(0, 2).toUpperCase() : "ST";
+            const feedback = helpfulReviews[review._id];
+
+            return (
+              <div key={review._id} className="py-6 flex items-start gap-4">
+                {/* Avatar with Initials bubble */}
+                <Avatar className="h-10 w-10 rounded-full border border-gray-100 shrink-0">
+                  <AvatarImage src={review.user?.photoUrl} />
+                  <AvatarFallback className="bg-[#2d2f31] text-white text-xs font-bold rounded-full">
+                    {initial}
+                  </AvatarFallback>
+                </Avatar>
+
+                {/* Content body */}
+                <div className="flex-1 min-w-0 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <h4 className="text-xs font-bold text-[#2d2f31] truncate">
+                      {review.user?.name || "Student"}
+                    </h4>
                   </div>
-                </CardHeader>
-                <CardContent className="p-4 pt-0">
-                  <p className="text-gray-800 leading-relaxed">
-                    {review.comment}
+
+                  {/* Rating Stars and Date relative info */}
+                  <div className="flex items-center gap-2">
+                    {renderStars(review.rating)}
+                    <span className="text-[10px] text-[#6a6f73] font-normal">
+                      {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : "4 months ago"}
+                    </span>
+                  </div>
+
+                  {/* Text Comment body */}
+                  <p className="text-xs leading-relaxed text-[#2d2f31] font-normal pt-1 break-words">
+                    {review.comment || "Good"}
                   </p>
 
-                  {/* --- ⭐ NEW: Instructor's Reply Part (Conditional Render) --- */}
-                  {review.reply && (
-                    <div className="mt-4 ml-4 p-4 bg-slate-50 border-l-4 border-purple-200 rounded-r-md">
-                      <div className="flex items-center gap-3">
-                        <Avatar className="h-8 w-8">
-                          <AvatarImage src={creator?.photoUrl} />
-                          <AvatarFallback>
-                            {creator?.name.slice(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        <div>
-                          <p className="font-semibold text-sm">
-                            {creator?.name}
-                          </p>
-                          <p className="text-xs text-muted-foreground">
-                            Instructor
-                          </p>
-                        </div>
-                      </div>
-                      <p className="text-gray-700 leading-relaxed mt-2 text-sm">
-                        {review.reply}
-                      </p>
-                    </div>
-                  )}
-                  {/* --- End of Reply Part --- */}
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        </>
-      )}
+                  {/* Helpful question line */}
+                  <div className="flex items-center gap-3 text-[10px] text-[#6a6f73] font-normal pt-2">
+                    <span>Was this review helpful?</span>
+                    
+                    <button
+                      onClick={() => handleHelpfulClick(review._id, "up")}
+                      className={`h-7 w-7 rounded-full border flex items-center justify-center transition-all ${
+                        feedback === "up"
+                          ? "bg-[#2d2f31] border-[#2d2f31] text-white"
+                          : "border-[#d1d7dc] text-[#2d2f31] hover:bg-gray-100"
+                      }`}
+                    >
+                      <ThumbsUp className="h-3 w-3" />
+                    </button>
+
+                    <button
+                      onClick={() => handleHelpfulClick(review._id, "down")}
+                      className={`h-7 w-7 rounded-full border flex items-center justify-center transition-all ${
+                        feedback === "down"
+                          ? "bg-[#2d2f31] border-[#2d2f31] text-white"
+                          : "border-[#d1d7dc] text-[#2d2f31] hover:bg-gray-100"
+                      }`}
+                    >
+                      <ThumbsDown className="h-3 w-3" />
+                    </button>
+
+                    <button className="hover:underline text-[#2d2f31] ml-1">
+                      Report
+                    </button>
+                  </div>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
     </section>
   );
 };
 
-// --- Updated PropType Definitions ---
 ReviewsSection.propTypes = {
   course: PropTypes.shape({
     _id: PropTypes.string.isRequired,
@@ -134,11 +289,6 @@ ReviewsSection.propTypes = {
     isEnrolled: PropTypes.bool,
     ratings: PropTypes.number,
     numOfReviews: PropTypes.number,
-    // Add the instructor's details, as they are now used
-    creator: PropTypes.shape({
-      name: PropTypes.string,
-      photoUrl: PropTypes.string,
-    }),
     reviews: PropTypes.arrayOf(
       PropTypes.shape({
         _id: PropTypes.string.isRequired,
@@ -148,11 +298,11 @@ ReviewsSection.propTypes = {
         }),
         rating: PropTypes.number.isRequired,
         comment: PropTypes.string,
-        // Add the optional 'reply' field
-        reply: PropTypes.string,
+        createdAt: PropTypes.string,
       })
     ),
   }).isRequired,
+  percentCompleted: PropTypes.number,
 };
 
 export default ReviewsSection;

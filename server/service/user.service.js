@@ -270,7 +270,7 @@ export const trackCourseView = async (userId, courseId) => {
  * This was already well-written in the controller — moved here as-is.
  */
 export const getMyLearningCourses = async (userId) => {
-  const userData = await User.findById(userId).select("enrolledCourses").lean();
+  const userData = await User.findById(userId).select("enrolledCourses archivedCourses").lean();
 
   if (!userData) {
     const error = new Error("User not found.");
@@ -278,7 +278,11 @@ export const getMyLearningCourses = async (userId) => {
     throw error;
   }
 
-  const enrolledCourseIds = userData.enrolledCourses;
+  const enrolledCourseIds = (userData.enrolledCourses || []).filter(
+    (id) => !(userData.archivedCourses || []).some(
+      (archId) => archId.toString() === id.toString()
+    )
+  );
 
   if (enrolledCourseIds.length === 0) {
     return [];
@@ -302,7 +306,6 @@ export const getMyLearningCourses = async (userId) => {
   ]);
 
   // Build a map: { courseId string → lectureProgress array }
-  // This lets us look up progress in O(1) instead of O(n) inside the loop below
   const progressMap = userProgress.reduce((map, prog) => {
     map[prog.courseId.toString()] = prog.lectureProgress || [];
     return map;
@@ -316,6 +319,105 @@ export const getMyLearningCourses = async (userId) => {
     let watchedDuration = 0;
 
     // Set of viewed lecture IDs for O(1) lookup inside the loop
+    const viewedIds = new Set(
+      lectureProgress
+        .filter((lp) => lp.viewed)
+        .map((lp) => lp.lectureId.toString())
+    );
+
+    course.sections.forEach((section) => {
+      section.lectures.forEach((lecture) => {
+        const dur = lecture.durationInSeconds || 0;
+        totalDuration += dur;
+        if (viewedIds.has(lecture._id.toString())) {
+          watchedDuration += dur;
+        }
+      });
+    });
+
+    const progress =
+      totalDuration > 0
+        ? Math.min(Math.round((watchedDuration / totalDuration) * 100), 100)
+        : 0;
+
+    return { ...course, progress, isPurchased: true };
+  });
+
+  return coursesWithProgress;
+};
+
+// Archive a course
+export const archiveCourse = async (userId, courseId) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    const error = new Error("User not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  if (!user.archivedCourses.includes(courseId)) {
+    user.archivedCourses.push(courseId);
+    await user.save();
+  }
+  return user.archivedCourses;
+};
+
+// Unarchive a course
+export const unarchiveCourse = async (userId, courseId) => {
+  const user = await User.findById(userId);
+  if (!user) {
+    const error = new Error("User not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  user.archivedCourses = user.archivedCourses.filter(
+    (id) => id.toString() !== courseId.toString()
+  );
+  await user.save();
+  return user.archivedCourses;
+};
+
+// Get user's archived courses with progress
+export const getArchivedCourses = async (userId) => {
+  const userData = await User.findById(userId).select("archivedCourses").lean();
+  if (!userData) {
+    const error = new Error("User not found.");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const archivedCourseIds = userData.archivedCourses || [];
+  if (archivedCourseIds.length === 0) {
+    return [];
+  }
+
+  const [courses, userProgress] = await Promise.all([
+    Course.find({ _id: { $in: archivedCourseIds } })
+      .populate({
+        path: "sections",
+        select: "lectures",
+        populate: { path: "lectures", select: "durationInSeconds" },
+      })
+      .populate({ path: "creator", select: "name photoUrl" })
+      .lean(),
+
+    CourseProgress.find({
+      userId,
+      courseId: { $in: archivedCourseIds },
+    }).lean(),
+  ]);
+
+  const progressMap = userProgress.reduce((map, prog) => {
+    map[prog.courseId.toString()] = prog.lectureProgress || [];
+    return map;
+  }, {});
+
+  const coursesWithProgress = courses.map((course) => {
+    const lectureProgress = progressMap[course._id.toString()] || [];
+    let totalDuration   = 0;
+    let watchedDuration = 0;
+
     const viewedIds = new Set(
       lectureProgress
         .filter((lp) => lp.viewed)

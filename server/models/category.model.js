@@ -12,11 +12,17 @@ const categorySchema = new mongoose.Schema({
     required: [true, 'Category slug is required.'],
     unique: true,
     lowercase: true,
-    // e.g., "it-software"
+  },
+  parent: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Category',
+    default: null,
   },
 }, {
-  timestamps: true
+  timestamps: true,
 });
+
+categorySchema.index({ parent: 1, name: 1 });
 
 const Category = mongoose.model('Category', categorySchema);
 
