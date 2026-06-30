@@ -23,7 +23,10 @@ import {
   updateUserPasswordController, 
   getPublicUserProfile,
   getMyLearningCoursesController,
-  trackCourseViewController , 
+  trackCourseViewController,
+  archiveCourseController,
+  unarchiveCourseController,
+  getArchivedCoursesController,
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
@@ -52,6 +55,9 @@ router
 // ── Learning routes ──────────────────────────────────────────────────────────
 router.route("/view-history/:courseId").post(isAuthenticated, trackCourseViewController);
 router.route("/my-learning").get(isAuthenticated, getMyLearningCoursesController);
+router.route("/archived").get(isAuthenticated, getArchivedCoursesController);
+router.route("/archive/:courseId").post(isAuthenticated, archiveCourseController);
+router.route("/unarchive/:courseId").post(isAuthenticated, unarchiveCourseController);
 
 // ── Public routes ────────────────────────────────────────────────────────────
 router

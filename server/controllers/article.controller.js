@@ -4,6 +4,7 @@
 import Article from "../models/article.model.js";
 import Author from "../models/author.model.js";
 import Category from "../models/category.model.js";
+import { upsertSearchSuggestion } from "../helpers/searchSuggestion.helper.js";
 
 
 // CREATE a new article
@@ -21,6 +22,10 @@ export const createArticle = async (req, res) => {
 
     const newArticle = new Article({ title, featuredImage, content, author, category, popular });
     await newArticle.save(); // The pre-save hook in your model will automatically create the slug
+
+    // Sync the article title into search suggestions for autocomplete.
+    await upsertSearchSuggestion(title);
+
     res.status(201).json({ success: true, article: newArticle });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Server error while creating article.', error: error.message });

@@ -16,13 +16,14 @@ import {
 const SEGMENT_DURATION_SECONDS = 6; // must match ffmpeg -hls_time value
 const MAX_BUFFER_SECONDS = 30; // must match hls.js maxBufferLength below
 
-const BolaVideoPlayer = ({ src, onPlay }) => {
+const BolaVideoPlayer = ({ src, onPlay, onEnded }) => {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const hlsRef = useRef(null);
   const bolaRef = useRef(null);
 
   const userSelectionRef = useRef(-1);
+  const hasEndedRef = useRef(false);
 
   // Player UI states
   const [isPlaying, setIsPlaying] = useState(false);
@@ -51,6 +52,7 @@ const BolaVideoPlayer = ({ src, onPlay }) => {
   };
 
   useEffect(() => {
+    hasEndedRef.current = false;
     if (!src || !videoRef.current) return;
 
     if (!Hls.isSupported()) {
@@ -147,7 +149,13 @@ const BolaVideoPlayer = ({ src, onPlay }) => {
   // Video Progress Events
   const handleTimeUpdate = () => {
     if (videoRef.current) {
-      setCurrentTime(videoRef.current.currentTime);
+      const current = videoRef.current.currentTime;
+      const dur = videoRef.current.duration;
+      setCurrentTime(current);
+      if (dur > 0 && dur - current <= 3 && !hasEndedRef.current) {
+        hasEndedRef.current = true;
+        if (onEnded) onEnded();
+      }
     }
   };
 
@@ -240,6 +248,10 @@ const BolaVideoPlayer = ({ src, onPlay }) => {
         onClick={togglePlay}
         onTimeUpdate={handleTimeUpdate}
         onLoadedMetadata={handleLoadedMetadata}
+        onEnded={() => {
+          setIsPlaying(false);
+          if (onEnded) onEnded();
+        }}
       />
 
       {/* YouTube Style Overlay UI Control Strip */}

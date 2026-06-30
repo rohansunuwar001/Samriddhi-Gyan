@@ -82,7 +82,7 @@ export const updateLectureProgress = async (req, res) => {
     );
  
     if (existingIndex !== -1) {
-      courseProgress.lectureProgress[existingIndex].viewed = true;
+      courseProgress.lectureProgress[existingIndex].viewed = !courseProgress.lectureProgress[existingIndex].viewed;
     } else {
       courseProgress.lectureProgress.push({ lectureId, viewed: true });
     }

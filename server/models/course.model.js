@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import { generateEmbedding } from "../service/embedding.service.js";
+import { slugify } from "../utils/slugify.js";
 
 const courseSchema = new mongoose.Schema(
   {
@@ -8,6 +9,14 @@ const courseSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
+    },
+    // URL-friendly identifier, e.g. "the-complete-react-bootcamp".
+    // Auto-generated from title on save (see pre-save hook below) — never set manually.
+    slug: {
+      type: String,
+      unique: true,
+      lowercase: true,
+      index: true,
     },
     subtitle: {
       type: String,
@@ -71,9 +80,28 @@ const courseSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
-    includes: {
+    whoIsThisFor: {
       type: [String],
       default: [],
+    },
+    // Topic tags used to power "Explore related topics" and cross-link
+    // this course to blog articles sharing the same Category.
+    // Each value MUST correspond to an existing Category.name — enforced
+    // in course.service.js (editCourse/createCourse), not here, since
+    // Mongoose can't validate against a dynamic DB-backed list at the schema level.
+    topics: {
+      type: [String],
+      default: [],
+    },
+    // --- COURSE INCLUDES (replaces the old free-text `includes` array) ---
+    // Video hours are auto-computed from totalDurationInSeconds.
+    // The fields below are set by the instructor on the landing-page editor.
+    courseIncludes: {
+      codingExercises:       { type: Number,  default: 0    },
+      articles:              { type: Number,  default: 0    },
+      downloadableResources: { type: Number,  default: 0    },
+      hasMobileAccess:       { type: Boolean, default: true },
+      hasCertificate:        { type: Boolean, default: true },
     },
     // --- USER RELATIONSHIPS & PUBLISHING ---
     creator: {
@@ -121,6 +149,27 @@ const courseSchema = new mongoose.Schema(
   },
   { timestamps: true }
 );
+
+// Step 1: Auto-generate a unique slug from the title whenever it changes.
+// Runs before the embedding hook below so the slug is available if needed elsewhere.
+courseSchema.pre("save", async function (next) {
+  if (this.isNew || this.isModified("title")) {
+    const baseSlug = slugify(this.title);
+    let candidate = baseSlug;
+    let suffix = 1;
+
+    // Walk candidates until we find one that isn't taken by another course.
+    // (excludes this document itself when re-saving with an unchanged title)
+    const Course = this.constructor;
+    while (await Course.exists({ slug: candidate, _id: { $ne: this._id } })) {
+      suffix += 1;
+      candidate = `${baseSlug}-${suffix}`;
+    }
+
+    this.slug = candidate;
+  }
+  next();
+});
 
 // Step 2: Add Mongoose middleware to automatically generate embeddings
 courseSchema.pre("save", async function (next) {

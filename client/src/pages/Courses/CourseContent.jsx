@@ -4,74 +4,141 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
-import { PlayCircle } from 'lucide-react';
+import { ChevronDown, ChevronUp, Download, FileText, PlayCircle } from 'lucide-react';
 import PropTypes from 'prop-types';
+import { useState } from 'react';
 
-// Helper to format seconds to "hh:mm:ss"
-const formatDuration = (seconds) => {
-    if (!seconds || isNaN(seconds)) return "0m";
+// ── Duration formatting ─────────────────────────────────────────────────────
+// Short form for section/course summary line: "61h 53m"
+const formatDurationShort = (seconds) => {
+    if (!seconds || isNaN(seconds) || seconds <= 0) return "0m";
     const h = Math.floor(seconds / 3600);
-    const m = Math.floor((seconds % 3600) / 60);
-    const s = seconds % 60;
-    return [
-        h > 0 ? `${h}h` : null,
-        m > 0 ? `${m}m` : null,
-        s > 0 && h === 0 ? `${s}s` : null,
-    ].filter(Boolean).join(" ");
+    const m = Math.round((seconds % 3600) / 60);
+    if (h > 0) return `${h}h ${m}m`;
+    return `${m}m`;
 };
 
-const CourseContent = ({ sections = [], totalLectures = 0, totalLength = 0 }) => (
-    <div>
-        <h2 className="text-2xl font-bold">Course content</h2>
-        <div className="text-sm text-gray-600 flex items-center gap-3 mt-1 mb-4">
-            <span>{sections.length} sections</span>
-            <span>•</span>
-            <span>{totalLectures} lectures</span>
-            <span>•</span>
-            <span>{formatDuration(totalLength)} total length</span>
-        </div>
-        <Accordion type="single" collapsible className="w-full">
-            {sections.map((section, index) => (
-                <AccordionItem value={`item-${index}`} key={section._id || index}>
-                    <AccordionTrigger className="font-bold bg-gray-50 hover:bg-gray-100 px-4">
-                        <div className="flex justify-between w-full pr-4">
-                            <span>{section.title}</span>
-                            <span className="text-gray-600 font-normal text-sm">
-                                {(section.lectures?.length || 0)} lectures • {formatDuration(section.totalDurationInSeconds)}
-                            </span>
-                        </div>
-                    </AccordionTrigger>
-                    <AccordionContent>
-                        <ul className="divide-y divide-gray-200">
-                            {Array.isArray(section.lectures) && section.lectures.length > 0 ? (
-                                section.lectures.map((lecture, lecIndex) => (
-                                    <li key={lecture._id || lecIndex} className="px-4 py-3 flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <PlayCircle className="h-5 w-5 text-gray-500" />
-                                            <span className={lecture.isPreview ? "text-blue-500 underline" : ""}>
-                                                {lecture.title}
-                                            </span>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            {lecture.isPreview && (
-                                                <span className="text-blue-500 text-sm underline cursor-pointer">Preview</span>
-                                            )}
-                                            <span className="text-gray-500 text-sm">
-                                                {formatDuration(lecture.duration)}
-                                            </span>
-                                        </div>
-                                    </li>
-                                ))
+// Per-lecture form, Udemy style: "3:08", "0:12", "1:05:33"
+const formatDurationClock = (seconds) => {
+    if (!seconds || isNaN(seconds) || seconds <= 0) return "0:00";
+    const total = Math.round(seconds);
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const s = total % 60;
+    if (h > 0) {
+        return `${h}:${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+    }
+    return `${m}:${String(s).padStart(2, "0")}`;
+};
+
+// ── Single lecture row ───────────────────────────────────────────────────────
+const LectureRow = ({ lecture }) => {
+    const [showDescription, setShowDescription] = useState(false);
+    const hasDescription = Boolean(lecture.description?.trim());
+    const isDownload = lecture.type === "article" || lecture.type === "resource";
+
+    return (
+        <li className="px-4 py-3">
+            <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                    {isDownload ? (
+                        <FileText className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                    ) : (
+                        <PlayCircle className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                    )}
+                    <span className={`truncate ${lecture.isPreview ? "text-purple-700" : "text-gray-700"}`}>
+                        {lecture.title}
+                    </span>
+                    {hasDescription && (
+                        <button
+                            type="button"
+                            onClick={() => setShowDescription((v) => !v)}
+                            className="text-gray-400 hover:text-gray-700 flex-shrink-0"
+                            aria-label={showDescription ? "Hide description" : "Show description"}
+                        >
+                            {showDescription ? (
+                                <ChevronUp className="h-4 w-4" />
                             ) : (
-                                <li className="px-4 py-3 text-gray-400">No lectures in this section.</li>
+                                <ChevronDown className="h-4 w-4" />
                             )}
-                        </ul>
-                    </AccordionContent>
-                </AccordionItem>
-            ))}
-        </Accordion>
-    </div>
-);
+                        </button>
+                    )}
+                </div>
+                <div className="flex items-center gap-3 flex-shrink-0">
+                    {lecture.isPreview && (
+                        <span className="flex items-center gap-1 text-purple-700 text-sm font-medium">
+                            <PlayCircle className="h-3.5 w-3.5 fill-current" />
+                            Preview
+                        </span>
+                    )}
+                    {isDownload && (
+                        <Download className="h-4 w-4 text-gray-400" />
+                    )}
+                    <span className="text-gray-500 text-sm tabular-nums">
+                        {formatDurationClock(lecture.durationInSeconds)}
+                    </span>
+                </div>
+            </div>
+            {hasDescription && showDescription && (
+                <p className="mt-2 ml-7 text-sm text-gray-600 leading-relaxed">
+                    {lecture.description}
+                </p>
+            )}
+        </li>
+    );
+};
+
+LectureRow.propTypes = {
+    lecture: PropTypes.shape({
+        _id: PropTypes.string,
+        title: PropTypes.string.isRequired,
+        description: PropTypes.string,
+        durationInSeconds: PropTypes.number,
+        isPreview: PropTypes.bool,
+        type: PropTypes.string,
+    }).isRequired,
+};
+
+// ── Main component ───────────────────────────────────────────────────────────
+const CourseContent = ({ sections = [], totalLectures = 0, totalLength = 0 }) => {
+    const totalSections = sections.length;
+
+    return (
+        <div>
+            <div className="flex items-center justify-between mb-1">
+                <h2 className="text-2xl font-bold">Course content</h2>
+            </div>
+            <div className="text-sm text-gray-600 mb-4">
+                {totalSections} section{totalSections !== 1 ? "s" : ""} • {totalLectures} lecture{totalLectures !== 1 ? "s" : ""} • {formatDurationShort(totalLength)} total length
+            </div>
+            <Accordion type="multiple" className="w-full border border-gray-200 rounded-md overflow-hidden divide-y divide-gray-200">
+                {sections.map((section, index) => (
+                    <AccordionItem value={`item-${index}`} key={section._id || index} className="border-0">
+                        <AccordionTrigger className="font-bold bg-gray-50 hover:bg-gray-100 px-4 py-3 hover:no-underline">
+                            <div className="flex justify-between w-full pr-4 items-center">
+                                <span className="text-left">{section.title}</span>
+                                <span className="text-gray-600 font-normal text-sm flex-shrink-0 ml-4">
+                                    {(section.lectures?.length || 0)} lecture{(section.lectures?.length || 0) !== 1 ? "s" : ""} • {formatDurationShort(section.totalDurationInSeconds)}
+                                </span>
+                            </div>
+                        </AccordionTrigger>
+                        <AccordionContent className="pb-0">
+                            <ul className="divide-y divide-gray-100">
+                                {Array.isArray(section.lectures) && section.lectures.length > 0 ? (
+                                    section.lectures.map((lecture, lecIndex) => (
+                                        <LectureRow key={lecture._id || lecIndex} lecture={lecture} />
+                                    ))
+                                ) : (
+                                    <li className="px-4 py-3 text-gray-400">No lectures in this section.</li>
+                                )}
+                            </ul>
+                        </AccordionContent>
+                    </AccordionItem>
+                ))}
+            </Accordion>
+        </div>
+    );
+};
 
 CourseContent.propTypes = {
     sections: PropTypes.arrayOf(
@@ -83,7 +150,8 @@ CourseContent.propTypes = {
                 PropTypes.shape({
                     _id: PropTypes.string,
                     title: PropTypes.string.isRequired,
-                    duration: PropTypes.number, // in seconds
+                    description: PropTypes.string,
+                    durationInSeconds: PropTypes.number,
                     isPreview: PropTypes.bool,
                 })
             ),
@@ -92,6 +160,5 @@ CourseContent.propTypes = {
     totalLectures: PropTypes.number,
     totalLength: PropTypes.number, // in seconds
 };
-
 
 export default CourseContent;

@@ -1,16 +1,15 @@
 import { Check } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
 import PropTypes from 'prop-types';
 
 const WhatYouWillLearn = ({ learnings }) => (
-    <Card className="border-2 border-gray-200">
-        <CardContent className="p-6">
-            <h2 className="text-2xl font-bold mb-4">What you'll learn</h2>
+    <section className="border border-[#d1d7dc] bg-white">
+        <div className="px-8 py-8">
+            <h2 className="mb-7 text-3xl font-extrabold tracking-tight text-[#2d2f31]">What you&apos;ll learn</h2>
             {Array.isArray(learnings) && learnings.length > 0 ? (
-                <ul className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+                <ul className="grid grid-cols-1 gap-x-14 gap-y-4 text-base leading-relaxed text-[#4b5563] md:grid-cols-2">
                     {learnings.map((item, index) => (
-                        <li key={index} className="flex items-start gap-3">
-                            <Check className="h-5 w-5 mt-1 flex-shrink-0 text-gray-700" />
+                        <li key={index} className="flex items-start gap-4">
+                            <Check className="mt-1 h-4 w-4 flex-shrink-0 text-[#2d2f31]" />
                             <span>{item}</span>
                         </li>
                     ))}
@@ -18,8 +17,8 @@ const WhatYouWillLearn = ({ learnings }) => (
             ) : (
                 <p className="text-gray-500">No learning outcomes provided yet.</p>
             )}
-        </CardContent>
-    </Card>
+        </div>
+    </section>
 );
 
 WhatYouWillLearn.propTypes = {
@@ -27,3 +26,4 @@ WhatYouWillLearn.propTypes = {
 };
 
 export default WhatYouWillLearn;
+

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { slugify } from '../utils/slugify.js';
 
 const articleSchema = new mongoose.Schema({
   title: {
@@ -56,16 +57,29 @@ const articleSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-// Best Practice: Add a pre-save hook to auto-generate the slug from the title
-// This ensures slugs are consistent.
-articleSchema.pre('save', function(next) {
-  if (this.isModified('title')) {
-    this.slug = this.title
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, '') // Remove special characters
-      .replace(/\s+/g, '-')        // Replace spaces with hyphens
-      .trim();
+// Auto-generate a unique slug from the title using the shared slugify utility.
+// This keeps slug formatting identical across courses, articles, authors, and categories.
+articleSchema.pre("validate", async function (next) {
+  if (this.isNew || this.isModified("title")) {
+    const baseSlug = slugify(this.title);
+    let candidate = baseSlug;
+    let suffix = 1;
+
+    const Article = this.constructor;
+
+    while (
+      await Article.exists({
+        slug: candidate,
+        _id: { $ne: this._id },
+      })
+    ) {
+      suffix++;
+      candidate = `${baseSlug}-${suffix}`;
+    }
+
+    this.slug = candidate;
   }
+
   next();
 });
 

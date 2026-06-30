@@ -12,28 +12,24 @@ import {
 import { Separator } from "@/components/ui/separator";
 import React, { useState, useMemo } from "react";
 import PropTypes from "prop-types";
-const allCategories = [
-  "HTML", "CSS", "JavaScript", "TypeScript",
-  "Frontend Development", "Backend Development", "Fullstack Development",
-  "MERN Stack Development", "Next JS", "React JS", "Vue JS", "Node JS",
-  "Express JS", "MongoDB", "SQL", "Python", "Data Science", "Machine Learning",
-  "Artificial Intelligence", "DevOps", "Docker", "Git & GitHub", "UI/UX Design",
-  "Figma", "Adobe XD", "Photoshop", "Cybersecurity", "Cloud Computing", "AWS",
-  "Firebase", "Java", "C++", "C#", "Android Development", "iOS Development",
-  "Mobile App Development", "Software Testing", "System Design",
-  "Operating Systems", "DSA (Data Structures & Algorithms)"
-];
+import { useGetAllCategoriesQuery } from "@/features/api/categoryApi";
 
 const Filter = ({ handleFilterChange }) => {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [sortByPrice, setSortByPrice] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
 
+  const { data: categoryData, isLoading: isLoadingCategories } = useGetAllCategoriesQuery();
+  const allCategories = useMemo(
+    () => (categoryData?.categories || []).map((c) => c.name),
+    [categoryData]
+  );
+
   const filteredCategories = useMemo(() => {
     return allCategories.filter(category =>
       category.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [searchTerm]);
+  }, [allCategories, searchTerm]);
 
   const handleCategoryChange = (category) => {
     setSelectedCategories((prevCategories) => {
@@ -88,7 +84,9 @@ const Filter = ({ handleFilterChange }) => {
         />
 
         <div className="max-h-[400px] overflow-y-auto pr-2">
-          {filteredCategories.length > 0 ? (
+          {isLoadingCategories ? (
+            <p className="text-sm text-gray-500">Loading categories...</p>
+          ) : filteredCategories.length > 0 ? (
             filteredCategories.map((category) => (
               <div key={category} className="flex items-center space-x-2 my-2">
                 <Checkbox

@@ -12,10 +12,50 @@ import dotenv from "dotenv";
 import { Course } from "../models/course.model.js";
 import { CoursePurchase } from "../models/coursePurchase.model.js";
 import { CourseProgress } from "../models/courseProgress.model.js";
+import Category from "../models/category.model.js";
 import { completeOrder, createPendingOrder, getAllCompletedPurchases, getOrderByOrderId } from "../service/purchase.service.js";
 
 dotenv.config();
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+
+const normalizeTopicName = (value) => value?.trim().toLowerCase();
+
+const getCategoryDisplayInfo = async (categoryName) => {
+  if (!categoryName) return { categoryDetails: null, categoryHierarchy: [] };
+
+  const category = await Category.findOne({ name: categoryName })
+    .populate('parent', 'name slug')
+    .lean();
+
+  if (!category) {
+    return { categoryDetails: null, categoryHierarchy: [categoryName] };
+  }
+
+  return {
+    categoryDetails: category,
+    categoryHierarchy: category.parent ? [category.parent.name, category.name] : [category.name],
+  };
+};
+
+const removeDuplicateCategoryTopics = (topics, category) => {
+  if (!Array.isArray(topics) || topics.length === 0) return [];
+
+  const categoryName = normalizeTopicName(category);
+  const seen = new Set();
+
+  return topics
+    .map((topic) => topic?.trim())
+    .filter(Boolean)
+    .filter((topic) => {
+      const normalizedTopic = normalizeTopicName(topic);
+      if (!normalizedTopic || normalizedTopic === categoryName || seen.has(normalizedTopic)) {
+        return false;
+      }
+
+      seen.add(normalizedTopic);
+      return true;
+    });
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // POST /checkout/create-checkout-session
@@ -238,6 +278,9 @@ export const getCourseDetailWithPurchaseStatus = async (req, res) => {
     }
 
     // Default values — not enrolled
+    course.topics = removeDuplicateCategoryTopics(course.topics, course.category);
+    Object.assign(course, await getCategoryDisplayInfo(course.category));
+
     course.isEnrolled      = false;
     course.allowReview     = false;
     course.purchaseStatus  = "not_purchased";

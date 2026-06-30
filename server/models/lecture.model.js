@@ -8,6 +8,13 @@ const lectureSchema = new mongoose.Schema(
       required: [true, "A lecture title is required."],
       trim: true,
     },
+    // Optional short description shown when the student expands the lecture row.
+    // The frontend hides the expand/collapse toggle entirely when this is empty.
+    description: {
+      type: String,
+      trim: true,
+      default: "",
+    },
 
     // --- Video Information (No changes needed here) ---
     videoUrl: {

@@ -35,7 +35,7 @@ const NoCoursesAvailable = ({ isLoggedIn }) => (
         {isLoggedIn && (
           <div className="mt-4">
             <Button asChild>
-              <Link to="/my-learning">Go to My Learning</Link>
+              <Link to="/home/my-courses/learning">Go to My Learning</Link>
             </Button>
           </div>
         )}

@@ -24,48 +24,7 @@ import {
 
 import { Loader2, PlusCircle, Trash2 } from "lucide-react";
 import { useEditCourseMutation, useGetCourseByIdQuery, usePublishCourseMutation } from "@/features/api/courseApi";
-const categories = [
-  "HTML",
-  "CSS",
-  "JavaScript",
-  "TypeScript",
-  "Frontend Development",
-  "Backend Development",
-  "Fullstack Development",
-  "MERN Stack Development",
-  "Next JS",
-  "React JS",
-  "Vue JS",
-  "Node JS",
-  "Express JS",
-  "MongoDB",
-  "SQL",
-  "Python",
-  "Data Science",
-  "Machine Learning",
-  "Artificial Intelligence",
-  "DevOps",
-  "Docker",
-  "Git & GitHub",
-  "UI/UX Design",
-  "Figma",
-  "Adobe XD",
-  "Photoshop",
-  "Cybersecurity",
-  "Cloud Computing",
-  "AWS",
-  "Firebase",
-  "Java",
-  "C++",
-  "C#",
-  "Android Development",
-  "iOS Development",
-  "Mobile App Development",
-  "Software Testing",
-  "System Design",
-  "Operating Systems",
-  "DSA (Data Structures & Algorithms)",
-];
+import { useGetAllCategoriesQuery } from "@/features/api/categoryApi";
 const levels = ["Beginner", "Intermediate", "Advanced", "All Levels"];
 
 const CourseLandingPageTab = () => {
@@ -81,7 +40,15 @@ const CourseLandingPageTab = () => {
     thumbnailFile: null,
     learnings: [""],
     requirements: [""],
-    includes: [""], // <-- Add this line
+    whoIsThisFor: [""],
+    topics: [],
+    courseIncludes: {
+      codingExercises: 0,
+      articles: 0,
+      downloadableResources: 0,
+      hasMobileAccess: true,
+      hasCertificate: true,
+    },
   });
   const [previewThumbnail, setPreviewThumbnail] = useState("");
 
@@ -90,9 +57,32 @@ const CourseLandingPageTab = () => {
     isLoading: isLoadingCourse,
     refetch,
   } = useGetCourseByIdQuery(courseId);
+  const { data: categoryData, isLoading: isLoadingCategories } = useGetAllCategoriesQuery();
   const [editCourse, { isLoading: isUpdating }] = useEditCourseMutation();
   const [publishCourse, { isLoading: isPublishing }] =
     usePublishCourseMutation();
+
+  const availableCategories = categoryData?.categories || [];
+  const parentCategories = availableCategories.filter((cat) => !cat.parent);
+  const childCategories = availableCategories.filter((cat) => cat.parent);
+  const childrenByParent = childCategories.reduce((map, cat) => {
+    const parentId = cat.parent?._id || cat.parent;
+    if (!map[parentId]) map[parentId] = [];
+    map[parentId].push(cat);
+    return map;
+  }, {});
+  const selectableCategories = parentCategories.flatMap((parent) => {
+    const children = childrenByParent[parent._id] || [];
+    if (children.length === 0) return [{ category: parent, label: parent.name }];
+    return children.map((child) => ({
+      category: child,
+      label: parent.name + " > " + child.name,
+    }));
+  });
+  const topicCategories = availableCategories.map((cat) => ({
+    category: cat,
+    label: cat.parent?.name ? cat.parent.name + " > " + cat.name : cat.name,
+  }));
 
   useEffect(() => {
     if (courseData?.course) {
@@ -111,7 +101,16 @@ const CourseLandingPageTab = () => {
         learnings: course.learnings?.length > 0 ? course.learnings : [""],
         requirements:
           course.requirements?.length > 0 ? course.requirements : [""],
-        includes: course.includes?.length > 0 ? course.includes : [""], // <-- Add this line
+        whoIsThisFor:
+          course.whoIsThisFor?.length > 0 ? course.whoIsThisFor : [""],
+        topics: course.topics?.length > 0 ? course.topics : [],
+        courseIncludes: {
+          codingExercises:       course.courseIncludes?.codingExercises       ?? 0,
+          articles:              course.courseIncludes?.articles              ?? 0,
+          downloadableResources: course.courseIncludes?.downloadableResources ?? 0,
+          hasMobileAccess:       course.courseIncludes?.hasMobileAccess       ?? true,
+          hasCertificate:        course.courseIncludes?.hasCertificate        ?? true,
+        },
         thumbnailFile: null,
       });
       setPreviewThumbnail(course.thumbnail || "");
@@ -147,6 +146,18 @@ const CourseLandingPageTab = () => {
     }
   };
 
+  const toggleTopic = (categoryName) => {
+    setDetails((prev) => {
+      const alreadySelected = prev.topics.includes(categoryName);
+      return {
+        ...prev,
+        topics: alreadySelected
+          ? prev.topics.filter((t) => t !== categoryName)
+          : [...prev.topics, categoryName],
+      };
+    });
+  };
+
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -162,6 +173,9 @@ const CourseLandingPageTab = () => {
         key !== "price" &&
         key !== "learnings" &&
         key !== "requirements" &&
+        key !== "whoIsThisFor" &&
+        key !== "topics" &&
+        key !== "courseIncludes" &&
         key !== "thumbnailFile"
       ) {
         formData.append(key, value);
@@ -175,9 +189,16 @@ const CourseLandingPageTab = () => {
     details.requirements
       .filter((item) => item.trim() !== "")
       .forEach((item) => formData.append("requirements[]", item));
-    details.includes
+    details.whoIsThisFor
       .filter((item) => item.trim() !== "")
-      .forEach((item) => formData.append("includes[]", item)); // <-- Add this line
+      .forEach((item) => formData.append("whoIsThisFor[]", item));
+    details.topics.forEach((topic) => formData.append("topics[]", topic));
+    // Send courseIncludes as a nested object
+    formData.append("courseIncludes[codingExercises]",       details.courseIncludes.codingExercises);
+    formData.append("courseIncludes[articles]",              details.courseIncludes.articles);
+    formData.append("courseIncludes[downloadableResources]", details.courseIncludes.downloadableResources);
+    formData.append("courseIncludes[hasMobileAccess]",       details.courseIncludes.hasMobileAccess);
+    formData.append("courseIncludes[hasCertificate]",        details.courseIncludes.hasCertificate);
     if (details.thumbnailFile)
       formData.append("courseThumbnail", details.thumbnailFile); // <-- use 'courseThumbnail'
 
@@ -246,14 +267,20 @@ const CourseLandingPageTab = () => {
               }
             >
               <SelectTrigger>
-                <SelectValue />
+                <SelectValue placeholder={isLoadingCategories ? "Loading categories..." : "Select a category"} />
               </SelectTrigger>
               <SelectContent>
-                {categories.map((c) => (
-                  <SelectItem key={c} value={c}>
-                    {c}
-                  </SelectItem>
-                ))}
+                {availableCategories.length === 0 ? (
+                  <div className="px-2 py-1.5 text-sm text-muted-foreground">
+                    No categories yet. Ask an admin to create some.
+                  </div>
+                ) : (
+                  selectableCategories.map(({ category, label }) => (
+                    <SelectItem key={category._id} value={category.name}>
+                      {label}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -362,18 +389,18 @@ const CourseLandingPageTab = () => {
           </Button>
         </div>
         <div className="space-y-2">
-          <Label>What’s included</Label>
-          {details.includes.map((item, i) => (
+          <Label>Who this course is for</Label>
+          {details.whoIsThisFor.map((item, i) => (
             <div key={i} className="flex items-center gap-2">
               <Input
                 value={item}
-                onChange={(e) => handleArrayChange(e, i, "includes")}
+                onChange={(e) => handleArrayChange(e, i, "whoIsThisFor")}
               />
               <Button
                 type="button"
                 variant="ghost"
                 size="icon"
-                onClick={() => removeArrayItem(i, "includes")}
+                onClick={() => removeArrayItem(i, "whoIsThisFor")}
               >
                 <Trash2 className="h-4 w-4 text-red-500" />
               </Button>
@@ -383,11 +410,127 @@ const CourseLandingPageTab = () => {
             type="button"
             size="sm"
             variant="outline"
-            onClick={() => addArrayItem("includes")}
+            onClick={() => addArrayItem("whoIsThisFor")}
           >
             <PlusCircle className="h-4 w-4 mr-2" />
-            Add include
+            Add audience point
           </Button>
+        </div>
+        <div className="space-y-2">
+          <Label>Related topics</Label>
+          <p className="text-sm text-muted-foreground">
+            Select the topics that power &quot;Explore related topics&quot; on your course page and
+            link this course to relevant blog articles.
+          </p>
+          {isLoadingCategories ? (
+            <p className="text-sm text-muted-foreground">Loading topics...</p>
+          ) : availableCategories.length === 0 ? (
+            <p className="text-sm text-muted-foreground">
+              No categories exist yet. Ask an admin to create some under Categories.
+            </p>
+          ) : (
+            <div className="flex flex-wrap gap-2 pt-1">
+              {topicCategories.map(({ category, label }) => {
+                const isSelected = details.topics.includes(category.name);
+                return (
+                  <button
+                    type="button"
+                    key={category._id}
+                    onClick={() => toggleTopic(category.name)}
+                    className={`px-3 py-1.5 rounded-full border text-sm font-medium transition-colors ${
+                      isSelected
+                        ? "bg-purple-700 border-purple-700 text-white"
+                        : "border-gray-300 text-gray-700 hover:bg-gray-100"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+        <div className="space-y-4">
+          <div>
+            <Label className="text-base font-semibold">Course includes</Label>
+            <p className="text-sm text-muted-foreground mt-1">
+              Video hours are calculated automatically. Set the counts below — they will display with icons on your course page.
+            </p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="space-y-1">
+              <Label>Coding exercises</Label>
+              <Input
+                type="number"
+                min="0"
+                value={details.courseIncludes.codingExercises}
+                onChange={(e) =>
+                  setDetails((prev) => ({
+                    ...prev,
+                    courseIncludes: { ...prev.courseIncludes, codingExercises: Number(e.target.value) },
+                  }))
+                }
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Articles</Label>
+              <Input
+                type="number"
+                min="0"
+                value={details.courseIncludes.articles}
+                onChange={(e) =>
+                  setDetails((prev) => ({
+                    ...prev,
+                    courseIncludes: { ...prev.courseIncludes, articles: Number(e.target.value) },
+                  }))
+                }
+              />
+            </div>
+            <div className="space-y-1">
+              <Label>Downloadable resources</Label>
+              <Input
+                type="number"
+                min="0"
+                value={details.courseIncludes.downloadableResources}
+                onChange={(e) =>
+                  setDetails((prev) => ({
+                    ...prev,
+                    courseIncludes: { ...prev.courseIncludes, downloadableResources: Number(e.target.value) },
+                  }))
+                }
+              />
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-4">
+            <label className="flex items-center gap-3 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                className="h-4 w-4 rounded border-gray-300"
+                checked={details.courseIncludes.hasMobileAccess}
+                onChange={(e) =>
+                  setDetails((prev) => ({
+                    ...prev,
+                    courseIncludes: { ...prev.courseIncludes, hasMobileAccess: e.target.checked },
+                  }))
+                }
+              />
+              <span className="text-sm font-medium">Access on mobile and TV</span>
+            </label>
+            <label className="flex items-center gap-3 cursor-pointer select-none">
+              <input
+                type="checkbox"
+                className="h-4 w-4 rounded border-gray-300"
+                checked={details.courseIncludes.hasCertificate}
+                onChange={(e) =>
+                  setDetails((prev) => ({
+                    ...prev,
+                    courseIncludes: { ...prev.courseIncludes, hasCertificate: e.target.checked },
+                  }))
+                }
+              />
+              <span className="text-sm font-medium">Certificate of completion</span>
+            </label>
+          </div>
         </div>
         <div className="space-y-2">
           <Label>Thumbnail</Label>

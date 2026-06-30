@@ -12,11 +12,11 @@ const CategoriesNavBar = ({ categories, selectedCategory, onSelectCategory }) =>
                 </button>
                 {categories.map(category => (
                     <button
-                        key={category}
-                        onClick={() => onSelectCategory(category)}
-                        className={`px-3 py-2 text-sm font-medium rounded-md whitespace-nowrap ${selectedCategory === category ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
+                        key={category._id}
+                        onClick={() => onSelectCategory(category.name)}
+                        className={`px-3 py-2 text-sm font-medium rounded-md whitespace-nowrap ${selectedCategory === category.name ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
                     >
-                        {category}
+                        {category.name}
                     </button>
                 ))}
             </div>
@@ -24,9 +24,14 @@ const CategoriesNavBar = ({ categories, selectedCategory, onSelectCategory }) =>
     </nav>
 );
 
-// PropTypes for CategoriesNavBar
 CategoriesNavBar.propTypes = {
-    categories: PropTypes.arrayOf(PropTypes.string).isRequired,
+    categories: PropTypes.arrayOf(
+        PropTypes.shape({
+            _id: PropTypes.string.isRequired,
+            name: PropTypes.string.isRequired,
+            slug: PropTypes.string,
+        })
+    ).isRequired,
     selectedCategory: PropTypes.string.isRequired,
     onSelectCategory: PropTypes.func.isRequired,
 };

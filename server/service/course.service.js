@@ -11,9 +11,11 @@ import { User } from "../models/user.model.js";
 import { Section } from "../models/section.model.js";
 import { Lecture } from "../models/lecture.model.js";
 import { SearchSuggestion } from "../models/searchSuggestion.js";
+import Category from "../models/category.model.js";
 import { uploadMedia, deleteFromCloudinary } from "../utils/cloudinary.js";
 import { createEmbeddingForText, cosineSimilarity } from "../utils/embedding.js";
 import { extractCloudinaryPublicId } from "../helpers/cloudinary.helper.js";
+import { upsertSearchSuggestion } from "../helpers/searchSuggestion.helper.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // INTERNAL HELPER — not exported
@@ -60,14 +62,87 @@ const getCourseProgressPercent = async (courseId, userId) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // 1. CREATE COURSE
 // ─────────────────────────────────────────────────────────────────────────────
+// ─────────────────────────────────────────────────────────────────────────────
+// Validate that every requested topic matches an existing Category.name.
+// Topics are restricted to the admin-managed Category list — no auto-creation —
+// so "Explore related topics" always cross-links cleanly to real blog categories.
+// Throws a 400 error listing any invalid topic names.
+// ─────────────────────────────────────────────────────────────────────────────
+const normalizeTopicName = (value) => value?.trim().toLowerCase();
+
+const removeDuplicateCategoryTopics = (topics, category) => {
+  if (!Array.isArray(topics) || topics.length === 0) return [];
+
+  const categoryName = normalizeTopicName(category);
+  const seen = new Set();
+
+  return topics
+    .map((topic) => topic?.trim())
+    .filter(Boolean)
+    .filter((topic) => {
+      const normalizedTopic = normalizeTopicName(topic);
+      if (!normalizedTopic || normalizedTopic === categoryName || seen.has(normalizedTopic)) {
+        return false;
+      }
+
+      seen.add(normalizedTopic);
+      return true;
+    });
+};
+
+const getCategoryDisplayInfo = async (categoryName) => {
+  if (!categoryName) return { categoryDetails: null, categoryHierarchy: [] };
+
+  const category = await Category.findOne({ name: categoryName })
+    .populate('parent', 'name slug')
+    .lean();
+
+  if (!category) {
+    return { categoryDetails: null, categoryHierarchy: [categoryName] };
+  }
+
+  const categoryHierarchy = category.parent
+    ? [category.parent.name, category.name]
+    : [category.name];
+
+  return { categoryDetails: category, categoryHierarchy };
+};
+
+const attachCategoryDisplayInfo = async (course) => {
+  if (!course) return course;
+  const categoryInfo = await getCategoryDisplayInfo(course.category);
+  return { ...course, ...categoryInfo };
+};
+
+const validateTopics = async (topics, category) => {
+  const cleaned = removeDuplicateCategoryTopics(topics, category);
+  if (cleaned.length === 0) return [];
+
+  const matchingCategories = await Category.find({ name: { $in: cleaned } }).select("name");
+  const validNames = new Set(matchingCategories.map((c) => c.name));
+  const invalid = cleaned.filter((t) => !validNames.has(t));
+
+  if (invalid.length > 0) {
+    const error = new Error(
+      `These topics don't match any existing category: ${invalid.join(", ")}. Please create the category first or choose from the existing list.`
+    );
+    error.statusCode = 400;
+    throw error;
+  }
+
+  return cleaned;
+};
+
 export const createCourse = async ({ userId, courseData }) => {
-  const { title, category, price, language, level, subtitle, description, learnings } = courseData;
+  const { title, category, price, language, level, subtitle, description, learnings, topics } = courseData;
 
   if (!title || !category || !price?.original || !price?.current) {
     const error = new Error("Title, category, and a full price object (original, current) are required.");
     error.statusCode = 400;
     throw error;
   }
+
+  const validatedTopics = await validateTopics(topics, category);
 
   const course = await Course.create({
     title,
@@ -78,8 +153,12 @@ export const createCourse = async ({ userId, courseData }) => {
     subtitle,
     description,
     learnings,
+    topics: validatedTopics,
     creator: userId,
   });
+
+  // Sync into search suggestions so the new course title shows up in autocomplete.
+  await upsertSearchSuggestion(title);
 
   return course;
 };
@@ -113,10 +192,34 @@ export const editCourse = async (courseId, fields, thumbnailFile) => {
   }
 
   // Apply text field updates
-  const textFields = ["title", "subtitle", "description", "category", "language", "level", "learnings", "requirements", "includes"];
+  const textFields = ["title", "subtitle", "description", "category", "language", "level", "learnings", "requirements", "whoIsThisFor"];
   textFields.forEach((key) => {
     if (fields[key] !== undefined) course[key] = fields[key];
   });
+
+  // Validate topics against the existing Category list before applying.
+  if (fields.topics !== undefined) {
+    course.topics = await validateTopics(fields.topics, fields.category ?? course.category);
+  } else if (fields.category !== undefined) {
+    course.topics = removeDuplicateCategoryTopics(course.topics, course.category);
+  }
+
+  // Handle structured courseIncludes (replaces old free-text includes[])
+  if (fields.courseIncludes) {
+    const ci = fields.courseIncludes;
+    const existing = course.courseIncludes || {};
+    course.courseIncludes = {
+      codingExercises:       Number(ci.codingExercises       ?? existing.codingExercises       ?? 0),
+      articles:              Number(ci.articles              ?? existing.articles              ?? 0),
+      downloadableResources: Number(ci.downloadableResources ?? existing.downloadableResources ?? 0),
+      hasMobileAccess: ci.hasMobileAccess !== undefined
+        ? ci.hasMobileAccess === true || ci.hasMobileAccess === "true"
+        : (existing.hasMobileAccess ?? true),
+      hasCertificate: ci.hasCertificate !== undefined
+        ? ci.hasCertificate === true || ci.hasCertificate === "true"
+        : (existing.hasCertificate ?? true),
+    };
+  }
 
   if (fields.price) {
     if (fields.price.original) course.price.original = fields.price.original;
@@ -182,7 +285,9 @@ export const getPublishedCourses = async (userId = null, enrolledIds = []) => {
  
   if (!userId) {
     // Guest users — no progress info needed
-    return courses.map((c) => ({ ...c, isPurchased: false, progress: 0 }));
+    return await Promise.all(
+      courses.map(async (course) => attachCategoryDisplayInfo({ ...course, isPurchased: false, progress: 0 }))
+    );
   }
  
   // Logged-in users: attach real progress.
@@ -191,7 +296,7 @@ export const getPublishedCourses = async (userId = null, enrolledIds = []) => {
   const enriched = await Promise.all(
     courses.map(async (course) => {
       const progress = await getCourseProgressPercent(course._id, userId);
-      return { ...course, isPurchased: false, progress };
+      return attachCategoryDisplayInfo({ ...course, isPurchased: false, progress });
     })
   );
  
@@ -229,6 +334,7 @@ export const getCourseById = async (courseId, userId = null) => {
 
   course.totalDurationInSeconds = totalDuration;
   course.totalLectures = totalLectures;
+  course.topics = removeDuplicateCategoryTopics(course.topics, course.category);
 
   // Default values for guest
   course.purchaseStatus = "not_purchased";
@@ -249,7 +355,7 @@ export const getCourseById = async (courseId, userId = null) => {
     }
   }
 
-  return course;
+  return attachCategoryDisplayInfo(course);
 };
 
 // ─────────────────────────────────────────────────────────────────────────────

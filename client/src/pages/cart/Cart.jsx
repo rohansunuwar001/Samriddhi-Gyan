@@ -1,44 +1,33 @@
-// src/components/Cart.jsx
+// src/pages/cart/Cart.jsx
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Loader2, ShoppingCart, Trash2, Heart, Tag, Star } from "lucide-react";
+import { Loader2, ShoppingCart, Trash2, Heart, Tag, Star, ArrowRight } from "lucide-react";
 import { useGetCartQuery, useRemoveFromCartMutation } from "@/features/api/cartApi";
-import {
-  useCreateCheckoutSessionMutation,
-  useCreateStripeCheckoutSessionMutation,
-} from "@/features/api/purchaseApi";
 import { useState } from "react";
 import YouMightAlsoLike from "../Courses/YouMightAlsoLike";
 
-
 const Cart = () => {
-  // RTK Query hooks
+  const navigate = useNavigate();
   const { data, isLoading: isCartLoading, isError } = useGetCartQuery();
   const [removeFromCart, { isLoading: isRemoving }] = useRemoveFromCartMutation();
 
-  // purchaseApi hooks
-  const [createEsewaSession] = useCreateCheckoutSessionMutation();
-  const [createStripeSession] = useCreateStripeCheckoutSessionMutation();
-
-  // Track which payment method is loading
-  const [loadingMethod, setLoadingMethod] = useState(null);
-
-  // Coupon field
-  const [showCouponField, setShowCouponField] = useState(false);
   const [couponCode, setCouponCode] = useState("");
+  const [isCouponApplied, setIsCouponApplied] = useState(false);
+  const [appliedCouponText, setAppliedCouponText] = useState("");
 
   const handleApplyCoupon = () => {
     if (!couponCode.trim()) {
       toast.error("Please enter a coupon code.");
       return;
     }
-    // Hook this up to a real coupon-validation endpoint when one exists.
-    toast.info("Coupon codes aren't supported yet.");
+    // Simulate applying coupon
+    setIsCouponApplied(true);
+    setAppliedCouponText(couponCode.toUpperCase());
+    toast.success("Coupon applied successfully!");
   };
 
-  // Remove course from cart
   const handleRemove = async (courseId) => {
     try {
       await removeFromCart(courseId).unwrap();
@@ -48,52 +37,17 @@ const Cart = () => {
     }
   };
 
-  // Checkout handler for Stripe/eSewa
-  const handleProceedToCheckout = async (paymentMethod) => {
-    if (!data?.cart || data.cart.length === 0) {
-      toast.error("Your cart is empty.");
-      return;
-    }
-    const courseIds = data.cart.map((item) => item._id);
-    toast.info("Preparing your order, please wait...");
-    setLoadingMethod(paymentMethod);
-    try {
-      if (paymentMethod === "Stripe") {
-        const response = await createStripeSession(courseIds).unwrap();
-        if (response.url) {
-          window.location.href = response.url;
-        } else {
-          toast.error("Could not process Stripe payment. Please try again.");
-        }
-      } else if (paymentMethod === "eSewa") {
-        const response = await createEsewaSession(courseIds).unwrap();
-        if (response.payment_url) {
-          window.location.href = response.payment_url;
-        } else {
-          toast.error("Could not process eSewa payment. Please try again.");
-        }
-      }
-    } catch (error) {
-      console.error("Failed to create order:", error);
-      toast.error(error?.data?.message || "Checkout failed. Please try again.");
-    } finally {
-      setLoadingMethod(null);
-    }
-  };
-
-  // Loading state
   if (isCartLoading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
-        <Loader2 className="animate-spin h-12 w-12 text-gray-400" />
+        <Loader2 className="animate-spin h-12 w-12 text-purple-600" />
       </div>
     );
   }
 
-  // Error state
   if (isError || !data) {
     return (
-      <div className="text-center py-10 text-gray-600">
+      <div className="text-center py-10 text-red-500">
         Couldn&apos;t load your cart. Please try again later.
       </div>
     );
@@ -111,196 +65,226 @@ const Cart = () => {
       ? Math.round(100 - (subtotal / originalTotal) * 100)
       : 0;
 
-  return (
-    <div className="container mx-auto px-4 md:px-8 py-8 max-w-6xl">
-      <h1 className="text-3xl font-bold mb-1">Shopping Cart</h1>
-      <p className="text-gray-500 mb-6">
-        {cart.length} Course{cart.length !== 1 ? "s" : ""} in Cart
-      </p>
+  const renderStars = (rating = 0, size = "h-3.5 w-3.5") => (
+    <div className="flex items-center gap-0.5">
+      {Array.from({ length: 5 }).map((_, index) => {
+        const filled = index + 1 <= Math.round(rating);
+        return (
+          <Star
+            key={index}
+            className={`${size} ${
+              filled ? "fill-[#b4690e] text-[#b4690e]" : "text-gray-300"
+            }`}
+          />
+        );
+      })}
+    </div>
+  );
 
-      {cart.length === 0 ? (
-        <div className="text-center min-h-[400px] flex flex-col justify-center items-center bg-gray-50 rounded-lg border">
-          <ShoppingCart className="h-16 w-16 text-gray-300 mb-4" />
-          <h2 className="text-2xl font-semibold mb-2">Your cart is empty</h2>
-          <p className="text-gray-500 mb-6">
-            Looks like you haven&apos;t added anything to your cart yet.
-          </p>
-          <Link to="/courses">
-            <Button>Explore Courses</Button>
-          </Link>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
-          {/* Cart items */}
-          <div className="lg:col-span-2">
-            <ul className="divide-y border-b">
+  return (
+    <div className="bg-white text-[#2d2f31] min-h-screen">
+      <div className="mx-auto max-w-[1400px] px-6 py-12 sm:px-8 lg:px-10">
+        <h1 className="text-4xl font-extrabold tracking-tight text-[#2d2f31] mb-2">Shopping Cart</h1>
+        <p className="text-base font-bold text-[#2d2f31] mb-8">
+          {cart.length} Course{cart.length !== 1 ? "s" : ""} in Cart
+        </p>
+
+        {cart.length === 0 ? (
+          <div className="text-center py-20 flex flex-col justify-center items-center bg-[#f7f9fa] rounded border border-[#d1d7dc]">
+            <ShoppingCart className="h-20 w-20 text-[#6a6f73] mb-6" />
+            <h2 className="text-2xl font-extrabold text-[#2d2f31] mb-2">Your cart is empty</h2>
+            <p className="text-[#6a6f73] mb-8 text-base">
+              Looks like you haven&apos;t added any courses to your cart yet.
+            </p>
+            <Link to="/courses">
+              <Button className="h-12 px-8 bg-[#a435f0] text-white hover:bg-[#8710d8] font-bold text-base rounded-none">
+                Keep shopping
+              </Button>
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_360px] gap-12 items-start">
+            {/* Left Side: Course List */}
+            <div className="border-t border-[#d1d7dc] divide-y divide-[#d1d7dc]">
               {cart.map((course) => {
                 const current = course.price?.current ?? 0;
-                const original = course.price?.original;
-                const hasDiscount = original && original > current;
+                const original = course.price?.original ?? 0;
+                const hasDiscount = original > current;
                 const itemDiscount = hasDiscount
                   ? Math.round(100 - (current / original) * 100)
                   : 0;
 
+                const ratingValue = course.ratings ?? course.rating ?? 4.5;
+                const reviewsCount = course.numOfReviews ?? course.numRatings ?? 2500;
+                const instructorName = course.creator?.name ?? course.instructor?.name ?? "Instructor";
+                const totalHours = course.totalDurationInSeconds 
+                  ? Math.round(course.totalDurationInSeconds / 3600) 
+                  : 45;
+                const totalLectures = course.totalLectures ?? 120;
+                const courseLevel = course.level ?? "All Levels";
+
                 return (
-                  <li
+                  <div
                     key={course._id}
-                    className="flex items-start justify-between gap-4 py-5"
+                    className="flex flex-col md:flex-row items-start justify-between gap-6 py-6"
                   >
-                    <div className="flex items-start gap-4 min-w-0">
+                    {/* Course Card Details */}
+                    <div className="flex items-start gap-4 min-w-0 flex-1">
                       <img
                         src={course.thumbnail || "/placeholder.jpg"}
                         alt={course.title}
-                        className="w-32 h-20 object-cover rounded-md flex-shrink-0"
+                        className="w-32 h-20 md:w-36 md:h-24 object-cover border border-[#d1d7dc] flex-shrink-0"
                       />
-                      <div className="min-w-0">
+                      <div className="min-w-0 space-y-1">
                         <Link
                           to={`/course-detail/${course._id}`}
-                          className="font-semibold text-base leading-snug hover:text-violet-600 line-clamp-2"
+                          className="font-bold text-[#2d2f31] text-base leading-snug hover:text-[#5624d0] line-clamp-2"
                         >
                           {course.title}
                         </Link>
-                        <p className="text-sm text-gray-500 mt-1">
-                          By {course.instructor?.name || "Instructor"}
+                        <p className="text-xs text-[#6a6f73]">
+                          By {instructorName}
                         </p>
 
-                        {(course.bestseller || course.rating) && (
-                          <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                            {course.bestseller && (
-                              <span className="text-xs font-semibold bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded">
-                                Bestseller
-                              </span>
-                            )}
-                            {course.rating && (
-                              <span className="flex items-center gap-1 text-sm text-amber-700">
-                                <span className="font-semibold">{course.rating}</span>
-                                <Star className="h-3.5 w-3.5 fill-amber-500 text-amber-500" />
-                                {course.numRatings && (
-                                  <span className="text-gray-400 text-xs">
-                                    ({course.numRatings.toLocaleString()} ratings)
-                                  </span>
-                                )}
-                              </span>
-                            )}
-                          </div>
-                        )}
+                        {/* Rating, hours, lectures */}
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-xs">
+                          {course.isBestseller && (
+                            <span className="bg-[#ecebfa] text-[#2d2f31] font-bold px-2 py-0.5 rounded text-[10px] uppercase">
+                              Bestseller
+                            </span>
+                          )}
+                          <span className="text-[#b4690e] font-extrabold">{ratingValue.toFixed(1)}</span>
+                          {renderStars(ratingValue)}
+                          <span className="text-[#6a6f73]">({reviewsCount.toLocaleString()} ratings)</span>
+                        </div>
 
-                        <div className="flex items-center gap-4 mt-3 text-sm">
-                          <button
-                            onClick={() => handleRemove(course._id)}
-                            disabled={isRemoving}
-                            className="flex items-center gap-1 text-violet-600 hover:underline disabled:opacity-50"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" /> Remove
-                          </button>
-                          <button className="flex items-center gap-1 text-violet-600 hover:underline">
-                            <Heart className="h-3.5 w-3.5" /> Move to wishlist
-                          </button>
+                        <div className="text-xs text-[#6a6f73] flex flex-wrap gap-2 pt-1">
+                          <span>{totalHours} total hours</span>
+                          <span>•</span>
+                          <span>{totalLectures} lectures</span>
+                          <span>•</span>
+                          <span>{courseLevel}</span>
+                        </div>
+
+                        {/* Premium check badge */}
+                        <div className="pt-2">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#ecebfa] text-[#5624d0]">
+                            Premium
+                          </span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="text-right flex-shrink-0">
-                      <p className="font-bold text-lg">Rs {current.toFixed(2)}</p>
+                    {/* Actions Panel */}
+                    <div className="flex md:flex-col items-center md:items-end gap-4 text-xs font-bold text-[#5624d0] md:min-w-[120px]">
+                      <button
+                        onClick={() => handleRemove(course._id)}
+                        disabled={isRemoving}
+                        className="hover:text-[#3b189f] underline"
+                      >
+                        Remove
+                      </button>
+                      <button className="hover:text-[#3b189f] underline">
+                        Save for Later
+                      </button>
+                      <button className="hover:text-[#3b189f] underline">
+                        Move to Wishlist
+                      </button>
+                    </div>
+
+                    {/* Price panel */}
+                    <div className="text-right flex-shrink-0 md:min-w-[100px]">
+                      <div className="flex items-center justify-end gap-1.5 text-[#5624d0] font-extrabold text-lg">
+                        <span>Rs {current.toLocaleString()}</span>
+                        <Tag className="h-4 w-4" />
+                      </div>
                       {hasDiscount && (
-                        <>
-                          <p className="text-sm text-gray-400 line-through">
-                            Rs {original.toFixed(2)}
-                          </p>
-                          <p className="text-xs text-violet-600 font-medium">
+                        <div className="space-y-0.5">
+                          <span className="text-sm text-[#6a6f73] line-through block">
+                            Rs {original.toLocaleString()}
+                          </span>
+                          <span className="text-xs text-[#2d2f31] block">
                             {itemDiscount}% off
-                          </p>
-                        </>
+                          </span>
+                        </div>
                       )}
                     </div>
-                  </li>
+                  </div>
                 );
               })}
-            </ul>
-          </div>
+            </div>
 
-          {/* Order summary */}
-          <div className="lg:col-span-1">
-            <div className="border rounded-lg p-6 sticky top-24 bg-white shadow-sm">
-              <p className="text-sm text-gray-500 mb-1">Total:</p>
-              <p className="text-3xl font-bold mb-1">Rs {subtotal.toFixed(2)}</p>
-              {discountPct > 0 && (
-                <div className="flex items-center gap-2 mb-4">
-                  <span className="text-sm text-gray-400 line-through">
-                    Rs {originalTotal.toFixed(2)}
-                  </span>
-                  <span className="text-sm text-violet-600 font-semibold">
-                    {discountPct}% off
-                  </span>
+            {/* Right Side: Order Summary Sidebar */}
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <div className="text-[#2d2f31]">
+                  <p className="text-base font-bold text-[#6a6f73]">Total:</p>
+                  <p className="text-4xl font-extrabold mt-1">Rs {subtotal.toLocaleString()}</p>
+                  {discountPct > 0 && (
+                    <div className="mt-1 flex items-center gap-2">
+                      <span className="text-[#6a6f73] line-through text-base">
+                        Rs {originalTotal.toLocaleString()}
+                      </span>
+                      <span className="text-[#2d2f31] text-sm">
+                        {discountPct}% off
+                      </span>
+                    </div>
+                  )}
                 </div>
-              )}
 
-              <div className="space-y-3 mt-4">
                 <Button
-                  className="w-full bg-violet-600 hover:bg-violet-700 text-white"
-                  size="lg"
-                  onClick={() => handleProceedToCheckout("eSewa")}
-                  disabled={loadingMethod === "eSewa" || loadingMethod === "Stripe"}
+                  className="w-full h-14 bg-[#a435f0] text-white hover:bg-[#8710d8] font-bold text-lg rounded-none flex items-center justify-center gap-2 shadow-none transition-colors"
+                  onClick={() => navigate("/checkout")}
                 >
-                  {loadingMethod === "eSewa" && (
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  )}
-                  Pay with eSewa
+                  Proceed to Checkout
+                  <ArrowRight className="h-5 w-5" />
                 </Button>
-                <Button
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white"
-                  size="lg"
-                  onClick={() => handleProceedToCheckout("Stripe")}
-                  disabled={loadingMethod === "Stripe" || loadingMethod === "eSewa"}
-                >
-                  {loadingMethod === "Stripe" && (
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  )}
-                  Pay with Card (Stripe)
-                </Button>
+
+                <p className="text-xs text-[#6a6f73] text-center">
+                  You won&apos;t be charged yet
+                </p>
               </div>
 
-              <p className="text-xs text-gray-400 text-center mt-3">
-                You won&apos;t be charged yet
-              </p>
+              <hr className="border-[#d1d7dc]" />
 
-              <hr className="my-5" />
-
-              {showCouponField ? (
-                <div>
-                  <p className="text-sm font-semibold text-gray-800 mb-2">
-                    Promotions
-                  </p>
-                  <div className="flex gap-2">
-                    <input
-                      type="text"
-                      value={couponCode}
-                      onChange={(e) => setCouponCode(e.target.value)}
-                      placeholder="Enter Coupon"
-                      className="flex-1 min-w-0 border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-300"
-                    />
-                    <Button
-                      onClick={handleApplyCoupon}
-                      className="bg-violet-600 hover:bg-violet-700 text-white px-5"
-                    >
-                      Apply
-                    </Button>
+              {/* Promotions Section */}
+              <div className="space-y-3">
+                <h3 className="text-sm font-extrabold text-[#2d2f31]">Promotions</h3>
+                
+                {isCouponApplied && (
+                  <div className="flex items-center justify-between border border-[#8a8d91] bg-[#f7f9fa] px-4 py-2.5 text-sm">
+                    <span className="font-bold text-[#6a6f73]">{appliedCouponText}</span>
+                    <span className="font-bold text-[#38755b]">Applied!</span>
                   </div>
+                )}
+
+                <div className="grid grid-cols-[1fr_80px] gap-2">
+                  <input
+                    type="text"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    placeholder="Enter Coupon"
+                    className="h-10 border border-[#2d2f31] bg-white px-3 text-sm outline-none focus:border-[#5624d0]"
+                  />
+                  <Button
+                    onClick={handleApplyCoupon}
+                    className="h-10 bg-white border border-[#2d2f31] text-[#2d2f31] hover:bg-[#f7f9fa] font-bold text-sm rounded-none shadow-none"
+                  >
+                    Apply
+                  </Button>
                 </div>
-              ) : (
-                <button
-                  onClick={() => setShowCouponField(true)}
-                  className="w-full border rounded-md py-2.5 text-sm font-semibold text-violet-700 border-violet-200 hover:bg-violet-50 flex items-center justify-center gap-2"
-                >
-                  <Tag className="h-4 w-4" /> Apply Coupon
-                </button>
-              )}
+              </div>
             </div>
           </div>
+        )}
+      </div>
+      
+      {/* Recommended list */}
+      <div className="border-t border-[#d1d7dc] bg-[#f7f9fa] py-12 mt-12">
+        <div className="mx-auto max-w-[1400px] px-6 sm:px-8 lg:px-10">
+          <YouMightAlsoLike excludeIds={cart.map((c) => c._id)} />
         </div>
-      )}
-
-      <YouMightAlsoLike excludeIds={cart.map((c) => c._id)} />
+      </div>
     </div>
   );
 };

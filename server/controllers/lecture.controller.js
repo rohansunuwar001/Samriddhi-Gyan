@@ -206,11 +206,20 @@ export const getLectureStatus = async (req, res) => {
 export const updateLecture = async (req, res) => {
   try {
     const { lectureId } = req.params;
-    const { title, isPreview } = req.body;
+    const { title, description, isPreview } = req.body;
 
     const update = {};
-    if (title !== undefined) update.title = title.trim();
-    if (isPreview !== undefined) update.isPreview = isPreview;
+    if (title !== undefined) {
+      update.title = title.trim();
+    }
+
+    if (description !== undefined) {
+      update.description = description.trim();
+    }
+
+    if (isPreview !== undefined) {
+      update.isPreview = isPreview;
+    }
 
     const lecture = await Lecture.findByIdAndUpdate(lectureId, update, {
       new: true,
