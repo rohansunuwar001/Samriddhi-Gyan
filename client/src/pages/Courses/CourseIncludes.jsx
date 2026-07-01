@@ -4,6 +4,7 @@
 // Video hours are auto-computed from course.totalDurationInSeconds.
 // All other stats come from course.courseIncludes (set by instructor).
 
+import React from 'react';
 import { Award, Code, Download, FileText, Smartphone, Video } from 'lucide-react';
 import PropTypes from 'prop-types';
 
@@ -70,18 +71,18 @@ const CourseIncludes = ({ course }) => {
       <h2 className="text-xl font-bold mb-4">This course includes:</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
         {Array.from({ length: maxRows }).map((_, i) => (
-          <>
+          <React.Fragment key={`row-${i}`}>
             {left[i] ? (
-              <IncludeRow key={`l-${i}`} Icon={left[i].Icon} label={left[i].label} />
+              <IncludeRow Icon={left[i].Icon} label={left[i].label} />
             ) : (
-              <div key={`l-empty-${i}`} />
+              <div />
             )}
             {right[i] ? (
-              <IncludeRow key={`r-${i}`} Icon={right[i].Icon} label={right[i].label} />
+              <IncludeRow Icon={right[i].Icon} label={right[i].label} />
             ) : (
-              <div key={`r-empty-${i}`} />
+              <div />
             )}
-          </>
+          </React.Fragment>
         ))}
       </div>
     </section>

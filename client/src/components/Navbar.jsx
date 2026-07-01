@@ -10,7 +10,9 @@ import {
   Menu,
   Search,
   ShoppingCart,
-  User
+  User,
+  ChevronRight,
+  TrendingUp
 } from "lucide-react";
 import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
@@ -18,6 +20,8 @@ import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import NotificationBell from './NotificationBell';
+import { useGetAllCategoriesQuery } from "@/features/api/categoryApi";
+import { useGetAllTopicsQuery } from "@/features/api/topicApi";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Button } from "./ui/button";
 import {
@@ -57,8 +61,8 @@ const UserAvatar = ({ user, onLogout, t }) => {
         <DropdownMenuContent className="w-48" align="end">
           <DropdownMenuLabel className="font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-medium leading-none">{user.name}</p>
-              <p className="text-xs leading-none text-muted-foreground">
+              <p className="text-base font-medium leading-none">{user.name}</p>
+              <p className="text-sm leading-none text-muted-foreground">
                 {user.email}
               </p>
             </div>
@@ -121,11 +125,68 @@ const Navbar = () => {
   const [isDropdownVisible, setIsDropdownVisible] = useState(false);
   const searchContainerRef = useRef(null);
 
+  const [activeParent, setActiveParent] = useState(null);
+  const [activeChild, setActiveChild] = useState(null);
+  const [showFindCoursesDropdown, setShowFindCoursesDropdown] = useState(false);
+
+  const [activeIssuer, setActiveIssuer] = useState(null);
+  const [showGetCertifiedDropdown, setShowGetCertifiedDropdown] = useState(false);
+
+  const [trendingSuggestions, setTrendingSuggestions] = useState([]);
+
+  const { data: catData } = useGetAllCategoriesQuery();
+  const { data: topicsData } = useGetAllTopicsQuery();
+
+  const categoryTree = catData?.categoryTree || [];
+  const topics = topicsData?.topics || [];
+
+  const findCoursesTimeoutRef = useRef(null);
+  const getCertifiedTimeoutRef = useRef(null);
+
+  const handleFindCoursesEnter = () => {
+    if (findCoursesTimeoutRef.current) clearTimeout(findCoursesTimeoutRef.current);
+    setShowFindCoursesDropdown(true);
+  };
+
+  const handleFindCoursesLeave = () => {
+    findCoursesTimeoutRef.current = setTimeout(() => {
+      setShowFindCoursesDropdown(false);
+      setActiveParent(null);
+      setActiveChild(null);
+    }, 200);
+  };
+
+  const handleGetCertifiedEnter = () => {
+    if (getCertifiedTimeoutRef.current) clearTimeout(getCertifiedTimeoutRef.current);
+    setShowGetCertifiedDropdown(true);
+  };
+
+  const handleGetCertifiedLeave = () => {
+    getCertifiedTimeoutRef.current = setTimeout(() => {
+      setShowGetCertifiedDropdown(false);
+      setActiveIssuer(null);
+    }, 200);
+  };
+
+  useEffect(() => {
+    const loadTrending = async () => {
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/api/v1/search/trending`);
+        const data = await response.json();
+        if (data?.success) {
+          setTrendingSuggestions(data.suggestions);
+        }
+      } catch (err) {
+        console.error("Failed to load trending suggestions", err);
+      }
+    };
+    loadTrending();
+  }, []);
+
   // --- All your useEffects and handlers remain unchanged ---
   useEffect(() => {
     if (searchQuery.trim() === "") {
       setResults({ suggestions: [], courses: [] });
-      setIsDropdownVisible(false);
       return;
     }
     const timerId = setTimeout(() => {
@@ -198,18 +259,18 @@ const Navbar = () => {
 
   const dashboardLabel =
     user?.role === "instructor" ? (
-      <span className="font-bold text-2xl text-purple-700">
+      <span className="font-normal text-3xl text-purple-700">
         {t("navbar.instructor_dashboard")}
       </span>
     ) : user?.role === "admin" ? (
-      <span className="font-bold text-2xl text-purple-700">
+      <span className="font-normal text-3xl text-purple-700">
         {t("navbar.admin_dashboard") || "Admin Dashboard"}
       </span>
     ) : null;
 
   const welcomeText =
     user && (user.role === "instructor" || user.role === "admin") ? (
-      <span className="ml-6 font-semibold text-lg text-gray-700">
+      <span className="ml-6 font-normal text-lg text-gray-700">
         Welcome, {user.name}
       </span>
     ) : null;
@@ -238,7 +299,7 @@ const Navbar = () => {
     user?.role === "instructor" || user?.role === "admin";
 
   return (
-    <header className="bg-white shadow-md sticky top-0 z-50">
+    <header className="bg-white shadow-md z-50">
       <div className="container mx-auto px-4 h-16 flex justify-between items-center gap-4">
         {/* --- Left side of Navbar (No Changes) --- */}
         <div className="flex items-center gap-4 shrink-0">
@@ -257,12 +318,180 @@ const Navbar = () => {
             </>
           )}
           {!isInstructorOrAdmin && (
-            <div className="hidden lg:block">
-              <Link
-                to="/course/search"
-                className="text-sm text-gray-700 hover:text-purple-600 transition-colors"
+            <div className="hidden lg:flex items-center gap-5 relative z-50">
+              {/* Find Courses Hover Menu */}
+              <div
+                className="relative py-4"
+                onMouseEnter={handleFindCoursesEnter}
+                onMouseLeave={handleFindCoursesLeave}
               >
-                {t("navbar.explore")}
+                <button className="text-base font-normal text-gray-700 hover:text-purple-600 transition-colors">
+                  Find Courses
+                </button>
+                {showFindCoursesDropdown && (
+                  <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 shadow-2xl rounded-lg flex z-50 text-slate-800 min-h-[400px] w-[700px] overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200">
+                    {/* Column 1: Parent Categories */}
+                    <div className="w-56 border-r border-gray-100 py-3 bg-gray-50/50 flex flex-col overflow-y-auto">
+                      {categoryTree.map((parent) => (
+                        <Link
+                          key={parent._id}
+                          to={`/topic/${parent.slug}`}
+                          onClick={() => {
+                            setShowFindCoursesDropdown(false);
+                            setActiveParent(null);
+                            setActiveChild(null);
+                          }}
+                          onMouseEnter={() => {
+                            setActiveParent(parent);
+                            setActiveChild(null);
+                          }}
+                          className={`px-4 py-2 text-base font-medium cursor-pointer flex items-center justify-between transition-colors ${
+                            activeParent?._id === parent._id
+                              ? "bg-purple-50 text-[#a435f0]"
+                              : "hover:bg-gray-100 hover:text-purple-600"
+                          }`}
+                        >
+                          <span>{parent.name}</span>
+                          {parent.children?.length > 0 && <ChevronRight className="w-4 h-4 opacity-75" />}
+                        </Link>
+                      ))}
+                    </div>
+
+                    {/* Column 2: Child Categories */}
+                    <div className="w-56 border-r border-gray-100 py-3 flex flex-col overflow-y-auto bg-white">
+                      {activeParent?.children?.map((child) => (
+                        <Link
+                          key={child._id}
+                          to={`/topic/${child.slug}`}
+                          onClick={() => {
+                            setShowFindCoursesDropdown(false);
+                            setActiveParent(null);
+                            setActiveChild(null);
+                          }}
+                          onMouseEnter={() => setActiveChild(child)}
+                          className={`px-4 py-2 text-base font-medium cursor-pointer flex items-center justify-between transition-colors ${
+                            activeChild?._id === child._id
+                              ? "bg-purple-50 text-[#a435f0]"
+                              : "hover:bg-gray-100 hover:text-purple-600"
+                          }`}
+                        >
+                          <span>{child.name}</span>
+                          <ChevronRight className="w-4 h-4 opacity-75" />
+                        </Link>
+                      ))}
+                      {!activeParent && (
+                        <div className="px-4 py-8 text-center text-sm text-gray-400">
+                          Hover over a category to explore subcategories.
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Column 3: Topics */}
+                    <div className="w-60 py-3 flex flex-col overflow-y-auto bg-white">
+                      <h4 className="px-4 py-1 text-sm font-normal text-gray-400 uppercase tracking-wider mb-2">
+                        Popular topics
+                      </h4>
+                      {activeChild ? (
+                        topics
+                          .filter((t) => t.type === "topic" && t.parentCategory === activeChild.name)
+                          .map((topic) => (
+                            <Link
+                              key={topic._id}
+                              to={`/topic/${topic.slug}`}
+                              onClick={() => setShowFindCoursesDropdown(false)}
+                              className="px-4 py-2 text-base font-normal text-gray-700 hover:bg-purple-50 hover:text-[#a435f0] transition-colors"
+                            >
+                              {topic.name}
+                            </Link>
+                          ))
+                      ) : (
+                        <div className="px-4 py-8 text-center text-sm text-gray-400">
+                          Hover over a subcategory to see popular topics.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Get Certified Hover Menu */}
+              <div
+                className="relative py-4"
+                onMouseEnter={handleGetCertifiedEnter}
+                onMouseLeave={handleGetCertifiedLeave}
+              >
+                <button className="text-base font-normal text-gray-700 hover:text-purple-600 transition-colors">
+                  Get Certified
+                </button>
+                {showGetCertifiedDropdown && (
+                  <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 shadow-2xl rounded-lg flex z-50 text-slate-800 min-h-[350px] w-[550px] overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200">
+                    {/* Column 1: Issuers */}
+                    <div className="w-60 border-r border-gray-100 py-3 bg-gray-50/50 flex flex-col overflow-y-auto">
+                      <h4 className="px-4 py-1 text-sm font-normal text-gray-400 uppercase tracking-wider mb-2">
+                        Popular Issuers
+                      </h4>
+                      {Array.from(
+                        new Set(
+                          topics
+                            .filter((t) => t.type === "certification")
+                            .map((t) => t.parentCategory)
+                            .filter(Boolean)
+                        )
+                      ).map((issuer) => (
+                        <Link
+                          key={issuer}
+                          to={`/course/search?query=${encodeURIComponent(issuer)}`}
+                          onClick={() => {
+                            setShowGetCertifiedDropdown(false);
+                            setActiveIssuer(null);
+                          }}
+                          onMouseEnter={() => setActiveIssuer(issuer)}
+                          className={`px-4 py-2 text-base font-medium cursor-pointer flex items-center justify-between transition-colors ${
+                            activeIssuer === issuer
+                              ? "bg-purple-50 text-[#a435f0]"
+                              : "hover:bg-gray-100 hover:text-purple-600"
+                          }`}
+                        >
+                          <span>{issuer}</span>
+                          <ChevronRight className="w-4 h-4 opacity-75" />
+                        </Link>
+                      ))}
+                    </div>
+
+                    {/* Column 2: Certifications */}
+                    <div className="w-80 py-3 flex flex-col overflow-y-auto bg-white">
+                      <h4 className="px-4 py-1 text-sm font-normal text-gray-400 uppercase tracking-wider mb-2">
+                        Certifications
+                      </h4>
+                      {activeIssuer ? (
+                        topics
+                          .filter((t) => t.type === "certification" && t.parentCategory === activeIssuer)
+                          .map((topic) => (
+                            <Link
+                              key={topic._id}
+                              to={`/topic/${topic.slug}`}
+                              onClick={() => setShowGetCertifiedDropdown(false)}
+                              className="px-4 py-2 text-base font-normal text-gray-700 hover:bg-purple-50 hover:text-[#a435f0] transition-colors leading-snug"
+                            >
+                              {topic.name}
+                            </Link>
+                          ))
+                      ) : (
+                        <div className="px-4 py-8 text-center text-sm text-gray-400">
+                          Hover over an issuer to see certifications.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Subscribe Link */}
+              <Link
+                to="/subscribe"
+                className="text-base font-normal text-gray-700 hover:text-purple-600 transition-colors"
+              >
+                Subscribe
               </Link>
             </div>
           )}
@@ -279,16 +508,43 @@ const Navbar = () => {
               <input
                 type="text"
                 placeholder={t("navbar.search_placeholder")}
-                className="relative w-full h-12 border border-black rounded-full pl-12 pr-4 text-sm text-black focus:outline-none focus:ring-1 focus:ring-black"
+                className="relative w-full h-12 border border-black rounded-full pl-12 pr-4 text-base text-black focus:outline-none focus:ring-1 focus:ring-black"
                 value={searchQuery}
                 onChange={handleInputChange}
-                onFocus={() => setIsDropdownVisible(searchQuery.trim() !== "")}
+                onFocus={() => setIsDropdownVisible(true)}
                 autoComplete="off"
               />
             </form>
             {isDropdownVisible && (
               <div className="absolute top-full w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-20 max-h-[70vh] overflow-y-auto p-2">
-                {isLoading ? (
+                {searchQuery.trim() === "" ? (
+                  <div>
+                    <h3 className="px-3 py-2 text-sm font-normal text-gray-400 uppercase tracking-wider flex items-center gap-2 border-b border-gray-50">
+                      <TrendingUp size={16} />
+                      Trending Searches
+                    </h3>
+                    {trendingSuggestions.length > 0 ? (
+                      <ul className="py-1">
+                        {trendingSuggestions.map((suggestion) => (
+                          <li key={suggestion}>
+                            <button
+                              type="button"
+                              onClick={() => handleSuggestionClick(suggestion)}
+                              className="w-full flex items-center gap-4 px-3 py-3 text-lg font-normal text-gray-800 hover:bg-gray-100 rounded-md text-left"
+                            >
+                              <TrendingUp size={20} className="text-gray-400" />
+                              <span>{suggestion}</span>
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="px-3 py-4 text-base text-gray-500">
+                        No trending suggestions found.
+                      </div>
+                    )}
+                  </div>
+                ) : isLoading ? (
                   <div className="flex items-center justify-center p-4">
                     <Loader2 className="h-6 w-6 animate-spin text-gray-500" />
                   </div>
@@ -297,7 +553,7 @@ const Navbar = () => {
                     {!isLoading &&
                       results.suggestions.length === 0 &&
                       results.courses.length === 0 && (
-                        <div className="p-4 text-sm text-center text-gray-500">
+                        <div className="p-4 text-base text-center text-gray-500">
                           {t("navbar.no_results", { query: searchQuery })}
                         </div>
                       )}
@@ -307,7 +563,7 @@ const Navbar = () => {
                           <li key={suggestion}>
                             <button
                               onClick={() => handleSuggestionClick(suggestion)}
-                              className="w-full flex items-center gap-4 px-3 py-3 text-base font-bold text-gray-800 hover:bg-gray-100 rounded-md"
+                              className="w-full flex items-center gap-4 px-3 py-3 text-lg font-normal text-gray-800 hover:bg-gray-100 rounded-md"
                             >
                               <Search size={20} />
                               <span>{suggestion}</span>
@@ -320,7 +576,7 @@ const Navbar = () => {
                       results.courses.length > 0 && <hr className="my-2" />}
                     {results.courses.length > 0 && (
                       <div>
-                        <h3 className="px-3 py-1 text-xs font-bold text-gray-500 uppercase">
+                        <h3 className="px-3 py-1 text-sm font-normal text-gray-500 uppercase">
                           {t("navbar.courses_heading")}
                         </h3>
                         <ul>
@@ -337,10 +593,10 @@ const Navbar = () => {
                                   className="w-11 h-11 object-cover bg-gray-200"
                                 />
                                 <div className="flex flex-col">
-                                  <span className="font-bold text-sm leading-tight">
+                                  <span className="font-normal text-base leading-tight">
                                     {course.title}
                                   </span>
-                                  <span className="text-xs text-gray-500">
+                                  <span className="text-sm text-gray-500">
                                     {course.creatorName}
                                   </span>
                                 </div>
@@ -361,16 +617,16 @@ const Navbar = () => {
         <div className="hidden md:flex items-center gap-6">
           {!isInstructorOrAdmin && (
             <div className="hidden lg:flex items-center gap-6">
-              <Link to="/about" className="text-sm text-gray-700 hover:text-purple-600 transition-colors">
+              <Link to="/about" className="text-base text-gray-700 hover:text-purple-600 transition-colors">
                 {t("navbar.about")}
               </Link>
-              <Link to="/how-it-works" className="text-sm text-gray-700 hover:text-purple-600 transition-colors">
+              <Link to="/how-it-works" className="text-base text-gray-700 hover:text-purple-600 transition-colors">
                 {t("navbar.how_it_works")}
               </Link>
-              <Link to="/contact" className="text-sm text-gray-700 hover:text-purple-600 transition-colors">
+              <Link to="/contact" className="text-base text-gray-700 hover:text-purple-600 transition-colors">
                 {t("navbar.contact")}
               </Link>
-              <Link to="/blog" className="text-sm text-gray-700 hover:text-purple-600 transition-colors">
+              <Link to="/blog" className="text-base text-gray-700 hover:text-purple-600 transition-colors">
                 {t("navbar.blog")}
               </Link>
             </div>
@@ -380,14 +636,14 @@ const Navbar = () => {
               <UserAvatar user={user} onLogout={logoutHandler} t={t} />
             ) : !isInstructorOrAdmin && user ? (
               <div className="flex items-center gap-4">
-                <Link to="/home/my-courses/wishlist" className="text-2xl text-gray-700 hover:text-purple-600" aria-label={t("navbar.wishlist")}>
+                <Link to="/home/my-courses/wishlist" className="text-3xl text-gray-700 hover:text-purple-600" aria-label={t("navbar.wishlist")}>
                   <Heart />
                 </Link>
-                <Link to="/cart" className="text-2xl text-gray-700 hover:text-purple-600" aria-label={t("navbar.cart")}>
+                <Link to="/cart" className="text-3xl text-gray-700 hover:text-purple-600" aria-label={t("navbar.cart")}>
                   <ShoppingCart />
                 </Link>
 
-           
+
                 <NotificationBell />
 
                 <UserAvatar user={user} onLogout={logoutHandler} t={t} />
@@ -412,7 +668,7 @@ const Navbar = () => {
           <SheetHeader />
           <nav className="grid gap-4 mt-8">
             <button
-              className="flex items-center gap-3 rounded-lg px-3 py-2 text-base font-medium hover:bg-gray-100"
+              className="flex items-center gap-3 rounded-lg px-3 py-2 text-lg font-medium hover:bg-gray-100"
               onClick={() => {
                 setMobileMenuOpen(false);
                 handleLogoClick();
@@ -422,39 +678,39 @@ const Navbar = () => {
             </button>
             {!isInstructorOrAdmin && (
               <>
-                <Link to="/course/search" className="flex items-center gap-3 rounded-lg px-3 py-2 text-base font-medium hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
+                <Link to="/course/search" className="flex items-center gap-3 rounded-lg px-3 py-2 text-lg font-medium hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
                   <BookOpen size={16} /> {t("navbar.courses_heading")}
                 </Link>
                 {user?.role === "student" && (
-                  <Link to="/home/my-courses/learning" className="flex items-center gap-3 rounded-lg px-3 py-2 text-base font-medium hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
+                  <Link to="/home/my-courses/learning" className="flex items-center gap-3 rounded-lg px-3 py-2 text-lg font-medium hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
                     <BookOpen size={16} /> {t("navbar.my_learning")}
                   </Link>
                 )}
-                <Link to="/about" className="flex items-center gap-3 rounded-lg px-3 py-2 text-base font-medium hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
+                <Link to="/about" className="flex items-center gap-3 rounded-lg px-3 py-2 text-lg font-medium hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
                   {t("navbar.about")}
                 </Link>
-                <Link to="/how-it-works" className="flex items-center gap-3 rounded-lg px-3 py-2 text-base font-medium hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
+                <Link to="/how-it-works" className="flex items-center gap-3 rounded-lg px-3 py-2 text-lg font-medium hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
                   {t("navbar.how_it_works")}
                 </Link>
-                <Link to="/contact" className="flex items-center gap-3 rounded-lg px-3 py-2 text-base font-medium hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
+                <Link to="/contact" className="flex items-center gap-3 rounded-lg px-3 py-2 text-lg font-medium hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
                   {t("navbar.contact")}
                 </Link>
-                <Link to="/blog" className="flex items-center gap-3 rounded-lg px-3 py-2 text-base font-medium hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
+                <Link to="/blog" className="flex items-center gap-3 rounded-lg px-3 py-2 text-lg font-medium hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
                   {t("navbar.blog")}
                 </Link>
               </>
             )}
             {user && (
-              <Link to="/profile" className="flex items-center gap-3 rounded-lg px-3 py-2 text-base font-medium hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
+              <Link to="/profile" className="flex items-center gap-3 rounded-lg px-3 py-2 text-lg font-medium hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
                 <User size={16} /> {t("navbar.profile")}
               </Link>
             )}
             {isInstructorOrAdmin && (
               <span className="flex flex-col gap-1 px-3 py-2">
-                <span className="font-bold text-lg text-purple-700">
+                <span className="font-normal text-xl text-purple-700">
                   {user?.role === "instructor" ? t("navbar.instructor_dashboard") : t("navbar.admin_dashboard") || "Admin Dashboard"}
                 </span>
-                <span className="font-semibold text-base text-gray-700">
+                <span className="font-normal text-lg text-gray-700">
                   Welcome, {user.name}
                 </span>
               </span>

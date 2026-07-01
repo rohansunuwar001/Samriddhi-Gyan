@@ -15,10 +15,10 @@ const Archived = () => {
     return (
       <div className="max-w-4xl mx-auto my-10 text-center select-none">
         <div className="bg-white border border-[#d1d7dc] p-8 shadow-sm">
-          <h2 className="text-sm font-extrabold text-red-600 mb-2">
+          <h2 className="text-sm font-normal text-red-600 mb-2">
             Failed to load your archived courses
           </h2>
-          <p className="text-xs text-[#6a6f73] mb-5">
+          <p className="text-sm text-[#6a6f73] mb-5">
             Please try refreshing the page or check your internet connection.
           </p>
         </div>
@@ -42,10 +42,10 @@ const Archived = () => {
       ) : archivedCourses.length === 0 ? (
         <div className="bg-white rounded-none border border-[#d1d7dc] p-12 text-center max-w-lg mx-auto shadow-sm space-y-4">
           <Archive className="h-10 w-10 text-gray-300 mx-auto" />
-          <h3 className="text-sm font-extrabold text-[#2d2f31]">
+          <h3 className="text-sm font-normal text-[#2d2f31]">
             No archived courses
           </h3>
-          <p className="text-xs text-[#6a6f73] leading-relaxed">
+          <p className="text-sm text-[#6a6f73] leading-relaxed">
             Archive courses you've finished or aren't currently studying to organize your workspace.
           </p>
         </div>

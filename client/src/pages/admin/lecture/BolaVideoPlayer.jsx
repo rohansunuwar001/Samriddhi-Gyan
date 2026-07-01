@@ -155,6 +155,8 @@ const BolaVideoPlayer = ({ src, onPlay, onEnded }) => {
       if (dur > 0 && dur - current <= 3 && !hasEndedRef.current) {
         hasEndedRef.current = true;
         if (onEnded) onEnded();
+      } else if (dur > 0 && dur - current > 3 && hasEndedRef.current) {
+        hasEndedRef.current = false;
       }
     }
   };
@@ -250,7 +252,10 @@ const BolaVideoPlayer = ({ src, onPlay, onEnded }) => {
         onLoadedMetadata={handleLoadedMetadata}
         onEnded={() => {
           setIsPlaying(false);
-          if (onEnded) onEnded();
+          if (onEnded && !hasEndedRef.current) {
+            hasEndedRef.current = true;
+            onEnded();
+          }
         }}
       />
 

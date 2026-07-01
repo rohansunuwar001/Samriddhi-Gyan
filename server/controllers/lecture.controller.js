@@ -4,6 +4,94 @@ import path from "path";
 import { Lecture } from "../models/lecture.model.js";
 import { Section } from "../models/section.model.js";
 import { updateCourseStats } from "../helpers/courseStats.helper.js";
+import { spawn } from "child_process";
+import ffmpegStatic from "ffmpeg-static";
+import { GoogleAIFileManager } from "@google/generative-ai/server";
+import { GoogleGenerativeAI } from "@google/generative-ai";
+
+const extractAudioAndTranscribe = async (videoPath, lectureId) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey || apiKey === "your_api_key_here") {
+    console.log("[transcription] Skipping: No valid GEMINI_API_KEY.");
+    return "";
+  }
+
+  const audioPath = path.join(process.cwd(), "public", "hls", lectureId, "audio.mp3");
+  
+  try {
+    console.log("[transcription] Extracting audio from video...");
+    // Create lecture output dir if not exist
+    const dir = path.dirname(audioPath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+
+    // FFmpeg extraction
+    await new Promise((resolve, reject) => {
+      const args = [
+        "-y",
+        "-i", videoPath,
+        "-vn",
+        "-acodec", "libmp3lame",
+        "-ab", "96k",
+        "-ar", "16000",
+        audioPath
+      ];
+      const proc = spawn(ffmpegStatic, args);
+      let stderr = "";
+      proc.stderr.on("data", (d) => { stderr += d.toString(); });
+      proc.on("close", (code) => {
+        if (code === 0) resolve();
+        else reject(new Error(`FFmpeg audio extraction failed: ${stderr.slice(-300)}`));
+      });
+    });
+
+    console.log("[transcription] Uploading audio to Gemini File API...");
+    const fileManager = new GoogleAIFileManager(apiKey);
+    const uploadResult = await fileManager.uploadFile(audioPath, {
+      mimeType: "audio/mp3",
+      displayName: `Lecture Audio ${lectureId}`,
+    });
+
+    console.log("[transcription] File uploaded. URI:", uploadResult.file.uri);
+    
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+    
+    console.log("[transcription] Triggering transcription from audio...");
+    const result = await model.generateContent([
+      {
+        fileData: {
+          fileUri: uploadResult.file.uri,
+          mimeType: uploadResult.file.mimeType,
+        },
+      },
+      { text: "Transcribe the audio speech word-for-word in English. Only output the transcription text, do not add headers or commentary." }
+    ]);
+
+    const transcript = await result.response.text();
+    console.log("[transcription] Successful. Length:", transcript.length);
+
+    // Clean up file from Gemini manager
+    try {
+      await fileManager.deleteFile(uploadResult.file.name);
+    } catch (delErr) {
+      console.warn("[transcription] Failed to delete file in Gemini:", delErr.message);
+    }
+
+    return transcript;
+  } catch (err) {
+    console.error("[transcription] Error:", err.message);
+    return "";
+  } finally {
+    // Delete local audio.mp3
+    try {
+      if (fs.existsSync(audioPath)) {
+        fs.unlinkSync(audioPath);
+      }
+    } catch {}
+  }
+};
 
 
 /**
@@ -122,11 +210,20 @@ export const uploadVideo = async (req, res) => {
       const backendUrl = process.env.BACKEND_URI || "http://localhost:8080";
       const masterUrl = `${backendUrl}/hls/${lectureId}/master.m3u8`;
 
+      // Extract and transcribe speech in the background
+      let transcriptText = "";
+      try {
+        transcriptText = await extractAudioAndTranscribe(rawPath, lectureId);
+      } catch (trErr) {
+        console.error("[uploadVideo] Transcription error:", trErr.message);
+      }
+
       await Lecture.findByIdAndUpdate(lectureId, {
         videoUrl: masterUrl,
         status: "ready",
         durationInSeconds: Math.round(metadata.duration),
         resolution: `${metadata.width}x${metadata.height}`,
+        transcript: transcriptText,
       });
 
       const updatedLecture = await Lecture.findById(lectureId).populate({

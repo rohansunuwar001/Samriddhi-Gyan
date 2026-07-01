@@ -3,7 +3,7 @@ import express from "express";
 import { initializePayment } from "../controllers/esewa.controller.js";
 
 import { createCheckoutSession, getAllPurchasedCourse, getCourseDetailWithPurchaseStatus, getPaymentStatus } from "../controllers/coursePurchase.controller.js";
-import { isAuthenticated } from "../middlewares/isAuthenticated.js";
+import { isAuthenticated, isOptionalAuthenticated } from "../middlewares/isAuthenticated.js";
 
 const router = express.Router();
 
@@ -20,7 +20,7 @@ router
   .post(isAuthenticated, createCheckoutSession);
 router
   .route("/course/:courseId/detail-with-status")
-  .get(isAuthenticated, getCourseDetailWithPurchaseStatus);
+  .get(isOptionalAuthenticated, getCourseDetailWithPurchaseStatus);
 router.route("/").get(isAuthenticated, getAllPurchasedCourse);
 router.get("/payment-status/:orderId", isAuthenticated, getPaymentStatus);
 

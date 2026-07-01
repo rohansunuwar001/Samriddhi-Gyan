@@ -1,5 +1,9 @@
 import { useSelector } from "react-redux";
-import { createBrowserRouter, Navigate, RouterProvider } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+} from "react-router-dom";
 
 // --- CORE LAYOUT & UTILITY IMPORTS ---
 import AnimatedErrorPage from "./AnimatedErrorPage";
@@ -8,11 +12,11 @@ import MainLayout from "./layout/MainLayout";
 
 // --- AUTHENTICATION & ROUTE PROTECTION ---
 import {
-    AdminRoute,
-    AuthenticatedUser,
-    InstructorRoute,
-    ProtectedRoute,
-    StudentRoute,
+  AdminRoute,
+  AuthenticatedUser,
+  InstructorRoute,
+  ProtectedRoute,
+  StudentRoute,
 } from "./components/ProtectedRoutes";
 import PurchaseCourseProtectedRoute from "./components/PurchaseCourseProtectedRoute";
 
@@ -78,12 +82,14 @@ import SupAdmAllRevenueDetails from "./pages/superAdmin/SupAdmAllRevenueDetails"
 import SupAdmAllUser from "./pages/superAdmin/SupAdmAllUser";
 import SupAdmCourseAnalytics from "./pages/superAdmin/SupAdmCourseAnalytics";
 import SupAdmDashboard from "./pages/superAdmin/SupAdmDashboard";
-// import WishList from "./pages/WishList/WishList";
 import CategoryManager from "./pages/admin/CategoryManager";
 import TopicSearchResultsPage from "./pages/Courses/TopicSearchResultsPage";
 import PaymentFailed from "./pages/PaymentFailed";
-// import CategoryManager from "./pages/admin/Categories/CategoryManager";
-// import TopicSearchResultsPage from "./pages/Topics/TopicSearchResultsPage";
+import BlogImporter from "./pages/admin/blog/BlogImporter";
+import TopicPage from "./pages/student/TopicPage";
+import TopicManager from "./pages/admin/TopicManager";
+import SubscribePage from "./pages/student/SubscribePage";
+import Terms from "./pages/Terms";
 
 // --- LAYOUT WRAPPER COMPONENT ---
 const MainLayoutWithScroll = () => (
@@ -122,6 +128,14 @@ const appRouter = createBrowserRouter([
         element: (
           <StudentRoute>
             <Contact />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/terms",
+        element: (
+          <StudentRoute>
+            <Terms />
           </StudentRoute>
         ),
       },
@@ -166,6 +180,22 @@ const appRouter = createBrowserRouter([
         element: (
           <StudentRoute>
             <HowItWorks />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/topic/:topicSlug",
+        element: (
+          <StudentRoute>
+            <TopicPage />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/subscribe",
+        element: (
+          <StudentRoute>
+            <SubscribePage />
           </StudentRoute>
         ),
       },
@@ -318,12 +348,11 @@ const appRouter = createBrowserRouter([
       {
         path: "course-detail/:courseId",
         element: (
-          <ProtectedRoute>
+          <StudentRoute>
             <CourseDetailPage />
-          </ProtectedRoute>
+          </StudentRoute>
         ),
       },
-
 
       {
         path: "courses",
@@ -396,6 +425,8 @@ const appRouter = createBrowserRouter([
           { path: "users", element: <SupAdmAllUser /> },
           { path: "revenue", element: <SupAdmAllRevenueDetails /> },
           { path: "categories", element: <CategoryManager /> },
+          { path: "topics", element: <TopicManager /> },
+          { path: "blog-import", element: <BlogImporter /> },
           { path: "cms", element: <HomeCms /> },
         ],
       },

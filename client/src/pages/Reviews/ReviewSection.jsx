@@ -99,19 +99,19 @@ const ReviewsSection = ({ course, percentCompleted }) => {
   return (
     <section className="space-y-8 select-none bg-white py-2 text-[#2d2f31]">
       <div>
-        <h2 className="text-xl font-bold tracking-tight mb-5">Student feedback</h2>
+        <h2 className="text-2xl font-normal tracking-tight mb-5">Student feedback</h2>
 
         {/* Rating Grid Breakdown */}
         <div className="flex flex-col md:flex-row items-start md:items-center gap-8 bg-white pb-6">
           {/* Large Average Score */}
           <div className="text-center md:text-left shrink-0">
-            <div className="text-[64px] font-extrabold text-[#b4690e] leading-none mb-1">
+            <div className="text-[72px] font-normal text-[#b4690e] leading-none mb-1">
               {ratings ? ratings.toFixed(1) : "0.0"}
             </div>
             <div className="flex justify-center md:justify-start mb-2">
               {renderStars(ratings)}
             </div>
-            <div className="text-xs font-bold text-[#b4690e] uppercase tracking-wider">
+            <div className="text-sm font-normal text-[#b4690e] uppercase tracking-wider">
               Course Rating
             </div>
           </div>
@@ -121,7 +121,7 @@ const ReviewsSection = ({ course, percentCompleted }) => {
             {[5, 4, 3, 2, 1].map((rating) => {
               const pct = breakdown[rating] || 0;
               return (
-                <div key={rating} className="flex items-center gap-3 text-xs">
+                <div key={rating} className="flex items-center gap-3 text-sm">
                   {/* Progress Bar Line */}
                   <div className="flex-1 bg-gray-200 h-2 rounded-none overflow-hidden relative">
                     <div
@@ -152,11 +152,11 @@ const ReviewsSection = ({ course, percentCompleted }) => {
         {allowReview ? (
           <AddReviewForm courseId={courseId} />
         ) : isEnrolled ? (
-          <p className="text-center text-xs text-[#6a6f73] font-normal leading-relaxed">
-            Please complete at least 80% of the course to leave a review. (Currently at {percentCompleted.toFixed(0)}%)
+          <p className="text-center text-sm text-[#6a6f73] font-normal leading-relaxed">
+            Please complete at least 80% of the course to leave a review. (Currently at {(percentCompleted || 0).toFixed(0)}%)
           </p>
         ) : (
-          <p className="text-center text-xs text-[#6a6f73] font-normal leading-relaxed">
+          <p className="text-center text-sm text-[#6a6f73] font-normal leading-relaxed">
             You must be enrolled in this course to leave a review.
           </p>
         )}
@@ -164,7 +164,7 @@ const ReviewsSection = ({ course, percentCompleted }) => {
 
       {/* Reviews Search & Filtration controls */}
       <div className="space-y-4">
-        <h3 className="text-lg font-bold">Reviews</h3>
+        <h3 className="text-xl font-normal">Reviews</h3>
 
         <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
           {/* Search Reviews Input bar */}
@@ -174,7 +174,7 @@ const ReviewsSection = ({ course, percentCompleted }) => {
               placeholder="Search reviews"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-grow border border-[#d1d7dc] px-3.5 py-2.5 text-xs outline-none focus:border-[#2d2f31] bg-white text-[#2d2f31] placeholder-gray-400 rounded-none h-10 min-w-0"
+              className="flex-grow border border-[#d1d7dc] px-3.5 py-2.5 text-sm outline-none focus:border-[#2d2f31] bg-white text-[#2d2f31] placeholder-gray-400 rounded-none h-10 min-w-0"
             />
             <button className="h-10 w-10 shrink-0 bg-[#2d2f31] hover:bg-black text-white flex items-center justify-center transition-colors">
               <Search className="h-4 w-4" />
@@ -183,11 +183,11 @@ const ReviewsSection = ({ course, percentCompleted }) => {
 
           {/* Filter ratings dropdown selection */}
           <div className="flex items-center gap-3">
-            <span className="text-xs font-bold text-[#2d2f31] whitespace-nowrap">Filter ratings</span>
+            <span className="text-sm font-normal text-[#2d2f31] whitespace-nowrap">Filter ratings</span>
             <select
               value={ratingFilter}
               onChange={(e) => setRatingFilter(e.target.value)}
-              className="border border-[#d1d7dc] px-3.5 py-2 text-xs outline-none focus:border-[#2d2f31] bg-white text-[#2d2f31] rounded-none h-10 min-w-[120px] font-normal cursor-pointer"
+              className="border border-[#d1d7dc] px-3.5 py-2 text-sm outline-none focus:border-[#2d2f31] bg-white text-[#2d2f31] rounded-none h-10 min-w-[120px] font-normal cursor-pointer"
             >
               <option value="all">All ratings</option>
               <option value="5">5 stars</option>
@@ -203,7 +203,7 @@ const ReviewsSection = ({ course, percentCompleted }) => {
       {/* Reviews feed list */}
       <div className="divide-y divide-[#d1d7dc] border-t border-[#d1d7dc]">
         {filteredReviews.length === 0 ? (
-          <p className="py-8 text-center text-xs text-gray-500 font-normal">
+          <p className="py-8 text-center text-sm text-gray-500 font-normal">
             No reviews match your filter parameters.
           </p>
         ) : (
@@ -216,7 +216,7 @@ const ReviewsSection = ({ course, percentCompleted }) => {
                 {/* Avatar with Initials bubble */}
                 <Avatar className="h-10 w-10 rounded-full border border-gray-100 shrink-0">
                   <AvatarImage src={review.user?.photoUrl} />
-                  <AvatarFallback className="bg-[#2d2f31] text-white text-xs font-bold rounded-full">
+                  <AvatarFallback className="bg-[#2d2f31] text-white text-sm font-normal rounded-full">
                     {initial}
                   </AvatarFallback>
                 </Avatar>
@@ -224,7 +224,7 @@ const ReviewsSection = ({ course, percentCompleted }) => {
                 {/* Content body */}
                 <div className="flex-1 min-w-0 space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-xs font-bold text-[#2d2f31] truncate">
+                    <h4 className="text-sm font-normal text-[#2d2f31] truncate">
                       {review.user?.name || "Student"}
                     </h4>
                   </div>
@@ -232,18 +232,18 @@ const ReviewsSection = ({ course, percentCompleted }) => {
                   {/* Rating Stars and Date relative info */}
                   <div className="flex items-center gap-2">
                     {renderStars(review.rating)}
-                    <span className="text-[10px] text-[#6a6f73] font-normal">
+                    <span className="text-xs text-[#6a6f73] font-normal">
                       {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : "4 months ago"}
                     </span>
                   </div>
 
                   {/* Text Comment body */}
-                  <p className="text-xs leading-relaxed text-[#2d2f31] font-normal pt-1 break-words">
+                  <p className="text-sm leading-relaxed text-[#2d2f31] font-normal pt-1 break-words">
                     {review.comment || "Good"}
                   </p>
 
                   {/* Helpful question line */}
-                  <div className="flex items-center gap-3 text-[10px] text-[#6a6f73] font-normal pt-2">
+                  <div className="flex items-center gap-3 text-xs text-[#6a6f73] font-normal pt-2">
                     <span>Was this review helpful?</span>
                     
                     <button

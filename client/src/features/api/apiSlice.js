@@ -27,7 +27,7 @@ export const apiSlice = createApi({
     tagTypes: [
         'User', 'Course', 'Section', 'Lecture', 'Wishlist',
         'Cart', 'Order', 'Purchase', 'AdminData', 'Instructor',
-        'Notification', 'CourseAnalytics','AdminStats', 'Question', 'Reminder'
+        'Notification', 'CourseAnalytics','AdminStats', 'Question', 'Reminder', 'Flashcard'
     ],
     baseQuery,
     endpoints: builder => ({}),

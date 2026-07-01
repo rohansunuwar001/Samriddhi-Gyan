@@ -64,6 +64,7 @@ export const getCourseProgress = async (req, res) => {
 export const updateLectureProgress = async (req, res) => {
   try {
     const { courseId, lectureId } = req.params;
+    const { viewed } = req.body;
     const userId = req.user._id;
  
     let courseProgress = await CourseProgress.findOne({ courseId, userId });
@@ -82,9 +83,13 @@ export const updateLectureProgress = async (req, res) => {
     );
  
     if (existingIndex !== -1) {
-      courseProgress.lectureProgress[existingIndex].viewed = !courseProgress.lectureProgress[existingIndex].viewed;
+      if (viewed !== undefined) {
+        courseProgress.lectureProgress[existingIndex].viewed = viewed;
+      } else {
+        courseProgress.lectureProgress[existingIndex].viewed = !courseProgress.lectureProgress[existingIndex].viewed;
+      }
     } else {
-      courseProgress.lectureProgress.push({ lectureId, viewed: true });
+      courseProgress.lectureProgress.push({ lectureId, viewed: viewed !== undefined ? viewed : true });
     }
  
     const courseDetails = await Course.findById(courseId).populate({

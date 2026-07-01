@@ -1,4 +1,3 @@
-// eslint-disable-next-line no-unused-vars
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -11,13 +10,13 @@ import {
     MessageSquare,
     DollarSign,
     BarChart3,
-    FilePenLine, // Icon for CMS
-    Tag // Icon for Categories
+    FilePenLine,
+    Tag,
+    Upload,
 } from 'lucide-react';
 
 // A single, reusable NavLink component for the dashboard.
 // This avoids code duplication.
-// eslint-disable-next-line react/prop-types
 const DashboardNavLink = ({ to, icon, label }) => {
     return (
         <NavLink
@@ -56,6 +55,8 @@ const adminLinks = [
     { to: 'users', icon: <Users size={20} />, label: 'Users' },
     { to: 'revenue', icon: <DollarSign size={20} />, label: 'Revenue' },
     { to: 'categories', icon: <Tag size={20} />, label: 'Categories' },
+    { to: 'topics', icon: <Tag size={20} />, label: 'Topics' },
+    { to: 'blog-import', icon: <Upload size={20} />, label: 'Blog Import' },
     { to: 'cms', icon: <FilePenLine size={20} />, label: 'CMS' },
 ];
 
