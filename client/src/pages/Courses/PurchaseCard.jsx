@@ -24,10 +24,12 @@ import {
 } from "lucide-react";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { toast } from "sonner";
 
 const PurchaseCard = ({ course }) => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useSelector((store) => store.auth);
   const [selectedPlan, setSelectedPlan] = useState("subscription");
   const [isCompact, setIsCompact] = useState(false);
 
@@ -44,9 +46,9 @@ const PurchaseCard = ({ course }) => {
     };
   }, []);
 
-  const { data: cartData, isLoading: isCartDataLoading } = useGetCartQuery();
+  const { data: cartData, isLoading: isCartDataLoading } = useGetCartQuery(undefined, { skip: !isAuthenticated });
   const { data: wishlistData, isLoading: isWishlistDataLoading } =
-    useGetWishlistQuery();
+    useGetWishlistQuery(undefined, { skip: !isAuthenticated });
 
   const [addToCart, { isLoading: isAddingToCart }] = useAddToCartMutation();
   const [addToWishlist, { isLoading: isAddingToWishlist }] =
@@ -75,6 +77,12 @@ const PurchaseCard = ({ course }) => {
   );
 
   const handleCartClick = async () => {
+    if (!isAuthenticated) {
+      toast.error("Please log in to add courses to your cart.");
+      navigate("/login");
+      return;
+    }
+
     if (isCourseInCart) {
       navigate("/cart");
       return;
@@ -90,6 +98,12 @@ const PurchaseCard = ({ course }) => {
   };
 
   const handleBuyNow = async () => {
+    if (!isAuthenticated) {
+      toast.error("Please log in to buy this course.");
+      navigate("/login");
+      return;
+    }
+
     if (!isCourseInCart) {
       try {
         await addToCart(course._id).unwrap();
@@ -103,6 +117,12 @@ const PurchaseCard = ({ course }) => {
   };
 
   const handleWishlistClick = async () => {
+    if (!isAuthenticated) {
+      toast.error("Please log in to add courses to your wishlist.");
+      navigate("/login");
+      return;
+    }
+
     if (isCourseInWishlist) {
       try {
         await removeFromWishlist(course._id).unwrap();
@@ -224,6 +244,7 @@ const PurchaseCard = ({ course }) => {
         <Info className="h-5 w-5 text-[#2d2f31]" />
         <button
           type="button"
+          onClick={() => navigate("/subscribe")}
           className="font-extrabold text-[#5624d0] underline"
         >
           Learn more
@@ -290,10 +311,9 @@ const PurchaseCard = ({ course }) => {
         <Button
           type="button"
           className="h-14 w-full rounded-md bg-[#6d28d9] text-lg font-extrabold text-white hover:bg-[#5b21b6]"
-          onClick={handleCartClick}
-          disabled={isCartDataLoading || isAddingToCart}
+          onClick={() => navigate("/subscribe")}
         >
-          {isAddingToCart ? <Loader2 className="animate-spin" /> : "Start subscription"}
+          Start subscription
         </Button>
       </div>
 

@@ -19,6 +19,7 @@ import {
   getCoursesWithStudentsAndReviews,
   getPaidCoursesWithPayments,
   getCourseAnalytics as getCourseAnalyticsService,
+  getTrendingSuggestions as getTrendingSuggestionsService,
 } from "../service/course.service.js";
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -203,5 +204,15 @@ export const getCourseAnalytics = async (req, res) => {
   } catch (error) {
     console.error("getCourseAnalytics error:", error.message);
     return res.status(500).json({ success: false, message: "Failed to fetch analytics." });
+  }
+};
+
+export const getTrendingSuggestions = async (req, res) => {
+  try {
+    const suggestions = await getTrendingSuggestionsService();
+    return res.status(200).json({ success: true, suggestions });
+  } catch (error) {
+    console.error("getTrendingSuggestions error:", error.message);
+    return res.status(500).json({ success: false, message: "Failed to fetch trending suggestions." });
   }
 };

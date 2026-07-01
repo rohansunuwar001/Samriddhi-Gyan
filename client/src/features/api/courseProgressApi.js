@@ -15,10 +15,42 @@ export const courseProgressApi = apiSlice.injectEndpoints({
          * @desc Marks a specific lecture as viewed/completed.
          */
         updateLectureProgress: builder.mutation({
-            query: ({ courseId, lectureId }) => ({
+            query: ({ courseId, lectureId, viewed }) => ({
                 url: `/progress/${courseId}/lecture/${lectureId}/view`,
                 method: 'POST',
+                body: viewed !== undefined ? { viewed } : undefined,
             }),
+            async onQueryStarted({ courseId, lectureId, viewed }, { dispatch, queryFulfilled }) {
+                const patchResult = dispatch(
+                    courseProgressApi.util.updateQueryData('getCourseProgress', courseId, (draft) => {
+                        if (draft && draft.data) {
+                            if (!draft.data.progress) {
+                                draft.data.progress = [];
+                            }
+                            const existingIndex = draft.data.progress.findIndex(
+                                (lp) => lp.lectureId === lectureId
+                            );
+                            if (existingIndex !== -1) {
+                                if (viewed !== undefined) {
+                                    draft.data.progress[existingIndex].viewed = viewed;
+                                } else {
+                                    draft.data.progress[existingIndex].viewed = !draft.data.progress[existingIndex].viewed;
+                                }
+                            } else {
+                                draft.data.progress.push({
+                                    lectureId,
+                                    viewed: viewed !== undefined ? viewed : true,
+                                });
+                            }
+                        }
+                    })
+                );
+                try {
+                    await queryFulfilled;
+                } catch (err) {
+                    patchResult.undo();
+                }
+            },
             // On success, invalidates the progress for this course, forcing a refetch
             invalidatesTags: (result, error, { courseId }) => [{ type: 'CourseProgress', id: courseId }],
         }),

@@ -79,7 +79,7 @@ const CoursePayout = () => {
             .filter((pc) => pc.courseId?._id === course.courseId)
             .map((pc) => ({
               // Create a unique ID for each record
-              paymentId: `${purchase._id}-${pc.courseId._id}`,
+              paymentId: `${purchase.purchaseId}-${pc.courseId?._id || pc.courseId}`,
               user: purchase.user,
               status: purchase.status,
               purchasedAt: purchase.purchasedAt,

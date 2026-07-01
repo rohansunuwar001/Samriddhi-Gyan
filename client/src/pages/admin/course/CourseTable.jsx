@@ -67,6 +67,7 @@ let CourseTable = () => {
                 <TableCaption>A list of all courses you have created.</TableCaption>
                 <TableHeader>
                     <TableRow>
+                        <TableHead className="w-[80px]">S.N.</TableHead>
                         <TableHead>Title</TableHead>
                         <TableHead>Price (NPR)</TableHead>
                         <TableHead>Lectures</TableHead>
@@ -76,8 +77,9 @@ let CourseTable = () => {
                 </TableHeader>
                 <TableBody>
                     {courses.length > 0 ? (
-                        courses.map((course) => (
+                        courses.map((course, index) => (
                             <TableRow key={course._id}>
+                                <TableCell className="font-semibold text-gray-500">{index + 1}</TableCell>
                                 <TableCell className="font-semibold">{course.title}</TableCell>
                                 <TableCell>
                                   Rs{course.price?.current ?? course.coursePrice ?? 'N/A'}
@@ -110,7 +112,7 @@ let CourseTable = () => {
                         ))
                     ) : (
                         <TableRow>
-                            <TableCell colSpan="5" className="text-center h-24">
+                            <TableCell colSpan="6" className="text-center h-24">
                                 You haven`t created any courses yet.
                             </TableCell>
                         </TableRow>

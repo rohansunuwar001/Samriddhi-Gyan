@@ -51,12 +51,44 @@ export const isAuthenticated = async (req, res, next) => {
   }
 };
 
+export const isOptionalAuthenticated = async (req, res, next) => {
+  try {
+    const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+
+    if (!token) {
+      return next();
+    }
+
+    const decoded = jwt.verify(token, process.env.SECRET_KEY);
+    if (!decoded) {
+      return next();
+    }
+
+    const user = await User.findById(decoded.userId)
+      .select("-password")
+      .populate("enrolledCourses")
+      .populate("wishlist")
+      .populate({
+        path: "viewHistory.course",
+        select: "title category thumbnail ratings",
+      });
+
+    if (user) {
+      req.user = user;
+    }
+    next();
+  } catch (error) {
+    console.log("Optional authentication error:", error.message);
+    next();
+  }
+};
+
 export const authorizeRoles = (...roles) => {
   return (req, res, next) => {
-    if (!roles.includes(req.user.role)) {
+    if (!roles.includes(req.user?.role)) {
       return res.status(403).json({
         success: false,
-        message: `Role '${req.user.role}' is not authorized to access this route.`,
+        message: `Role '${req.user?.role}' is not authorized to access this route.`,
       });
     }
     next();

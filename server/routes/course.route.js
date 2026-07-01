@@ -53,6 +53,7 @@ router.get("/creator", isAuthenticated, getCreatorCourses);
 router.get("/courses-with-students",          isAuthenticated, getCoursesWithEnrolledStudents);
 router.get("/courses-with-students-reviews",  isAuthenticated, getCoursesWithEnrolledStudentsAndReviews);
 router.get("/paid-courses-with-payments",     isAuthenticated, getPaidCoursesWithEnrolledStudentsAndPayments);
+router.get("/paid-courses-with-students-payments", isAuthenticated, getPaidCoursesWithEnrolledStudentsAndPayments);
 router.get("/analytics",                      isAuthenticated, authorizeRoles("instructor"), getCourseAnalytics);
 
 // Admin: all purchases

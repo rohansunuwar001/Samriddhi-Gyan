@@ -51,12 +51,12 @@ export const generateGeminiResponse = async (promptText, context = {}) => {
   try {
     const genAI = new GoogleGenerativeAI(apiKey);
     const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
+      model: "gemini-2.5-flash",
     });
 
     const schemaInfo = await getModelSchemas();
     const enhancedPrompt = `
-    You are an AI assistant for an LMS platform. Below is the database schema and any additional context.
+    You are an AI assistant for an LMS platform named Samriddhi Gyan. Below is the database schema, user context, and current course/lecture context.
 
     Database Schema:
     ${schemaInfo}
@@ -68,15 +68,29 @@ export const generateGeminiResponse = async (promptText, context = {}) => {
         : "No user context provided"
     }
 
+    Course Context:
+    ${
+      context.course
+        ? JSON.stringify(context.course, null, 2)
+        : "No course context provided"
+    }
+
+    Current Lecture Context:
+    ${
+      context.lecture
+        ? JSON.stringify(context.lecture, null, 2)
+        : "No lecture context provided"
+    }
+
     Current Query:
     ${promptText}
 
     Instructions:
-    1. Provide accurate responses based on the database schema
-    2. If asking about courses or content, consider the relationships between models
-    3. For user-specific queries, use the provided context
-    4. Be concise but thorough in explanations
-    5. If you need more information to answer properly, say so
+    1. Provide accurate and helpful responses based on the provided Course Context and Lecture Context.
+    2. If the user asks about the course curriculum, content, or relevance to careers (e.g. web developer, jobs), use the course title, description, learnings, and requirements.
+    3. If the user asks about the current lecture, explain the concept using the lecture title, description, and transcript text if available.
+    4. Speak directly, concisely, and encouragingly as an expert instructor or learning assistant at Samriddhi Gyan.
+    5. If a query is unrelated to the course and schema, you can still answer general programming/concepts helpfully, but relate it to full stack development when possible.
 
     Response:
     `;

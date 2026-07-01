@@ -8,12 +8,13 @@ import passport from "passport";
 import { stripeWebhook } from "./controllers/coursePurchase.controller.js";
 import { configurePassport } from "./database/passport-config.js"; // adjust path as needed
 import adminRouter from "./routes/admin.route.js";
+import blogImportRouter from "./routes/blogImport.route.js";
 import aiRoutes from "./routes/ai.route.js";
 import articleRouter from "./routes/article.route.js";
 import authorRouter from "./routes/author.route.js";
 import cartRouter from "./routes/cart.route.js";
 import categoryRoutes from "./routes/category.route.js";
- // ← ADDED
+import combinedSearchRouter from "./routes/combinedSearch.route.js"; // ← ADDED
 import courseRoute from "./routes/course.route.js";
 import courseProgressRoute from "./routes/courseProgress.route.js";
 import esewaRoute from "./routes/esewa.route.js";
@@ -25,12 +26,15 @@ import purchaseCourseRoutes from "./routes/purchaseCourse.route.js";
 import recommendedRoutes from "./routes/recommended.route.js";
 import reviewRouter from "./routes/review.route.js";
 import searchRouter from "./routes/searchSug.routes.js";
+import topicRouter from "./routes/topic.route.js";
 import sectionRouter from "./routes/section.route.js";
 import userRoute from "./routes/user.route.js";
 import wishlistRouter from "./routes/wishlist.route.js";
+import flashcardRouter from "./routes/flashcard.route.js";
+import questionRoute from "./routes/question.route.js";
+import reminderRoute from "./routes/reminder.route.js";
 import path from 'path';
 import { fileURLToPath } from 'url';
-import combinedSearchRouter from "./routes/combinedsearch.route.js";
 dotenv.config({});
 
 const app = express();
@@ -93,6 +97,7 @@ app.use("/api/v1/buy", esewaRoute);
 app.use("/api/v1/progress", courseProgressRoute);
 app.use("/api/v1/ai", aiRoutes);
 app.use("/api/v1/search", searchRouter);
+app.use("/api/v1/topic", topicRouter);
 app.use("/api/v1/search-by-topic", combinedSearchRouter); // ← ADDED: GET /api/v1/search-by-topic?topic=Node.js
 app.use("/api/v1/authors", authorRouter);
 app.use("/api/v1/categories", categoryRoutes);
@@ -105,5 +110,9 @@ app.use("/api/v1/wishlist", wishlistRouter);
 app.use("/api/v1/cart", cartRouter);
 app.use("/api/v1/notifications", notificationRouter);
 app.use("/api/v1/recommendations", recommendedRoutes);
+app.use("/api/v1/flashcard", flashcardRouter);
+app.use("/api/v1/question", questionRoute);
+app.use("/api/v1/reminder", reminderRoute);
 app.use("/api/v1/admin", adminRouter)
+app.use("/api/v1/admin", blogImportRouter); // POST /api/v1/admin/blog-import
 export default app;

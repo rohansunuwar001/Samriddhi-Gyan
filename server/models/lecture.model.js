@@ -15,6 +15,10 @@ const lectureSchema = new mongoose.Schema(
       trim: true,
       default: "",
     },
+    transcript: {
+      type: String,
+      default: "",
+    },
 
     // --- Video Information (No changes needed here) ---
     videoUrl: {

@@ -8,6 +8,7 @@ import { BookOpen, Clock, PlayCircle, Star, Users, Heart, Loader2 } from "lucide
 import PropTypes from "prop-types";
 import { Link, useNavigate } from "react-router-dom";
 import { useState, useEffect, useRef } from "react";
+import { useSelector } from "react-redux";
 import { toast } from "sonner";
 import { useAddToCartMutation, useGetCartQuery } from "@/features/api/cartApi";
 import {
@@ -20,14 +21,15 @@ import * as PopoverPrimitive from "@radix-ui/react-popover";
 
 const CourseCard = ({ course, showRecommendationBadge }) => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useSelector((store) => store.auth);
   const [showDetails, setShowDetails] = useState(false);
   const [popoverSide, setPopoverSide] = useState("right");
   const cardRef = useRef(null);
   const enterTimeoutRef = useRef(null);
   const leaveTimeoutRef = useRef(null);
 
-  const { data: cartData } = useGetCartQuery();
-  const { data: wishlistData } = useGetWishlistQuery();
+  const { data: cartData } = useGetCartQuery(undefined, { skip: !isAuthenticated });
+  const { data: wishlistData } = useGetWishlistQuery(undefined, { skip: !isAuthenticated });
   const [addToCart, { isLoading: isAddingToCart }] = useAddToCartMutation();
   const [addToWishlist] = useAddToWishlistMutation();
   const [removeFromWishlist] = useRemoveFromWishlistMutation();
@@ -76,6 +78,12 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
     e.preventDefault();
     e.stopPropagation();
 
+    if (!isAuthenticated) {
+      toast.error("Please log in to add courses to your cart.");
+      navigate("/login");
+      return;
+    }
+
     if (isCourseInCart) {
       navigate("/cart");
       return;
@@ -93,6 +101,12 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
   const handleWishlistAction = async (e) => {
     e.preventDefault();
     e.stopPropagation();
+
+    if (!isAuthenticated) {
+      toast.error("Please log in to add courses to your wishlist.");
+      navigate("/login");
+      return;
+    }
 
     if (isCourseInWishlist) {
       try {

@@ -615,3 +615,8 @@ export const getCourseAnalytics = async (instructorId) => {
     };
   });
 };
+
+export const getTrendingSuggestions = async () => {
+  const suggestions = await SearchSuggestion.find({}).limit(10).lean();
+  return suggestions.map((s) => s.term);
+};

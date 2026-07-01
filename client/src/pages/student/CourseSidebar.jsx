@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
-import { Play, Check, ChevronDown, ChevronUp, X, Sparkles, Paperclip, Send, Loader2, Bot } from "lucide-react";
+import { Play, Check, ChevronDown, ChevronUp, X, Sparkles, Paperclip, Send, Loader2, Bot, Video } from "lucide-react";
+import { Link } from "react-router-dom";
 import axios from "axios";
 import { BASE_URL } from "@/app/constant";
 import { toast } from "sonner";
@@ -19,7 +20,15 @@ const CourseSidebar = ({
   const [prompt, setPrompt] = useState("");
   const [conversation, setConversation] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [expandedMessages, setExpandedMessages] = useState({});
   const chatEndRef = useRef(null);
+
+  const toggleMessageExpand = (index) => {
+    setExpandedMessages((prev) => ({
+      ...prev,
+      [index]: prev[index] === false ? true : false,
+    }));
+  };
 
   // Auto-scroll chat to bottom
   useEffect(() => {
@@ -79,9 +88,11 @@ const CourseSidebar = ({
     setConversation((prev) => [...prev, { role: "user", content: query }]);
 
     try {
-      const host = BASE_URL || import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
+      const host = BASE_URL || import.meta.env.VITE_BACKEND_URL || "http://localhost:10000";
       const res = await axios.post(`${host}/api/v1/ai/ask`, {
         prompt: query,
+        courseId: course?._id,
+        lectureId: selectedLecture?._id,
       });
 
       const aiResponse = res.data.answer;
@@ -106,22 +117,25 @@ const CourseSidebar = ({
     }
   };
 
-  // Preset question triggers
+  // Preset question triggers based on active course details
+  const courseTitle = course?.title || "this course";
+  const courseCategory = course?.category || "this subject";
+
   const presets = [
-    "How is the course helpful to a Full Stack Web Developer?",
-    "How do I apply the information from this course to my job?",
-    "Explain Special Education to me as if I was a child",
-    "Explain Special Education in simpler terms",
+    `How is this course helpful to a ${courseCategory} professional?`,
+    `How do I apply the information from "${courseTitle}" to my job?`,
+    `Explain "${courseTitle}" to me as if I was a child`,
+    `Explain the key concepts of "${courseTitle}" in simpler terms`,
   ];
 
   return (
-    <aside className="w-[360px] bg-white border-l border-[#d1d7dc] flex-shrink-0 flex flex-col h-full select-none z-10">
+    <aside className="w-[420px] bg-white border-l border-[#d1d7dc] flex-shrink-0 flex flex-col h-full select-none z-10">
       {/* Sidebar Header Tabs */}
       <div className="flex items-center justify-between border-b border-[#d1d7dc] h-12 bg-white px-2 shrink-0">
         <div className="flex space-x-4 h-full">
           <button
             onClick={() => setActiveTab("content")}
-            className={`h-full px-2 text-xs font-bold transition-all relative border-b-2 ${
+            className={`h-full px-2 text-base font-normal transition-all relative border-b-2 ${
               activeTab === "content"
                 ? "border-[#2d2f31] text-[#2d2f31]"
                 : "border-transparent text-[#6a6f73] hover:text-[#2d2f31]"
@@ -131,7 +145,7 @@ const CourseSidebar = ({
           </button>
           <button
             onClick={() => setActiveTab("ai")}
-            className={`h-full px-2 text-xs font-bold transition-all relative border-b-2 flex items-center gap-1 ${
+            className={`h-full px-2 text-base font-normal transition-all relative border-b-2 flex items-center gap-1 ${
               activeTab === "ai"
                 ? "border-[#2d2f31] text-[#2d2f31]"
                 : "border-transparent text-[#6a6f73] hover:text-[#2d2f31]"
@@ -151,7 +165,7 @@ const CourseSidebar = ({
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto min-h-0 flex flex-col">
+      <div className={`flex-1 min-h-0 flex flex-col ${activeTab === "content" ? "overflow-y-auto" : "overflow-hidden"}`}>
         {activeTab === "content" ? (
           <div className="divide-y divide-[#d1d7dc]">
             {course.sections?.map((section, idx) => {
@@ -176,10 +190,10 @@ const CourseSidebar = ({
                     className="w-full flex justify-between items-start p-4 bg-[#f7f9fa] hover:bg-[#ecebfa]/50 transition-colors text-left border-b border-[#d1d7dc]"
                   >
                     <div className="space-y-1 pr-4">
-                      <h3 className="font-bold text-[#2d2f31] text-xs sm:text-sm leading-snug">
+                      <h3 className="font-normal text-[#2d2f31] text-sm sm:text-base leading-snug capitalize">
                         {section.title}
                       </h3>
-                      <p className="text-[10px] text-[#6a6f73] font-normal">
+                      <p className="text-sm text-[#6a6f73] font-normal">
                         {viewedLecturesCount} / {totalLecturesCount} |{" "}
                         {formatSectionDuration(sectionDuration)}
                       </p>
@@ -195,7 +209,7 @@ const CourseSidebar = ({
 
                   {/* Lectures List */}
                   {isSectionOpen && (
-                    <ul className="divide-y divide-[#e4e8eb] bg-white">
+                    <ul className="divide-y divide-[#e4e8eb] bg-white list-none">
                       {section.lectures?.map((lecture, lIdx) => {
                         const isViewed = progress.some(
                           (lp) => lp.lectureId === lecture._id && lp.viewed
@@ -222,9 +236,9 @@ const CourseSidebar = ({
                               className="mt-0.5 shrink-0"
                             >
                               <div
-                                className={`h-4.5 w-4.5 border flex items-center justify-center transition-all ${
+                                className={`h-5 w-5 border flex items-center justify-center transition-all shrink-0 ${
                                   isViewed
-                                    ? "bg-[#5624d0] border-[#5624d0] text-white"
+                                    ? "bg-[#ecebfa] border-[#2d2f31] text-[#2d2f31]"
                                     : "border-gray-400 hover:border-gray-600 bg-white"
                                 }`}
                               >
@@ -235,14 +249,14 @@ const CourseSidebar = ({
                             {/* Lecture Details */}
                             <div className="space-y-1 min-w-0 flex-1">
                               <h4
-                                className={`text-[13px] leading-relaxed text-[#2d2f31] ${
-                                  isSelected ? "font-bold" : "font-normal"
+                                className={`text-base leading-relaxed text-[#2d2f31] ${
+                                  isSelected ? "font-medium" : "font-normal"
                                 }`}
                               >
                                 {lIdx + 1}. {lecture.title}
                               </h4>
-                              <div className="flex items-center gap-1.5 text-[10px] text-[#6a6f73]">
-                                <Play className="h-3 w-3 text-gray-500 fill-gray-400" />
+                              <div className="flex items-center gap-1.5 text-sm text-[#6a6f73]">
+                                <Video className="h-3.5 w-3.5 text-gray-400" />
                                 <span>{formatDuration(lecture.durationInSeconds)}</span>
                               </div>
                             </div>
@@ -264,14 +278,14 @@ const CourseSidebar = ({
                 /* Suggestion Presets Overlay (Udemy style) */
                 <div className="space-y-5">
                   <div className="space-y-1">
-                    <h3 className="text-base font-bold text-[#2d2f31]">
+                    <h3 className="text-lg font-bold text-[#2d2f31]">
                       Do you have any questions about this course?
                     </h3>
-                    <p className="text-[11px] text-[#6a6f73] leading-relaxed font-normal">
+                    <p className="text-xs text-[#6a6f73] leading-relaxed font-normal">
                       Our AI assistant may make mistakes. Verify for accuracy.{" "}
-                      <span className="text-[#a435f0] hover:underline cursor-pointer">
+                      <Link to="/terms" className="text-[#a435f0] hover:underline cursor-pointer">
                         Terms Apply.
-                      </span>
+                      </Link>
                     </p>
                   </div>
 
@@ -281,7 +295,7 @@ const CourseSidebar = ({
                       <button
                         key={index}
                         onClick={() => askAI(preset)}
-                        className="w-full text-left p-3.5 border border-[#d1d7dc] hover:bg-[#f7f9fa] transition-colors rounded-none outline-none block text-xs text-[#2d2f31] leading-relaxed font-normal shadow-none"
+                        className="w-full text-left p-3.5 border border-[#d1d7dc] hover:bg-[#f7f9fa] transition-colors rounded-none outline-none block text-sm text-[#2d2f31] leading-relaxed font-normal shadow-none"
                       >
                         {preset}
                       </button>
@@ -297,25 +311,41 @@ const CourseSidebar = ({
                       className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                     >
                       <div
-                        className={`max-w-[85%] px-3.5 py-2.5 text-xs leading-relaxed ${
+                        className={`max-w-[85%] px-3.5 py-2.5 text-sm leading-relaxed ${
                           msg.role === "user"
                             ? "bg-[#a435f0] text-white rounded-none"
                             : "bg-[#f7f9fa] border border-[#d1d7dc] text-[#2d2f31] rounded-none"
                         }`}
                       >
                         {msg.role === "assistant" && (
-                          <div className="flex items-center gap-1.5 mb-1.5 text-[10px] font-bold text-[#a435f0]">
+                          <div className="flex items-center gap-1.5 mb-1.5 text-xs font-bold text-[#a435f0]">
                             <Bot className="h-3.5 w-3.5" /> Course Assistant
                           </div>
                         )}
-                        <p className="whitespace-pre-wrap">{msg.content}</p>
+                        {msg.role === "assistant" && msg.content.length > 200 ? (
+                          <>
+                            <p className="whitespace-pre-wrap">
+                              {expandedMessages[index] !== false
+                                ? msg.content
+                                : `${msg.content.slice(0, 200)}...`}
+                            </p>
+                            <button
+                              onClick={() => toggleMessageExpand(index)}
+                              className="mt-2 text-xs font-bold text-[#a435f0] hover:text-[#8710d8] flex items-center gap-1 focus:outline-none uppercase tracking-wider transition-colors"
+                            >
+                              {expandedMessages[index] !== false ? "Minimize ▴" : "Read Full Response ▾"}
+                            </button>
+                          </>
+                        ) : (
+                          <p className="whitespace-pre-wrap">{msg.content}</p>
+                        )}
                       </div>
                     </div>
                   ))}
 
                   {loading && (
                     <div className="flex justify-start">
-                      <div className="bg-[#f7f9fa] border border-[#d1d7dc] text-[#2d2f31] max-w-[85%] px-3.5 py-2.5 rounded-none text-xs flex items-center gap-2">
+                      <div className="bg-[#f7f9fa] border border-[#d1d7dc] text-[#2d2f31] max-w-[85%] px-3.5 py-2.5 rounded-none text-sm flex items-center gap-2">
                         <Loader2 className="h-3.5 w-3.5 animate-spin text-[#a435f0]" />
                         <span>Thinking...</span>
                       </div>
@@ -331,7 +361,7 @@ const CourseSidebar = ({
               <div className="flex items-center gap-3.5">
                 {/* Paperclip file link indicator */}
                 <button className="text-[#6a6f73] hover:text-[#2d2f31] shrink-0 outline-none">
-                  <Paperclip className="h-4.5 w-4.5" />
+                  <Paperclip className="h-5 w-5" />
                 </button>
                 {/* Input Textbox */}
                 <input
@@ -341,7 +371,7 @@ const CourseSidebar = ({
                   onChange={(e) => setPrompt(e.target.value)}
                   onKeyDown={handleKeyDown}
                   disabled={loading}
-                  className="flex-grow border border-[#d1d7dc] px-3.5 py-2.5 text-xs outline-none focus:border-[#2d2f31] bg-white text-[#2d2f31] placeholder-gray-400 rounded-none h-10 min-w-0"
+                  className="flex-grow border border-[#d1d7dc] px-3.5 py-2.5 text-sm outline-none focus:border-[#2d2f31] bg-white text-[#2d2f31] placeholder-gray-400 rounded-none h-10 min-w-0"
                 />
                 {/* Submit Circle Button */}
                 <button
@@ -349,12 +379,12 @@ const CourseSidebar = ({
                   disabled={loading || !prompt.trim()}
                   className="h-8 w-8 rounded-full bg-[#a435f0] hover:bg-[#8710d8] flex items-center justify-center text-white shrink-0 disabled:opacity-40 disabled:hover:bg-[#a435f0] transition-colors outline-none"
                 >
-                  <Send className="h-3.5 w-3.5 rotate-[-45deg] translate-x-0.5 -translate-y-0.5" />
+                  <Send className="h-3.5 w-3.5 rotate-[45deg] " />
                 </button>
               </div>
 
               {/* Feedback Links */}
-              <span className="text-[10px] text-[#a435f0] hover:underline cursor-pointer block text-center font-bold">
+              <span className="text-xs text-[#a435f0] hover:underline cursor-pointer block text-center font-bold">
                 Share feedback
               </span>
             </div>
