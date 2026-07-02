@@ -1,6 +1,7 @@
 import { Course } from "../models/course.model.js";
 import Topic from "../models/topic.model.js";
 import Category from "../models/category.model.js";
+import { Review } from "../models/review.model.js";
 import { slugify } from "../utils/slugify.js";
 
 export const createTopic = async (req, res) => {
@@ -52,7 +53,49 @@ export const createTopic = async (req, res) => {
 export const getAllTopics = async (req, res) => {
   try {
     const topics = await Topic.find({}).sort({ name: 1 }).lean();
-    res.status(200).json({ success: true, topics });
+    
+    // For each topic, compute stats dynamically from matching courses in database
+    const enrichedTopics = await Promise.all(
+      topics.map(async (topic) => {
+        const searchRegex = new RegExp(topic.name.trim(), "i");
+        const courses = await Course.find({
+          isPublished: true,
+          $or: [
+            { topics: topic.name },
+            { category: topic.name },
+            { title: { $regex: searchRegex } },
+          ],
+        }).select("enrolledStudents courseIncludes ratings").lean();
+
+        let numLearners = 0;
+        let handsOnPracticeCount = 0;
+        let totalRatingSum = 0;
+        let ratedCoursesCount = 0;
+
+        courses.forEach((c) => {
+          numLearners += c.enrolledStudents?.length || 0;
+          handsOnPracticeCount += c.courseIncludes?.codingExercises || 0;
+          if (c.ratings > 0) {
+            totalRatingSum += c.ratings;
+            ratedCoursesCount++;
+          }
+        });
+
+        const avgRating =
+          ratedCoursesCount > 0
+            ? Number((totalRatingSum / ratedCoursesCount).toFixed(1))
+            : topic.rating || 0;
+
+        return {
+          ...topic,
+          numLearners,
+          handsOnPracticeCount,
+          rating: avgRating,
+        };
+      })
+    );
+
+    res.status(200).json({ success: true, topics: enrichedTopics });
   } catch (error) {
     console.error("getAllTopics error:", error);
     res.status(500).json({ success: false, message: "Server error", error: error.message });
@@ -77,6 +120,27 @@ export const getTopicBySlug = async (req, res) => {
       })
         .populate("creator", "name photoUrl headline")
         .lean();
+
+      let numLearners = 0;
+      let handsOnPracticeCount = 0;
+      let totalRatingSum = 0;
+      let ratedCoursesCount = 0;
+
+      courses.forEach((c) => {
+        numLearners += c.enrolledStudents?.length || 0;
+        handsOnPracticeCount += c.courseIncludes?.codingExercises || 0;
+        if (c.ratings > 0) {
+          totalRatingSum += c.ratings;
+          ratedCoursesCount++;
+        }
+      });
+
+      topic.numLearners = numLearners;
+      topic.handsOnPracticeCount = handsOnPracticeCount;
+      topic.rating =
+        ratedCoursesCount > 0
+          ? Number((totalRatingSum / ratedCoursesCount).toFixed(1))
+          : topic.rating || 0;
     } else {
       // Fallback: search Category by slug
       const categoryDoc = await Category.findOne({ slug }).lean();
@@ -96,6 +160,20 @@ export const getTopicBySlug = async (req, res) => {
         .populate("creator", "name photoUrl headline")
         .lean();
 
+      let numLearners = 0;
+      let handsOnPracticeCount = 0;
+      let totalRatingSum = 0;
+      let ratedCoursesCount = 0;
+
+      courses.forEach((c) => {
+        numLearners += c.enrolledStudents?.length || 0;
+        handsOnPracticeCount += c.courseIncludes?.codingExercises || 0;
+        if (c.ratings > 0) {
+          totalRatingSum += c.ratings;
+          ratedCoursesCount++;
+        }
+      });
+
       // Create a virtual topic object
       topic = {
         name: categoryDoc.name,
@@ -104,15 +182,27 @@ export const getTopicBySlug = async (req, res) => {
         description: `Explore top-rated online courses in ${categoryDoc.name}. Master new skills with curated paths and hands-on practice.`,
         bannerTitle: `${categoryDoc.name} Courses`,
         logoUrl: "",
-        numLearners: 1245890,
-        handsOnPracticeCount: 450,
-        rating: 4.6,
+        numLearners,
+        handsOnPracticeCount,
+        rating: ratedCoursesCount > 0 ? Number((totalRatingSum / ratedCoursesCount).toFixed(1)) : 0,
         relatedTopics: subcategories.map(s => s.name),
         parentCategory: "",
       };
     }
 
-    return res.status(200).json({ success: true, topic, courses });
+    // Fetch top rated reviews (rating >= 4) for courses under this topic/category
+    const courseIds = courses.map(c => c._id);
+    const reviews = await Review.find({
+      course: { $in: courseIds },
+      rating: { $gte: 4 }
+    })
+      .sort({ rating: -1, createdAt: -1 })
+      .limit(6)
+      .populate("user", "name photoUrl")
+      .populate("course", "title")
+      .lean();
+
+    return res.status(200).json({ success: true, topic, courses, reviews });
   } catch (error) {
     console.error("getTopicBySlug error:", error);
     return res.status(500).json({ success: false, message: "Server error", error: error.message });

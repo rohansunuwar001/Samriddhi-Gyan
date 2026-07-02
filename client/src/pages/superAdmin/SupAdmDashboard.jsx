@@ -50,7 +50,7 @@ const MainRevenueChart = ({ currentWeekData, previousWeekData }) => (
                     <LineChart data={currentWeekData} margin={{ top: 5, right: 20, left: -10, bottom: 5 }}>
                         <defs><linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1"><stop offset="5%" stopColor="#ef4444" stopOpacity={0.2}/><stop offset="95%" stopColor="#ef4444" stopOpacity={0}/></linearGradient></defs>
                         <XAxis dataKey="date" tickLine={false} axisLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} />
-                        <YAxis tickLine={false} axisLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} tickFormatter={(value) => `RsRs{value/1000}k`} />
+                        <YAxis tickLine={false} axisLine={false} tick={{ fill: '#6b7280', fontSize: 12 }} tickFormatter={(value) => `Rs ${value/1000}k`} />
                         <Tooltip contentStyle={{ borderRadius: '0.5rem', border: '1px solid #e2e8f0' }} formatter={(value) => [new Intl.NumberFormat('en-US').format(value), 'Revenue']} />
                         <Line type="monotone" dataKey="previous" stroke="#a0aec0" strokeWidth={2} strokeDasharray="5 5" dot={false} name="Previous Week" />
                         <Line type="monotone" dataKey="dailyRevenue" stroke="#ef4444" strokeWidth={3} dot={false} fill="url(#colorRevenue)" name="Current Week" />

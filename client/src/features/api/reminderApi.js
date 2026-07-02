@@ -3,17 +3,25 @@ import { apiSlice } from "./apiSlice";
 export const reminderApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getUserReminders: builder.query({
-      query: (courseId) => `reminder/${courseId}`,
-      providesTags: (result, error, courseId) => [
+      query: () => `reminder`,
+      providesTags: (result) => [
         { type: "Reminder", id: "LIST" },
         ...(result?.reminders ? result.reminders.map((r) => ({ type: "Reminder", id: r._id })) : []),
       ],
     }),
     createReminder: builder.mutation({
-      query: ({ courseId, time, days, frequency }) => ({
-        url: `reminder/${courseId}`,
+      query: (body) => ({
+        url: `reminder`,
         method: "POST",
-        body: { time, days, frequency },
+        body,
+      }),
+      invalidatesTags: [{ type: "Reminder", id: "LIST" }],
+    }),
+    updateReminder: builder.mutation({
+      query: ({ reminderId, ...body }) => ({
+        url: `reminder/${reminderId}`,
+        method: "PUT",
+        body,
       }),
       invalidatesTags: [{ type: "Reminder", id: "LIST" }],
     }),
@@ -30,5 +38,6 @@ export const reminderApi = apiSlice.injectEndpoints({
 export const {
   useGetUserRemindersQuery,
   useCreateReminderMutation,
+  useUpdateReminderMutation,
   useDeleteReminderMutation,
 } = reminderApi;

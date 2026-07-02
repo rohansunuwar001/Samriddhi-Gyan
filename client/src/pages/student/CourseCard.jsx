@@ -193,7 +193,7 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
             </div>
           </div>
           <CardHeader className="px-4 pt-4 pb-2">
-            <h3 className="font-bold text-xl leading-tight line-clamp-2">
+            <h3 className="font-normal text-xl leading-tight line-clamp-2">
               {course.title}
             </h3>
           </CardHeader>
@@ -229,97 +229,70 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
         >
-          <Card className="overflow-visible rounded-2xl border border-gray-200 bg-white shadow-lg hover:shadow-2xl transition-all duration-300 h-full flex flex-col hover:scale-[1.025]">
-            <div className="relative overflow-hidden rounded-t-2xl">
+          <div className="flex flex-col text-left cursor-pointer transition-all bg-white relative rounded-none overflow-hidden h-full">
+            {/* Thumbnail */}
+            <div className="relative aspect-video w-full overflow-hidden shrink-0">
               <img
                 src={course.thumbnail || "/default-course-thumbnail.jpg"}
                 alt={course.title}
-                className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
               />
-              {hasDiscount && (
-                <Badge className="absolute top-3 left-3 bg-gradient-to-r from-red-500 to-pink-500 text-white px-2.5 py-1 text-xs font-bold shadow-lg">
-                  {discountPercentage}% OFF
-                </Badge>
-              )}
-              <Badge className="absolute top-3 right-3 bg-gradient-to-r from-blue-600 to-blue-400 text-white px-2.5 py-1 text-xs font-bold shadow-lg">
-                {courseLevel}
-              </Badge>
-
-              {showRecommendationBadge && (
-                <Badge className="absolute bottom-3 right-3 bg-purple-600 text-white text-xs font-semibold px-2 py-1 rounded shadow-lg">
-                  Recommended
-                </Badge>
-              )}
             </div>
 
-            <CardHeader className="px-5 pt-5 pb-3">
-              <h3 className="font-extrabold text-xl leading-tight line-clamp-2 group-hover:text-blue-700 transition-colors duration-200">
-                {course.title}
-              </h3>
-            </CardHeader>
-
-            <CardContent className="px-5 py-2 flex-1">
-              <div className="flex items-center flex-wrap gap-x-4 gap-y-2 mb-4">
-                <div className="flex items-center">
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />
-                  <span className="ml-1 text-sm font-semibold text-gray-800">
+            {/* Course details */}
+            <div className="pt-2 px-1 pb-2 flex-1 flex flex-col justify-between">
+              <div className="space-y-1">
+                <h3 className="font-normal text-sm text-[#1c1d1f] leading-snug line-clamp-2">
+                  {course.title}
+                </h3>
+                <p className="text-xs text-[#6a6f73] line-clamp-1 truncate">
+                  {instructorName}
+                </p>
+                <div className="flex items-center flex-wrap">
+                  <span className="text-xs font-normal text-[#b4690e] mr-1">
                     {ratingValue.toFixed(1)}
                   </span>
-                  <span className="text-gray-500 text-xs ml-1">
-                    ({reviewsCount})
-                  </span>
-                </div>
-                <div className="flex items-center">
-                  <Users className="w-4 h-4 text-blue-500" />
-                  <span className="ml-1 text-sm text-gray-800 font-medium">
-                    {enrolledCount} students
-                  </span>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-5 text-sm text-gray-600">
-                <div className="flex items-center">
-                  <Clock className="w-4 h-4 mr-1" />
-                  {formatDuration(course.totalDurationInSeconds)}
-                </div>
-                <div className="flex items-center">
-                  <BookOpen className="w-4 h-4 mr-1" />
-                  {totalLectures} lessons
-                </div>
-              </div>
-            </CardContent>
-
-            <CardFooter className="px-5 pb-5 pt-4 mt-auto border-t border-gray-100">
-              <div className="flex items-center justify-between w-full">
-                <div className="flex flex-col items-start">
-                  <div className="flex items-baseline gap-2">
-                    <span className="font-bold text-2xl text-blue-800">
-                      Rs{course.price?.current}
-                    </span>
-                    {hasDiscount && (
-                      <span className="text-gray-500 line-through text-base font-medium">
-                        Rs{course.price?.original}
-                      </span>
-                    )}
+                  <div className="flex items-center text-[#b4690e]">
+                    {Array.from({ length: 5 }).map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`h-3 w-3 ${
+                          i < Math.round(ratingValue)
+                            ? "fill-current text-[#b4690e]"
+                            : "text-gray-200"
+                        }`}
+                      />
+                    ))}
                   </div>
+                  <span className="text-[11px] text-[#6a6f73] ml-1">
+                    ({reviewsCount.toLocaleString()})
+                  </span>
                 </div>
-
-                <div className="flex items-center gap-2">
-                  <Avatar className="h-10 w-10 border-2 border-white shadow">
-                    <AvatarImage
-                      src={
-                        course.creator?.photoUrl || "https://github.com/shadcn.png"
-                      }
-                      alt={instructorName}
-                    />
-                    <AvatarFallback>
-                      {instructorName.charAt(0)}
-                    </AvatarFallback>
-                  </Avatar>
+                <div className="flex items-baseline gap-1.5 pt-1">
+                  <span className="font-normal text-sm text-[#1c1d1f]">
+                    Rs {course.price?.current}
+                  </span>
+                  {hasDiscount && (
+                    <span className="text-xs line-through text-[#6a6f73]">
+                      Rs {course.price?.original}
+                    </span>
+                  )}
                 </div>
               </div>
-            </CardFooter>
-          </Card>
+
+              {/* Badges block */}
+              <div className="flex flex-wrap items-center gap-1.5 pt-1.5">
+                {course.isBestseller || ratingValue >= 4.6 ? (
+                  <span className="inline-block bg-[#f3ca8c] text-[#593d10] font-normal text-[9px] uppercase px-2 py-0.5 rounded-sm">
+                    Bestseller
+                  </span>
+                ) : null}
+                <span className="inline-block bg-[#ecebfa] text-[#5624d0] font-normal text-[9px] uppercase px-2 py-0.5 rounded-sm">
+                  Premium
+                </span>
+              </div>
+            </div>
+          </div>
         </Link>
       </PopoverAnchor>
 
@@ -336,16 +309,16 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
 
         <div className="space-y-4">
           <div>
-            <h4 className="font-extrabold text-[#2d2f31] text-base leading-snug line-clamp-3">
+            <h4 className="font-normal text-[#2d2f31] text-base leading-snug line-clamp-3">
               {course.title}
             </h4>
             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
               {course.isBestseller && (
-                <span className="bg-[#ecebfa] text-[#2d2f31] font-bold px-2 py-0.5 rounded text-[10px] uppercase">
+                <span className="bg-[#ecebfa] text-[#2d2f31] font-normal px-2 py-0.5 rounded text-[10px] uppercase">
                   Bestseller
                 </span>
               )}
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#ecebfa] text-[#5624d0]">
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-normal bg-[#ecebfa] text-[#5624d0]">
                 Premium
               </span>
             </div>
@@ -364,7 +337,7 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
           <ul className="space-y-1.5 text-xs text-[#2d2f31]">
             {bulletPoints.map((point, index) => (
               <li key={index} className="flex items-start gap-2">
-                <span className="text-gray-500 mt-0.5 font-bold">✓</span>
+                <span className="text-gray-500 mt-0.5 font-normal">✓</span>
                 <span className="line-clamp-2">{point}</span>
               </li>
             ))}
@@ -375,7 +348,7 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
             <Button
               onClick={handleCartAction}
               disabled={isAddingToCart}
-              className="flex-1 h-11 bg-[#a435f0] text-white hover:bg-[#8710d8] font-bold text-sm rounded-none shadow-none"
+              className="flex-1 h-11 bg-[#a435f0] text-white hover:bg-[#8710d8] font-normal text-sm rounded-none shadow-none"
             >
               {isAddingToCart ? (
                 <Loader2 className="animate-spin h-4 w-4" />

@@ -82,14 +82,17 @@ import SupAdmAllRevenueDetails from "./pages/superAdmin/SupAdmAllRevenueDetails"
 import SupAdmAllUser from "./pages/superAdmin/SupAdmAllUser";
 import SupAdmCourseAnalytics from "./pages/superAdmin/SupAdmCourseAnalytics";
 import SupAdmDashboard from "./pages/superAdmin/SupAdmDashboard";
+import SupAdmSubscriptions from "./pages/superAdmin/SupAdmSubscriptions";
 import CategoryManager from "./pages/admin/CategoryManager";
 import TopicSearchResultsPage from "./pages/Courses/TopicSearchResultsPage";
 import PaymentFailed from "./pages/PaymentFailed";
 import BlogImporter from "./pages/admin/blog/BlogImporter";
 import TopicPage from "./pages/student/TopicPage";
 import TopicManager from "./pages/admin/TopicManager";
+import DiscountManager from "./pages/admin/DiscountManager";
 import SubscribePage from "./pages/student/SubscribePage";
 import Terms from "./pages/Terms";
+import PersonalizeWizard from "./pages/student/PersonalizeWizard";
 
 // --- LAYOUT WRAPPER COMPONENT ---
 const MainLayoutWithScroll = () => (
@@ -197,6 +200,14 @@ const appRouter = createBrowserRouter([
           <StudentRoute>
             <SubscribePage />
           </StudentRoute>
+        ),
+      },
+      {
+        path: "/personalize",
+        element: (
+          <ProtectedRoute>
+            <PersonalizeWizard />
+          </ProtectedRoute>
         ),
       },
 
@@ -428,6 +439,8 @@ const appRouter = createBrowserRouter([
           { path: "topics", element: <TopicManager /> },
           { path: "blog-import", element: <BlogImporter /> },
           { path: "cms", element: <HomeCms /> },
+          { path: "discounts", element: <DiscountManager /> },
+          { path: "subscriptions", element: <SupAdmSubscriptions /> },
         ],
       },
     ],

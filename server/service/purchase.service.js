@@ -37,10 +37,17 @@ export const createPendingOrder = async ({
     throw error;
   }
 
-  const purchaseCourses = courses.map((course) => ({
-    courseId: course._id,
-    priceAtPurchase: course.price.current,
-  }));
+  const purchaseCourses = courses.map((course) => {
+    const price = course.price.current;
+    const instructorShare = Number((price * 0.37).toFixed(2));
+    const adminShare = Number((price * 0.63).toFixed(2));
+    return {
+      courseId: course._id,
+      priceAtPurchase: price,
+      instructorShare,
+      adminShare,
+    };
+  });
 
   const totalAmount = purchaseCourses.reduce(
     (sum, item) => sum + item.priceAtPurchase,

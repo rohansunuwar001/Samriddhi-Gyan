@@ -301,7 +301,9 @@ export const getCourseDetailWithPurchaseStatus = async (req, res) => {
         (studentId) => studentId.toString() === userId.toString()
       );
 
-      const hasAccess = !!purchase || isDirectlyEnrolled;
+      const isSubscribedAndIncluded = req.user?.subscription?.status === "active" && course.includedInSubscription;
+
+      const hasAccess = !!purchase || isDirectlyEnrolled || !!isSubscribedAndIncluded;
 
       if (hasAccess) {
         course.isEnrolled     = true;

@@ -47,7 +47,10 @@ export const createCategory = async (req, res) => {
         return res.status(404).json({ success: false, message: 'Parent category not found.' });
       }
       if (parentCategory.parent) {
-        return res.status(400).json({ success: false, message: 'Only one child level is supported. Select a parent category, not a child category.' });
+        const grandparent = await Category.findById(parentCategory.parent);
+        if (grandparent && grandparent.parent) {
+          return res.status(400).json({ success: false, message: 'Maximum category depth of 3 levels exceeded. You can only create up to a sub-child category.' });
+        }
       }
     }
 
@@ -123,7 +126,10 @@ export const updateCategory = async (req, res) => {
           return res.status(404).json({ success: false, message: 'Parent category not found.' });
         }
         if (parentCategory.parent) {
-          return res.status(400).json({ success: false, message: 'Only one child level is supported. Select a parent category, not a child category.' });
+          const grandparent = await Category.findById(parentCategory.parent);
+          if (grandparent && grandparent.parent) {
+            return res.status(400).json({ success: false, message: 'Maximum category depth of 3 levels exceeded. You can only create up to a sub-child category.' });
+          }
         }
 
         category.parent = parentCategory._id;

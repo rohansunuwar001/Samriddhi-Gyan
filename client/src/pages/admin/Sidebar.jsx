@@ -13,6 +13,8 @@ import {
     FilePenLine,
     Tag,
     Upload,
+    Percent,
+    CreditCard,
 } from 'lucide-react';
 
 // A single, reusable NavLink component for the dashboard.
@@ -58,6 +60,8 @@ const adminLinks = [
     { to: 'topics', icon: <Tag size={20} />, label: 'Topics' },
     { to: 'blog-import', icon: <Upload size={20} />, label: 'Blog Import' },
     { to: 'cms', icon: <FilePenLine size={20} />, label: 'CMS' },
+    { to: 'discounts', icon: <Percent size={20} />, label: 'Discount CRUD' },
+    { to: 'subscriptions', icon: <CreditCard size={20} />, label: 'Subscriptions' },
 ];
 
 

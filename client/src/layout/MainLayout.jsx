@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 // --- Your Original Imports ---
 import Footer from '@/components/Footer';
 import Navbar from '@/components/Navbar';
+import DiscountBannerBar from '@/components/DiscountBannerBar';
 
 // --- NEW: Import the necessary hook and spinner component ---
 import { useLoadUserQuery } from '@/features/api/authApi'; // Adjust path if needed
@@ -15,9 +16,11 @@ const MainLayout = () => {
   const { isLoading } = useLoadUserQuery();
   const { user } = useSelector((store) => store.auth);
   const isInstructor = user?.role === 'instructor';
+  const showBanner = !user || user.role === 'student';
 
   return (
     <div className='flex flex-col min-h-screen'>
+      {showBanner && <DiscountBannerBar />}
       <Navbar />
       
       <main className='flex-grow'>

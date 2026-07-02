@@ -197,6 +197,10 @@ export const editCourse = async (courseId, fields, thumbnailFile) => {
     if (fields[key] !== undefined) course[key] = fields[key];
   });
 
+  if (fields.includedInSubscription !== undefined) {
+    course.includedInSubscription = fields.includedInSubscription === true || fields.includedInSubscription === "true";
+  }
+
   // Validate topics against the existing Category list before applying.
   if (fields.topics !== undefined) {
     course.topics = await validateTopics(fields.topics, fields.category ?? course.category);
@@ -582,7 +586,7 @@ export const getCourseAnalytics = async (instructorId) => {
       const item = purchase.courses.find(
         (c) => c.courseId?._id?.toString() === course._id.toString()
       );
-      return sum + (item?.priceAtPurchase || 0);
+      return sum + (item?.instructorShare || 0);
     }, 0);
 
     const ratings = (course.reviews || []).map((r) => r.rating).filter((r) => typeof r === "number");

@@ -27,6 +27,16 @@ const purchaseSchema = new mongoose.Schema({
         priceAtPurchase: {
             type: Number,
             required: true
+        },
+        instructorShare: {
+            type: Number,
+            required: true,
+            default: 0
+        },
+        adminShare: {
+            type: Number,
+            required: true,
+            default: 0
         }
     }],
     // The final amount that was charged to the customer

@@ -55,9 +55,17 @@ const ROOT_PARENT_VALUE = "__root__";
 const getParentId = (category) => category.parent?._id || category.parent || null;
 
 const CategoryManager = () => {
+  // Create state
   const [newParentName, setNewParentName] = useState("");
   const [newChildName, setNewChildName] = useState("");
   const [selectedParentId, setSelectedParentId] = useState("");
+
+  // Sub-child Create state
+  const [newSubChildName, setNewSubChildName] = useState("");
+  const [subSelectedParentId, setSubSelectedParentId] = useState("");
+  const [subSelectedChildId, setSubSelectedChildId] = useState("");
+
+  // Edit/Delete state
   const [editingId, setEditingId] = useState(null);
   const [editingName, setEditingName] = useState("");
   const [editingParent, setEditingParent] = useState(ROOT_PARENT_VALUE);
@@ -69,23 +77,79 @@ const CategoryManager = () => {
   const [deleteCategory, { isLoading: isDeleting }] = useDeleteCategoryMutation();
 
   const categories = data?.categories || [];
+
+  // Helper map for fast lookup
+  const categoryMap = useMemo(() => {
+    const map = {};
+    categories.forEach((c) => {
+      map[c._id] = c;
+    });
+    return map;
+  }, [categories]);
+
+  // Determine hierarchical depth (0 = parent, 1 = child, 2 = sub-child)
+  const getCategoryLevel = (category) => {
+    const pId = getParentId(category);
+    if (!pId) return 0;
+    
+    const parentCat = categoryMap[pId];
+    if (!parentCat) return 1;
+
+    const gpId = getParentId(parentCat);
+    if (!gpId) return 1;
+
+    return 2;
+  };
+
+  // Memoized filtered category lists
   const parentCategories = useMemo(
-    () => categories.filter((category) => !getParentId(category)),
-    [categories]
-  );
-  const childCategories = useMemo(
-    () => categories.filter((category) => getParentId(category)),
-    [categories]
+    () => categories.filter((c) => getCategoryLevel(c) === 0),
+    [categories, categoryMap]
   );
 
-  const childrenByParent = useMemo(() => {
-    return childCategories.reduce((map, category) => {
-      const parentId = getParentId(category);
-      if (!map[parentId]) map[parentId] = [];
-      map[parentId].push(category);
-      return map;
-    }, {});
-  }, [childCategories]);
+  const childCategories = useMemo(
+    () => categories.filter((c) => getCategoryLevel(c) === 1),
+    [categories, categoryMap]
+  );
+
+  const subChildCategories = useMemo(
+    () => categories.filter((c) => getCategoryLevel(c) === 2),
+    [categories, categoryMap]
+  );
+
+  // Subcategories filtered by selected parent in the sub-child panel
+  const childrenFilteredByParent = useMemo(() => {
+    if (!subSelectedParentId) return [];
+    return childCategories.filter((c) => getParentId(c) === subSelectedParentId);
+  }, [childCategories, subSelectedParentId]);
+
+  // Build a flat list in hierarchical order: Parent > Child > Sub-child
+  const renderedRows = useMemo(() => {
+    const list = [];
+    
+    parentCategories.forEach((parent) => {
+      list.push({ ...parent, level: 0 });
+      
+      const children = childCategories.filter((c) => getParentId(c) === parent._id);
+      children.forEach((child) => {
+        list.push({ ...child, level: 1 });
+        
+        const subChildren = subChildCategories.filter((c) => getParentId(c) === child._id);
+        subChildren.forEach((subChild) => {
+          list.push({ ...subChild, level: 2 });
+        });
+      });
+    });
+
+    // Fallback/Safety: push any categories that didn't match the clean structure
+    categories.forEach((c) => {
+      if (!list.some((l) => l._id === c._id)) {
+        list.push({ ...c, level: getCategoryLevel(c) });
+      }
+    });
+
+    return list;
+  }, [categories, parentCategories, childCategories, subChildCategories, categoryMap]);
 
   const handleCreateParent = async (e) => {
     e.preventDefault();
@@ -122,6 +186,27 @@ const CategoryManager = () => {
       setNewChildName("");
     } catch (err) {
       toast.error(err?.data?.message || "Failed to create child category.");
+    }
+  };
+
+  const handleCreateSubChild = async (e) => {
+    e.preventDefault();
+    const trimmed = newSubChildName.trim();
+    if (!trimmed) {
+      toast.error("Sub-child category name is required.");
+      return;
+    }
+    if (!subSelectedChildId) {
+      toast.error("Select a child category first.");
+      return;
+    }
+
+    try {
+      await createCategory({ name: trimmed, parent: subSelectedChildId }).unwrap();
+      toast.success("Sub-child category created!");
+      setNewSubChildName("");
+    } catch (err) {
+      toast.error(err?.data?.message || "Failed to create sub-child category.");
     }
   };
 
@@ -170,30 +255,32 @@ const CategoryManager = () => {
   };
 
   return (
-    <div className="flex-1 space-y-6 p-8 pt-6 bg-slate-50 min-h-screen">
+    <div className="flex-1 space-y-6 p-8 pt-6 bg-slate-50 min-h-screen text-left">
       <header>
-        <h2 className="text-3xl font-bold tracking-tight">Categories</h2>
-        <p className="text-muted-foreground">
-          Create parent categories and child branches for course breadcrumbs and topic organization.
+        <h2 className="text-3xl font-bold tracking-tight text-slate-900 font-sans">Categories</h2>
+        <p className="text-muted-foreground font-sans">
+          Create parent categories, child categories, and sub-child categories for course breadcrumbs and topic organization.
         </p>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        <Card>
+      {/* CREATE FORMS ROW */}
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* CREATE PARENT (LEVEL 0) */}
+        <Card className="shadow-sm border border-slate-200">
           <CardHeader>
-            <CardTitle>Create parent category</CardTitle>
+            <CardTitle className="text-base font-bold text-slate-800">Create parent category</CardTitle>
             <CardDescription>
               Example: Development, Business, Design, Marketing.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleCreateParent} className="flex flex-col gap-3 sm:flex-row">
+            <form onSubmit={handleCreateParent} className="flex flex-col gap-3">
               <Input
                 placeholder="e.g., Development"
                 value={newParentName}
                 onChange={(e) => setNewParentName(e.target.value)}
               />
-              <Button type="submit" disabled={isCreating} className="shrink-0">
+              <Button type="submit" disabled={isCreating} className="w-full">
                 {isCreating ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
@@ -205,15 +292,16 @@ const CategoryManager = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        {/* CREATE CHILD (LEVEL 1) */}
+        <Card className="shadow-sm border border-slate-200">
           <CardHeader>
-            <CardTitle>Create child category</CardTitle>
+            <CardTitle className="text-base font-bold text-slate-800">Create child category</CardTitle>
             <CardDescription>
               Example: Web Development inside Development.
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleCreateChild} className="grid gap-3 sm:grid-cols-[1fr_1fr_auto]">
+            <form onSubmit={handleCreateChild} className="flex flex-col gap-3">
               <Select value={selectedParentId} onValueChange={setSelectedParentId}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select parent" />
@@ -235,7 +323,7 @@ const CategoryManager = () => {
                 value={newChildName}
                 onChange={(e) => setNewChildName(e.target.value)}
               />
-              <Button type="submit" disabled={isCreating} className="shrink-0">
+              <Button type="submit" disabled={isCreating} className="w-full">
                 {isCreating ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 ) : (
@@ -246,11 +334,73 @@ const CategoryManager = () => {
             </form>
           </CardContent>
         </Card>
+
+        {/* CREATE SUB-CHILD (LEVEL 2) */}
+        <Card className="shadow-sm border border-slate-200">
+          <CardHeader>
+            <CardTitle className="text-base font-bold text-slate-800">Create sub-child category</CardTitle>
+            <CardDescription>
+              Example: Javascript inside Web Development.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleCreateSubChild} className="flex flex-col gap-3">
+              <Select value={subSelectedParentId} onValueChange={(val) => {
+                setSubSelectedParentId(val);
+                setSubSelectedChildId(""); // reset child selection
+              }}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select parent" />
+                </SelectTrigger>
+                <SelectContent>
+                  {parentCategories.map((category) => (
+                    <SelectItem key={category._id} value={category._id}>
+                      {category.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              <Select value={subSelectedChildId} onValueChange={setSubSelectedChildId} disabled={!subSelectedParentId}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select child" />
+                </SelectTrigger>
+                <SelectContent>
+                  {childrenFilteredByParent.length === 0 ? (
+                    <div className="px-2 py-1.5 text-sm text-muted-foreground">No child categories found.</div>
+                  ) : (
+                    childrenFilteredByParent.map((category) => (
+                      <SelectItem key={category._id} value={category._id}>
+                        {category.name}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+
+              <Input
+                placeholder="e.g., JavaScript"
+                value={newSubChildName}
+                onChange={(e) => setNewSubChildName(e.target.value)}
+                disabled={!subSelectedChildId}
+              />
+              <Button type="submit" disabled={isCreating || !subSelectedChildId} className="w-full">
+                {isCreating ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <PlusCircle className="mr-2 h-4 w-4" />
+                )}
+                Add Sub-child
+              </Button>
+            </form>
+          </CardContent>
+        </Card>
       </div>
 
-      <Card>
+      {/* HIERARCHY TABLE */}
+      <Card className="shadow-sm border border-slate-200 bg-white">
         <CardHeader>
-          <CardTitle>Category hierarchy</CardTitle>
+          <CardTitle className="text-lg font-bold text-slate-800">Category hierarchy</CardTitle>
           <CardDescription>
             Student course pages use this hierarchy for breadcrumbs.
           </CardDescription>
@@ -286,94 +436,112 @@ const CategoryManager = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {categories.length > 0 ? (
-                  parentCategories.map((parent) => {
-                    const children = childrenByParent[parent._id] || [];
-                    return [parent, ...children].map((category) => {
-                      const isChild = !!getParentId(category);
-                      return (
-                        <TableRow key={category._id}>
-                          <TableCell className="font-medium">
-                            {editingId === category._id ? (
-                              <Input
-                                value={editingName}
-                                onChange={(e) => setEditingName(e.target.value)}
-                                onKeyDown={(e) => e.key === "Enter" && saveEditing(category._id)}
-                                autoFocus
-                              />
-                            ) : (
-                              <span className={isChild ? "pl-6" : "font-semibold"}>
-                                {isChild ? "- " : ""}{category.name}
-                              </span>
-                            )}
-                          </TableCell>
-                          <TableCell>
-                            {editingId === category._id ? (
-                              <Select value={editingParent} onValueChange={setEditingParent}>
-                                <SelectTrigger className="max-w-xs">
-                                  <SelectValue />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  <SelectItem value={ROOT_PARENT_VALUE}>No parent</SelectItem>
-                                  {parentCategories
-                                    .filter((parentOption) => parentOption._id !== category._id)
-                                    .map((parentOption) => (
-                                      <SelectItem key={parentOption._id} value={parentOption._id}>
-                                        {parentOption.name}
-                                      </SelectItem>
-                                    ))}
-                                </SelectContent>
-                              </Select>
-                            ) : (
-                              <span className="text-muted-foreground">
-                                {category.parent?.name || "Parent category"}
-                              </span>
-                            )}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground">{category.slug}</TableCell>
-                          <TableCell className="text-right">
-                            {editingId === category._id ? (
-                              <div className="flex justify-end gap-2">
-                                <Button
-                                  size="sm"
-                                  onClick={() => saveEditing(category._id)}
-                                  disabled={isUpdating}
-                                >
-                                  {isUpdating ? (
-                                    <Loader2 className="h-4 w-4 animate-spin" />
-                                  ) : (
-                                    "Save"
-                                  )}
-                                </Button>
-                                <Button size="sm" variant="ghost" onClick={cancelEditing}>
-                                  Cancel
-                                </Button>
-                              </div>
-                            ) : (
-                              <div className="flex justify-end gap-2">
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  onClick={() => startEditing(category)}
-                                  aria-label="Edit category"
-                                >
-                                  <Edit className="h-4 w-4" />
-                                </Button>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  onClick={() => setDeleteTarget(category)}
-                                  aria-label="Delete category"
-                                >
-                                  <Trash2 className="h-4 w-4 text-red-500" />
-                                </Button>
-                              </div>
-                            )}
-                          </TableCell>
-                        </TableRow>
-                      );
-                    });
-                  }).flat()
+                {renderedRows.length > 0 ? (
+                  renderedRows.map((category) => {
+                    const level = category.level;
+                    
+                    // Generate full breadcrumb description for Parent column
+                    let parentText = "Parent category";
+                    if (level === 1) {
+                      const p = categoryMap[getParentId(category)];
+                      parentText = p?.name || "Parent category";
+                    } else if (level === 2) {
+                      const child = categoryMap[getParentId(category)];
+                      const parent = child ? categoryMap[getParentId(child)] : null;
+                      parentText = `${parent?.name || "?"} > ${child?.name || "?"}`;
+                    }
+
+                    return (
+                      <TableRow key={category._id}>
+                        <TableCell className="font-medium">
+                          {editingId === category._id ? (
+                            <Input
+                              value={editingName}
+                              onChange={(e) => setEditingName(e.target.value)}
+                              onKeyDown={(e) => e.key === "Enter" && saveEditing(category._id)}
+                              autoFocus
+                            />
+                          ) : (
+                            <span 
+                              className={`
+                                block
+                                ${level === 0 ? "font-bold text-slate-900" : ""}
+                                ${level === 1 ? "pl-6 text-slate-800" : ""}
+                                ${level === 2 ? "pl-12 text-slate-500 italic" : ""}
+                              `}
+                            >
+                              {level === 1 && "- "}
+                              {level === 2 && "-- "}
+                              {category.name}
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell>
+                          {editingId === category._id ? (
+                            <Select value={editingParent} onValueChange={setEditingParent}>
+                              <SelectTrigger className="max-w-xs">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value={ROOT_PARENT_VALUE}>No parent</SelectItem>
+                                {categories
+                                  .filter((parentOption) => parentOption._id !== category._id)
+                                  .map((parentOption) => (
+                                    <SelectItem key={parentOption._id} value={parentOption._id}>
+                                      {parentOption.name}
+                                    </SelectItem>
+                                  ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <span className="text-muted-foreground font-medium text-xs">
+                              {parentText}
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground text-xs">{category.slug}</TableCell>
+                        <TableCell className="text-right">
+                          {editingId === category._id ? (
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                size="sm"
+                                onClick={() => saveEditing(category._id)}
+                                disabled={isUpdating}
+                              >
+                                {isUpdating ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  "Save"
+                                )}
+                              </Button>
+                              <Button size="sm" variant="ghost" onClick={cancelEditing}>
+                                Cancel
+                              </Button>
+                            </div>
+                          ) : (
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => startEditing(category)}
+                                aria-label="Edit category"
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                size="icon"
+                                variant="ghost"
+                                onClick={() => setDeleteTarget(category)}
+                                aria-label="Delete category"
+                              >
+                                <Trash2 className="h-4 w-4 text-red-500" />
+                              </Button>
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    );
+                  })
                 ) : (
                   <TableRow>
                     <TableCell colSpan={4} className="text-center h-24 text-muted-foreground">
@@ -392,7 +560,7 @@ const CategoryManager = () => {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete "{deleteTarget?.name}"?</AlertDialogTitle>
             <AlertDialogDescription>
-              Parent categories with child categories cannot be deleted until their children are removed.
+              Categories with subcategories cannot be deleted until their children are removed.
               This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

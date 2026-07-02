@@ -80,6 +80,17 @@ const userSchema = new mongoose.Schema({
         viewedAt: { type: Date, default: Date.now },
       }
     ],
+    subscription: {
+        status: {
+            type: String,
+            enum: ["none", "active", "expired"],
+            default: "none"
+        },
+        planName: { type: String, default: "" },
+        startsAt: { type: Date },
+        expiresAt: { type: Date },
+        paymentMethod: { type: String, default: "" }
+    },
 }, {timestamps: true});
 
 export const User = mongoose.model("User", userSchema);

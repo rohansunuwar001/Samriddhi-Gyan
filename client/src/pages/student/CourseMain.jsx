@@ -15,7 +15,10 @@ import { Link } from "react-router-dom";
 import CourseRow from "../Courses/CourseRow";
 import FeaturedCourses from "../Courses/FeaturedCourses";
 import { useGetPublishedCourseQuery } from "@/features/api/courseApi";
-import { useGetTrendingCourseQuery } from "@/features/api/recommendedApi";
+import {
+  useGetTrendingCourseQuery,
+  useGetRecommendedCourseQuery,
+} from "@/features/api/recommendedApi";
 
 const NoCoursesAvailable = ({ isLoggedIn }) => (
   <div className="flex items-center justify-center min-h-[400px]">
@@ -68,62 +71,63 @@ const CourseRowSkeleton = () => (
 );
 
 const CourseMain = () => {
-  const { data, isLoading, isError, error, refetch } =
-    useGetPublishedCourseQuery();
-  const { data: trendingData } = useGetTrendingCourseQuery();
+  // Fetch actual server recommendations using embeddings/collab filtering
+  const {
+    data: recommendedData,
+    isLoading: isLoadingRec,
+    isError: isErrorRec,
+    error: recError,
+  } = useGetRecommendedCourseQuery();
+  console.log("Recommended course:",recommendedData);
+
+  // Fetch actual server trending data
+  const {
+    data: trendingData,
+    isLoading: isLoadingTrending,
+  } = useGetTrendingCourseQuery();
+console.log("Trending course:",trendingData);
+  // Fetch all published courses for fallbacks & categories grouping
+  const {
+    data: publishedData,
+    isLoading: isLoadingPublished,
+    isError: isErrorPublished,
+    error: publishedError,
+    refetch,
+  } = useGetPublishedCourseQuery();
+
+  console.log("Published course:",publishedData);
+
   const { user } = useSelector((state) => state.auth);
 
-  console.log("get published course", data);
-  console.log("get trending course", trendingData);
+  const recommendedCourses = recommendedData?.recommendedCourses || [];
+  const trendingCourses = trendingData?.trendingCourses || [];
+  const allCourses = publishedData?.courses || [];
 
-  console.log("User enrolledCourses:", user?.enrolledCourses);
-  console.log("First enrolled item type:", typeof user?.enrolledCourses?.[0]);
-  console.log("First enrolled item:", user?.enrolledCourses?.[0]);
-  const trendingRow = React.useMemo(() => {
-    if (!trendingData?.trendingCourses) return [];
-    const enrolledIds = new Set(
+  // Exclude enrolled courses from fallback views
+  const enrolledIds = React.useMemo(() => {
+    return new Set(
       (user?.enrolledCourses || []).map((course) =>
-        typeof course === "string" ? course : course._id,
-      ),
+        typeof course === "string" ? course : course._id
+      )
     );
-    return trendingData.trendingCourses.filter((c) => !enrolledIds.has(c._id));
-  }, [trendingData, user]);
+  }, [user]);
 
   const filteredCourses = React.useMemo(() => {
-    if (!data?.courses) return [];
-
-    if (user && data.courses.length > 0) {
-      const enrolledIds = new Set(
-        (user.enrolledCourses || []).map((course) =>
-          typeof course === "string" ? course : course._id,
-        ),
-      );
-
-      return data.courses.filter((course) => !enrolledIds.has(course._id));
+    if (allCourses.length === 0) return [];
+    if (user) {
+      return allCourses.filter((course) => !enrolledIds.has(course._id));
     }
+    return allCourses;
+  }, [allCourses, user, enrolledIds]);
 
-    return data.courses;
-  }, [data, user]);
-
-  // Build the recommendation rows: top-rated first, then grouped by category.
-  // Falls back gracefully if courses don't have `rating` / `category` fields.
-  const { recommended, categoryRows, fallbackRow } = React.useMemo(() => {
+  // Build category rows from remaining unpurchased courses
+  const { categoryRows, fallbackRow } = React.useMemo(() => {
     if (filteredCourses.length === 0) {
-      return { recommended: [], categoryRows: [], fallbackRow: [] };
+      return { categoryRows: [], fallbackRow: [] };
     }
-
-    const sorted = [...filteredCourses].sort((a, b) => {
-      const ratingDiff = (b.ratings ?? 0) - (a.ratings ?? 0);
-      if (ratingDiff !== 0) return ratingDiff;
-      return (b.numOfReviews ?? 0) - (a.numOfReviews ?? 0);
-    });
-
-    const recommended = sorted.slice(0, 8);
-    const recommendedIds = new Set(recommended.map((c) => c._id));
-    const remaining = filteredCourses.filter((c) => !recommendedIds.has(c._id));
 
     const byCategory = {};
-    remaining.forEach((course) => {
+    filteredCourses.forEach((course) => {
       const category = course.category;
       if (!category) return;
       if (!byCategory[category]) byCategory[category] = [];
@@ -135,14 +139,17 @@ const CourseMain = () => {
       .slice(0, 3)
       .map(([category, list]) => ({ category, courses: list.slice(0, 8) }));
 
-    // If no category data exists at all, just show the remaining courses in one row.
+    const categoryCourseIds = new Set(
+      categoryRows.flatMap(({ courses }) => courses.map((c) => c._id))
+    );
+    const remaining = filteredCourses.filter((c) => !categoryCourseIds.has(c._id));
+
     const fallbackRow = categoryRows.length === 0 ? remaining.slice(0, 8) : [];
 
-    return { recommended, categoryRows, fallbackRow };
+    return { categoryRows, fallbackRow };
   }, [filteredCourses]);
 
-  // Match courses against the user's freeform "occupation" text (e.g. "Full Stack Web Developer").
-  // Matches on course.category/title containing the occupation, or sharing a significant word with it.
+  // Match courses against the user's freeform "occupation" text
   const occupationRow = React.useMemo(() => {
     if (!user?.occupation || filteredCourses.length === 0) return [];
 
@@ -165,9 +172,7 @@ const CourseMain = () => {
       .slice(0, 8);
   }, [filteredCourses, user]);
 
-  // "Because you wishlisted X" — pick the most recently wishlisted course (last
-  // item added) and show other courses from the same category.
-  // Handles user.wishlist being either an array of ids or populated course objects.
+  // "Because you wishlisted X" — pick the most recently wishlisted course
   const wishlistRow = React.useMemo(() => {
     if (
       !user?.wishlist ||
@@ -178,18 +183,18 @@ const CourseMain = () => {
     }
 
     const wishlistIds = user.wishlist.map((item) =>
-      typeof item === "string" ? item : item._id,
+      typeof item === "string" ? item : item._id
     );
     const pivotId = wishlistIds[wishlistIds.length - 1];
 
     const pivot =
       filteredCourses.find((c) => c._id === pivotId) ||
-      data?.courses?.find((c) => c._id === pivotId);
+      allCourses.find((c) => c._id === pivotId);
 
     if (!pivot) return { pivot: null, courses: [] };
 
     const related = filteredCourses.filter(
-      (c) => c._id !== pivot._id && c.category && c.category === pivot.category,
+      (c) => c._id !== pivot._id && c.category && c.category === pivot.category
     );
 
     if (related.length === 0) return { pivot: null, courses: [] };
@@ -200,11 +205,9 @@ const CourseMain = () => {
         .sort((a, b) => (b.ratings ?? 0) - (a.ratings ?? 0))
         .slice(0, 8),
     };
-  }, [filteredCourses, user, data]);
+  }, [filteredCourses, user, allCourses]);
 
-  // "Because you viewed X" — pick the most recently viewed course (first item,
-  // since trackCourseView unshifts onto the front) and show same-category courses.
-  // Handles entry.course being either an id string or a populated course object.
+  // "Because you viewed X" — pick the most recently viewed course
   const viewedRow = React.useMemo(() => {
     if (
       !user?.viewHistory ||
@@ -222,12 +225,12 @@ const CourseMain = () => {
 
     const pivot =
       filteredCourses.find((c) => c._id === pivotId) ||
-      data?.courses?.find((c) => c._id === pivotId);
+      allCourses.find((c) => c._id === pivotId);
 
     if (!pivot) return { pivot: null, courses: [] };
 
     const related = filteredCourses.filter(
-      (c) => c._id !== pivot._id && c.category && c.category === pivot.category,
+      (c) => c._id !== pivot._id && c.category && c.category === pivot.category
     );
 
     if (related.length === 0) return { pivot: null, courses: [] };
@@ -238,12 +241,16 @@ const CourseMain = () => {
         .sort((a, b) => (b.ratings ?? 0) - (a.ratings ?? 0))
         .slice(0, 8),
     };
-  }, [filteredCourses, user, data]);
+  }, [filteredCourses, user, allCourses]);
+
+  const isLoading = isLoadingRec || isLoadingTrending || isLoadingPublished;
+  const isError = isErrorRec || isErrorPublished;
+  const error = publishedError || recError;
 
   const isEmpty = !isLoading && !isError && filteredCourses.length === 0;
 
   return (
-    <div className="bg-white font-sans">
+    <div className="bg-white font-sans text-left">
       <div className="container max-w-7xl px-4 py-16 sm:px-6 lg:px-8">
         <main className="mt-12">
           {isLoading ? (
@@ -269,19 +276,21 @@ const CourseMain = () => {
             <NoCoursesAvailable isLoggedIn={!!user} />
           ) : (
             <>
-              {trendingRow.length > 0 && (
+              {trendingCourses.length > 0 && (
                 <CourseRow
                   heading="Trending courses"
                   subheading="What's gaining momentum this week"
-                  courses={trendingRow}
+                  courses={trendingCourses}
                 />
               )}
 
-              <CourseRow
-                heading="Recommended to you based on ratings"
-                subheading="Courses tailored to your learning preferences and history"
-                courses={recommended}
-              />
+              {recommendedCourses.length > 0 && (
+                <CourseRow
+                  heading="Recommended for you"
+                  subheading="Courses tailored to your learning preferences and history"
+                  courses={recommendedCourses}
+                />
+              )}
 
               {occupationRow.length > 0 && (
                 <CourseRow
