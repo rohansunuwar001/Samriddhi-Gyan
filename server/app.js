@@ -14,7 +14,7 @@ import articleRouter from "./routes/article.route.js";
 import authorRouter from "./routes/author.route.js";
 import cartRouter from "./routes/cart.route.js";
 import categoryRoutes from "./routes/category.route.js";
-import combinedSearchRouter from "./routes/combinedSearch.route.js"; // ← ADDED
+import combinedSearchRouter from "./routes/combinedsearch.route.js"; // ← ADDED
 import courseRoute from "./routes/course.route.js";
 import courseProgressRoute from "./routes/courseProgress.route.js";
 import esewaRoute from "./routes/esewa.route.js";
