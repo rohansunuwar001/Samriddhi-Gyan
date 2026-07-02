@@ -191,16 +191,15 @@ export const getPaidCoursesWithEnrolledStudentsAndPayments = async (req, res) =>
 export const getCourseAnalytics = async (req, res) => {
   try {
     const analytics = await getCourseAnalyticsService(req.user._id);
+    const { getSubscriptionPayouts } = await import("../utils/subscriptionPayout.js");
+    const payoutsData = await getSubscriptionPayouts();
+    const subscriptionRevenue = payoutsData.payouts[req.user._id.toString()] || 0;
 
-    if (!analytics.length) {
-      return res.status(200).json({
-        success: true,
-        message: "No course analytics to display yet.",
-        analytics: [],
-      });
-    }
-
-    return res.status(200).json({ success: true, analytics });
+    return res.status(200).json({
+      success: true,
+      analytics,
+      subscriptionRevenue
+    });
   } catch (error) {
     console.error("getCourseAnalytics error:", error.message);
     return res.status(500).json({ success: false, message: "Failed to fetch analytics." });

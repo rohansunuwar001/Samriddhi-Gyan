@@ -119,6 +119,10 @@ const courseSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    includedInSubscription: {
+      type: Boolean,
+      default: false,
+    },
 
     // --- REVIEWS & RATINGS ---
     ratings: {

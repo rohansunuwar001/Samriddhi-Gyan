@@ -145,11 +145,15 @@ const Dashboard = () => {
   // Memoize summary calculations for performance
   const summaryStats = useMemo(() => {
     const analytics = data?.analytics || [];
+    const courseSalesRevenue = analytics.reduce(
+      (sum, c) => sum + (c.totalRevenue || 0),
+      0
+    );
+    const subscriptionRevenue = data?.subscriptionRevenue || 0;
     return {
-      totalRevenue: analytics.reduce(
-        (sum, c) => sum + (c.totalRevenue || 0),
-        0
-      ),
+      courseSalesRevenue,
+      subscriptionRevenue,
+      totalRevenue: courseSalesRevenue + subscriptionRevenue,
       totalStudents: analytics.reduce(
         (sum, c) => sum + (c.enrolledCount || 0),
         0
@@ -179,10 +183,22 @@ const Dashboard = () => {
       </header>
 
       {/* --- Key Metric Cards --- */}
-      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-5">
         <StatCard
-          title="Total Revenue"
+          title="Total Earnings"
           value={summaryStats.totalRevenue}
+          icon={DollarSign}
+          prefix="Rs"
+        />
+        <StatCard
+          title="Course Payout (37%)"
+          value={summaryStats.courseSalesRevenue}
+          icon={DollarSign}
+          prefix="Rs"
+        />
+        <StatCard
+          title="Subscription Share"
+          value={summaryStats.subscriptionRevenue}
           icon={DollarSign}
           prefix="Rs"
         />
@@ -190,11 +206,6 @@ const Dashboard = () => {
           title="Total Students"
           value={summaryStats.totalStudents}
           icon={Users}
-        />
-        <StatCard
-          title="Total Sales"
-          value={summaryStats.totalPurchases}
-          icon={ShoppingCart}
         />
         <StatCard
           title="Published Courses"

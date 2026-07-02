@@ -33,6 +33,8 @@ import wishlistRouter from "./routes/wishlist.route.js";
 import flashcardRouter from "./routes/flashcard.route.js";
 import questionRoute from "./routes/question.route.js";
 import reminderRoute from "./routes/reminder.route.js";
+import cmsRouter from "./routes/cms.route.js";
+import subscriptionRouter from "./routes/subscription.route.js";
 import path from 'path';
 import { fileURLToPath } from 'url';
 dotenv.config({});
@@ -115,4 +117,6 @@ app.use("/api/v1/question", questionRoute);
 app.use("/api/v1/reminder", reminderRoute);
 app.use("/api/v1/admin", adminRouter)
 app.use("/api/v1/admin", blogImportRouter); // POST /api/v1/admin/blog-import
+app.use("/api/v1/cms", cmsRouter);
+app.use("/api/v1/subscription", subscriptionRouter);
 export default app;

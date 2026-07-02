@@ -121,7 +121,7 @@ const FilterControls = ({ search, role, onParamsChange }) => (
  */
 const UserTableSkeleton = ({ rows = 5 }) =>
   Array.from({ length: rows }).map((_, i) => (
-    <TableRow key={`skeleton-Rs{i}`}>
+    <TableRow key={`skeleton-row-${i}`}>
       <TableCell>
         <div className="flex items-center gap-3">
           <Skeleton className="h-10 w-10 rounded-full" />
@@ -178,19 +178,34 @@ const SupAdmAllUser = () => {
     });
   };
 
+  // --- Reset pointer events on the body when dialog closes to prevent Radix UI freeze bugs ---
+  useEffect(() => {
+    if (!isAlertOpen) {
+      const timer = setTimeout(() => {
+        document.body.style.pointerEvents = "";
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [isAlertOpen]);
+
   const openDeleteDialog = (user) => {
     setUserToDelete(user);
-    setIsAlertOpen(true);
+    // Defer opening the dialog to allow the DropdownMenu to fully close and restore pointer events first
+    setTimeout(() => {
+      setIsAlertOpen(true);
+    }, 50);
   };
 
   const confirmDelete = async () => {
     if (!userToDelete) return;
+    const userName = userToDelete.name;
+    setIsAlertOpen(false);
+    setUserToDelete(null);
     toast.promise(deleteUser(userToDelete._id).unwrap(), {
-      loading: `Deleting user Rs{userToDelete.name}...`,
-      success: `User "Rs{userToDelete.name}" has been deleted.`,
+      loading: `Deleting user ${userName}...`,
+      success: `User "${userName}" has been deleted.`,
       error: (err) => err.data?.message || "Failed to delete user.",
     });
-    setUserToDelete(null);
   };
 
   return (
@@ -258,7 +273,7 @@ const SupAdmAllUser = () => {
                     </TableCell>
                     <TableCell>
                       <span
-                        className={`px-2 py-1 text-xs font-semibold rounded-full Rs{
+                        className={`px-2 py-1 text-xs font-semibold rounded-full ${
                           user.role === "admin"
                             ? "bg-red-100 text-red-700"
                             : user.role === "instructor"

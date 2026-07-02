@@ -30,7 +30,14 @@ import { toast } from "sonner";
 const PurchaseCard = ({ course }) => {
   const navigate = useNavigate();
   const { isAuthenticated } = useSelector((store) => store.auth);
-  const [selectedPlan, setSelectedPlan] = useState("subscription");
+  const [selectedPlan, setSelectedPlan] = useState(
+    course?.includedInSubscription ? "subscription" : "individual"
+  );
+
+  useEffect(() => {
+    setSelectedPlan(course?.includedInSubscription ? "subscription" : "individual");
+  }, [course?.includedInSubscription]);
+
   const [isCompact, setIsCompact] = useState(false);
 
   useEffect(() => {
@@ -338,22 +345,30 @@ const PurchaseCard = ({ course }) => {
 
   const renderIndividualSelected = () => (
     <>
-      <button
-        type="button"
-        className="block w-full p-7 text-left"
-        onClick={() => setSelectedPlan("individual")}
-      >
-        <div className="grid grid-cols-[32px_1fr] gap-4">
-          {renderRadio(true)}
-          <div>
-            <p className="text-lg text-[#6a6f73]">Buy individual course</p>
-            {renderPriceLine()}
-            {renderTimer()}
+      {course?.includedInSubscription ? (
+        <button
+          type="button"
+          className="block w-full p-7 text-left"
+          onClick={() => setSelectedPlan("individual")}
+        >
+          <div className="grid grid-cols-[32px_1fr] gap-4">
+            {renderRadio(true)}
+            <div>
+              <p className="text-lg text-[#6a6f73]">Buy individual course</p>
+              {renderPriceLine()}
+              {renderTimer()}
+            </div>
           </div>
+        </button>
+      ) : (
+        <div className="p-7 text-left border-b border-[#d1d7dc]">
+          <p className="text-lg font-extrabold text-[#2d2f31]">Buy individual course</p>
+          {renderPriceLine()}
+          {renderTimer()}
         </div>
-      </button>
+      )}
 
-      <div className="space-y-4 px-7 pb-7 text-base text-[#6a6f73]">
+      <div className="space-y-4 px-7 pb-7 text-base text-[#6a6f73] pt-4">
         <div className="flex items-center gap-4">
           <BadgeCheck className="h-5 w-5 text-[#2d2f31]" />
           <span>30-day money-back guarantee</span>
@@ -386,19 +401,21 @@ const PurchaseCard = ({ course }) => {
         </Button>
       </div>
 
-      <button
-        type="button"
-        className="block w-full border-y border-[#d1d7dc] p-7 text-left hover:bg-[#f7f9fa]"
-        onClick={() => setSelectedPlan("subscription")}
-      >
-        <div className="grid grid-cols-[32px_1fr] gap-4">
-          {renderRadio(false)}
-          <div>
-            <p className="text-lg text-[#6a6f73]">Subscribe and save</p>
-            {renderPriceLine({ subscription: true, large: false })}
+      {course?.includedInSubscription && (
+        <button
+          type="button"
+          className="block w-full border-y border-[#d1d7dc] p-7 text-left hover:bg-[#f7f9fa]"
+          onClick={() => setSelectedPlan("subscription")}
+        >
+          <div className="grid grid-cols-[32px_1fr] gap-4">
+            {renderRadio(false)}
+            <div>
+              <p className="text-lg text-[#6a6f73]">Subscribe and save</p>
+              {renderPriceLine({ subscription: true, large: false })}
+            </div>
           </div>
-        </div>
-      </button>
+        </button>
+      )}
 
       {renderCouponBox()}
     </>

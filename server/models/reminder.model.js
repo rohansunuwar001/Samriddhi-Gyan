@@ -10,10 +10,14 @@ const reminderSchema = new mongoose.Schema(
     courseId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Course",
-      required: true,
+      required: false, // Optional if user selects "None"
+    },
+    name: {
+      type: String,
+      default: "Learning reminder",
     },
     time: {
-      type: String, // e.g. "09:00"
+      type: String, // e.g. "12:00 PM"
       required: true,
     },
     days: [
@@ -22,8 +26,12 @@ const reminderSchema = new mongoose.Schema(
       },
     ],
     frequency: {
-      type: String, // e.g. "Daily", "Weekly"
+      type: String, // e.g. "Daily", "Weekly", "Once"
       default: "Weekly",
+    },
+    calendarSynced: {
+      type: String, // e.g. "Google", "Apple", "Outlook", "None"
+      default: "None",
     },
   },
   { timestamps: true }

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useGetPublishedCourseQuery } from "@/features/api/courseApi";
 import CourseCard from "../student/CourseCard";
+import TrustedBySection from "@/components/home/TrustedBySction";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -176,6 +177,9 @@ const GuestHome = () => {
           </div>
         </div>
       </section>
+
+      {/* Trusted By Section (Moved from logged-in Home) */}
+      <TrustedBySection />
 
       {/* Categories Grid Section */}
       <section className="py-12 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">

@@ -1,28 +1,15 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2 } from "lucide-react";
 import { useCreateCourseMutation } from "@/features/api/courseApi";
-
-
-// const categories = ["Web Development", "Data Science", "Mobile Development", "DevOps", "UI/UX Design"];
-const categories = [
-  "HTML", "CSS", "JavaScript", "TypeScript",
-  "Frontend Development", "Backend Development", "Fullstack Development",
-  "MERN Stack Development", "Next JS", "React JS", "Vue JS", "Node JS",
-  "Express JS", "MongoDB", "SQL", "Python", "Data Science", "Machine Learning",
-  "Artificial Intelligence", "DevOps", "Docker", "Git & GitHub", "UI/UX Design",
-  "Figma", "Adobe XD", "Photoshop", "Cybersecurity", "Cloud Computing", "AWS",
-  "Firebase", "Java", "C++", "C#", "Android Development", "iOS Development",
-  "Mobile App Development", "Software Testing", "System Design",
-  "Operating Systems", "DSA (Data Structures & Algorithms)"
-];
+import { useGetAllCategoriesQuery } from "@/features/api/categoryApi";
 
 const AddCourse = () => {
     const [courseDetails, setCourseDetails] = useState({
@@ -32,6 +19,57 @@ const AddCourse = () => {
     });
     const navigate = useNavigate();
     const [createCourse, { data, isLoading, error, isSuccess, isError }] = useCreateCourseMutation();
+    const { data: categoryData, isLoading: isLoadingCategories } = useGetAllCategoriesQuery();
+
+    const availableCategories = categoryData?.categories || [];
+
+    // Helper map for fast lookup
+    const categoryMap = useMemo(() => {
+        const map = {};
+        availableCategories.forEach((c) => {
+            map[c._id] = c;
+        });
+        return map;
+    }, [availableCategories]);
+
+    const getCategoryLevel = (category) => {
+        const pId = category.parent?._id || category.parent || null;
+        if (!pId) return 0;
+        const parentCat = categoryMap[pId];
+        if (!parentCat) return 1;
+        const gpId = parentCat.parent?._id || parentCat.parent || null;
+        if (!gpId) return 1;
+        return 2;
+    };
+
+    const parents = useMemo(
+        () => availableCategories.filter((c) => getCategoryLevel(c) === 0),
+        [availableCategories, categoryMap]
+    );
+
+    const selectedHierarchy = useMemo(() => {
+        const selected = availableCategories.find((c) => c.name === courseDetails.category);
+        if (!selected) {
+            return { parentId: "", childId: "", subChildId: "" };
+        }
+
+        const pId = selected.parent?._id || selected.parent || null;
+        if (!pId) {
+            return { parentId: selected._id, childId: "", subChildId: "" };
+        }
+
+        const parentCat = availableCategories.find((c) => c._id === pId);
+        if (!parentCat) {
+            return { parentId: "", childId: selected._id, subChildId: "" };
+        }
+
+        const gpId = parentCat.parent?._id || parentCat.parent || null;
+        if (!gpId) {
+            return { parentId: parentCat._id, childId: selected._id, subChildId: "" };
+        }
+
+        return { parentId: gpId, childId: parentCat._id, subChildId: selected._id };
+    }, [courseDetails.category, availableCategories]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -43,15 +81,11 @@ const AddCourse = () => {
         setCourseDetails(prev => ({ ...prev, price: { ...prev.price, [name]: value } }));
     };
 
-    const handleCategoryChange = (value) => {
-        setCourseDetails(prev => ({ ...prev, category: value }));
-    };
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         const { title, category, price } = courseDetails;
         if (!title.trim() || !category || !price.current) {
-            toast.error("Please provide a Title, Category, and a Current Price.");
+            toast.error("Please provide a Title, Category (Parent/Child/Sub-child), and a Current Price.");
             return;
         }
         await createCourse(courseDetails);
@@ -68,7 +102,7 @@ const AddCourse = () => {
     }, [isSuccess, isError, data, error, navigate]);
 
     return (
-        <div className="flex-1 mx-auto max-w-2xl p-4">
+        <div className="flex-1 mx-auto max-w-2xl p-4 text-left">
             <Card>
                 <CardHeader>
                     <CardTitle>Create Your New Course</CardTitle>
@@ -92,22 +126,89 @@ const AddCourse = () => {
                                 <Input id="originalPrice" name="original" type="number" value={courseDetails.price.original} onChange={handlePriceChange} placeholder="e.g., 9999" />
                             </div>
                         </div>
-                        <div className="space-y-2">
-                            <Label>Category</Label>
-                            <Select onValueChange={handleCategoryChange} value={courseDetails.category}>
-                                <SelectTrigger><SelectValue placeholder="Select a category" /></SelectTrigger>
-                                <SelectContent>
-                                    <SelectGroup>
-                                        <SelectLabel>Categories</SelectLabel>
-                                        {categories.map(cat => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}
-                                    </SelectGroup>
-                                </SelectContent>
-                            </Select>
+
+                        {/* 3-Level Category Selector Grid */}
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border border-slate-100 bg-slate-50/50 p-4 rounded-xl">
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold text-slate-700">Category (Parent)</Label>
+                                <Select
+                                    value={selectedHierarchy.parentId}
+                                    onValueChange={(val) => {
+                                        const cat = availableCategories.find((c) => c._id === val);
+                                        setCourseDetails((prev) => ({ ...prev, category: cat ? cat.name : "" }));
+                                    }}
+                                >
+                                    <SelectTrigger className="bg-white">
+                                        <SelectValue placeholder="Select Parent" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {parents.length === 0 ? (
+                                            <SelectItem value="none" disabled>No categories available</SelectItem>
+                                        ) : (
+                                            parents.map((c) => (
+                                                <SelectItem key={c._id} value={c._id}>
+                                                    {c.name}
+                                                </SelectItem>
+                                            ))
+                                        )}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold text-slate-700">Subcategory (Child)</Label>
+                                <Select
+                                    value={selectedHierarchy.childId}
+                                    onValueChange={(val) => {
+                                        const cat = availableCategories.find((c) => c._id === val);
+                                        setCourseDetails((prev) => ({ ...prev, category: cat ? cat.name : "" }));
+                                    }}
+                                    disabled={!selectedHierarchy.parentId}
+                                >
+                                    <SelectTrigger className="bg-white">
+                                        <SelectValue placeholder="Select Subcategory" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {availableCategories
+                                            .filter((c) => (c.parent?._id || c.parent) === selectedHierarchy.parentId)
+                                            .map((c) => (
+                                                <SelectItem key={c._id} value={c._id}>
+                                                    {c.name}
+                                                </SelectItem>
+                                            ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label className="text-xs font-bold text-slate-700">Topic (Sub-child)</Label>
+                                <Select
+                                    value={selectedHierarchy.subChildId}
+                                    onValueChange={(val) => {
+                                        const cat = availableCategories.find((c) => c._id === val);
+                                        setCourseDetails((prev) => ({ ...prev, category: cat ? cat.name : "" }));
+                                    }}
+                                    disabled={!selectedHierarchy.childId}
+                                >
+                                    <SelectTrigger className="bg-white">
+                                        <SelectValue placeholder="Select Topic" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {availableCategories
+                                            .filter((c) => (c.parent?._id || c.parent) === selectedHierarchy.childId)
+                                            .map((c) => (
+                                                <SelectItem key={c._id} value={c._id}>
+                                                    {c.name}
+                                                </SelectItem>
+                                            ))}
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
                     </CardContent>
                     <CardFooter className="flex justify-end gap-4 pt-6">
                         <Button type="button" variant="outline" onClick={() => navigate("/instructor/course")}>Cancel</Button>
-                        <Button type="submit" disabled={isLoading}>
+                        <Button type="submit" disabled={isLoading || isLoadingCategories}>
                             {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Create & Continue
                         </Button>

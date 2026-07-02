@@ -325,22 +325,45 @@ export const getMyLearningCourses = async (userId) => {
         .map((lp) => lp.lectureId.toString())
     );
 
+    let leftOffLecture = null;
+    let leftOffSection = null;
+
     course.sections.forEach((section) => {
-      section.lectures.forEach((lecture) => {
-        const dur = lecture.durationInSeconds || 0;
-        totalDuration += dur;
-        if (viewedIds.has(lecture._id.toString())) {
-          watchedDuration += dur;
-        }
-      });
+      if (section.lectures) {
+        section.lectures.forEach((lecture) => {
+          const dur = lecture.durationInSeconds || 0;
+          totalDuration += dur;
+          if (viewedIds.has(lecture._id.toString())) {
+            watchedDuration += dur;
+          } else if (!leftOffLecture) {
+            leftOffLecture = lecture;
+            leftOffSection = section;
+          }
+        });
+      }
     });
+
+    // If all are viewed, default to the last lecture
+    if (!leftOffLecture && course.sections.length > 0) {
+      const lastSection = course.sections[course.sections.length - 1];
+      if (lastSection.lectures && lastSection.lectures.length > 0) {
+        leftOffLecture = lastSection.lectures[lastSection.lectures.length - 1];
+        leftOffSection = lastSection;
+      }
+    }
 
     const progress =
       totalDuration > 0
         ? Math.min(Math.round((watchedDuration / totalDuration) * 100), 100)
         : 0;
 
-    return { ...course, progress, isPurchased: true };
+    const resumeInfo = {
+      sectionTitle: leftOffSection ? leftOffSection.title || "Introduction" : "Introduction",
+      lectureTitle: leftOffLecture ? leftOffLecture.title || "First Lesson" : "First Lesson",
+      lectureDuration: leftOffLecture ? leftOffLecture.durationInSeconds || 0 : 0
+    };
+
+    return { ...course, progress, resumeInfo, isPurchased: true };
   });
 
   return coursesWithProgress;

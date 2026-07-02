@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
 
@@ -49,6 +49,7 @@ const CourseLandingPageTab = () => {
       hasMobileAccess: true,
       hasCertificate: true,
     },
+    includedInSubscription: false,
   });
   const [previewThumbnail, setPreviewThumbnail] = useState("");
 
@@ -63,26 +64,77 @@ const CourseLandingPageTab = () => {
     usePublishCourseMutation();
 
   const availableCategories = categoryData?.categories || [];
-  const parentCategories = availableCategories.filter((cat) => !cat.parent);
-  const childCategories = availableCategories.filter((cat) => cat.parent);
-  const childrenByParent = childCategories.reduce((map, cat) => {
-    const parentId = cat.parent?._id || cat.parent;
-    if (!map[parentId]) map[parentId] = [];
-    map[parentId].push(cat);
+
+  const categoryMap = useMemo(() => {
+    const map = {};
+    availableCategories.forEach((c) => {
+      map[c._id] = c;
+    });
     return map;
-  }, {});
-  const selectableCategories = parentCategories.flatMap((parent) => {
-    const children = childrenByParent[parent._id] || [];
-    if (children.length === 0) return [{ category: parent, label: parent.name }];
-    return children.map((child) => ({
-      category: child,
-      label: parent.name + " > " + child.name,
-    }));
-  });
-  const topicCategories = availableCategories.map((cat) => ({
-    category: cat,
-    label: cat.parent?.name ? cat.parent.name + " > " + cat.name : cat.name,
-  }));
+  }, [availableCategories]);
+
+  const getCategoryLevel = (category) => {
+    const pId = category.parent?._id || category.parent || null;
+    if (!pId) return 0;
+    const parentCat = categoryMap[pId];
+    if (!parentCat) return 1;
+    const gpId = parentCat.parent?._id || parentCat.parent || null;
+    if (!gpId) return 1;
+    return 2;
+  };
+
+  const parents = useMemo(
+    () => availableCategories.filter((c) => getCategoryLevel(c) === 0),
+    [availableCategories, categoryMap]
+  );
+
+  const selectedHierarchy = useMemo(() => {
+    const selected = availableCategories.find((c) => c.name === details.category);
+    if (!selected) {
+      return { parentId: "", childId: "", subChildId: "" };
+    }
+
+    const pId = selected.parent?._id || selected.parent || null;
+    if (!pId) {
+      return { parentId: selected._id, childId: "", subChildId: "" };
+    }
+
+    const parentCat = availableCategories.find((c) => c._id === pId);
+    if (!parentCat) {
+      return { parentId: "", childId: selected._id, subChildId: "" };
+    }
+
+    const gpId = parentCat.parent?._id || parentCat.parent || null;
+    if (!gpId) {
+      return { parentId: parentCat._id, childId: selected._id, subChildId: "" };
+    }
+
+    return { parentId: gpId, childId: parentCat._id, subChildId: selected._id };
+  }, [details.category, availableCategories]);
+
+  const topicCategories = useMemo(() => {
+    return availableCategories.map((cat) => {
+      const pId = cat.parent?._id || cat.parent || null;
+      let label = cat.name;
+      if (pId) {
+        const parent = availableCategories.find((c) => c._id === pId);
+        if (parent) {
+          label = `${parent.name} > ${cat.name}`;
+          const gpId = parent.parent?._id || parent.parent || null;
+          if (gpId) {
+            const grandparent = availableCategories.find((c) => c._id === gpId);
+            if (grandparent) {
+              label = `${grandparent.name} > ${parent.name} > ${cat.name}`;
+            }
+          }
+        }
+      }
+      return {
+        category: cat,
+        label,
+      };
+    });
+  }, [availableCategories]);
 
   useEffect(() => {
     if (courseData?.course) {
@@ -111,6 +163,7 @@ const CourseLandingPageTab = () => {
           hasMobileAccess:       course.courseIncludes?.hasMobileAccess       ?? true,
           hasCertificate:        course.courseIncludes?.hasCertificate        ?? true,
         },
+        includedInSubscription: course.includedInSubscription ?? false,
         thumbnailFile: null,
       });
       setPreviewThumbnail(course.thumbnail || "");
@@ -258,31 +311,83 @@ const CourseLandingPageTab = () => {
               onChange={handleChange}
             />
           </div>
-          <div className="space-y-2">
-            <Label>Category</Label>
-            <Select
-              value={details.category}
-              onValueChange={(val) =>
-                setDetails((prev) => ({ ...prev, category: val }))
-              }
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={isLoadingCategories ? "Loading categories..." : "Select a category"} />
-              </SelectTrigger>
-              <SelectContent>
-                {availableCategories.length === 0 ? (
-                  <div className="px-2 py-1.5 text-sm text-muted-foreground">
-                    No categories yet. Ask an admin to create some.
-                  </div>
-                ) : (
-                  selectableCategories.map(({ category, label }) => (
-                    <SelectItem key={category._id} value={category.name}>
-                      {label}
-                    </SelectItem>
-                  ))
-                )}
-              </SelectContent>
-            </Select>
+          {/* 3-Level Category Selector Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:col-span-2 border border-slate-100 bg-slate-50/50 p-4 rounded-xl">
+            <div className="space-y-2">
+              <Label className="text-xs font-bold text-slate-700">Category (Parent)</Label>
+              <Select
+                value={selectedHierarchy.parentId}
+                onValueChange={(val) => {
+                  const cat = availableCategories.find((c) => c._id === val);
+                  setDetails((prev) => ({ ...prev, category: cat ? cat.name : "" }));
+                }}
+              >
+                <SelectTrigger className="bg-white">
+                  <SelectValue placeholder="Select Parent" />
+                </SelectTrigger>
+                <SelectContent>
+                  {parents.length === 0 ? (
+                    <SelectItem value="none" disabled>No categories available</SelectItem>
+                  ) : (
+                    parents.map((c) => (
+                      <SelectItem key={c._id} value={c._id}>
+                        {c.name}
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs font-bold text-slate-700">Subcategory (Child)</Label>
+              <Select
+                value={selectedHierarchy.childId}
+                onValueChange={(val) => {
+                  const cat = availableCategories.find((c) => c._id === val);
+                  setDetails((prev) => ({ ...prev, category: cat ? cat.name : "" }));
+                }}
+                disabled={!selectedHierarchy.parentId}
+              >
+                <SelectTrigger className="bg-white">
+                  <SelectValue placeholder="Select Subcategory" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableCategories
+                    .filter((c) => (c.parent?._id || c.parent) === selectedHierarchy.parentId)
+                    .map((c) => (
+                      <SelectItem key={c._id} value={c._id}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-xs font-bold text-slate-700">Topic (Sub-child)</Label>
+              <Select
+                value={selectedHierarchy.subChildId}
+                onValueChange={(val) => {
+                  const cat = availableCategories.find((c) => c._id === val);
+                  setDetails((prev) => ({ ...prev, category: cat ? cat.name : "" }));
+                }}
+                disabled={!selectedHierarchy.childId}
+              >
+                <SelectTrigger className="bg-white">
+                  <SelectValue placeholder="Select Topic" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableCategories
+                    .filter((c) => (c.parent?._id || c.parent) === selectedHierarchy.childId)
+                    .map((c) => (
+                      <SelectItem key={c._id} value={c._id}>
+                        {c.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
           <div className="space-y-2">
             <Label>Level</Label>
@@ -321,6 +426,20 @@ const CourseLandingPageTab = () => {
               value={details.price.original}
               onChange={handlePriceChange}
             />
+          </div>
+          <div className="flex items-center gap-3 pt-8">
+            <input
+              type="checkbox"
+              id="includedInSubscription"
+              className="h-4 w-4 rounded border-gray-300 accent-[#a435f0] cursor-pointer"
+              checked={details.includedInSubscription}
+              onChange={(e) =>
+                setDetails((prev) => ({ ...prev, includedInSubscription: e.target.checked }))
+              }
+            />
+            <Label htmlFor="includedInSubscription" className="cursor-pointer font-semibold select-none">
+              Included in Subscription (Free for active subscribers)
+            </Label>
           </div>
         </div>
         <div className="space-y-2">

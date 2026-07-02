@@ -25,31 +25,40 @@ export const getEnrolledIds = async (req) => {
   // ── Guest / unauthenticated ──────────────────────────────────────────────────
   if (!userId) return [];
 
-  // ── Fast path: auth middleware already attached enrolledCourses ──────────────
+  const ids = new Set();
+
+  // ── Step 1: Add enrolledCourses from user object ─────────────────────────────
   const attached = req.user?.enrolledCourses;
-  if (Array.isArray(attached) && attached.length > 0) {
-    return attached.map((entry) => {
-      // Handle ObjectId | string | populated object
-      if (typeof entry === "string") return entry;
-      if (entry?._id) return entry._id.toString();
-      return entry.toString();
+  if (Array.isArray(attached)) {
+    attached.forEach((entry) => {
+      if (typeof entry === "string") ids.add(entry);
+      else if (entry?._id) ids.add(entry._id.toString());
+      else if (entry) ids.add(entry.toString());
     });
   }
 
-  // ── Fallback: query CoursePurchase directly ──────────────────────────────────
-  // Useful when enrolledCourses isn't populated on req.user (e.g. lightweight
-  // auth middleware that only attaches _id + role).
-  const purchases = await CoursePurchase.find({
-    userId,
-    status: "completed",
-  })
-    .select("courses.courseId")
-    .lean();
+  // ── Step 2: Add subscription courses if active ───────────────────────────────
+  if (req.user?.subscription?.status === "active") {
+    const { Course } = await import("../models/course.model.js");
+    const subCourses = await Course.find({ includedInSubscription: true, isPublished: true })
+      .select("_id")
+      .lean();
+    subCourses.forEach((c) => ids.add(c._id.toString()));
+  }
 
-  const ids = new Set();
-  for (const purchase of purchases) {
-    for (const { courseId } of purchase.courses ?? []) {
-      if (courseId) ids.add(courseId.toString());
+  // ── Step 3: Fallback if Set is empty ─────────────────────────────────────────
+  if (ids.size === 0) {
+    const purchases = await CoursePurchase.find({
+      userId,
+      status: "completed",
+    })
+      .select("courses.courseId")
+      .lean();
+
+    for (const purchase of purchases) {
+      for (const { courseId } of purchase.courses ?? []) {
+        if (courseId) ids.add(courseId.toString());
+      }
     }
   }
 

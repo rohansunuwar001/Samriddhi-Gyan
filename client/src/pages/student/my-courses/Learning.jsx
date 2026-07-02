@@ -1,20 +1,35 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useGetMyLearningCoursesQuery } from "@/features/api/authApi";
+import { useGetUserRemindersQuery } from "@/features/api/reminderApi";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Flame, Info, Clock, Loader2, BookOpen } from "lucide-react";
+import { Flame, Info, Clock, Loader2, BookOpen, X } from "lucide-react";
 import MyLearningCourseCard from "./MyLearningCourseCard";
+import ReminderWizardModal from "../../../components/ReminderWizardModal";
 
 const Learning = () => {
   const navigate = useNavigate();
-  const { data, isLoading, isError } = useGetMyLearningCoursesQuery();
+  const { data: coursesData, isLoading: coursesLoading, isError } = useGetMyLearningCoursesQuery();
+  const { data: remindersData } = useGetUserRemindersQuery();
+  
   const [showScheduler, setShowScheduler] = useState(true);
+  const [isWizardOpen, setIsWizardOpen] = useState(false);
+  const [isStreakInfoOpen, setIsStreakInfoOpen] = useState(false);
 
-  const myLearningCourses = data?.courses || [];
+  const myLearningCourses = coursesData?.courses || [];
+  const reminders = remindersData?.reminders || [];
+  const hasReminders = reminders.length > 0;
+
+  // Hide scheduler card if active reminders exist
+  const displayScheduler = showScheduler && !hasReminders;
 
   if (isError) {
     return <ErrorState />;
   }
+
+  const handleSaveSuccess = () => {
+    navigate("/home/my-courses/learning-tools");
+  };
 
   return (
     <div className="space-y-6">
@@ -79,7 +94,10 @@ const Learning = () => {
               </div>
               <div className="flex items-center gap-1 text-[#6a6f73] pt-0.5 font-normal">
                 <span>Jun 28 - Jul 4</span>
-                <Info className="h-3 w-3 cursor-pointer" />
+                <Info
+                  className="h-3 w-3 cursor-pointer hover:text-[#6d28d2] transition-colors"
+                  onClick={() => setIsStreakInfoOpen(true)}
+                />
               </div>
             </div>
           </div>
@@ -87,8 +105,8 @@ const Learning = () => {
       </div>
 
       {/* Schedule learning time scheduler widget */}
-      {showScheduler && (
-        <div className="border border-[#d1d7dc] bg-white p-6 rounded-none flex items-start gap-4 shadow-sm relative">
+      {displayScheduler && (
+        <div className="border border-[#d1d7dc] bg-white p-6 rounded-none flex items-start gap-4 shadow-sm relative animate-in fade-in">
           <div className="h-10 w-10 rounded-full bg-gray-50 flex items-center justify-center text-gray-700 shrink-0 mt-0.5">
             <Clock className="h-5 w-5" />
           </div>
@@ -103,8 +121,8 @@ const Learning = () => {
             </div>
             <div className="flex items-center gap-3">
               <button
-                onClick={() => navigate("/courses")}
-                className="border border-[#2d2f31] bg-white text-[#2d2f31] hover:bg-gray-50 px-4 py-2 text-sm font-normal transition-all"
+                onClick={() => setIsWizardOpen(true)}
+                className="border border-[#6d28d2] text-[#6d28d2] bg-white hover:bg-[#f5eeff] hover:border-[#892de1] hover:text-[#892de1] px-5 py-2.5 text-xs font-bold transition-all"
               >
                 Get started
               </button>
@@ -120,7 +138,7 @@ const Learning = () => {
       )}
 
       {/* Redesigned Courses Grid feed */}
-      {isLoading ? (
+      {coursesLoading ? (
         <MyLearningSkeleton />
       ) : myLearningCourses.length === 0 ? (
         <EmptyLearningState navigate={navigate} />
@@ -129,6 +147,69 @@ const Learning = () => {
           {myLearningCourses.map((course) => (
             <MyLearningCourseCard key={course._id} course={course} isArchived={false} />
           ))}
+        </div>
+      )}
+
+      {/* 3-Step Reminder Setup Wizard Modal */}
+      <ReminderWizardModal
+        isOpen={isWizardOpen}
+        onClose={() => setIsWizardOpen(false)}
+        reminderToEdit={null}
+        onSaveSuccess={handleSaveSuccess}
+      />
+
+      {/* About Streaks Modal */}
+      {isStreakInfoOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center"
+          style={{ backgroundColor: "rgba(0,0,0,0.45)" }}
+          onClick={() => setIsStreakInfoOpen(false)}
+        >
+          <div
+            className="relative bg-white rounded-none shadow-2xl w-full max-w-sm mx-4 p-7"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Close */}
+            <button
+              onClick={() => setIsStreakInfoOpen(false)}
+              className="absolute top-4 right-4 text-[#6a6f73] hover:text-[#2d2f31] transition-colors"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            {/* Title */}
+            <h2 className="text-lg font-semibold text-[#2d2f31] mb-2">About streaks</h2>
+            <p className="text-sm text-[#6a6f73] leading-relaxed mb-5">
+              Complete both your visit and minutes watched rings to maintain your weekly streak.
+            </p>
+
+            {/* Watch ring */}
+            <div className="flex items-start gap-3 mb-3">
+              <span className="mt-1 h-3 w-3 shrink-0 rounded-full bg-amber-500" />
+              <div>
+                <p className="text-sm font-semibold text-[#2d2f31]">To complete the watch ring</p>
+                <p className="text-sm text-[#6a6f73]">Watch 30 minutes of course videos.</p>
+              </div>
+            </div>
+
+            {/* Visit ring */}
+            <div className="flex items-start gap-3 mb-6">
+              <span className="mt-1 h-3 w-3 shrink-0 rounded-full bg-[#1f7a54]" />
+              <div>
+                <p className="text-sm font-semibold text-[#2d2f31]">To complete the visit ring</p>
+                <p className="text-sm text-[#6a6f73]">Open the app or website once a week</p>
+              </div>
+            </div>
+
+            {/* Data updates */}
+            <div className="border-t border-[#d1d7dc] pt-4">
+              <p className="text-sm font-semibold text-[#2d2f31] mb-1">Data updates</p>
+              <p className="text-sm text-[#6a6f73] leading-relaxed">
+                Your minutes watched updates three{" "}
+                <span className="text-[#6d28d2] font-medium">times</span> per day. Return in a few hours to see your progress.
+              </p>
+            </div>
+          </div>
         </div>
       )}
     </div>

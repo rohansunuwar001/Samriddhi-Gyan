@@ -2,7 +2,7 @@
 
 import { Router } from "express";
 import { authorizeRoles, isAuthenticated } from "../middlewares/isAuthenticated.js";
-import { deleteCourseByAdmin, deleteUser, getAllUsers, getPlatformAnalytics, getRevenueDetails, getSuperAdminDashboardAnalytics, updateCourseByAdmin, updateUserRoleAndDetails } from "../controllers/admin.controller.js";
+import { deleteCourseByAdmin, deleteUser, getAllUsers, getPlatformAnalytics, getRevenueDetails, getSuperAdminDashboardAnalytics, updateCourseByAdmin, updateUserRoleAndDetails, getInstructorPayoutSummary, createInstructorPayout } from "../controllers/admin.controller.js";
 
 const adminRouter = Router();
 
@@ -53,11 +53,22 @@ adminRouter.route('/courses/:id')
         deleteCourseByAdmin
     );
 
-    adminRouter.route('/revenue').get(
+adminRouter.route('/revenue').get(
     isAuthenticated,
     authorizeRoles('admin'),
     getRevenueDetails
 );
 
+adminRouter.route('/instructor-payout-summary').get(
+    isAuthenticated,
+    authorizeRoles('admin'),
+    getInstructorPayoutSummary
+);
+
+adminRouter.route('/instructor-payout').post(
+    isAuthenticated,
+    authorizeRoles('admin'),
+    createInstructorPayout
+);
 
 export default adminRouter;

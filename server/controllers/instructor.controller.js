@@ -12,13 +12,32 @@ export const getDashboardAnalytics = async (req, res) => {
                 monthlySales: []
             });
         }
-        
-        // --- Calculate Stats ---
+
+        const courseIds = courses.map(c => c._id);
+
+        // Aggregate actual completed purchases for these courses to sum instructorShare (37%)
+        const { CoursePurchase } = await import("../models/coursePurchase.model.js");
+        const { getSubscriptionPayouts } = await import("../utils/subscriptionPayout.js");
+
+        const [salesAggregate, payoutsData] = await Promise.all([
+          CoursePurchase.aggregate([
+            { $match: { status: "completed" } },
+            { $unwind: "$courses" },
+            { $match: { "courses.courseId": { $in: courseIds } } },
+            {
+              $group: {
+                _id: null,
+                totalRevenue: { $sum: "$courses.instructorShare" }
+              }
+            }
+          ]),
+          getSubscriptionPayouts()
+        ]);
+
+        const courseSalesRevenue = salesAggregate[0]?.totalRevenue || 0;
+        const subscriptionRevenue = payoutsData.payouts[instructorId] || 0;
+        const totalRevenue = courseSalesRevenue + subscriptionRevenue;
         const totalCourses = courses.filter(c => c.isPublished).length;
-        const totalRevenue = courses.reduce(
-          (acc, course) => acc + ((course.price?.current || 0) * (course.enrolledStudents?.length || 0)),
-          0
-        );
         
         // Get a unique set of all student IDs across all courses
         const allStudentIds = courses.reduce((acc, course) => {
@@ -40,7 +59,14 @@ export const getDashboardAnalytics = async (req, res) => {
         ];
         
         res.status(200).json({
-            stats: { totalRevenue, totalStudents, totalCourses, averageRating },
+            stats: { 
+                totalRevenue, 
+                totalStudents, 
+                totalCourses, 
+                averageRating,
+                courseSalesRevenue,
+                subscriptionRevenue
+            },
             monthlySales
         });
         

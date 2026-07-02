@@ -3,6 +3,9 @@
 import { User } from "../models/user.model.js";
 import { Course } from "../models/course.model.js";
 import { CoursePurchase } from "../models/coursePurchase.model.js";
+import { SubscriptionPurchase } from "../models/subscriptionPurchase.model.js";
+import { getSubscriptionPayouts } from "../utils/subscriptionPayout.js";
+import { InstructorPayout } from "../models/instructorPayout.model.js";
 
 export const getSuperAdminDashboardAnalytics = async (req, res) => {
   try {
@@ -412,21 +415,71 @@ export const getRevenueDetails = async (req, res) => {
             })
             .populate({
                 path: 'courses.courseId',
-                select: 'title' // Get the title of each course in the bundle
+                select: 'title creator', // Get the title of each course in the bundle
+                populate: {
+                    path: 'creator',
+                    select: 'name email'
+                }
             })
             .lean(); // Use lean for faster read operations
 
         const totalPurchasesPromise = CoursePurchase.countDocuments(criteria);
 
-        const [purchases, totalPurchases] = await Promise.all([
+        // Fetch aggregate course splits summary
+        const courseSummaryPromise = CoursePurchase.aggregate([
+          { $match: { status: "completed" } },
+          { $unwind: "$courses" },
+          {
+            $group: {
+              _id: null,
+              totalCourseSales: { $sum: "$courses.priceAtPurchase" },
+              totalInstructorShare: { $sum: "$courses.instructorShare" },
+              totalAdminShare: { $sum: "$courses.adminShare" }
+            }
+          }
+        ]);
+
+        // Fetch aggregate subscription summary
+        const subSummaryPromise = SubscriptionPurchase.aggregate([
+          { $match: { status: "completed" } },
+          {
+            $group: {
+              _id: null,
+              totalSubSales: { $sum: "$amount" }
+            }
+          }
+        ]);
+
+        const [purchases, totalPurchases, courseSummary, payoutsData] = await Promise.all([
             purchasesPromise,
             totalPurchasesPromise,
+            courseSummaryPromise,
+            getSubscriptionPayouts()
         ]);
+
+        const totalCourseSales = courseSummary[0]?.totalCourseSales || 0;
+        const totalInstructorShare = courseSummary[0]?.totalInstructorShare || 0;
+        const totalAdminShare = courseSummary[0]?.totalAdminShare || 0;
         
+        const totalSubSales = payoutsData.totalSubSales || 0;
+        const subInstructorPool = payoutsData.instructorPool || 0;
+        const subAdminShare = payoutsData.adminSubShare || 0;
+        const netAdminRevenue = totalAdminShare + subAdminShare;
+
         // --- 5. Assemble and Send the Final Response ---
         res.status(200).json({
             success: true,
             data: purchases,
+            summary: {
+                totalCourseSales,
+                totalInstructorShare,
+                totalAdminShare,
+                totalSubSales,
+                subInstructorPool,
+                subAdminShare,
+                netAdminRevenue,
+                instructorShares: payoutsData.instructorShares
+            },
             pagination: {
                 currentPage: page,
                 totalPages: Math.ceil(totalPurchases / limit),
@@ -441,5 +494,146 @@ export const getRevenueDetails = async (req, res) => {
             success: false,
             message: "Server error while fetching revenue details.",
         });
+    }
+};
+
+export const getInstructorPayoutSummary = async (req, res) => {
+    try {
+        // 1. Fetch all instructors
+        const instructors = await User.find({ role: "instructor" }).select("name email photoUrl").lean();
+
+        // 2. Fetch aggregate course earnings grouped by creator
+        const courseEarnings = await CoursePurchase.aggregate([
+            { $match: { status: "completed" } },
+            { $unwind: "$courses" },
+            {
+                $lookup: {
+                    from: "courses",
+                    localField: "courses.courseId",
+                    foreignField: "_id",
+                    as: "courseInfo"
+                }
+            },
+            { $unwind: "$courseInfo" },
+            {
+                $group: {
+                    _id: "$courseInfo.creator",
+                    totalCourseEarnings: { $sum: "$courses.instructorShare" },
+                    totalCourseSales: { $sum: "$courses.priceAtPurchase" }
+                }
+            }
+        ]);
+
+        // Convert course earnings to a map for easy lookup
+        const courseEarningsMap = {};
+        courseEarnings.forEach(item => {
+            if (item._id) {
+                courseEarningsMap[item._id.toString()] = {
+                    totalCourseEarnings: item.totalCourseEarnings || 0,
+                    totalCourseSales: item.totalCourseSales || 0
+                };
+            }
+        });
+
+        // 3. Fetch subscription pool payouts
+        const payoutsData = await getSubscriptionPayouts();
+        const subPayoutsMap = payoutsData.payouts || {};
+
+        // 4. Fetch past completed payouts grouped by instructor
+        const paidEarnings = await InstructorPayout.aggregate([
+            { $match: { status: "completed" } },
+            {
+                $group: {
+                    _id: "$instructorId",
+                    totalPaid: { $sum: "$amount" }
+                }
+            }
+        ]);
+
+        const paidMap = {};
+        paidEarnings.forEach(item => {
+            if (item._id) {
+                paidMap[item._id.toString()] = item.totalPaid || 0;
+            }
+        });
+
+        // 5. Build summary per instructor
+        const summary = instructors.map(inst => {
+            const instIdStr = inst._id.toString();
+            const courseData = courseEarningsMap[instIdStr] || { totalCourseEarnings: 0, totalCourseSales: 0 };
+            const subEarnings = subPayoutsMap[instIdStr] || 0;
+            const totalEarnings = courseData.totalCourseEarnings + subEarnings;
+            const totalPaid = paidMap[instIdStr] || 0;
+            const pendingBalance = Math.max(0, totalEarnings - totalPaid);
+
+            return {
+                instructorId: inst._id,
+                name: inst.name,
+                email: inst.email,
+                photoUrl: inst.photoUrl,
+                courseSales: courseData.totalCourseSales,
+                courseEarnings: courseData.totalCourseEarnings,
+                subscriptionEarnings: subEarnings,
+                totalEarnings,
+                totalPaid,
+                pendingBalance: Number(pendingBalance.toFixed(2))
+            };
+        });
+
+        // 6. Fetch full payout history
+        const payoutHistory = await InstructorPayout.find()
+            .populate("instructorId", "name email photoUrl")
+            .sort({ createdAt: -1 })
+            .lean();
+
+        res.status(200).json({
+            success: true,
+            summary,
+            payoutHistory
+        });
+    } catch (error) {
+        console.error("Error in getInstructorPayoutSummary:", error);
+        res.status(500).json({ success: false, message: "Failed to fetch payout summary." });
+    }
+};
+
+export const createInstructorPayout = async (req, res) => {
+    try {
+        const { instructorId, amount, paymentMethod, transactionId, remarks } = req.body;
+
+        if (!instructorId || !amount || !paymentMethod) {
+            return res.status(400).json({ success: false, message: "Missing required payout details." });
+        }
+
+        if (Number(amount) <= 0) {
+            return res.status(400).json({ success: false, message: "Payout amount must be greater than zero." });
+        }
+
+        // Validate instructor exists
+        const instructor = await User.findById(instructorId);
+        if (!instructor || instructor.role !== "instructor") {
+            return res.status(400).json({ success: false, message: "Invalid instructor ID or user role is not instructor." });
+        }
+
+        // Create new payout record
+        const payout = new InstructorPayout({
+            instructorId,
+            amount: Number(amount),
+            paymentMethod,
+            transactionId,
+            remarks,
+            status: "completed"
+        });
+
+        await payout.save();
+
+        res.status(201).json({
+            success: true,
+            message: "Payout successfully created and logged.",
+            data: payout
+        });
+    } catch (error) {
+        console.error("Error in createInstructorPayout:", error);
+        res.status(500).json({ success: false, message: "Server error while processing payout." });
     }
 };

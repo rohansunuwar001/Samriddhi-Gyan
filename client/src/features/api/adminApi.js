@@ -6,7 +6,7 @@ export const adminApi = apiSlice.injectEndpoints({
     // Define all caching tags used in this admin-focused API slice.
     // This helps RTK Query manage data fetching and re-fetching automatically.
     reducerPath: 'adminApi',
-    tagTypes: ['AdminStats', 'User', 'PlatformAnalytics', 'AdminCourses'],
+    tagTypes: ['AdminStats', 'User', 'PlatformAnalytics', 'AdminCourses', 'PayoutSummary'],
    
     endpoints: (builder) => ({
         
@@ -111,6 +111,18 @@ export const adminApi = apiSlice.injectEndpoints({
             // If you ever add a 'refund' mutation, it would invalidate this tag.
             providesTags: [{ type: 'Revenue', id: 'LIST' }],
         }),
+        getInstructorPayoutSummary: builder.query({
+            query: () => '/admin/instructor-payout-summary',
+            providesTags: ['PayoutSummary'],
+        }),
+        createInstructorPayout: builder.mutation({
+            query: (payoutData) => ({
+                url: '/admin/instructor-payout',
+                method: 'POST',
+                body: payoutData,
+            }),
+            invalidatesTags: ['PayoutSummary'],
+        }),
 
     }),
 });
@@ -128,6 +140,8 @@ export const {
     useUpdateCourseMutation,      // Hook for the "Update Course" action
     useDeleteCourseMutation,      // Hook for the "Delete Course" action
 
-    // Revenu Api
+    // Revenue Api
     useGetRevenueDetailsQuery,
+    useGetInstructorPayoutSummaryQuery,
+    useCreateInstructorPayoutMutation,
 } = adminApi;

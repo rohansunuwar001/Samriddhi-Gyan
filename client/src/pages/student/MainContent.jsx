@@ -84,7 +84,16 @@ const MainContent = ({
   const [showAiModal, setShowAiModal] = useState(false);
 
   // Reminders queries & states
-  const { data: reminderData } = useGetUserRemindersQuery(courseId, { skip: !courseId });
+  const { data: reminderData } = useGetUserRemindersQuery();
+  const courseReminders = React.useMemo(() => {
+    if (!reminderData?.reminders) return [];
+    return reminderData.reminders.filter(
+      (r) => {
+        const cId = r.courseId?._id || r.courseId;
+        return cId === courseId;
+      }
+    );
+  }, [reminderData, courseId]);
   const [createReminder] = useCreateReminderMutation();
   const [deleteReminder] = useDeleteReminderMutation();
 
@@ -434,7 +443,7 @@ const MainContent = ({
                 </div>
                 <div className="space-y-1">
                   <span className="text-[#6a6f73] block">Certificates</span>
-                  <p>Get Udemy certificate by completing entire course</p>
+                  <p>Get Samriddhi Gyan certificate by completing entire course</p>
                 </div>
               </div>
 
@@ -1180,13 +1189,13 @@ const MainContent = ({
                   </div>
 
                   {/* Display saved reminders list */}
-                  {reminderData?.reminders && reminderData.reminders.length > 0 && (
+                  {courseReminders && courseReminders.length > 0 && (
                     <div className="space-y-3 max-w-md pt-2">
                       <h4 className="text-sm font-normal uppercase tracking-wider text-gray-500">
                         Active Reminders
                       </h4>
                       <div className="divide-y divide-[#d1d7dc]">
-                        {reminderData.reminders.map((rem) => (
+                        {courseReminders.map((rem) => (
                           <div key={rem._id} className="py-3 flex items-center justify-between gap-4">
                             <div className="flex items-start gap-3">
                               <Calendar className="h-5 w-5 text-[#5624d0] mt-0.5" />

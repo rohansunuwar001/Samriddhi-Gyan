@@ -9,6 +9,7 @@
 //   3. No logic changes to getTrendingCourses, getFeaturedCourses, or
 //      getRecommendedCourses — they already had the correct $nin filtering.
 
+import mongoose from "mongoose";
 import { Course } from "../models/course.model.js";
 import { User } from "../models/user.model.js";
 import { CoursePurchase } from "../models/coursePurchase.model.js";
@@ -24,8 +25,26 @@ const populateCreator = { path: "creator", select: "name email photoUrl" };
  * Returns the most popular published courses, sorted by actual enrollment count.
  */
 async function getPopularCourses(filter, limit) {
+  // Deep clone filter and convert any string IDs to ObjectIds for the aggregation pipeline
+  const queryFilter = { ...filter };
+  if (queryFilter._id) {
+    if (queryFilter._id.$nin) {
+      queryFilter._id = {
+        $nin: queryFilter._id.$nin.map((id) =>
+          typeof id === "string" ? new mongoose.Types.ObjectId(id) : id
+        ),
+      };
+    } else if (queryFilter._id.$in) {
+      queryFilter._id = {
+        $in: queryFilter._id.$in.map((id) =>
+          typeof id === "string" ? new mongoose.Types.ObjectId(id) : id
+        ),
+      };
+    }
+  }
+
   const popularIds = await Course.aggregate([
-    { $match: filter },
+    { $match: queryFilter },
     { $addFields: { studentCount: { $size: { $ifNull: ["$enrolledStudents", []] } } } },
     { $sort: { studentCount: -1 } },
     { $limit: limit },
@@ -139,6 +158,9 @@ export const getTrendingCourses = async (req, res) => {
 
     // Uses shared helper — reads req.user (set by loadUserIfAuthenticated middleware)
     const enrolledCourseIds = await getEnrolledIds(req);
+    const enrolledObjectIds = enrolledCourseIds.map(
+      (id) => new mongoose.Types.ObjectId(id)
+    );
 
     // --- Primary signal: recent completed purchases ---
     const purchaseAgg = await CoursePurchase.aggregate([
@@ -152,7 +174,7 @@ export const getTrendingCourses = async (req, res) => {
     // Remove courses the user already owns from trending
     let trendingIds = purchaseAgg
       .map((p) => p._id)
-      .filter((id) => !enrolledCourseIds.includes(id.toString()));
+      .filter((id) => id && !enrolledCourseIds.includes(id.toString()));
 
     const trendingSource = new Map(
       trendingIds.map((id) => [id.toString(), "purchases"])
@@ -161,6 +183,9 @@ export const getTrendingCourses = async (req, res) => {
     // --- Fallback signal: recent views, only to fill remaining slots ---
     if (trendingIds.length < limit) {
       const remaining = limit - trendingIds.length;
+      const trendingObjectIds = trendingIds.map(
+        (id) => new mongoose.Types.ObjectId(id)
+      );
 
       const viewAgg = await User.aggregate([
         { $unwind: "$viewHistory" },
@@ -168,7 +193,7 @@ export const getTrendingCourses = async (req, res) => {
         {
           $match: {
             "viewHistory.course": {
-              $nin: [...trendingIds, ...enrolledCourseIds],
+              $nin: [...trendingObjectIds, ...enrolledObjectIds],
             },
           },
         },
@@ -178,10 +203,17 @@ export const getTrendingCourses = async (req, res) => {
       ]);
 
       viewAgg.forEach((v) => {
-        trendingIds.push(v._id);
-        trendingSource.set(v._id.toString(), "views");
+        if (v._id) {
+          trendingIds.push(v._id);
+          trendingSource.set(v._id.toString(), "views");
+        }
       });
     }
+
+    // Definitive cleanup: Filter out any enrolled course IDs from trendingIds in JS
+    trendingIds = trendingIds.filter(
+      (id) => id && !enrolledCourseIds.includes(id.toString())
+    );
 
     // --- Final fallback: no recent activity → all-time popular (minus enrolled) ---
     if (trendingIds.length === 0) {

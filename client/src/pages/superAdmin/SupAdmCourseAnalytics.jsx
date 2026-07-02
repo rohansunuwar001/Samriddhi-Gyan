@@ -105,9 +105,22 @@ const SupAdmCourseAnalytics = () => {
         setIsEditDialogOpen(true);
     };
 
+    // --- Reset pointer events on the body when dialog closes to prevent Radix UI freeze bugs ---
+    React.useEffect(() => {
+        if (!isDeleteDialogOpen) {
+            const timer = setTimeout(() => {
+                document.body.style.pointerEvents = "";
+            }, 100);
+            return () => clearTimeout(timer);
+        }
+    }, [isDeleteDialogOpen]);
+
     const openDeleteDialog = (course) => {
         setSelectedCourse(course);
-        setIsDeleteDialogOpen(true);
+        // Defer opening the dialog to allow the DropdownMenu to fully close and restore pointer events first
+        setTimeout(() => {
+            setIsDeleteDialogOpen(true);
+        }, 50);
     };
     
     const handleUpdateCourse = async (courseId, updateData) => {
@@ -123,7 +136,7 @@ const SupAdmCourseAnalytics = () => {
         if (!selectedCourse) return;
         toast.promise(deleteCourse(selectedCourse._id).unwrap(), {
             loading: 'Deleting course...',
-            success: `Course "Rs{selectedCourse.title}" deleted.`,
+            success: `Course "${selectedCourse.title}" deleted.`,
             error: (err) => err.data?.message || 'Failed to delete course.',
         });
         setIsDeleteDialogOpen(false);
