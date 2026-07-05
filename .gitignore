@@ -1,2 +1,7 @@
 client/src/pages/GoogleAuthCallback.jsx
 client/.env
+# Editor config (optional to keep, safe to ignore)
+.vscode/
+
+# Dev scratch scripts
+scratch/
