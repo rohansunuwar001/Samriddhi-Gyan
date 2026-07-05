@@ -15,15 +15,16 @@ import { createPendingOrder, completeOrder } from "../service/purchase.service.j
 export const initializePayment = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { courseIds } = req.body;
+    const { courseIds = [], certificationIds = [] } = req.body;
 
-    if (!Array.isArray(courseIds) || courseIds.length === 0) {
-      return res.status(400).json({ message: "No courses selected!" });
+    if (courseIds.length === 0 && certificationIds.length === 0) {
+      return res.status(400).json({ message: "No items selected!" });
     }
 
     const { order, totalAmount } = await createPendingOrder({
       userId,
       courseIds,
+      certificationIds,
       paymentMethod: "eSewa",
     });
 

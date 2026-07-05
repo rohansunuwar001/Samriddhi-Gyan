@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { CheckCircle, Award, BookOpen, ShieldCheck, Zap } from "lucide-react";
+import { CheckCircle, Award, BookOpen, ShieldCheck, Zap, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   useGetActiveGetOfferPromoQuery,
@@ -33,6 +33,47 @@ const SubscribePage = () => {
   const offerButtonRef = useRef(null);
   const [showStickyNav, setShowStickyNav] = useState(false);
 
+  // Match user's active plan inside the plans list
+  const activePlan = React.useMemo(() => {
+    if (!plans || plans.length === 0 || !user?.subscription?.planName) return null;
+    return plans.find(p => p.planName === user.subscription.planName);
+  }, [plans, user]);
+
+  // Calculate remaining subscription credit value (prorated)
+  const activeCreditDeduction = React.useMemo(() => {
+    if (user?.subscription?.status === "active" && activePlan) {
+      const activePlanPricePaid = activePlan.priceNpr - activePlan.discountNpr;
+      const now = new Date();
+      const startsAt = new Date(user.subscription.startsAt);
+      const expiresAt = new Date(user.subscription.expiresAt);
+      const totalDurationMs = expiresAt.getTime() - startsAt.getTime();
+      const remainingDurationMs = expiresAt.getTime() - now.getTime();
+
+      if (totalDurationMs > 0 && remainingDurationMs > 0) {
+        const ratio = Math.max(0, Math.min(1, remainingDurationMs / totalDurationMs));
+        return Math.round(ratio * activePlanPricePaid);
+      }
+    }
+    return 0;
+  }, [user, activePlan]);
+
+  // Filter plans: hide plan and below
+  const filteredPlans = React.useMemo(() => {
+    if (user?.subscription?.status === "active" && activePlan) {
+      return plans.filter(p => p.durationMonths > activePlan.durationMonths);
+    }
+    return plans;
+  }, [plans, user, activePlan]);
+
+  // Handle plan key default selection
+  useEffect(() => {
+    if (filteredPlans.length > 0) {
+      if (!filteredPlans.some(p => p.key === selectedPlanKey)) {
+        setSelectedPlanKey(filteredPlans[0].key);
+      }
+    }
+  }, [filteredPlans, selectedPlanKey]);
+
   useEffect(() => {
     const handleScroll = () => {
       if (offerButtonRef.current) {
@@ -49,7 +90,7 @@ const SubscribePage = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [activePromo]);
 
-  const handleSubscribe = async (planKeyOrUrl) => {
+  const handleSubscribe = (planKeyOrUrl) => {
     if (!user) {
       toast.error("Please log in to start your subscription plan.");
       navigate("/login");
@@ -62,20 +103,7 @@ const SubscribePage = () => {
     }
 
     const key = (typeof planKeyOrUrl === "string" && planKeyOrUrl) ? planKeyOrUrl : selectedPlanKey;
-
-    try {
-      toast.info("Initiating subscription payment...");
-      const response = await buySubscription({ planKey: key }).unwrap();
-
-      if (response.success && response.payment_url) {
-        window.location.href = response.payment_url;
-      } else {
-        toast.error("Failed to initiate subscription payment.");
-      }
-    } catch (err) {
-      console.error(err);
-      toast.error(err.data?.message || "Failed to initiate payment.");
-    }
+    navigate(`/checkout?type=subscription&planKey=${key}`);
   };
 
   return (
@@ -102,19 +130,19 @@ const SubscribePage = () => {
                   e.target.style.display = "none";
                 }}
               />
-              <span className="font-bold text-gray-800 text-sm md:text-base border-l border-gray-200 pl-4">
+              <span className="font-normal text-gray-800 text-base md:text-lg border-l border-gray-200 pl-4">
                 {activeNavbar.planName}
               </span>
             </div>
 
             {/* Right side: Pricing and CTA */}
             <div className="flex items-center gap-4 sm:gap-6">
-              <p className="hidden md:block text-sm text-gray-600 font-medium">
+              <p className="hidden md:block text-base text-gray-600 font-light">
                 {activeNavbar.pricingText}
               </p>
               <Button
                 onClick={() => handleSubscribe(activeNavbar.buttonUrl)}
-                className="bg-[#a435f0] hover:bg-[#8720cf] text-white text-sm font-extrabold px-6 py-2.5 rounded transition-all shadow-sm"
+                className="bg-[#a435f0] hover:bg-[#8720cf] text-white text-base font-normal px-6 py-2.5 rounded transition-all shadow-sm"
               >
                 {activeNavbar.buttonText}
               </Button>
@@ -133,26 +161,26 @@ const SubscribePage = () => {
           <div className="lg:col-span-7 space-y-6">
             {activePromo ? (
               <>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-500/20 text-purple-400 text-xs font-bold rounded-full uppercase tracking-wider">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-500/20 text-purple-400 text-sm font-normal rounded-full uppercase tracking-wider">
                   <Zap className="w-3 h-3 fill-current" /> {activePromo.badgeText}
                 </div>
-                <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight">
+                <h1 className="text-4xl sm:text-5xl lg:text-6xl font-normal tracking-tight leading-tight">
                   {activePromo.title}
                 </h1>
-                <p className="text-base sm:text-lg text-gray-300 max-w-2xl leading-relaxed">
+                <p className="text-lg sm:text-xl text-gray-300 max-w-2xl leading-relaxed">
                   {activePromo.description}
                 </p>
               </>
             ) : (
               // Default Fallback offer
               <>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-500/20 text-purple-400 text-xs font-bold rounded-full uppercase tracking-wider">
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-purple-500/20 text-purple-400 text-sm font-normal rounded-full uppercase tracking-wider">
                   <Zap className="w-3 h-3 fill-current" /> Personal Plan
                 </div>
-                <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+                <h1 className="text-5xl sm:text-6xl font-normal tracking-tight leading-tight">
                   Access 10,000+ of our <span className="text-[#a435f0]">top-rated</span> courses
                 </h1>
-                <p className="text-lg text-gray-300 max-w-lg leading-relaxed">
+                <p className="text-xl text-gray-300 max-w-lg leading-relaxed">
                   Upskill in tech, business, design, and more with our subscription-based Personal Plan. Cancel anytime.
                 </p>
               </>
@@ -160,72 +188,127 @@ const SubscribePage = () => {
 
             {/* Plan pricing options list */}
             <div className="space-y-4 pt-2">
-              <h3 className="text-base font-bold text-gray-200">Choose your subscription plan duration:</h3>
-              {loadingPlans ? (
-                <div className="flex items-center gap-2 text-purple-400 py-2">
-                  <Loader2 className="animate-spin w-4 h-4" /> Loading subscription plans...
+              {user?.subscription?.status === "active" && activePlan && (
+                <div className="bg-[#10b981]/15 border border-[#10b981]/30 rounded-xl p-4 flex items-start gap-3">
+                  <CheckCircle className="w-5 h-5 text-emerald-400 shrink-0 mt-0.5" />
+                  <div>
+                    <div className="font-normal text-base text-white">{activePlan.planName} is already active</div>
+                    <div className="text-sm text-gray-350 mt-1 font-light">
+                      Expires on: {new Date(user.subscription.expiresAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' })}
+                    </div>
+                  </div>
                 </div>
-              ) : (
-                <div className="grid sm:grid-cols-2 gap-3">
-                  {plans.map((p) => {
-                    const finalPrice = p.priceNpr - p.discountNpr;
-                    const isSelected = selectedPlanKey === p.key;
-                    return (
-                      <div
-                        key={p.key}
-                        onClick={() => setSelectedPlanKey(p.key)}
-                        className={`border rounded-xl p-3.5 cursor-pointer transition-all ${
-                          isSelected
-                            ? "border-[#a435f0] bg-[#a435f0]/10 shadow-[0_0_12px_rgba(164,53,240,0.3)]"
-                            : "border-gray-800 hover:border-gray-700 bg-gray-900/50"
-                        }`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="font-bold text-white text-sm">{p.planName}</div>
-                          <span
-                            className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${
-                              isSelected ? "border-[#a435f0]" : "border-gray-600"
+              )}
+
+              {filteredPlans.length > 0 ? (
+                <>
+                  <h3 className="text-lg font-normal text-gray-250">
+                    {user?.subscription?.status === "active" 
+                      ? "Upgrade your plan duration to extend access:" 
+                      : "Choose your subscription plan duration:"}
+                  </h3>
+                  {loadingPlans ? (
+                    <div className="flex items-center gap-2 text-purple-400 py-2">
+                      <Loader2 className="animate-spin w-4 h-4" /> Loading subscription plans...
+                    </div>
+                  ) : (
+                    <div className="grid sm:grid-cols-2 gap-3">
+                      {filteredPlans.map((p) => {
+                        const finalPrice = p.priceNpr - p.discountNpr;
+                        const isSelected = selectedPlanKey === p.key;
+                        return (
+                          <div
+                            key={p.key}
+                            onClick={() => setSelectedPlanKey(p.key)}
+                            className={`border rounded-xl p-3.5 cursor-pointer transition-all ${
+                              isSelected
+                                ? "border-[#a435f0] bg-[#a435f0]/10 shadow-[0_0_12px_rgba(164,53,240,0.3)]"
+                                : "border-gray-800 hover:border-gray-700 bg-gray-900/50"
                             }`}
                           >
-                            {isSelected && <span className="w-2.5 h-2.5 rounded-full bg-[#a435f0]" />}
-                          </span>
-                        </div>
-                        <div className="mt-2 flex items-baseline gap-1.5">
-                          <span className="text-lg font-extrabold text-white">Rs {finalPrice.toLocaleString()}</span>
-                          {p.discountNpr > 0 && (
-                            <span className="text-xs text-gray-400 line-through">Rs {p.priceNpr.toLocaleString()}</span>
-                          )}
-                        </div>
-                        {p.discountNpr > 0 && (
-                          <div className="text-[10px] text-green-400 font-bold mt-0.5">
-                            Save Rs {p.discountNpr.toLocaleString()}!
+                            <div className="flex items-start justify-between">
+                              <div className="font-normal text-white text-base">{p.planName}</div>
+                              <span
+                                className={`w-4 h-4 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${
+                                  isSelected ? "border-[#a435f0]" : "border-gray-600"
+                                }`}
+                              >
+                                {isSelected && <span className="w-2.5 h-2.5 rounded-full bg-[#a435f0]" />}
+                              </span>
+                            </div>
+                            <div className="mt-2">
+                              {activeCreditDeduction > 0 ? (
+                                <div className="flex flex-col">
+                                  <div className="flex items-baseline gap-1.5">
+                                    <span className="text-xl font-normal text-white">Rs {Math.max(10, finalPrice - activeCreditDeduction).toLocaleString()}</span>
+                                    <span className="text-sm text-gray-450 line-through">Rs {p.priceNpr.toLocaleString()}</span>
+                                  </div>
+                                  <div className="flex flex-col gap-0.5 mt-1">
+                                    {p.discountNpr > 0 && (
+                                      <span className="text-[10px] text-green-400 font-normal">
+                                        Plan Discount: -Rs {p.discountNpr.toLocaleString()}
+                                      </span>
+                                    )}
+                                    <span className="text-[10px] text-emerald-400 font-normal">
+                                      Upgrade Credit: -Rs {activeCreditDeduction.toLocaleString()}
+                                    </span>
+                                  </div>
+                                </div>
+                              ) : (
+                                <>
+                                  <div className="flex items-baseline gap-1.5">
+                                    <span className="text-xl font-normal text-white">Rs {finalPrice.toLocaleString()}</span>
+                                    {p.discountNpr > 0 && (
+                                      <span className="text-sm text-gray-400 line-through">Rs {p.priceNpr.toLocaleString()}</span>
+                                    )}
+                                  </div>
+                                  {p.discountNpr > 0 && (
+                                    <div className="text-[10px] text-green-400 font-normal mt-0.5">
+                                      Save Rs {p.discountNpr.toLocaleString()}!
+                                    </div>
+                                  )}
+                                </>
+                              )}
+                            </div>
                           </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </>
+              ) : (
+                plans.length > 0 && (
+                  <div className="bg-purple-950/20 border border-purple-500/20 rounded-xl p-6 text-center space-y-3">
+                    <CheckCircle className="w-12 h-12 text-[#a435f0] mx-auto" />
+                    <h4 className="font-normal text-xl text-white">Max subscription is already purchased</h4>
+                    <p className="text-sm text-gray-300 max-w-sm mx-auto leading-normal font-light">
+                      You have currently active our highest tier plan ({activePlan?.planName || "1 Year Plan"}). Thank you for subscribing!
+                    </p>
+                  </div>
+                )
               )}
             </div>
 
-            <div className="pt-2">
-              <Button
-                ref={offerButtonRef}
-                disabled={isSubscribing}
-                onClick={() => handleSubscribe(selectedPlanKey)}
-                className="w-full sm:w-auto h-14 bg-[#a435f0] hover:bg-[#8720cf] text-white text-base font-extrabold px-8 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
-              >
-                {isSubscribing && <Loader2 className="animate-spin w-5 h-5" />}
-                Proceed to eSewa Checkout
-              </Button>
-              {activePromo?.finePrint && (
-                <p className="text-[11px] text-gray-400 leading-normal max-w-md mt-2">
-                  {activePromo.finePrint}
-                </p>
-              )}
-            </div>
+            {filteredPlans.length > 0 && (
+              <div className="pt-2">
+                <Button
+                  ref={offerButtonRef}
+                  disabled={isSubscribing}
+                  onClick={() => handleSubscribe(selectedPlanKey)}
+                  className="w-full sm:w-auto h-14 bg-[#a435f0] hover:bg-[#8720cf] text-white text-lg font-normal px-8 rounded-xl transition-all shadow-lg flex items-center justify-center gap-2"
+                >
+                  {isSubscribing && <Loader2 className="animate-spin w-5 h-5" />}
+                  {user?.subscription?.status === "active" ? "Upgrade Subscription" : "Proceed to Checkout"}
+                </Button>
+                {activePromo?.finePrint && (
+                  <p className="text-[11px] text-gray-400 leading-normal max-w-md mt-2">
+                    {activePromo.finePrint}
+                  </p>
+                )}
+              </div>
+            )}
 
-            <div className="space-y-3 pt-4 border-t border-gray-800 text-sm text-gray-300">
+            <div className="space-y-3 pt-4 border-t border-gray-800 text-base text-gray-300">
               <div className="flex items-center gap-3">
                 <CheckCircle className="w-5 h-5 text-green-400 shrink-0" />
                 <span>Hands-on practice exercises & coding quizzes</span>
@@ -264,7 +347,7 @@ const SubscribePage = () => {
       {/* BENEFITS GRID */}
       {/* ------------------------------------------------------------- */}
       <section className="max-w-6xl mx-auto px-6 py-20 space-y-12">
-        <h2 className="text-3xl font-extrabold text-center tracking-tight sm:text-4xl">
+        <h2 className="text-4xl font-normal text-center tracking-tight sm:text-5xl">
           Why subscribe to Personal Plan?
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 pt-6">
@@ -272,8 +355,8 @@ const SubscribePage = () => {
             <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400">
               <BookOpen className="w-6 h-6" />
             </div>
-            <h4 className="text-xl font-bold">10,000+ top courses</h4>
-            <p className="text-sm text-gray-400 leading-relaxed">
+            <h4 className="text-2xl font-normal">10,000+ top courses</h4>
+            <p className="text-base text-gray-400 leading-relaxed">
               Explore critical subjects like Python, JavaScript, Web Development, Data Science, AI, Leadership, and Finance.
             </p>
           </div>
@@ -282,8 +365,8 @@ const SubscribePage = () => {
             <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400">
               <Award className="w-6 h-6" />
             </div>
-            <h4 className="text-xl font-bold">Certificates of completion</h4>
-            <p className="text-sm text-gray-400 leading-relaxed">
+            <h4 className="text-2xl font-normal">Certificates of completion</h4>
+            <p className="text-base text-gray-400 leading-relaxed">
               Earn shareable credentials upon finishing courses to prove your expertise to employers or clients.
             </p>
           </div>
@@ -292,8 +375,8 @@ const SubscribePage = () => {
             <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400">
               <ShieldCheck className="w-6 h-6" />
             </div>
-            <h4 className="text-xl font-bold">Flexible learning schedule</h4>
-            <p className="text-sm text-gray-400 leading-relaxed">
+            <h4 className="text-2xl font-normal">Flexible learning schedule</h4>
+            <p className="text-base text-gray-400 leading-relaxed">
               Learn at your own pace from any device. Switch courses anytime, skip chapters, and resume wherever you left off.
             </p>
           </div>
@@ -303,22 +386,24 @@ const SubscribePage = () => {
       {/* ------------------------------------------------------------- */}
       {/* FINAL CALL TO ACTION BANNER */}
       {/* ------------------------------------------------------------- */}
-      <section className="bg-purple-950/40 border border-purple-500/20 rounded-3xl max-w-6xl mx-6 sm:mx-12 lg:mx-auto p-12 text-center space-y-6 mb-24">
-        <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
-          Ready to supercharge your learning?
-        </h2>
-        <p className="text-gray-300 text-base sm:text-lg max-w-xl mx-auto">
-          Start your 7-day trial of Personal Plan to unlock unlimited streaming of 10,000+ tech and career development courses.
-        </p>
-        <div className="pt-2">
-          <Button
-            onClick={() => handleSubscribe("/subscribe")}
-            className="px-8 h-14 bg-white hover:bg-gray-150 text-slate-900 text-lg font-extrabold rounded-xl transition-all shadow-lg"
-          >
-            Start Free Trial
-          </Button>
-        </div>
-      </section>
+      {(!user?.subscription || user.subscription.status === "none") && (
+        <section className="bg-purple-950/40 border border-purple-500/20 rounded-3xl max-w-6xl mx-6 sm:mx-12 lg:mx-auto p-12 text-center space-y-6 mb-24">
+          <h2 className="text-4xl sm:text-5xl font-normal tracking-tight">
+            Ready to supercharge your learning?
+          </h2>
+          <p className="text-gray-300 text-lg sm:text-xl max-w-xl mx-auto">
+            Start your 7-day trial of Personal Plan to unlock unlimited streaming of 10,000+ tech and career development courses.
+          </p>
+          <div className="pt-2">
+            <Button
+              onClick={() => handleSubscribe("/subscribe")}
+              className="px-8 h-14 bg-white hover:bg-gray-150 text-slate-900 text-xl font-normal rounded-xl transition-all shadow-lg"
+            >
+              Start Free Trial
+            </Button>
+          </div>
+        </section>
+      )}
     </div>
   );
 };

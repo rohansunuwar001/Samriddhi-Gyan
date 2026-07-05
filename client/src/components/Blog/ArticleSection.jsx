@@ -9,8 +9,8 @@ const ArticleSection = ({ title, categorySlug, articles }) => {
     return (
         <section className="container mx-auto px-6 py-16">
             <div className="flex justify-between items-center mb-8">
-                <h2 className="text-3xl font-bold text-gray-900 dark:text-white">{title}</h2>
-                <Link to={`/blog/category/${categorySlug}`} className="text-sm font-semibold text-indigo-600 hover:underline flex items-center gap-1">
+                <h2 className="text-4xl font-normal text-gray-900 dark:text-white">{title}</h2>
+                <Link to={`/blog/category/${categorySlug}`} className="text-base font-normal text-indigo-600 hover:underline flex items-center gap-1">
                     See all {title.replace(' Articles', '')} articles
                 </Link>
             </div>

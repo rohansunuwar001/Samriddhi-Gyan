@@ -10,6 +10,7 @@ import CourseHeader from './CourseHeader';
 import CourseIncludes from './CourseIncludes';
 import { Description } from './Description';
 import InstructorProfile from './InstructorProfile';
+import MoreCoursesFromInstructor from './MoreCoursesFromInstructor';
 import PurchaseCard from './PurchaseCard';
 import Requirements from './Requirements';
 import WhoThisCourseIsFor from './WhoThisCourseIsFor';
@@ -17,6 +18,7 @@ import ExploreRelatedTopics from './ExploreRelatedTopics';
 import WhatYouWillLearn from './WhatYouWillLearn';
 import ReviewsSection from '../Reviews/ReviewSection';
 import { CourseDetailSkeleton } from '@/components/ui/skeletons';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 const CourseDetailPage = () => {
     const { courseId } = useParams();
@@ -32,7 +34,7 @@ const CourseDetailPage = () => {
     }, [courseId, trackCourseView]);
 
     if (isLoading) {
-        return <CourseDetailSkeleton />;
+        return <LoadingSpinner />;
     }
 
     if (isError || !course) {
@@ -58,6 +60,7 @@ const CourseDetailPage = () => {
                     <InstructorProfile instructor={course.creator} />
                     <ExploreRelatedTopics topics={course.topics} />
                     <ReviewsSection course={course} />
+                    <MoreCoursesFromInstructor instructor={course.creator} currentCourseId={course._id} />
                 </main>
                 <div className="hidden lg:block relative">
                     <div className="sticky top-[90px] -mt-[370px] z-30">

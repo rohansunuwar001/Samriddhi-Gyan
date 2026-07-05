@@ -35,6 +35,9 @@ import questionRoute from "./routes/question.route.js";
 import reminderRoute from "./routes/reminder.route.js";
 import cmsRouter from "./routes/cms.route.js";
 import subscriptionRouter from "./routes/subscription.route.js";
+import paymentMethodRouter from "./routes/paymentMethod.route.js";
+import certificateRouter from "./routes/certificate.route.js";
+import certificationRouter from "./routes/certification.route.js";
 import path from 'path';
 import { fileURLToPath } from 'url';
 dotenv.config({});
@@ -62,6 +65,13 @@ app.use('/hls', (req, res, next) => {
   res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD');
   next();
 }, express.static(path.join(__dirname, 'public', 'hls')));
+
+// Serve uploaded library/raw files as static files
+app.use('/uploads', (req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, HEAD');
+  next();
+}, express.static(path.join(__dirname, 'uploads')));
 
 // --- Mount the webhook route BEFORE express.json() ---
 app.use("/api/v1/purchase/webhook", express.raw({ type: "application/json" }), stripeWebhook);
@@ -119,4 +129,7 @@ app.use("/api/v1/admin", adminRouter)
 app.use("/api/v1/admin", blogImportRouter); // POST /api/v1/admin/blog-import
 app.use("/api/v1/cms", cmsRouter);
 app.use("/api/v1/subscription", subscriptionRouter);
+app.use("/api/v1/payment-methods", paymentMethodRouter);
+app.use("/api/v1/certificate", certificateRouter);
+app.use("/api/v1/certifications", certificationRouter);
 export default app;

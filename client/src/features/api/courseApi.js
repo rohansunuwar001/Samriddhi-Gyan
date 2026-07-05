@@ -81,6 +81,20 @@ export const courseApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: [{ type: "Course", id: "LIST" }],
     }),
+
+    deletePromoVideo: builder.mutation({
+      query: (courseId) => ({
+        url: `/course/${courseId}/promo-video`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, courseId) => [
+        { type: "CourseDetail", id: courseId },
+      ],
+    }),
+    getAllCoursesBrief: builder.query({
+      query: () => "/course/list-brief",
+      providesTags: [{ type: "Course", id: "LIST_BRIEF" }],
+    }),
   }),
   overrideExisting: false,
 });
@@ -96,4 +110,6 @@ export const {
   useGetSearchCourseQuery,
   usePublishCourseMutation,
   useRemoveCourseMutation,
+  useDeletePromoVideoMutation,
+  useGetAllCoursesBriefQuery,
 } = courseApi;

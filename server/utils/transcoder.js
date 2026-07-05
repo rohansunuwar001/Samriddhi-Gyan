@@ -168,3 +168,29 @@ export const transcodeToHLS = async (inputPath, outputDir, onProgress) => {
   console.log(`[Transcoder] Master playlist written: ${masterPath}`);
   return { masterPath, renditions: applicableRenditions, metadata };
 };
+
+export const extractThumbnail = (inputPath, outputPath) =>
+  new Promise((resolve, reject) => {
+    const args = [
+      '-ss', '00:00:01.00',
+      '-i', inputPath,
+      '-vframes', '1',
+      '-vf', 'scale=640:-1',
+      '-q:v', '2',
+      '-y',
+      outputPath
+    ];
+    const proc = spawn(ffmpegStatic, args);
+    let stderr = '';
+    proc.stderr.on('data', (chunk) => {
+      stderr += chunk.toString();
+    });
+    proc.on('close', (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`Failed to extract thumbnail: ffmpeg exited with code ${code}:\n${stderr}`));
+      }
+    });
+    proc.on('error', reject);
+  });

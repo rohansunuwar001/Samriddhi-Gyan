@@ -2,7 +2,7 @@ import express from "express";
 
 import { initializePayment } from "../controllers/esewa.controller.js";
 
-import { createCheckoutSession, getAllPurchasedCourse, getCourseDetailWithPurchaseStatus, getPaymentStatus } from "../controllers/coursePurchase.controller.js";
+import { createCheckoutSession, getAllPurchasedCourse, getCourseDetailWithPurchaseStatus, getPaymentStatus, getMyPurchaseHistory } from "../controllers/coursePurchase.controller.js";
 import { isAuthenticated, isOptionalAuthenticated } from "../middlewares/isAuthenticated.js";
 
 const router = express.Router();
@@ -21,6 +21,7 @@ router
 router
   .route("/course/:courseId/detail-with-status")
   .get(isOptionalAuthenticated, getCourseDetailWithPurchaseStatus);
+router.get("/history", isAuthenticated, getMyPurchaseHistory);
 router.route("/").get(isAuthenticated, getAllPurchasedCourse);
 router.get("/payment-status/:orderId", isAuthenticated, getPaymentStatus);
 

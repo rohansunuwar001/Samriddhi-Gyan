@@ -19,7 +19,7 @@ import { getEnrolledIds } from "../helpers/courseFilter.helper.js";
 
 // jwt import removed — no longer needed here since the helper handles token resolution
 
-const populateCreator = { path: "creator", select: "name email photoUrl" };
+const populateCreator = { path: "creator", select: "name email photoUrl role" };
 
 /**
  * Returns the most popular published courses, sorted by actual enrollment count.

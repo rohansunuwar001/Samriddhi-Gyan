@@ -7,22 +7,28 @@ export const purchaseApi = apiSlice.injectEndpoints({
      * POST /purchase/esewa
      */
     createCheckoutSession: builder.mutation({
-      query: (courseIds) => ({
-        url: "/purchase/esewa",
-        method: "POST",
-        body: { courseIds },
-      }),
+      query: (arg) => {
+        const body = Array.isArray(arg) ? { courseIds: arg } : arg;
+        return {
+          url: "/purchase/esewa",
+          method: "POST",
+          body,
+        };
+      },
     }),
     /**
      * @desc Initiates a Stripe checkout session for selected courses.
      * POST /purchase/checkout/create-checkout-session
      */
     createStripeCheckoutSession: builder.mutation({
-      query: (courseIds) => ({
-        url: "/purchase/checkout/create-checkout-session",
-        method: "POST",
-        body: { courseIds },
-      }),
+      query: (arg) => {
+        const body = Array.isArray(arg) ? { courseIds: arg } : arg;
+        return {
+          url: "/purchase/checkout/create-checkout-session",
+          method: "POST",
+          body,
+        };
+      },
     }),
     /**
      * @desc Fetches detailed course info along with the user's purchase status.
@@ -59,6 +65,10 @@ export const purchaseApi = apiSlice.injectEndpoints({
       query: () => "/course/course-purchases",
       providesTags: [{ type: "Course", id: "PURCHASED_LIST" }],
     }),
+    getPurchaseHistory: builder.query({
+      query: () => "/purchase/history",
+      providesTags: [{ type: "Course", id: "PURCHASED_HISTORY" }],
+    }),
     getPaymentStatus: builder.query({
       query: (orderId) => `/purchase/payment-status/${orderId}`,
     }),
@@ -79,5 +89,6 @@ export const {
   useGetPurchasedCoursesQuery,
   useAddReviewMutation,
   useGetPurchaseCoursenewQuery,
+  useGetPurchaseHistoryQuery,
   useGetPaymentStatusQuery,
 } = purchaseApi;

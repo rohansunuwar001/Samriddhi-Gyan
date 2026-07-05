@@ -50,6 +50,23 @@ const courseSchema = new mongoose.Schema(
       type: String,
       default: "https://via.placeholder.com/720x405.png?text=Course+Thumbnail",
     },
+    promoVideoUrl: {
+      type: String,
+      default: "",
+    },
+    promoVideoThumbnail: {
+      type: String,
+      default: "",
+    },
+    promoVideoStatus: {
+      type: String,
+      enum: ["none", "processing", "ready", "failed"],
+      default: "none",
+    },
+    promoVideoProgress: {
+      type: Number,
+      default: 0,
+    },
     isBestseller: {
       type: Boolean,
       default: false,
@@ -93,6 +110,10 @@ const courseSchema = new mongoose.Schema(
       type: [String],
       default: [],
     },
+    primaryTopic: {
+      type: String,
+      default: "",
+    },
     // --- COURSE INCLUDES (replaces the old free-text `includes` array) ---
     // Video hours are auto-computed from totalDurationInSeconds.
     // The fields below are set by the instructor on the landing-page editor.
@@ -115,6 +136,12 @@ const courseSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    relatedCertificates: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Certification",
+      },
+    ],
     isPublished: {
       type: Boolean,
       default: false,
@@ -123,6 +150,21 @@ const courseSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    enrollmentType: {
+      type: String,
+      enum: ["public", "private-invite", "private-password"],
+      default: "public",
+    },
+    videoLibrary: [
+      {
+        filename: { type: String },
+        sizeBytes: { type: Number },
+        url: { type: String },
+        durationInSeconds: { type: Number, default: 0 },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
+
 
     // --- REVIEWS & RATINGS ---
     ratings: {

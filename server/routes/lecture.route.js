@@ -10,9 +10,30 @@ import {
   updateLecture,
   deleteLecture,
   getLectureById,
+  uploadCaption,
+  toggleCaptionsDisable,
+  deleteCaption,
 } from '../controllers/lecture.controller.js';
 
 const router = express.Router();
+
+// ─── Multer config for captions uploads ──────────────────────────────────────
+const captionsStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(process.cwd(), 'uploads', 'captions');
+    fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase() || '.vtt';
+    cb(null, `${req.params.lectureId}-${Date.now()}${ext}`);
+  },
+});
+
+const uploadCaptionMiddleware = multer({
+  storage: captionsStorage,
+  limits: { fileSize: 50 * 1024 * 1024 },
+});
 
 // ─── Multer config for raw video uploads ──────────────────────────────────────
 
@@ -62,6 +83,15 @@ router.delete('/lectures/:lectureId', isAuthenticated, deleteLecture);
 
 // Get lecture (used by student player to get the videoUrl)
 router.get('/lectures/:lectureId', getLectureById);
+
+// Upload subtitle file as caption
+router.post('/lectures/:lectureId/captions', isAuthenticated, uploadCaptionMiddleware.single('caption'), uploadCaption);
+
+// Toggle captions visibility status (disable/enable)
+router.put('/lectures/:lectureId/captions/toggle-disable', isAuthenticated, toggleCaptionsDisable);
+
+// Delete caption from a lecture
+router.delete('/lectures/:lectureId/captions/:captionId', isAuthenticated, deleteCaption);
 
 // ─── Multer error handler ─────────────────────────────────────────────────────
 

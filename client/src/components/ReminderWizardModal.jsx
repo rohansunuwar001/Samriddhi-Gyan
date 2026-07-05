@@ -139,7 +139,7 @@ const ReminderWizardModal = ({ isOpen, onClose, reminderToEdit, onSaveSuccess })
         
         {/* Header */}
         <div className="flex items-center justify-between p-5 border-b border-gray-100 shrink-0">
-          <h2 className="text-lg font-bold text-[#1c1d1f]">Learning reminders</h2>
+          <h2 className="text-xl font-normal text-[#1c1d1f]">Learning reminders</h2>
           <button 
             onClick={onClose}
             className="text-gray-400 hover:text-black p-1 transition-colors"
@@ -150,13 +150,13 @@ const ReminderWizardModal = ({ isOpen, onClose, reminderToEdit, onSaveSuccess })
 
         {/* Content */}
         <div className="p-6 overflow-y-auto max-h-[60vh] space-y-5 flex-1">
-          <p className="text-xs text-[#6a6f73] font-normal">Step {step} of 3</p>
+          <p className="text-sm text-[#6a6f73] font-normal">Step {step} of 3</p>
 
           {step === 1 && (
             <div className="space-y-4 animate-in slide-in-from-right-3 duration-200">
               <div className="space-y-1.5">
                 <div className="flex justify-between items-baseline">
-                  <label className="text-sm font-bold text-[#1c1d1f]">Name</label>
+                  <label className="text-base font-normal text-[#1c1d1f]">Name</label>
                   <span className="text-[10px] text-gray-400 font-normal">optional</span>
                 </div>
                 <input 
@@ -164,20 +164,20 @@ const ReminderWizardModal = ({ isOpen, onClose, reminderToEdit, onSaveSuccess })
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Learning reminder"
-                  className="w-full border border-gray-300 px-3 py-2 text-sm focus:border-black outline-none transition-colors"
+                  className="w-full border border-gray-300 px-3 py-2 text-base focus:border-black outline-none transition-colors"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#1c1d1f] block">Attach content (optional)</label>
-                <p className="text-xs text-[#6a6f73] font-normal">Most recent courses or labs:</p>
+                <label className="text-base font-normal text-[#1c1d1f] block">Attach content (optional)</label>
+                <p className="text-sm text-[#6a6f73] font-normal">Most recent courses or labs:</p>
                 
                 {/* Courses List */}
                 <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
                   {filteredCourses.map((course) => (
                     <label 
                       key={course._id} 
-                      className="flex items-start gap-2.5 text-xs text-[#2d2f31] font-normal cursor-pointer hover:bg-slate-50 p-1.5"
+                      className="flex items-start gap-2.5 text-sm text-[#2d2f31] font-normal cursor-pointer hover:bg-slate-50 p-1.5"
                     >
                       <input 
                         type="radio" 
@@ -190,7 +190,7 @@ const ReminderWizardModal = ({ isOpen, onClose, reminderToEdit, onSaveSuccess })
                     </label>
                   ))}
 
-                  <label className="flex items-center gap-2.5 text-xs text-[#2d2f31] font-normal cursor-pointer hover:bg-slate-50 p-1.5">
+                  <label className="flex items-center gap-2.5 text-sm text-[#2d2f31] font-normal cursor-pointer hover:bg-slate-50 p-1.5">
                     <input 
                       type="radio" 
                       name="attached_course"
@@ -210,7 +210,7 @@ const ReminderWizardModal = ({ isOpen, onClose, reminderToEdit, onSaveSuccess })
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Search"
-                    className="w-full border border-gray-300 pl-9 pr-3 py-2 text-sm focus:border-black outline-none transition-colors"
+                    className="w-full border border-gray-300 pl-9 pr-3 py-2 text-base focus:border-black outline-none transition-colors"
                   />
                 </div>
               </div>
@@ -220,14 +220,14 @@ const ReminderWizardModal = ({ isOpen, onClose, reminderToEdit, onSaveSuccess })
           {step === 2 && (
             <div className="space-y-4 animate-in slide-in-from-right-3 duration-200">
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#1c1d1f] block">Frequency</label>
+                <label className="text-base font-normal text-[#1c1d1f] block">Frequency</label>
                 <div className="flex gap-2">
                   {["Daily", "Weekly", "Once"].map((freq) => (
                     <button
                       key={freq}
                       type="button"
                       onClick={() => setFrequency(freq)}
-                      className={`px-4 py-2 text-xs font-bold border transition-colors ${
+                      className={`px-4 py-2 text-sm font-normal border transition-colors ${
                         frequency === freq
                           ? "bg-slate-900 border-slate-900 text-white"
                           : "border-gray-300 text-[#2d2f31] hover:bg-slate-50"
@@ -241,13 +241,13 @@ const ReminderWizardModal = ({ isOpen, onClose, reminderToEdit, onSaveSuccess })
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-bold text-[#1c1d1f] block">Time</label>
+                <label className="text-base font-normal text-[#1c1d1f] block">Time</label>
                 <div className="relative max-w-[200px]">
                   <input 
                     type="text" 
                     value={time}
                     onChange={(e) => setTime(e.target.value)}
-                    className="w-full border border-gray-300 pl-3 pr-9 py-2 text-sm focus:border-black outline-none transition-colors"
+                    className="w-full border border-gray-300 pl-3 pr-9 py-2 text-base focus:border-black outline-none transition-colors"
                     placeholder="12:00 PM"
                   />
                   <Clock className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
@@ -259,21 +259,21 @@ const ReminderWizardModal = ({ isOpen, onClose, reminderToEdit, onSaveSuccess })
           {step === 3 && (
             <div className="space-y-4 animate-in slide-in-from-right-3 duration-200">
               <div className="space-y-1.5">
-                <label className="text-sm font-bold text-[#1c1d1f] block">Add to calendar (optional)</label>
+                <label className="text-base font-normal text-[#1c1d1f] block">Add to calendar (optional)</label>
                 <div className="flex flex-wrap gap-2.5 pt-1.5">
                   <button
                     type="button"
                     onClick={() => handleCalendarSync("Google")}
-                    className={`flex items-center gap-1.5 px-4 py-2 border text-xs font-bold transition-all ${
+                    className={`flex items-center gap-1.5 px-4 py-2 border text-sm font-normal transition-all ${
                       calendarSynced === "Google" ? "border-black bg-slate-50" : "border-gray-300 hover:bg-slate-50"
                     }`}
                   >
-                    <span className="text-red-500 font-extrabold">G</span> Sign in with Google
+                    <span className="text-red-500 font-normal">G</span> Sign in with Google
                   </button>
                   <button
                     type="button"
                     onClick={() => handleCalendarSync("Apple")}
-                    className={`flex items-center gap-1.5 px-4 py-2 border text-xs font-bold transition-all ${
+                    className={`flex items-center gap-1.5 px-4 py-2 border text-sm font-normal transition-all ${
                       calendarSynced === "Apple" ? "border-black bg-slate-50" : "border-gray-300 hover:bg-slate-50"
                     }`}
                   >
@@ -282,7 +282,7 @@ const ReminderWizardModal = ({ isOpen, onClose, reminderToEdit, onSaveSuccess })
                   <button
                     type="button"
                     onClick={() => handleCalendarSync("Outlook")}
-                    className={`flex items-center gap-1.5 px-4 py-2 border text-xs font-bold transition-all ${
+                    className={`flex items-center gap-1.5 px-4 py-2 border text-sm font-normal transition-all ${
                       calendarSynced === "Outlook" ? "border-black bg-slate-50" : "border-gray-300 hover:bg-slate-50"
                     }`}
                   >
@@ -304,7 +304,7 @@ const ReminderWizardModal = ({ isOpen, onClose, reminderToEdit, onSaveSuccess })
               <button
                 type="button"
                 onClick={handlePrevious}
-                className="text-[#6d28d2] hover:text-[#892de1] text-xs font-bold transition-colors"
+                className="text-[#6d28d2] hover:text-[#892de1] text-sm font-normal transition-colors"
               >
                 Previous
               </button>
@@ -315,7 +315,7 @@ const ReminderWizardModal = ({ isOpen, onClose, reminderToEdit, onSaveSuccess })
               <button
                 type="button"
                 onClick={handleNext}
-                className="bg-[#6d28d2] hover:bg-[#892de1] text-white text-xs font-bold py-2.5 px-5 transition-colors"
+                className="bg-[#6d28d2] hover:bg-[#892de1] text-white text-sm font-normal py-2.5 px-5 transition-colors"
               >
                 Next
               </button>
@@ -324,7 +324,7 @@ const ReminderWizardModal = ({ isOpen, onClose, reminderToEdit, onSaveSuccess })
                 type="button"
                 onClick={handleSave}
                 disabled={isCreating || isUpdating}
-                className="bg-[#6d28d2] hover:bg-[#892de1] text-white text-xs font-bold py-2.5 px-5 transition-colors flex items-center gap-1"
+                className="bg-[#6d28d2] hover:bg-[#892de1] text-white text-sm font-normal py-2.5 px-5 transition-colors flex items-center gap-1"
               >
                 {(isCreating || isUpdating) && <Loader2 className="h-3 w-3 animate-spin" />}
                 Done

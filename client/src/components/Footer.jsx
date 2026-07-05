@@ -67,11 +67,11 @@ const Footer = () => {
                   {bottomLinks.map((section) => (
                       <div key={section.title}>
                           {/* Use the 't' function to translate the section title */}
-                          <h4 className="font-bold text-white mb-3">{t(section.title)}</h4>
+                          <h4 className="font-normal text-white mb-3">{t(section.title)}</h4>
                           <ul className="space-y-2">
                               {section.links.map((link) => (
                                   <li key={link.title}>
-                                      <Link to={link.to} className="hover:text-white hover:underline transition-colors duration-200 text-sm">
+                                      <Link to={link.to} className="hover:text-white hover:underline transition-colors duration-200 text-base">
                                           {/* Use the 't' function to translate the link title */}
                                           {t(link.title)}
                                       </Link>
@@ -88,18 +88,18 @@ const Footer = () => {
         <div className="bg-gray-900 border-t border-gray-700">
           <div className="container mx-auto px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                  <Link to="/" className="text-2xl font-bold text-white">Samriddhi Gyan</Link>
-                  <p className="text-sm text-gray-400">© {new Date().getFullYear()} Samriddhi Gyan</p>
+                  <Link to="/" className="text-3xl font-normal text-white">Samriddhi Gyan</Link>
+                  <p className="text-base text-gray-400">© {new Date().getFullYear()} Samriddhi Gyan</p>
               </div>
               <div className="flex items-center gap-6">
-                  <button className="text-sm hover:text-white hover:underline">
+                  <button className="text-base hover:text-white hover:underline">
                     {t('footer.cookie_settings')}
                   </button>
                   
                   {/* This button opens the language selection modal */}
                   <button 
                     onClick={() => setModalOpen(true)}
-                    className="border border-white px-4 py-2 flex items-center gap-2 hover:bg-gray-800 transition-colors duration-200 text-sm"
+                    className="border border-white px-4 py-2 flex items-center gap-2 hover:bg-gray-800 transition-colors duration-200 text-base"
                   >
                       <FaGlobe />
                       {/* 

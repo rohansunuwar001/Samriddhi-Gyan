@@ -16,7 +16,7 @@ const MyCoursesLayout = () => {
       {/* ── Dark Header block ── */}
       <header className="bg-[#1c1d1f] text-white shrink-0">
         <div className="max-w-7xl mx-auto px-6 md:px-12 pt-8 pb-0">
-          <h1 className="text-4xl font-normal leading-tight mb-6">
+          <h1 className="text-5xl font-normal leading-tight mb-6">
             My learning
           </h1>
 
@@ -27,7 +27,7 @@ const MyCoursesLayout = () => {
                 key={tab.path}
                 to={tab.path}
                 className={({ isActive }) =>
-                  `py-3 px-1 border-b-4 text-sm sm:text-base font-normal transition-all whitespace-nowrap ${
+                  `py-3 px-1 border-b-4 text-base sm:text-lg font-normal transition-all whitespace-nowrap ${
                     isActive
                       ? "border-white text-white"
                       : "border-transparent text-white/60 hover:text-white"

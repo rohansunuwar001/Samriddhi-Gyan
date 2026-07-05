@@ -18,7 +18,7 @@ const formatDurationShort = (seconds) => {
     return `${m}m`;
 };
 
-// Per-lecture form, Udemy style: "3:08", "0:12", "1:05:33"
+// Per-lecture form, Samriddhi Gyan style: "3:08", "0:12", "1:05:33"
 const formatDurationClock = (seconds) => {
     if (!seconds || isNaN(seconds) || seconds <= 0) return "0:00";
     const total = Math.round(seconds);

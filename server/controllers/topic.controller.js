@@ -3,6 +3,7 @@ import Topic from "../models/topic.model.js";
 import Category from "../models/category.model.js";
 import { Review } from "../models/review.model.js";
 import { slugify } from "../utils/slugify.js";
+import { Certification } from "../models/certification.model.js";
 
 export const createTopic = async (req, res) => {
   try {
@@ -52,6 +53,21 @@ export const createTopic = async (req, res) => {
 
 export const getAllTopics = async (req, res) => {
   try {
+    const { q } = req.query;
+    if (q !== undefined) {
+      const queryStr = (q || "").trim();
+      if (!queryStr) {
+        return res.status(200).json({ success: true, topics: [] });
+      }
+      const sanitizedQuery = queryStr.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const topics = await Topic.find({ name: new RegExp(sanitizedQuery, 'i') })
+        .select("name slug")
+        .sort({ name: 1 })
+        .limit(10)
+        .lean();
+      return res.status(200).json({ success: true, topics });
+    }
+
     const topics = await Topic.find({}).sort({ name: 1 }).lean();
     
     // For each topic, compute stats dynamically from matching courses in database
@@ -107,19 +123,64 @@ export const getTopicBySlug = async (req, res) => {
     const { slug } = req.params;
     let topic = await Topic.findOne({ slug }).lean();
     let courses = [];
+    let cert = null;
 
     if (topic) {
-      const searchRegex = new RegExp(topic.name.trim(), "i");
-      courses = await Course.find({
-        isPublished: true,
-        $or: [
-          { topics: topic.name },
-          { category: topic.name },
-          { title: { $regex: searchRegex } },
-        ],
-      })
-        .populate("creator", "name photoUrl headline")
-        .lean();
+      if (topic.type === "certification") {
+        cert = await Certification.findOne({ name: new RegExp(`^${topic.name.trim()}$`, "i") })
+          .populate("issuer", "name type")
+          .populate("categoryFilterParent", "name slug")
+          .populate("categoryFilterChild", "name slug")
+          .populate("categoryFilterSubChild", "name slug")
+          .lean();
+      }
+
+      if (cert) {
+        let targetCategoryNames = [];
+        const categoriesToQuery = [];
+        if (cert.categoryFilterParent) categoriesToQuery.push(cert.categoryFilterParent._id || cert.categoryFilterParent);
+        if (cert.categoryFilterChild) categoriesToQuery.push(cert.categoryFilterChild._id || cert.categoryFilterChild);
+        if (cert.categoryFilterSubChild) categoriesToQuery.push(cert.categoryFilterSubChild._id || cert.categoryFilterSubChild);
+
+        const resolvedCategories = await Category.find({ _id: { $in: categoriesToQuery } }).lean();
+
+        const parentCat = resolvedCategories.find(c => String(c._id) === String(cert.categoryFilterParent?._id || cert.categoryFilterParent));
+        const childCat = resolvedCategories.find(c => String(c._id) === String(cert.categoryFilterChild?._id || cert.categoryFilterChild));
+        const subChildCat = resolvedCategories.find(c => String(c._id) === String(cert.categoryFilterSubChild?._id || cert.categoryFilterSubChild));
+
+        if (subChildCat) {
+          targetCategoryNames.push(subChildCat.name);
+        } else if (childCat) {
+          targetCategoryNames.push(childCat.name);
+          const subCats = await Category.find({ parent: childCat._id }).select("name").lean();
+          subCats.forEach(sc => targetCategoryNames.push(sc.name));
+        } else if (parentCat) {
+          targetCategoryNames.push(parentCat.name);
+          const children = await Category.find({ parent: parentCat._id }).select("_id name").lean();
+          for (const child of children) {
+            targetCategoryNames.push(child.name);
+            const grandchildren = await Category.find({ parent: child._id }).select("name").lean();
+            grandchildren.forEach(gc => targetCategoryNames.push(gc.name));
+          }
+        }
+
+        courses = await Course.find({
+          category: { $in: targetCategoryNames },
+          isPublished: true,
+        })
+          .populate("creator", "name photoUrl headline")
+          .lean();
+      } else {
+        courses = await Course.find({
+          isPublished: true,
+          $or: [
+            { topics: topic.name },
+            { category: topic.name },
+          ],
+        })
+          .populate("creator", "name photoUrl headline")
+          .lean();
+      }
 
       let numLearners = 0;
       let handsOnPracticeCount = 0;
@@ -148,9 +209,16 @@ export const getTopicBySlug = async (req, res) => {
         return res.status(404).json({ success: false, message: "Topic or Category not found" });
       }
 
-      // If category is found, check if it has subcategories
-      const subcategories = await Category.find({ parent: categoryDoc._id }).lean();
-      const categoryNames = [categoryDoc.name, ...subcategories.map(s => s.name)];
+      // If category is found, fetch children AND grandchildren (up to 2 levels deep)
+      const children = await Category.find({ parent: categoryDoc._id }).lean();
+      const grandchildren = children.length
+        ? await Category.find({ parent: { $in: children.map(c => c._id) } }).lean()
+        : [];
+      const categoryNames = [
+        categoryDoc.name,
+        ...children.map(s => s.name),
+        ...grandchildren.map(s => s.name),
+      ];
 
       // Query published courses
       courses = await Course.find({
@@ -185,7 +253,7 @@ export const getTopicBySlug = async (req, res) => {
         numLearners,
         handsOnPracticeCount,
         rating: ratedCoursesCount > 0 ? Number((totalRatingSum / ratedCoursesCount).toFixed(1)) : 0,
-        relatedTopics: subcategories.map(s => s.name),
+        relatedTopics: [...children.map(s => s.name), ...grandchildren.map(s => s.name)],
         parentCategory: "",
       };
     }
@@ -202,7 +270,7 @@ export const getTopicBySlug = async (req, res) => {
       .populate("course", "title")
       .lean();
 
-    return res.status(200).json({ success: true, topic, courses, reviews });
+    return res.status(200).json({ success: true, topic, courses, reviews, certification: cert });
   } catch (error) {
     console.error("getTopicBySlug error:", error);
     return res.status(500).json({ success: false, message: "Server error", error: error.message });

@@ -1,6 +1,8 @@
 import React from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import InstructorSidebar from './InstructorSidebar';
+import AdminSidebar from './AdminSidebar';
 
 // Icons for all possible navigation links
 import {
@@ -27,7 +29,7 @@ const DashboardNavLink = ({ to, icon, label }) => {
             className={({ isActive }) =>
                 `flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-muted/50 dark:hover:bg-muted/20 ${
                 isActive
-                    ? 'bg-muted dark:bg-muted/30 font-semibold text-primary' // Style for active link
+                    ? 'bg-muted dark:bg-muted/30 font-normal text-primary' // Style for active link
                     : 'text-muted-foreground' // Style for inactive link
                 }`
             }
@@ -66,12 +68,46 @@ const adminLinks = [
 
 
 const Sidebar = () => {
+    const location = useLocation();
     // Get the current user from the Redux store
     const { user } = useSelector(store => store.auth);
 
+    const isPublicProfile = location.pathname.startsWith('/instructor/') &&
+        !location.pathname.startsWith('/instructor/dashboard') &&
+        !location.pathname.startsWith('/instructor/course') &&
+        !location.pathname.startsWith('/instructor/profile') &&
+        !location.pathname.startsWith('/instructor/account') &&
+        !location.pathname.startsWith('/instructor/tools') &&
+        !location.pathname.startsWith('/instructor/resources');
+
+    // If the user is an instructor, render the custom Samriddhi Gyan-style expandable sidebar
+    if (user?.role === 'instructor') {
+        return (
+            <div className="flex h-screen bg-background">
+                <InstructorSidebar />
+                {/* --- Main Content Area --- */}
+                <div className={`flex-1 overflow-y-auto ${isPublicProfile ? "" : "p-4 sm:p-6 lg:p-8"}`}>
+                    <Outlet />
+                </div>
+            </div>
+        );
+    }
+
+    // If the user is an admin, render the custom Samriddhi Gyan-style expandable admin sidebar
+    if (user?.role === 'admin') {
+        return (
+            <div className="flex h-screen bg-background">
+                <AdminSidebar />
+                {/* --- Main Content Area --- */}
+                <div className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+                    <Outlet />
+                </div>
+            </div>
+        );
+    }
+
     // Determine which set of links to render based on the user's role.
-    // This defaults to instructor links if the role is not 'admin' or is undefined.
-    const navLinks = user?.role === 'admin' ? adminLinks : instructorLinks;
+    const navLinks = adminLinks;
 
     return (
         <div className="flex h-screen bg-background">

@@ -57,6 +57,10 @@ export const updatePlans = async (req, res) => {
 // 3. INITIALIZE SUBSCRIPTION CHECKOUT
 export const initializeSubscription = async (req, res) => {
   try {
+    if (req.user?.role === "admin") {
+      return res.status(403).json({ success: false, message: "Administrators cannot enroll in or purchase courses." });
+    }
+
     const userId = req.user._id;
     const { planKey } = req.body;
 
@@ -70,10 +74,33 @@ export const initializeSubscription = async (req, res) => {
       return res.status(404).json({ success: false, message: "Plan tier not found." });
     }
 
-    const netAmount = plan.priceNpr - plan.discountNpr;
+    let netAmount = plan.priceNpr - plan.discountNpr;
     if (netAmount <= 0) {
       return res.status(400).json({ success: false, message: "Invalid plan pricing configuration." });
     }
+
+    // Check active subscription credit proration
+    const user = await User.findById(userId);
+    let activeCreditDeduction = 0;
+    if (user && user.subscription && user.subscription.status === "active") {
+      const activePlan = await SubscriptionPlan.findOne({ planName: user.subscription.planName });
+      if (activePlan) {
+        const activePlanPricePaid = activePlan.priceNpr - activePlan.discountNpr;
+        const now = new Date();
+        const startsAt = new Date(user.subscription.startsAt);
+        const expiresAt = new Date(user.subscription.expiresAt);
+        const totalDurationMs = expiresAt.getTime() - startsAt.getTime();
+        const remainingDurationMs = expiresAt.getTime() - now.getTime();
+
+        if (totalDurationMs > 0 && remainingDurationMs > 0) {
+          const ratio = Math.max(0, Math.min(1, remainingDurationMs / totalDurationMs));
+          activeCreditDeduction = Math.round(ratio * activePlanPricePaid);
+        }
+      }
+    }
+
+    // Apply proration deduction (minimum Rs 10)
+    netAmount = Math.max(10, netAmount - activeCreditDeduction);
 
     // Generate unique order ID
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);

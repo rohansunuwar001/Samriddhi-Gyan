@@ -34,10 +34,8 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 
 // User Profile Pages
-import AccountSecurityPage from "./pages/Profile/AccountSecurityPage";
-import PhotoPage from "./pages/Profile/PhotoPage";
 import Profile from "./pages/Profile/Profile";
-import ProfileEdit from "./pages/Profile/ProfileEdit";
+import StudentProfileEdit from "./pages/Profile/StudentProfileEdit";
 
 // Student-Facing Course Pages
 import CourseProgress from "./pages/student/CourseProgress";
@@ -60,6 +58,9 @@ import Sidebar from "./pages/admin/Sidebar";
 import AddCourse from "./pages/admin/course/AddCourse";
 import CourseTable from "./pages/admin/course/CourseTable";
 import EditCourse from "./pages/admin/course/EditCourse"; // This is the new tabbed Course Manager
+
+import InstructorProfile from "./pages/admin/course/InstructorProfile";
+import InstructorAccount from "./pages/admin/course/InstructorAccount";
 
 // Lecture Management Imports (Refined)
 import AIAssistant from "./components/AIAssistant";
@@ -93,6 +94,14 @@ import DiscountManager from "./pages/admin/DiscountManager";
 import SubscribePage from "./pages/student/SubscribePage";
 import Terms from "./pages/Terms";
 import PersonalizeWizard from "./pages/student/PersonalizeWizard";
+import NotificationsPage from "./pages/NotificationsPage";
+import PurchaseHistoryPage from "./pages/PurchaseHistoryPage";
+import PaymentMethodsPage from "./pages/PaymentMethodsPage";
+import CertificateManager from "./pages/admin/certificate/CertificateManager";
+import CertificateForm from "./pages/admin/certificate/CertificateForm";
+import AdminCertifications from "./pages/admin/certificate/AdminCertifications";
+import CertificationDetail from "./pages/student/CertificationDetail";
+import ExamEnvironment from "./pages/student/ExamEnvironment";
 
 // --- LAYOUT WRAPPER COMPONENT ---
 const MainLayoutWithScroll = () => (
@@ -155,6 +164,30 @@ const appRouter = createBrowserRouter([
         element: <Navigate to="/home/my-courses/wishlist" replace />,
       },
       {
+        path: "/notifications",
+        element: (
+          <ProtectedRoute>
+            <NotificationsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/purchase-history",
+        element: (
+          <ProtectedRoute>
+            <PurchaseHistoryPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/payment-methods",
+        element: (
+          <ProtectedRoute>
+            <PaymentMethodsPage />
+          </ProtectedRoute>
+        ),
+      },
+      {
         path: "/blog/:slug",
         element: (
           <StudentRoute>
@@ -191,6 +224,22 @@ const appRouter = createBrowserRouter([
         element: (
           <StudentRoute>
             <TopicPage />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/certification/:slug",
+        element: (
+          <StudentRoute>
+            <CertificationDetail />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/certification/:slug/exam/:regId",
+        element: (
+          <StudentRoute>
+            <ExamEnvironment />
           </StudentRoute>
         ),
       },
@@ -323,36 +372,94 @@ const appRouter = createBrowserRouter([
         ),
       },
       {
-        path: "profile/edit",
+        path: "user/:username",
+        element: <Profile />,
+      },
+      {
+        path: "instructor/:username",
+        element: <Profile />,
+      },
+      {
+        path: "admin/:username",
+        element: <Profile />,
+      },
+
+      {
+        path: "user/edit-profile",
         element: (
           <ProtectedRoute>
-            <ProfileEdit />
+            <StudentProfileEdit />
           </ProtectedRoute>
         ),
       },
       {
-        path: "profile/photo",
+        path: "user/edit-photo",
         element: (
           <ProtectedRoute>
-            <PhotoPage />
+            <StudentProfileEdit />
           </ProtectedRoute>
         ),
       },
       {
-        path: "profile/security",
+        path: "user/edit-account",
         element: (
           <ProtectedRoute>
-            <AccountSecurityPage />
+            <StudentProfileEdit />
           </ProtectedRoute>
         ),
       },
+      {
+        path: "user/manage-subscriptions",
+        element: (
+          <ProtectedRoute>
+            <StudentProfileEdit />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "user/edit-payment-methods",
+        element: (
+          <ProtectedRoute>
+            <StudentProfileEdit />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "user/edit-privacy",
+        element: (
+          <ProtectedRoute>
+            <StudentProfileEdit />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "user/edit-notification-preferences",
+        element: (
+          <ProtectedRoute>
+            <StudentProfileEdit />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "user/close-account",
+        element: (
+          <ProtectedRoute>
+            <StudentProfileEdit />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "user/edit-api-clients",
+        element: (
+          <ProtectedRoute>
+            <StudentProfileEdit />
+          </ProtectedRoute>
+        ),
+      },
+
       {
         path: "course/search",
-        element: (
-          <ProtectedRoute>
-            <SearchPage />
-          </ProtectedRoute>
-        ),
+        element: <SearchPage />,
       },
 
       // NOTE: The main course detail page for students
@@ -390,7 +497,8 @@ const appRouter = createBrowserRouter([
 
           // B. Course management routes
           { path: "course", element: <CourseTable /> }, // View all created courses
-          { path: "course/create", element: <AddCourse /> }, // Page to create a new course
+          { path: "course/create", element: <Navigate to="/instructor/course/create/1" replace /> }, // redirect bare /create → step 1
+          { path: "course/create/:step", element: <AddCourse /> }, // 4-step wizard
           { path: "course/:courseId", element: <EditCourse /> }, // The new central hub for editing
 
           // C. Lecture management route (simplified and corrected)
@@ -418,6 +526,46 @@ const appRouter = createBrowserRouter([
             path: "course/analytics",
             element: <CourseAnalytics />,
           },
+          {
+            path: "profile",
+            element: <Navigate to="/instructor/profile/basic-information" replace />,
+          },
+          {
+            path: "profile/basic-information",
+            element: <InstructorProfile />,
+          },
+          {
+            path: "profile/photo",
+            element: <InstructorProfile />,
+          },
+          {
+            path: "profile/privacy",
+            element: <InstructorProfile />,
+          },
+          {
+            path: "account",
+            element: <Navigate to="/instructor/account/security" replace />,
+          },
+          {
+            path: "account/security",
+            element: <InstructorAccount />,
+          },
+          {
+            path: "account/notifications",
+            element: <InstructorAccount />,
+          },
+          {
+            path: "account/messages",
+            element: <InstructorAccount />,
+          },
+          {
+            path: "account/api-clients",
+            element: <InstructorAccount />,
+          },
+          // ── Certificate routes ─────────────────────────────────────────
+          { path: "certificates", element: <CertificateManager /> },
+          { path: "certificates/new", element: <CertificateForm mode="create" /> },
+          { path: "certificates/:id/edit", element: <CertificateForm mode="edit" /> },
         ],
       },
       {
@@ -441,6 +589,45 @@ const appRouter = createBrowserRouter([
           { path: "cms", element: <HomeCms /> },
           { path: "discounts", element: <DiscountManager /> },
           { path: "subscriptions", element: <SupAdmSubscriptions /> },
+          { path: "certifications", element: <AdminCertifications /> },
+
+          // C. Profile and account settings routes for admin
+          {
+            path: "profile",
+            element: <Navigate to="/admin/profile/basic-information" replace />,
+          },
+          {
+            path: "profile/basic-information",
+            element: <InstructorProfile />,
+          },
+          {
+            path: "profile/photo",
+            element: <InstructorProfile />,
+          },
+          {
+            path: "profile/privacy",
+            element: <InstructorProfile />,
+          },
+          {
+            path: "account",
+            element: <Navigate to="/admin/account/security" replace />,
+          },
+          {
+            path: "account/security",
+            element: <InstructorAccount />,
+          },
+          {
+            path: "account/notifications",
+            element: <InstructorAccount />,
+          },
+          {
+            path: "account/messages",
+            element: <InstructorAccount />,
+          },
+          {
+            path: "account/api-clients",
+            element: <InstructorAccount />,
+          },
         ],
       },
     ],

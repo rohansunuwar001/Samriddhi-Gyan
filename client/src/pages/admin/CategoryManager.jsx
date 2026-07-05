@@ -257,7 +257,7 @@ const CategoryManager = () => {
   return (
     <div className="flex-1 space-y-6 p-8 pt-6 bg-slate-50 min-h-screen text-left">
       <header>
-        <h2 className="text-3xl font-bold tracking-tight text-slate-900 font-sans">Categories</h2>
+        <h2 className="text-4xl font-normal tracking-tight text-slate-900 font-sans">Categories</h2>
         <p className="text-muted-foreground font-sans">
           Create parent categories, child categories, and sub-child categories for course breadcrumbs and topic organization.
         </p>
@@ -268,7 +268,7 @@ const CategoryManager = () => {
         {/* CREATE PARENT (LEVEL 0) */}
         <Card className="shadow-sm border border-slate-200">
           <CardHeader>
-            <CardTitle className="text-base font-bold text-slate-800">Create parent category</CardTitle>
+            <CardTitle className="text-lg font-normal text-slate-800">Create parent category</CardTitle>
             <CardDescription>
               Example: Development, Business, Design, Marketing.
             </CardDescription>
@@ -295,7 +295,7 @@ const CategoryManager = () => {
         {/* CREATE CHILD (LEVEL 1) */}
         <Card className="shadow-sm border border-slate-200">
           <CardHeader>
-            <CardTitle className="text-base font-bold text-slate-800">Create child category</CardTitle>
+            <CardTitle className="text-lg font-normal text-slate-800">Create child category</CardTitle>
             <CardDescription>
               Example: Web Development inside Development.
             </CardDescription>
@@ -308,7 +308,7 @@ const CategoryManager = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {parentCategories.length === 0 ? (
-                    <div className="px-2 py-1.5 text-sm text-muted-foreground">Create a parent first.</div>
+                    <div className="px-2 py-1.5 text-base text-muted-foreground">Create a parent first.</div>
                   ) : (
                     parentCategories.map((category) => (
                       <SelectItem key={category._id} value={category._id}>
@@ -338,7 +338,7 @@ const CategoryManager = () => {
         {/* CREATE SUB-CHILD (LEVEL 2) */}
         <Card className="shadow-sm border border-slate-200">
           <CardHeader>
-            <CardTitle className="text-base font-bold text-slate-800">Create sub-child category</CardTitle>
+            <CardTitle className="text-lg font-normal text-slate-800">Create sub-child category</CardTitle>
             <CardDescription>
               Example: Javascript inside Web Development.
             </CardDescription>
@@ -367,7 +367,7 @@ const CategoryManager = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {childrenFilteredByParent.length === 0 ? (
-                    <div className="px-2 py-1.5 text-sm text-muted-foreground">No child categories found.</div>
+                    <div className="px-2 py-1.5 text-base text-muted-foreground">No child categories found.</div>
                   ) : (
                     childrenFilteredByParent.map((category) => (
                       <SelectItem key={category._id} value={category._id}>
@@ -400,7 +400,7 @@ const CategoryManager = () => {
       {/* HIERARCHY TABLE */}
       <Card className="shadow-sm border border-slate-200 bg-white">
         <CardHeader>
-          <CardTitle className="text-lg font-bold text-slate-800">Category hierarchy</CardTitle>
+          <CardTitle className="text-xl font-normal text-slate-800">Category hierarchy</CardTitle>
           <CardDescription>
             Student course pages use this hierarchy for breadcrumbs.
           </CardDescription>
@@ -453,7 +453,7 @@ const CategoryManager = () => {
 
                     return (
                       <TableRow key={category._id}>
-                        <TableCell className="font-medium">
+                        <TableCell className="font-light">
                           {editingId === category._id ? (
                             <Input
                               value={editingName}
@@ -465,7 +465,7 @@ const CategoryManager = () => {
                             <span 
                               className={`
                                 block
-                                ${level === 0 ? "font-bold text-slate-900" : ""}
+                                ${level === 0 ? "font-normal text-slate-900" : ""}
                                 ${level === 1 ? "pl-6 text-slate-800" : ""}
                                 ${level === 2 ? "pl-12 text-slate-500 italic" : ""}
                               `}
@@ -494,12 +494,12 @@ const CategoryManager = () => {
                               </SelectContent>
                             </Select>
                           ) : (
-                            <span className="text-muted-foreground font-medium text-xs">
+                            <span className="text-muted-foreground font-light text-sm">
                               {parentText}
                             </span>
                           )}
                         </TableCell>
-                        <TableCell className="text-muted-foreground text-xs">{category.slug}</TableCell>
+                        <TableCell className="text-muted-foreground text-sm">{category.slug}</TableCell>
                         <TableCell className="text-right">
                           {editingId === category._id ? (
                             <div className="flex justify-end gap-2">

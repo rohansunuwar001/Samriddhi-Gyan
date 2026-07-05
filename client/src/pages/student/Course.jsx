@@ -165,17 +165,17 @@ const Course = ({ course }) => {
                 className="w-full h-48 object-cover group-hover:opacity-90 transition-opacity duration-300"
               />
               {hasDiscount && (
-                <Badge className="absolute top-2 left-2 bg-red-500 hover:bg-red-600 text-white px-2 py-1 text-xs font-bold">
+                <Badge className="absolute top-2 left-2 bg-red-500 hover:bg-red-600 text-white px-2 py-1 text-sm font-normal">
                   {discountPercentage}% OFF
                 </Badge>
               )}
-              <Badge className="absolute top-2 right-2 bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 text-xs font-bold">
+              <Badge className="absolute top-2 right-2 bg-blue-600 hover:bg-blue-700 text-white px-2 py-1 text-sm font-normal">
                 {courseLevel}
               </Badge>
             </div>
             
             <CardHeader className="px-4 pt-4 pb-2">
-              <h3 className="font-bold text-lg leading-tight line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
+              <h3 className="font-normal text-xl leading-tight line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors duration-200">
                 {course.title}
               </h3>
             </CardHeader>
@@ -184,25 +184,25 @@ const Course = ({ course }) => {
               <div className="flex items-center gap-2 mb-3">
                 <div className="flex items-center">
                   <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <span className="ml-1 text-sm font-medium">
+                  <span className="ml-1 text-base font-light">
                     {ratingValue.toFixed(1)}
                   </span>
-                  <span className="text-gray-500 text-xs ml-1">({reviewsCount})</span>
+                  <span className="text-gray-500 text-sm ml-1">({reviewsCount})</span>
                 </div>
                 
                 <div className="flex items-center ml-3">
                   <Users className="w-4 h-4 text-gray-500" />
-                  <span className="ml-1 text-sm text-gray-500">
+                  <span className="ml-1 text-base text-gray-500">
                     {enrolledStudentsText} students
                   </span>
                 </div>
               </div>
               
-              <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-4">
+              <p className="text-gray-600 dark:text-gray-300 text-base line-clamp-2 mb-4">
                 {course.subtitles || course.description || 'Master this subject with our comprehensive course designed for all skill levels.'}
               </p>
               
-              <div className="flex items-center gap-3 text-sm text-gray-500 mb-4">
+              <div className="flex items-center gap-3 text-base text-gray-500 mb-4">
                 <div className="flex items-center">
                   <Clock className="w-4 h-4 mr-1" />
                   {formatDuration(course.totalDurationInSeconds)}
@@ -218,11 +218,11 @@ const Course = ({ course }) => {
               <div className="flex items-center justify-between w-full">
                 <div>
                   {hasDiscount && (
-                    <span className="text-gray-400 dark:text-gray-500 line-through text-sm mr-2">
+                    <span className="text-gray-400 dark:text-gray-500 line-through text-base mr-2">
                       Rs{originalPrice}
                     </span>
                   )}
-                  <span className="font-bold text-lg text-gray-900 dark:text-white">
+                  <span className="font-normal text-xl text-gray-900 dark:text-white">
                     Rs{currentPrice}
                   </span>
                 </div>
@@ -257,35 +257,35 @@ const Course = ({ course }) => {
 
         <div className="space-y-4">
           <div>
-            <h4 className="font-extrabold text-[#2d2f31] text-base leading-snug line-clamp-3">
+            <h4 className="font-normal text-[#2d2f31] text-lg leading-snug line-clamp-3">
               {course.title}
             </h4>
             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
               {course.isBestseller && (
-                <span className="bg-[#ecebfa] text-[#2d2f31] font-bold px-2 py-0.5 rounded text-[10px] uppercase">
+                <span className="bg-[#ecebfa] text-[#2d2f31] font-normal px-2 py-0.5 rounded text-[10px] uppercase">
                   Bestseller
                 </span>
               )}
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#ecebfa] text-[#5624d0]">
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-normal bg-[#ecebfa] text-[#5624d0]">
                 Premium
               </span>
             </div>
           </div>
 
-          <div className="text-xs text-[#6a6f73] space-y-1">
-            <p className="font-semibold text-[#38755b]">{formatUpdatedDate(course.updatedAt)}</p>
+          <div className="text-sm text-[#6a6f73] space-y-1">
+            <p className="font-normal text-[#38755b]">{formatUpdatedDate(course.updatedAt)}</p>
             <p>{formatDuration(course.totalDurationInSeconds)} total hours • {courseLevel} • Subtitles</p>
           </div>
 
-          <p className="text-xs text-[#2d2f31] line-clamp-2 leading-relaxed">
+          <p className="text-sm text-[#2d2f31] line-clamp-2 leading-relaxed">
             {course.subtitles || course.description || "Master this subject with our comprehensive, step-by-step curriculum."}
           </p>
 
           {/* Learnings bullet points */}
-          <ul className="space-y-1.5 text-xs text-[#2d2f31]">
+          <ul className="space-y-1.5 text-sm text-[#2d2f31]">
             {bulletPoints.map((point, index) => (
               <li key={index} className="flex items-start gap-2">
-                <span className="text-gray-500 mt-0.5 font-bold">✓</span>
+                <span className="text-gray-500 mt-0.5 font-normal">✓</span>
                 <span className="line-clamp-2">{point}</span>
               </li>
             ))}
@@ -296,7 +296,7 @@ const Course = ({ course }) => {
             <Button
               onClick={handleCartAction}
               disabled={isAddingToCart}
-              className="flex-1 h-11 bg-[#a435f0] text-white hover:bg-[#8710d8] font-bold text-sm rounded-none shadow-none"
+              className="flex-1 h-11 bg-[#a435f0] text-white hover:bg-[#8710d8] font-normal text-base rounded-none shadow-none"
             >
               {isAddingToCart ? (
                 <Loader2 className="animate-spin h-4 w-4" />

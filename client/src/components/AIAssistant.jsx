@@ -88,7 +88,7 @@ const AIAssistant = () => {
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 dark:from-blue-800 dark:to-indigo-800 p-4 text-white">
           <div className="flex items-center gap-3">
             <Bot className="h-6 w-6" />
-            <h2 className="text-xl font-bold">AI Course Assistant</h2>
+            <h2 className="text-2xl font-normal">AI Course Assistant</h2>
             <Badge variant="secondary" className="ml-auto">
               <Sparkles className="h-4 w-4 mr-1" />
               Powered by Gemini
@@ -101,8 +101,8 @@ const AIAssistant = () => {
           {conversation.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-gray-500 dark:text-gray-400">
               <Bot className="h-12 w-12 mb-4" />
-              <p className="text-lg">How can I help with your course today?</p>
-              <p className="text-sm mt-2">Ask about concepts, assignments, or learning strategies</p>
+              <p className="text-xl">How can I help with your course today?</p>
+              <p className="text-base mt-2">Ask about concepts, assignments, or learning strategies</p>
             </div>
           ) : (
             <div className="space-y-6">
@@ -120,7 +120,7 @@ const AIAssistant = () => {
                       {msg.role === 'assistant' && (
                         <Bot className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                       )}
-                      <span className="text-xs font-medium">
+                      <span className="text-sm font-light">
                         {msg.role === 'user' ? 'You' : 'Course Assistant'}
                       </span>
                       {msg.role === 'assistant' && (
@@ -188,7 +188,7 @@ const AIAssistant = () => {
               </Button>
             </div>
           </div>
-          <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+          <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
             Press Shift+Enter for new line. Just Enter to send.
           </p>
         </div>

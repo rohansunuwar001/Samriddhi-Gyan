@@ -29,10 +29,10 @@ const SearchResult = ({ course }) => {
         <div className="flex-1 space-y-2">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <h2 className="font-bold text-lg md:text-xl line-clamp-2">
+              <h2 className="font-normal text-xl md:text-2xl line-clamp-2">
                 {course.title}
               </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2">
+              <p className="text-base text-gray-600 dark:text-gray-400 line-clamp-2">
                 {course.subtitle}
               </p>
             </div>
@@ -41,7 +41,7 @@ const SearchResult = ({ course }) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400">
+          <div className="flex items-center gap-2 text-base text-gray-600 dark:text-gray-400">
             <span className="flex items-center gap-1">
               <Users className="h-4 w-4" />
               {course.enrolledStudents?.length || 0} students
@@ -60,7 +60,7 @@ const SearchResult = ({ course }) => {
             )}
           </div>
 
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-2 text-base">
             <Badge variant="outline" className="capitalize">
               {course.level}
             </Badge>
@@ -71,10 +71,10 @@ const SearchResult = ({ course }) => {
             )}
           </div>
 
-          <div className="flex items-center gap-2 text-sm">
+          <div className="flex items-center gap-2 text-base">
             <span className="text-gray-600 dark:text-gray-400">
               Instructor:{" "}
-              <span className="font-medium text-gray-800 dark:text-gray-200">
+              <span className="font-light text-gray-800 dark:text-gray-200">
                 {course.creator?.name || "Unknown"}
               </span>
             </span>
@@ -114,16 +114,16 @@ const PriceDisplay = ({ price }) => {
   if (price === 0 || price === null) {
     return (
       <div className="text-right">
-        <span className="font-bold text-green-600 dark:text-green-400">Free</span>
+        <span className="font-normal text-green-600 dark:text-green-400">Free</span>
       </div>
     );
   }
 
   return (
     <div className="text-right">
-      <span className="font-bold text-lg">Rs{price?.toLocaleString()}</span>
+      <span className="font-normal text-xl">Rs{price?.toLocaleString()}</span>
       {price > 999 && (
-        <span className="block text-xs text-gray-500 dark:text-gray-400">
+        <span className="block text-sm text-gray-500 dark:text-gray-400">
           or Rs{Math.round(price / 12)}/mo
         </span>
       )}

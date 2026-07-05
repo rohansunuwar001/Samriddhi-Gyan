@@ -18,7 +18,7 @@ const TrustedBySection = () => {
     <section className="bg-white font-sans py-16 sm:py-24">
       <div className="container mx-auto px-4">
         {/* Section Title */}
-        <h2 className="text-center text-lg text-gray-600 mb-12">
+        <h2 className="text-center text-xl text-gray-600 mb-12">
           Trusted by over 16,000 companies and millions of learners around the world
         </h2>
 

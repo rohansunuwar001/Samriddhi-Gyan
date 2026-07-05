@@ -1,10 +1,30 @@
 import DiscountBanner from "../models/discountBanner.model.js";
 import GetOfferPromo from "../models/getOfferPromo.model.js";
 import SubscriptionNavbar from "../models/subscriptionNavbar.model.js";
+import { User } from "../models/user.model.js";
+import { Notification } from "../models/notification.model.js";
 
 // Helper function to deactivate all other banners/promos of the same model type if the current one is set to active.
 const handleActivation = async (Model, activeId) => {
   await Model.updateMany({ _id: { $ne: activeId } }, { isActive: false });
+};
+
+// Helper function to notify all users of a new discount/offer
+const notifyAllUsersOfOffer = async (message, link) => {
+  try {
+    const users = await User.find({}, "_id");
+    if (!users || users.length === 0) return;
+
+    const notifications = users.map(u => ({
+      user: u._id,
+      message,
+      link: link || "/subscribe",
+      type: "system_alert"
+    }));
+    await Notification.insertMany(notifications);
+  } catch (err) {
+    console.error("Error creating discount/offer notifications:", err);
+  }
 };
 
 // ==========================================
@@ -26,6 +46,7 @@ export const createDiscountBanner = async (req, res) => {
 
     if (isActive) {
       await handleActivation(DiscountBanner, banner._id);
+      await notifyAllUsersOfOffer(`New Discount Offer: ${text}`, linkUrl || "/subscribe");
     }
 
     return res.status(201).json({
@@ -78,6 +99,7 @@ export const updateDiscountBanner = async (req, res) => {
 
     if (isActive) {
       await handleActivation(DiscountBanner, banner._id);
+      await notifyAllUsersOfOffer(`Updated Discount Offer: ${text}`, linkUrl || "/subscribe");
     }
 
     return res.status(200).json({
@@ -155,6 +177,7 @@ export const createGetOfferPromo = async (req, res) => {
 
     if (isActive) {
       await handleActivation(GetOfferPromo, promo._id);
+      await notifyAllUsersOfOffer(`New Promo Offer: ${title} - ${description}`, "/subscribe");
     }
 
     return res.status(201).json({
@@ -207,6 +230,7 @@ export const updateGetOfferPromo = async (req, res) => {
 
     if (isActive) {
       await handleActivation(GetOfferPromo, promo._id);
+      await notifyAllUsersOfOffer(`Updated Promo Offer: ${title} - ${description}`, "/subscribe");
     }
 
     return res.status(200).json({

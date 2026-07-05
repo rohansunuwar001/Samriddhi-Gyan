@@ -8,16 +8,12 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   FiChevronLeft,
   FiChevronRight,
-  FiX,
-  FiCpu,
-  FiAward,
-  FiTrendingUp,
 } from "react-icons/fi";
 import { Brain, Award, Database, Search } from "lucide-react";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const GuestHome = () => {
   const navigate = useNavigate();
-  const [showBanner, setShowBanner] = useState(true);
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const { data, isLoading, isError } = useGetPublishedCourseQuery();
@@ -39,12 +35,17 @@ const GuestHome = () => {
     },
   ];
 
+  // ⚠️ All hooks MUST be called before any conditional returns
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
     }, 6000);
     return () => clearInterval(timer);
   }, [slides.length]);
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
 
   const handlePrevSlide = () => {
     setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
@@ -85,21 +86,7 @@ const GuestHome = () => {
 
   return (
     <div className="bg-white text-[#2c2f31] min-h-screen font-sans">
-      {/* Top Teal Alert Banner */}
-      {showBanner && (
-        <div className="bg-[#eefcfd] border-b border-[#c8f1f4] px-4 py-3 relative flex items-center justify-center text-center">
-          <p className="text-sm font-normal text-[#005a60] pr-8">
-            <span className="font-extrabold mr-1">1 day left!</span> Get AI-ready with courses from Rs 999.
-          </p>
-          <button
-            onClick={() => setShowBanner(false)}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-[#005a60] hover:text-[#003b3f] transition"
-            aria-label="Close promotion banner"
-          >
-            <FiX className="w-5 h-5" />
-          </button>
-        </div>
-      )}
+
 
       {/* Hero Carousel Section */}
       <section className="relative overflow-hidden py-8 px-4 sm:px-6 lg:px-8">

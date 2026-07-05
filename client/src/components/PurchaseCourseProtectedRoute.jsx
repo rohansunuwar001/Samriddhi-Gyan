@@ -1,6 +1,7 @@
 import { useGetCourseDetailWithStatusQuery } from "@/features/api/purchaseApi";
 import { useParams, Navigate } from "react-router-dom";
 import PropTypes from "prop-types";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const PurchaseCourseProtectedRoute = ({ children }) => {
     const { courseId } = useParams();
@@ -8,7 +9,7 @@ const PurchaseCourseProtectedRoute = ({ children }) => {
 
     // Show a loading state while fetching the purchase status
     if (isLoading) {
-        return <p>Loading...</p>; // Or a better loading spinner component
+        return <LoadingSpinner />;
     }
 
     // If there was an error fetching, redirect back as a fallback

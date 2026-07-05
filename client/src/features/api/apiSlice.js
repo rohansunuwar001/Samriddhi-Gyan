@@ -28,7 +28,9 @@ export const apiSlice = createApi({
         'User', 'Course', 'Section', 'Lecture', 'Wishlist',
         'Cart', 'Order', 'Purchase', 'AdminData', 'Instructor',
         'Notification', 'CourseAnalytics','AdminStats', 'Question', 'Reminder', 'Flashcard',
-        'DiscountBanner', 'GetOfferPromo', 'SubscriptionNavbar', 'subscriptionPlans', 'subscriptions', 'PayoutSummary'
+        'DiscountBanner', 'GetOfferPromo', 'SubscriptionNavbar', 'subscriptionPlans', 'subscriptions', 'PayoutSummary', 'PaymentMethods',
+        'Certificate', 'CertStudents', 'CertIssued', 'CertReceived', 'CourseDetail',
+        'CertificationIssuer', 'Certification', 'ExamRegistration'
     ],
     baseQuery,
     endpoints: builder => ({}),

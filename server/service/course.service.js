@@ -4,6 +4,9 @@
 // Controllers read req → call these → send res.
 // These functions never touch req or res.
 
+import path from "path";
+import fs from "fs";
+import mongoose from "mongoose";
 import { Course } from "../models/course.model.js";
 import { CoursePurchase } from "../models/coursePurchase.model.js";
 import { CourseProgress } from "../models/courseProgress.model.js";
@@ -12,6 +15,7 @@ import { Section } from "../models/section.model.js";
 import { Lecture } from "../models/lecture.model.js";
 import { SearchSuggestion } from "../models/searchSuggestion.js";
 import Category from "../models/category.model.js";
+import Topic from "../models/topic.model.js";
 import { uploadMedia, deleteFromCloudinary } from "../utils/cloudinary.js";
 import { createEmbeddingForText, cosineSimilarity } from "../utils/embedding.js";
 import { extractCloudinaryPublicId } from "../helpers/cloudinary.helper.js";
@@ -118,13 +122,21 @@ const validateTopics = async (topics, category) => {
   const cleaned = removeDuplicateCategoryTopics(topics, category);
   if (cleaned.length === 0) return [];
 
-  const matchingCategories = await Category.find({ name: { $in: cleaned } }).select("name");
-  const validNames = new Set(matchingCategories.map((c) => c.name));
+  const [matchingCategories, matchingTopics] = await Promise.all([
+    Category.find({ name: { $in: cleaned } }).select("name"),
+    Topic.find({ name: { $in: cleaned } }).select("name")
+  ]);
+
+  const validNames = new Set([
+    ...matchingCategories.map((c) => c.name),
+    ...matchingTopics.map((t) => t.name)
+  ]);
+
   const invalid = cleaned.filter((t) => !validNames.has(t));
 
   if (invalid.length > 0) {
     const error = new Error(
-      `These topics don't match any existing category: ${invalid.join(", ")}. Please create the category first or choose from the existing list.`
+      `These topics don't match any existing category or topic: ${invalid.join(", ")}. Please create the topic first or choose from the existing list.`
     );
     error.statusCode = 400;
     throw error;
@@ -136,7 +148,14 @@ const validateTopics = async (topics, category) => {
 export const createCourse = async ({ userId, courseData }) => {
   const { title, category, price, language, level, subtitle, description, learnings, topics } = courseData;
 
-  if (!title || !category || !price?.original || !price?.current) {
+  if (
+    !title ||
+    !category ||
+    price?.original === undefined ||
+    price?.original === null ||
+    price?.current === undefined ||
+    price?.current === null
+  ) {
     const error = new Error("Title, category, and a full price object (original, current) are required.");
     error.statusCode = 400;
     throw error;
@@ -168,7 +187,7 @@ export const createCourse = async ({ userId, courseData }) => {
 // FIX: Uses extractCloudinaryPublicId() — the original .split().pop() broke
 //      for Cloudinary URLs with folder paths.
 // ─────────────────────────────────────────────────────────────────────────────
-export const editCourse = async (courseId, fields, thumbnailFile) => {
+export const editCourse = async (courseId, fields, files) => {
   const course = await Course.findById(courseId);
   if (!course) {
     const error = new Error("Course not found!");
@@ -176,10 +195,22 @@ export const editCourse = async (courseId, fields, thumbnailFile) => {
     throw error;
   }
 
+  // Parse files from upload.fields
+  let thumbnailFile = null;
+  let promoVideoFile = null;
+  if (files) {
+    if (files.courseThumbnail && files.courseThumbnail[0]) {
+      thumbnailFile = files.courseThumbnail[0];
+    }
+    if (files.coursePromoVideo && files.coursePromoVideo[0]) {
+      promoVideoFile = files.coursePromoVideo[0];
+    }
+  }
+
   // Handle thumbnail replacement
   if (thumbnailFile) {
     if (course.thumbnail) {
-      const publicId = extractCloudinaryPublicId(course.thumbnail); // ← FIXED
+      const publicId = extractCloudinaryPublicId(course.thumbnail);
       if (publicId) await deleteFromCloudinary(publicId).catch(() => {});
     }
     const uploaded = await uploadMedia(thumbnailFile.path);
@@ -191,14 +222,93 @@ export const editCourse = async (courseId, fields, thumbnailFile) => {
     course.thumbnail = uploaded.secure_url;
   }
 
-  // Apply text field updates
-  const textFields = ["title", "subtitle", "description", "category", "language", "level", "learnings", "requirements", "whoIsThisFor"];
+  // Handle promo video transcode to HLS in background
+  if (promoVideoFile) {
+    course.promoVideoStatus = "processing";
+    course.promoVideoUrl = ""; // reset url
+    await course.save();
+
+    // IMPORTANT: resolve to absolute path so ffmpeg can find the file
+    // Multer sometimes gives a relative path (e.g. "uploads\abc123").
+    // path.resolve() converts it to an absolute path from process.cwd().
+    const rawPath = path.resolve(promoVideoFile.path);
+    const outputDir = path.join(process.cwd(), "public", "hls", `promo-${courseId}`);
+
+    // Remove old HLS output dir if it exists (re-upload scenario)
+    if (fs.existsSync(outputDir)) {
+      fs.rmSync(outputDir, { recursive: true, force: true });
+    }
+
+    // Transcode in background
+    import("../utils/transcoder.js").then(({ transcodeToHLS, extractThumbnail }) => {
+      transcodeToHLS(rawPath, outputDir, async (pct) => {
+        console.log(`[Promo Transcoder] Course ${courseId} transcode progress: ${pct}%`);
+        try {
+          await Course.findByIdAndUpdate(courseId, { promoVideoProgress: pct });
+        } catch (err) {
+          console.error("Failed to update transcode progress:", err.message);
+        }
+      })
+      .then(async () => {
+        const backendUrl = process.env.BACKEND_URI || "http://localhost:8080";
+        const masterUrl = `${backendUrl}/hls/promo-${courseId}/master.m3u8`;
+        const thumbnailFilename = "thumbnail.jpg";
+        const thumbnailDest = path.join(outputDir, thumbnailFilename);
+        let promoVideoThumbnail = "";
+        try {
+          await extractThumbnail(rawPath, thumbnailDest);
+          promoVideoThumbnail = `${backendUrl}/hls/promo-${courseId}/${thumbnailFilename}`;
+          console.log(`[Promo Transcoder] Thumbnail extracted successfully: ${promoVideoThumbnail}`);
+        } catch (thumbErr) {
+          console.error("[Promo Transcoder] Failed to extract thumbnail:", thumbErr.message);
+        }
+
+        await Course.findByIdAndUpdate(courseId, {
+          promoVideoStatus: "ready",
+          promoVideoUrl: masterUrl,
+          promoVideoThumbnail: promoVideoThumbnail,
+          promoVideoProgress: 100
+        });
+        console.log(`[Promo Transcoder] Course ${courseId} transcode ready: ${masterUrl}`);
+        try { fs.rmSync(rawPath, { force: true }); } catch(_) {}
+      })
+      .catch(async (err) => {
+        console.error(`[Promo Transcoder] Course ${courseId} transcode failed:`, err.message);
+        await Course.findByIdAndUpdate(courseId, {
+          promoVideoStatus: "failed"
+        });
+        try { fs.rmSync(rawPath, { force: true }); } catch(_) {}
+      });
+    }).catch(err => {
+      console.error("Failed to load HLS transcoder:", err);
+    });
+  }
+
+  const textFields = ["title", "subtitle", "description", "category", "language", "level", "learnings", "requirements", "whoIsThisFor", "enrollmentType", "primaryTopic"];
   textFields.forEach((key) => {
     if (fields[key] !== undefined) course[key] = fields[key];
   });
 
+  if (fields.sections !== undefined) {
+    try {
+      course.sections = typeof fields.sections === "string" ? JSON.parse(fields.sections) : fields.sections;
+    } catch (err) {
+      console.error("Failed to parse sections array:", err);
+    }
+  }
+
   if (fields.includedInSubscription !== undefined) {
     course.includedInSubscription = fields.includedInSubscription === true || fields.includedInSubscription === "true";
+  }
+
+  if (fields.relatedCertificates !== undefined) {
+    try {
+      course.relatedCertificates = typeof fields.relatedCertificates === "string"
+        ? JSON.parse(fields.relatedCertificates)
+        : fields.relatedCertificates;
+    } catch (err) {
+      console.error("Failed to parse relatedCertificates:", err);
+    }
   }
 
   // Validate topics against the existing Category list before applying.
@@ -226,8 +336,17 @@ export const editCourse = async (courseId, fields, thumbnailFile) => {
   }
 
   if (fields.price) {
-    if (fields.price.original) course.price.original = fields.price.original;
-    if (fields.price.current)  course.price.current  = fields.price.current;
+    if (fields.price.original !== undefined && fields.price.original !== null) course.price.original = fields.price.original;
+    if (fields.price.current !== undefined && fields.price.current !== null)  course.price.current  = fields.price.current;
+  }
+
+  if (fields.videoLibrary) {
+    try {
+      const parsed = typeof fields.videoLibrary === "string" ? JSON.parse(fields.videoLibrary) : fields.videoLibrary;
+      course.videoLibrary = [...(course.videoLibrary || []), ...parsed];
+    } catch (err) {
+      console.error("Failed to parse videoLibrary:", err);
+    }
   }
 
   return await course.save();
@@ -253,6 +372,37 @@ export const removeCourse = async (courseId) => {
   }
 
   await Course.findByIdAndDelete(courseId);
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 3b. DELETE PROMO VIDEO
+// ─────────────────────────────────────────────────────────────────────────────
+export const removePromoVideo = async (courseId) => {
+  const course = await Course.findById(courseId);
+  if (!course) {
+    const error = new Error("Course not found!");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  // Delete HLS output directory if exists
+  const outputDir = path.join(process.cwd(), "public", "hls", `promo-${courseId}`);
+  if (fs.existsSync(outputDir)) {
+    try {
+      fs.rmSync(outputDir, { recursive: true, force: true });
+    } catch (err) {
+      console.error("Failed to delete promo video HLS directory:", err.message);
+    }
+  }
+
+  // Update DB fields
+  course.promoVideoUrl = "";
+  course.promoVideoStatus = "none";
+  course.promoVideoProgress = 0;
+  course.promoVideoThumbnail = "";
+  await course.save();
+
+  return course;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -313,7 +463,7 @@ export const getPublishedCourses = async (userId = null, enrolledIds = []) => {
 export const getCourseById = async (courseId, userId = null) => {
   const course = await Course.findById(courseId)
     .populate({ path: "sections", populate: { path: "lectures" } })
-    .populate("creator", "name headline photoUrl")
+    .populate("creator", "name headline photoUrl role")
     .populate({ path: "reviews", populate: { path: "user", select: "name photoUrl" } })
     .lean();
 
@@ -373,7 +523,7 @@ export const getCreatorCourses = async (userId) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // 8. VECTOR SEARCH (semantic search with embeddings)
 // ─────────────────────────────────────────────────────────────────────────────
-export const getSearchResults = async (query, userId = null) => {
+export const getSearchResults = async (query, enrolledIds = []) => {
   if (!query || query.trim() === "") return { suggestions: [], courses: [] };
 
   const queryEmbedding = await createEmbeddingForText(query.trim());
@@ -384,10 +534,8 @@ export const getSearchResults = async (query, userId = null) => {
     embedding: { $exists: true, $ne: [] },
   };
 
-  if (userId) {
-    const user = await User.findById(userId).select("enrolledCourses").lean();
-    const purchasedIds = user?.enrolledCourses || [];
-    if (purchasedIds.length > 0) findCriteria._id = { $nin: purchasedIds };
+  if (Array.isArray(enrolledIds) && enrolledIds.length > 0) {
+    findCriteria._id = { $nin: enrolledIds.map((id) => new mongoose.Types.ObjectId(id)) };
   }
 
   const allCourses = await Course.find(findCriteria)
@@ -410,7 +558,7 @@ export const getSearchResults = async (query, userId = null) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // 9. TEXT SEARCH + FILTER (the browse/search page)
 // ─────────────────────────────────────────────────────────────────────────────
-export const searchCourse = async ({ query, categories, sortByPrice, userId }) => {
+export const searchCourse = async ({ query, categories, sortByPrice, enrolledIds = [] }) => {
   const searchCriteria = {
     isPublished: true,
     $or: [
@@ -422,10 +570,8 @@ export const searchCourse = async ({ query, categories, sortByPrice, userId }) =
 
   if (categories?.length > 0) searchCriteria.category = { $in: categories };
 
-  if (userId) {
-    const user = await User.findById(userId).select("enrolledCourses").lean();
-    const purchased = user?.enrolledCourses || [];
-    if (purchased.length > 0) searchCriteria._id = { $nin: purchased };
+  if (Array.isArray(enrolledIds) && enrolledIds.length > 0) {
+    searchCriteria._id = { $nin: enrolledIds.map((id) => new mongoose.Types.ObjectId(id)) };
   }
 
   const sortOptions = {};
@@ -623,4 +769,31 @@ export const getCourseAnalytics = async (instructorId) => {
 export const getTrendingSuggestions = async () => {
   const suggestions = await SearchSuggestion.find({}).limit(10).lean();
   return suggestions.map((s) => s.term);
+};
+
+export const saveBulkVideos = async (courseId, files) => {
+  const course = await Course.findById(courseId);
+  if (!course) {
+    const error = new Error("Course not found!");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const backendUrl = process.env.BACKEND_URI || "http://localhost:10000";
+  const newVideos = files.map((file) => {
+    // Normalize path separators to forward slashes for URLs
+    const relativePath = path.relative(process.cwd(), file.path).replace(/\\/g, "/");
+    const videoUrl = `${backendUrl}/${relativePath}`;
+    return {
+      filename: file.originalname,
+      sizeBytes: file.size,
+      url: videoUrl,
+      durationInSeconds: 300, // Default duration mock
+      createdAt: new Date(),
+    };
+  });
+
+  course.videoLibrary.push(...newVideos);
+  await course.save();
+  return { course, videos: newVideos };
 };

@@ -45,6 +45,12 @@ const userSchema = new mongoose.Schema({
         ref: 'Course'
       }
     ],
+    cartCertifications: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Certification'
+      }
+    ],
     photoUrl: {
         type: String,
         default: ""
@@ -63,7 +69,16 @@ const userSchema = new mongoose.Schema({
         instagram: { type: String, default: "" },
         twitter: { type: String, default: "" },
         linkedin: { type: String, default: "" },
-        // You can add more links here in the future (e.g., twitter, linkedin)
+        tiktok: { type: String, default: "" },
+        youtube: { type: String, default: "" },
+    },
+    language: {
+        type: String,
+        default: "English (US)"
+    },
+    privacy: {
+        showProfileToLoggedIn: { type: Boolean, default: true },
+        showCoursesTaking: { type: Boolean, default: true },
     },
     occupation: {
         type: String,

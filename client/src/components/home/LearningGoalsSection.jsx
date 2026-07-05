@@ -59,18 +59,18 @@ const LearningGoalsSection = () => {
         className={`w-full text-left bg-white rounded-lg p-6 border-2 transition-all duration-300 ${activeClasses}`}
       >
         <div className="flex items-start gap-5">
-          <div className="text-2xl text-gray-800 mt-1">{icon}</div>
+          <div className="text-3xl text-gray-800 mt-1">{icon}</div>
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-1">
-              <h3 className="font-bold text-gray-900">{title}</h3>
+              <h3 className="font-normal text-gray-900">{title}</h3>
               {tag && (
-                <span className="text-xs font-semibold text-gray-700 bg-gray-100 border border-gray-300 px-2 py-0.5 rounded">
+                <span className="text-sm font-normal text-gray-700 bg-gray-100 border border-gray-300 px-2 py-0.5 rounded">
                   {tag}
                 </span>
               )}
             </div>
-            <p className="text-gray-600 text-sm mb-4">{description}</p>
-            <a href={cta.href} className="font-bold text-purple-600 hover:text-purple-800 flex items-center gap-2 text-sm">
+            <p className="text-gray-600 text-base mb-4">{description}</p>
+            <a href={cta.href} className="font-normal text-purple-600 hover:text-purple-800 flex items-center gap-2 text-base">
               <span>{cta.text}</span>
               <FaArrowRight size={12} />
             </a>
@@ -84,7 +84,7 @@ const LearningGoalsSection = () => {
   return (
     <section className="bg-white font-sans py-16 sm:py-24">
       <div className="container mx-auto px-4">
-        <h2 className="text-4xl text-center font-serif text-gray-900 mb-12">
+        <h2 className="text-5xl text-center font-serif text-gray-900 mb-12">
           Learning focused on your goals
         </h2>
 

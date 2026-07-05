@@ -11,7 +11,7 @@ import { Section } from "../models/section.model.js";
 export const createSection = async (req, res) => {
     try {
         const { courseId } = req.params;
-        const { title } = req.body;
+        const { title, learningObjective = "" } = req.body;
 
         if (!title) {
             return res.status(400).json({ message: "Section title is required." });
@@ -25,6 +25,7 @@ export const createSection = async (req, res) => {
         // Create the new section
         const section = await Section.create({
             title,
+            learningObjective,
             course: courseId,
         });
 
@@ -45,22 +46,23 @@ export const createSection = async (req, res) => {
 };
 
 /**
- * @desc    Update a section's title
+ * @desc    Update a section's title and learning objective
  * @route   PUT /api/v1/sections/:sectionId
  * @access  Private (Instructor only)
  */
 export const updateSection = async (req, res) => {
     try {
         const { sectionId } = req.params;
-        const { title } = req.body;
+        const { title, learningObjective, lectures } = req.body;
 
-        if (!title) {
-            return res.status(400).json({ message: "Section title is required." });
-        }
+        const updatePayload = {};
+        if (title !== undefined) updatePayload.title = title;
+        if (learningObjective !== undefined) updatePayload.learningObjective = learningObjective;
+        if (lectures !== undefined) updatePayload.lectures = lectures;
 
         const section = await Section.findByIdAndUpdate(
             sectionId,
-            { title },
+            updatePayload,
             { new: true }
         );
 

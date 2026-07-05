@@ -13,6 +13,7 @@ import { Course } from "../models/course.model.js";
 import { CoursePurchase } from "../models/coursePurchase.model.js";
 import { CourseProgress } from "../models/courseProgress.model.js";
 import Category from "../models/category.model.js";
+import { Certification } from "../models/certification.model.js";
 import { completeOrder, createPendingOrder, getAllCompletedPurchases, getOrderByOrderId } from "../service/purchase.service.js";
 
 dotenv.config();
@@ -63,31 +64,60 @@ const removeDuplicateCategoryTopics = (topics, category) => {
 // ─────────────────────────────────────────────────────────────────────────────
 export const createCheckoutSession = async (req, res) => {
   try {
-    const userId = req.user._id;
-    const { courseIds } = req.body;
+    if (req.user?.role === "admin") {
+      return res.status(403).json({ message: "Administrators cannot enroll in or purchase items." });
+    }
 
-    if (!Array.isArray(courseIds) || courseIds.length === 0) {
-      return res.status(400).json({ message: "No courses selected!" });
+    const userId = req.user._id;
+    const { courseIds = [], certificationIds = [] } = req.body;
+
+    if (courseIds.length === 0 && certificationIds.length === 0) {
+      return res.status(400).json({ message: "No items selected!" });
     }
 
     // ── Step 1: Create the pending order via service ───────────────────────
-    // The service handles: fetching courses, locking prices, saving to DB
     const { order, courses, totalAmount } = await createPendingOrder({
       userId,
       courseIds,
+      certificationIds,
       paymentMethod: "Stripe",
     });
 
-    // ── Step 2: Build Stripe line_items from the fetched courses ───────────
-    // (Controller's job: prepare gateway-specific data)
-    const line_items = courses.map((course) => ({
-      price_data: {
-        currency: "npr",
-        product_data: { name: course.title, images: [course.thumbnail] },
-        unit_amount: course.price.current * 100, // Stripe expects paise/cents
-      },
-      quantity: 1,
-    }));
+    // ── Step 2: Build Stripe line_items ────────────────────────────────────
+    const line_items = [];
+
+    if (courses && courses.length > 0) {
+      courses.forEach((course) => {
+        line_items.push({
+          price_data: {
+            currency: "npr",
+            product_data: { name: course.title, images: [course.thumbnail] },
+            unit_amount: course.price.current * 100, // Stripe expects paise/cents
+          },
+          quantity: 1,
+        });
+      });
+    }
+
+    if (order.certifications && order.certifications.length > 0) {
+      const certIds = order.certifications.map((c) => c.certificationId);
+      const certsInfo = await Certification.find({ _id: { $in: certIds } }).select("name badgeUrl").lean();
+
+      order.certifications.forEach((cItem) => {
+        const matchingCert = certsInfo.find((c) => c._id.toString() === cItem.certificationId.toString());
+        line_items.push({
+          price_data: {
+            currency: "npr",
+            product_data: {
+              name: `${matchingCert?.name || "Exam Voucher"} Exam Voucher`,
+              images: matchingCert?.badgeUrl ? [matchingCert.badgeUrl] : [],
+            },
+            unit_amount: cItem.priceAtPurchase * 100,
+          },
+          quantity: 1,
+        });
+      });
+    }
 
     // ── Step 3: Create the Stripe Checkout session ─────────────────────────
     const session = await stripe.checkout.sessions.create({
@@ -100,6 +130,7 @@ export const createCheckoutSession = async (req, res) => {
         orderId: order.orderId,
         userId: userId.toString(),
         courseIds: courseIds.join(","),
+        certificationIds: certificationIds.join(","),
       },
       shipping_address_collection: { allowed_countries: ["NP"] },
     });
@@ -418,4 +449,17 @@ export const paymentFailed = async (req, res) => {
   }
 
   return res.redirect(`${process.env.FRONTEND_URL}/payment-failed`);
+};
+
+export const getMyPurchaseHistory = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const purchases = await CoursePurchase.find({ userId, status: "completed" })
+      .populate("courses.courseId", "title thumbnail price")
+      .sort({ createdAt: -1 });
+    return res.status(200).json({ success: true, purchases });
+  } catch (error) {
+    console.error("getMyPurchaseHistory error:", error);
+    res.status(500).json({ success: false, message: "Failed to fetch purchase history" });
+  }
 };
