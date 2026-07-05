@@ -6,6 +6,9 @@ export const topicApi = apiSlice.injectEndpoints({
       query: () => "/topic",
       providesTags: [{ type: "Topic", id: "LIST" }],
     }),
+    searchTopics: builder.query({
+      query: (q) => `/topic?q=${encodeURIComponent(q)}`,
+    }),
     getTopicBySlug: builder.query({
       query: (slug) => `/topic/detail/${slug}`,
       providesTags: (result, error, slug) => [{ type: "Topic", id: slug }],
@@ -42,6 +45,7 @@ export const topicApi = apiSlice.injectEndpoints({
 
 export const {
   useGetAllTopicsQuery,
+  useSearchTopicsQuery,
   useGetTopicBySlugQuery,
   useCreateTopicMutation,
   useUpdateTopicMutation,

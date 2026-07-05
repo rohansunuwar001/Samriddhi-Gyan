@@ -6,6 +6,11 @@ const sectionSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
+    learningObjective: {
+        type: String,
+        trim: true,
+        default: ""
+    },
     // Each section holds an array of lectures
     lectures: [{
         type: mongoose.Schema.Types.ObjectId,

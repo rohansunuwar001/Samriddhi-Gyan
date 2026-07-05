@@ -75,11 +75,11 @@ const AddLectureModal = ({ sectionId, courseId, isOpen, onClose, onLectureAdded 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
       <div className="bg-white rounded-2xl shadow-lg w-[90%] max-w-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Add New Lecture</h2>
+        <h2 className="text-2xl font-normal mb-4">Add New Lecture</h2>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-sm font-medium">Lecture Title</label>
+            <label className="block text-base font-light">Lecture Title</label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -89,7 +89,7 @@ const AddLectureModal = ({ sectionId, courseId, isOpen, onClose, onLectureAdded 
           </div>
 
           <div>
-            <label className="block text-sm font-medium">Upload Video</label>
+            <label className="block text-base font-light">Upload Video</label>
             <Input
               type="file"
               accept="video/*"

@@ -39,6 +39,17 @@ const purchaseSchema = new mongoose.Schema({
             default: 0
         }
     }],
+    certifications: [{
+        certificationId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Certification',
+            required: true
+        },
+        priceAtPurchase: {
+            type: Number,
+            required: true
+        }
+    }],
     // The final amount that was charged to the customer
     totalAmount: {
         type: Number,

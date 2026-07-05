@@ -24,6 +24,14 @@ const lectureSchema = new mongoose.Schema(
     videoUrl: {
       type: String, // The secure URL from Cloudinary
     },
+    originalName: {
+      type: String,
+      default: "",
+    },
+    thumbnail: {
+      type: String,
+      default: "",
+    },
     publicId: {
       type: String, // The public_id from Cloudinary, used for deleting/managing the video
     },
@@ -38,6 +46,10 @@ const lectureSchema = new mongoose.Schema(
       type: Boolean,
       default: false, // It's safer to default to not free
     },
+    downloadable: {
+      type: Boolean,
+      default: false,
+    },
 
     // --- 3. CRITICAL: The required relationship to the parent Section ---
     section: {
@@ -51,6 +63,17 @@ const lectureSchema = new mongoose.Schema(
       default: "pending",
     },
     resolution: { type: String, default: "" },
+    captions: [
+      {
+        language: { type: String, required: true },
+        url: { type: String, required: true },
+        filename: { type: String, default: "" },
+      }
+    ],
+    captionsDisabled: {
+      type: Boolean,
+      default: false,
+    },
   },
   { timestamps: true },
 );

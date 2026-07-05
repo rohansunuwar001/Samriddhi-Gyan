@@ -6,7 +6,7 @@ const CategoriesNavBar = ({ categories, selectedCategory, onSelectCategory }) =>
             <div className="flex items-center h-16 space-x-6 overflow-x-auto">
                 <button
                     onClick={() => onSelectCategory('All')}
-                    className={`px-3 py-2 text-sm font-medium rounded-md whitespace-nowrap ${selectedCategory === 'All' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
+                    className={`px-3 py-2 text-base font-light rounded-md whitespace-nowrap ${selectedCategory === 'All' ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
                 >
                     All
                 </button>
@@ -14,7 +14,7 @@ const CategoriesNavBar = ({ categories, selectedCategory, onSelectCategory }) =>
                     <button
                         key={category._id}
                         onClick={() => onSelectCategory(category.name)}
-                        className={`px-3 py-2 text-sm font-medium rounded-md whitespace-nowrap ${selectedCategory === category.name ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
+                        className={`px-3 py-2 text-base font-light rounded-md whitespace-nowrap ${selectedCategory === category.name ? 'bg-gray-700' : 'hover:bg-gray-700'}`}
                     >
                         {category.name}
                     </button>

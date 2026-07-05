@@ -7,6 +7,8 @@
 import { Course } from "../models/course.model.js";
 import Article from "../models/article.model.js";
 import Category from "../models/category.model.js";
+import mongoose from "mongoose";
+import { getEnrolledIds } from "../helpers/courseFilter.helper.js";
 
 /**
  * @desc    Get courses + articles that match a given topic/category name
@@ -22,6 +24,7 @@ export const getCombinedSearchResults = async (req, res) => {
     }
 
     const cleanedTopic = topic.trim();
+    const enrolledIds = await getEnrolledIds(req);
 
     // Find the matching Category doc first — articles link to categories by
     // ObjectId, not by name, so we need the id to query Article.category.
@@ -32,6 +35,9 @@ export const getCombinedSearchResults = async (req, res) => {
       Course.find({
         isPublished: true,
         topics: cleanedTopic,
+        ...(enrolledIds.length > 0 && {
+          _id: { $nin: enrolledIds.map((id) => new mongoose.Types.ObjectId(id)) },
+        }),
       })
         .select("title slug thumbnail price ratings numOfReviews category")
         .limit(20)

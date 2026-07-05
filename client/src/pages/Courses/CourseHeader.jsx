@@ -91,17 +91,17 @@ const CourseHeader = ({ course, purchasePanel }) => {
                                 </div>
                             )}
 
-                            <p className="mt-6 text-lg font-semibold text-white">
+                            <p className="mt-6 text-lg font-normal text-white">
                                 Created by{' '}
                                 {course.creator?._id ? (
                                     <Link
-                                        to={'/instructor-profile/' + course.creator._id}
-                                        className="font-semibold text-[#a78bfa] underline underline-offset-2 hover:text-[#c4b5fd]"
+                                        to={`/${course.creator.role === 'admin' ? 'admin' : 'instructor'}/${(course.creator.name || "instructor").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "")}-${course.creator._id}`}
+                                        className="font-normal text-[#a78bfa] underline underline-offset-2 hover:text-[#c4b5fd]"
                                     >
                                         {creatorText}
                                     </Link>
                                 ) : (
-                                    <span className="text-[#a78bfa] underline underline-offset-2">
+                                    <span className="text-[#a78bfa] underline underline-offset-2 font-normal">
                                         {creatorText}
                                     </span>
                                 )}

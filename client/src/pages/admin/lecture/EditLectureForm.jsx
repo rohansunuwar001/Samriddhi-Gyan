@@ -4,6 +4,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { useDeleteLectureMutation, useGetLectureByIdQuery, useUpdateLectureMutation } from "@/features/api/lectureApi";
+import { useGetCourseByIdQuery } from "@/features/api/courseApi";
 
 import { CheckCircle2, AlertCircle, Upload, Film, Loader2, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
@@ -24,7 +25,7 @@ const StatusBadge = ({ status, phase, progress }) => {
   };
   const c = config[status] || config.pending;
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${c.cls}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-light ${c.cls}`}>
       {status === "transcoding" && <Loader2 className="w-3 h-3 animate-spin" />}
       {status === "ready"       && <CheckCircle2 className="w-3 h-3" />}
       {status === "failed"      && <AlertCircle className="w-3 h-3" />}
@@ -36,7 +37,7 @@ const StatusBadge = ({ status, phase, progress }) => {
 
 const ProgressBar = ({ value, label, color = "bg-blue-500" }) => (
   <div className="space-y-1">
-    <div className="flex justify-between text-xs text-muted-foreground">
+    <div className="flex justify-between text-sm text-muted-foreground">
       <span>{label}</span><span>{value}%</span>
     </div>
     <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
@@ -68,8 +69,11 @@ const EditLectureForm = () => {
   const xhrRef       = useRef(null);
 
   const { data: lectureData, isLoading } = useGetLectureByIdQuery(lectureId);
+  const { data: courseData } = useGetCourseByIdQuery(courseId);
   const [updateLecture, { isLoading: isSaving }] = useUpdateLectureMutation();
   const [deleteLecture, { isLoading: isDeleting }] = useDeleteLectureMutation();
+  const [videoSource, setVideoSource] = useState("upload");
+  const [selectedLibVideo, setSelectedLibVideo] = useState(null);
 
   // Populate form from fetched lecture
   useEffect(() => {
@@ -248,101 +252,181 @@ const EditLectureForm = () => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Enter lecture description..."
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
 
           {/* Video upload */}
           <div className="space-y-3">
-            <Label>Video</Label>
-
-            {/* Upload progress */}
-            {isUploading && (
-              <div className="space-y-3 p-4 bg-blue-50 rounded-lg border border-blue-100">
-                <ProgressBar value={uploadProgress} label="Uploading to server…" color="bg-blue-500" />
+            <div className="flex justify-between items-center">
+              <Label>Video</Label>
+              {/* Video Source Tabs */}
+              <div className="flex gap-2">
                 <button
                   type="button"
-                  onClick={() => xhrRef.current?.abort()}
-                  className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1"
+                  onClick={() => setVideoSource("upload")}
+                  className={`text-[11px] font-normal px-2.5 py-1 border transition-all ${videoSource === "upload" ? "bg-[#1c1d1f] text-white border-[#1c1d1f]" : "bg-white text-[#1c1d1f] border-[#d1d7dc] hover:bg-[#f7f9fa]"}`}
                 >
-                  <X className="w-3 h-3" /> Cancel
+                  Upload Video
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setVideoSource("library")}
+                  className={`text-[11px] font-normal px-2.5 py-1 border transition-all ${videoSource === "library" ? "bg-[#1c1d1f] text-white border-[#1c1d1f]" : "bg-white text-[#1c1d1f] border-[#d1d7dc] hover:bg-[#f7f9fa]"}`}
+                >
+                  Video Library
                 </button>
               </div>
-            )}
+            </div>
 
-            {/* Transcoding progress */}
-            {isProcessing && !isUploading && (
-              <div className="space-y-2 p-4 bg-amber-50 rounded-lg border border-amber-100">
-                <ProgressBar
-                  value={processingProgress}
-                  label={processingPhase || "FFmpeg transcoding…"}
-                  color="bg-amber-500"
-                />
-                <p className="text-xs text-amber-700">
-                  You can close this — processing continues in the background.
-                </p>
-              </div>
-            )}
-
-            {/* Drop zone */}
-            {!isUploading && !isProcessing && (
-              <div
-                className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary/40 hover:bg-secondary/30 transition-colors"
-                onDrop={(e) => {
-                  e.preventDefault();
-                  const f = e.dataTransfer.files?.[0];
-                  if (f?.type.startsWith("video/")) setSelectedFile(f);
-                  else toast.error("Please drop a video file");
-                }}
-                onDragOver={(e) => e.preventDefault()}
-                onClick={() => fileInputRef.current?.click()}
-              >
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  accept="video/*"
-                  className="hidden"
-                  onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
-                />
-
-                {selectedFile ? (
-                  <div className="space-y-1">
-                    <Film className="w-8 h-8 text-primary mx-auto" />
-                    <p className="font-medium text-sm">{selectedFile.name}</p>
-                    <p className="text-xs text-muted-foreground">{formatSize(selectedFile.size)}</p>
+            {videoSource === "upload" && (
+              <>
+                {/* Upload progress */}
+                {isUploading && (
+                  <div className="space-y-3 p-4 bg-blue-50 rounded-lg border border-blue-100">
+                    <ProgressBar value={uploadProgress} label="Uploading to server…" color="bg-blue-500" />
                     <button
                       type="button"
-                      className="text-xs text-muted-foreground hover:text-destructive"
-                      onClick={(e) => { e.stopPropagation(); setSelectedFile(null); }}
+                      onClick={() => xhrRef.current?.abort()}
+                      className="text-sm text-red-500 hover:text-red-700 flex items-center gap-1"
                     >
-                      Remove
+                      <X className="w-3 h-3" /> Cancel
                     </button>
                   </div>
-                ) : (
-                  <div className="space-y-1">
-                    <Upload className="w-8 h-8 text-muted-foreground mx-auto" />
-                    <p className="text-sm font-medium text-muted-foreground">
-                      Drop video here or click to browse
+                )}
+
+                {/* Transcoding progress */}
+                {isProcessing && !isUploading && (
+                  <div className="space-y-2 p-4 bg-amber-50 rounded-lg border border-amber-100">
+                    <ProgressBar
+                      value={processingProgress}
+                      label={processingPhase || "FFmpeg transcoding…"}
+                      color="bg-amber-500"
+                    />
+                    <p className="text-sm text-amber-700">
+                      You can close this — processing continues in the background.
                     </p>
-                    <p className="text-xs text-muted-foreground">
-                      MP4, MOV, MKV · Up to 20 GB · Up to 4K supported
-                    </p>
-                    {processingStatus === "ready" && (
-                      <p className="text-xs text-green-600 mt-1">
-                        Current video is live. Upload to replace it.
-                      </p>
+                  </div>
+                )}
+
+                {/* Drop zone */}
+                {!isUploading && !isProcessing && (
+                  <div
+                    className="border-2 border-dashed border-border rounded-xl p-8 text-center cursor-pointer hover:border-primary/40 hover:bg-secondary/30 transition-colors"
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      const f = e.dataTransfer.files?.[0];
+                      if (f?.type.startsWith("video/")) setSelectedFile(f);
+                      else toast.error("Please drop a video file");
+                    }}
+                    onDragOver={(e) => e.preventDefault()}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="video/*"
+                      className="hidden"
+                      onChange={(e) => setSelectedFile(e.target.files?.[0] || null)}
+                    />
+
+                    {selectedFile ? (
+                      <div className="space-y-1">
+                        <Film className="w-8 h-8 text-primary mx-auto" />
+                        <p className="font-light text-base">{selectedFile.name}</p>
+                        <p className="text-sm text-muted-foreground">{formatSize(selectedFile.size)}</p>
+                        <button
+                          type="button"
+                          className="text-sm text-muted-foreground hover:text-destructive"
+                          onClick={(e) => { e.stopPropagation(); setSelectedFile(null); }}
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-1">
+                        <Upload className="w-8 h-8 text-muted-foreground mx-auto" />
+                        <p className="text-base font-light text-muted-foreground">
+                          Drop video here or click to browse
+                        </p>
+                        <p className="text-sm text-muted-foreground">
+                          MP4, MOV, MKV · Up to 20 GB · Up to 4K supported
+                        </p>
+                        {processingStatus === "ready" && (
+                          <p className="text-sm text-green-600 mt-1">
+                            Current video is live. Upload to replace it.
+                          </p>
+                        )}
+                      </div>
                     )}
                   </div>
                 )}
-              </div>
+
+                {/* Upload button */}
+                {selectedFile && !isUploading && (
+                  <Button type="button" className="w-full" onClick={handleUpload}>
+                    <Upload className="w-4 h-4 mr-2" />
+                    Upload &amp; Process Video
+                  </Button>
+                )}
+              </>
             )}
 
-            {/* Upload button */}
-            {selectedFile && !isUploading && (
-              <Button type="button" className="w-full" onClick={handleUpload}>
-                <Upload className="w-4 h-4 mr-2" />
-                Upload &amp; Process Video
-              </Button>
+            {videoSource === "library" && (
+              <div className="border border-[#d1d7dc] p-5 bg-[#f7f9fa] rounded-lg">
+                <h4 className="font-normal text-base text-[#1c1d1f] mb-3">Course Video Library</h4>
+                {courseData?.course?.videoLibrary?.length > 0 ? (
+                  <div className="space-y-2 max-h-[220px] overflow-y-auto pr-2">
+                    {courseData.course.videoLibrary.map((vid, idx) => {
+                      const isSelected = selectedLibVideo === vid;
+                      return (
+                        <div
+                          key={idx}
+                          onClick={() => setSelectedLibVideo(vid)}
+                          className={`flex items-center justify-between p-3 border cursor-pointer transition-colors ${isSelected ? "border-[#a435f0] bg-[#f0e6ff]/20 font-normal" : "border-[#d1d7dc] bg-white hover:bg-slate-50"}`}
+                        >
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <Film className="w-4 h-4 text-[#6a6f73] shrink-0" />
+                            <span className="text-sm text-[#1c1d1f] truncate">{vid.filename}</span>
+                          </div>
+                          <span className="text-[10px] text-[#6a6f73] shrink-0 ml-4">
+                            {Math.round((vid.sizeBytes || 0) / (1024 * 1024))} MB
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-sm text-[#6a6f73] italic">No videos in the course library yet. Use the Bulk Uploader under Curriculum to upload files.</p>
+                )}
+
+                {selectedLibVideo && (
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        await updateLecture({
+                          lectureId,
+                          title,
+                          description,
+                          isPreview,
+                          videoUrl: selectedLibVideo.url,
+                          status: "ready",
+                          durationInSeconds: selectedLibVideo.durationInSeconds || 300,
+                          courseId,
+                        }).unwrap();
+                        setProcessingStatus("ready");
+                        toast.success("Linked video from course library!");
+                      } catch (err) {
+                        toast.error("Failed to link video.");
+                      }
+                    }}
+                    className="w-full mt-4 bg-[#a435f0] hover:bg-[#8710d8] text-white font-normal text-sm py-2.5 transition-colors"
+                  >
+                    Use Selected Video
+                  </button>
+                )}
+              </div>
             )}
           </div>
 

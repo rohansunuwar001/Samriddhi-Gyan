@@ -2,11 +2,12 @@
 
 import { Course } from "../models/course.model.js";
 import { User } from "../models/user.model.js";
+import { Certification } from "../models/certification.model.js";
 
 // Make sure to import your Course model
 
 /**
- * @desc    Get all courses in the user's cart
+ * @desc    Get all courses and certifications in the user's cart
  * @route   GET /api/cart
  * @access  Private
  */
@@ -16,6 +17,13 @@ export const getCart = async (req, res) => {
 
     const user = await User.findById(userId)
       .populate("cart")
+      .populate({
+        path: "cartCertifications",
+        populate: {
+          path: "issuer",
+          select: "name type"
+        }
+      })
       .populate("enrolledCourses");
 
     if (!user) {
@@ -38,6 +46,7 @@ export const getCart = async (req, res) => {
     res.status(200).json({
       success: true,
       cart: filteredCart,
+      cartCertifications: user.cartCertifications || [],
     });
   } catch (error) {
     console.error(error);
@@ -49,19 +58,26 @@ export const getCart = async (req, res) => {
 };
 
 /**
- * @desc    Add a course to the user's cart
+ * @desc    Add a course or certification to the user's cart
  * @route   POST /api/cart/add
  * @access  Private
  */
 export const addToCart = async (req, res) => {
   try {
-    const userId = req.user._id;
-    const { courseId } = req.body;
+    if (req.user?.role === "admin") {
+      return res.status(403).json({
+        success: false,
+        message: "Administrators cannot enroll in or purchase items.",
+      });
+    }
 
-    if (!courseId) {
+    const userId = req.user._id;
+    const { courseId, certificationId } = req.body;
+
+    if (!courseId && !certificationId) {
       return res
         .status(400)
-        .json({ message: "Course ID is required", success: false });
+        .json({ message: "Course ID or Certification ID is required", success: false });
     }
 
     const user = await User.findById(userId);
@@ -69,6 +85,33 @@ export const addToCart = async (req, res) => {
       return res
         .status(404)
         .json({ message: "User not found", success: false });
+    }
+
+    if (certificationId) {
+      // Check if certification exists
+      const cert = await Certification.findById(certificationId);
+      if (!cert) {
+        return res.status(404).json({ message: "Certification not found", success: false });
+      }
+
+      // Check if already in cartCertifications
+      if (user.cartCertifications?.some((id) => id.toString() === certificationId)) {
+        return res.status(400).json({
+          success: false,
+          message: "Certification is already in your cart.",
+        });
+      }
+
+      user.cartCertifications = user.cartCertifications || [];
+      user.cartCertifications.push(certificationId);
+      await user.save();
+
+      return res.status(200).json({
+        message: "Certification added to cart successfully",
+        success: true,
+        cart: user.cart,
+        cartCertifications: user.cartCertifications,
+      });
     }
 
     // Check if the course exists
@@ -94,6 +137,7 @@ export const addToCart = async (req, res) => {
       message: "Course added to cart successfully",
       success: true,
       cart: user.cart,
+      cartCertifications: user.cartCertifications,
     });
   } catch (error) {
     console.error(error);
@@ -102,19 +146,19 @@ export const addToCart = async (req, res) => {
 };
 
 /**
- * @desc    Remove a course from the user's cart
+ * @desc    Remove a course or certification from the user's cart
  * @route   POST /api/cart/remove
  * @access  Private
  */
 export const removeFromCart = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { courseId } = req.body;
+    const { courseId, certificationId } = req.body;
 
-    if (!courseId) {
+    if (!courseId && !certificationId) {
       return res
         .status(400)
-        .json({ message: "Course ID is required", success: false });
+        .json({ message: "Course ID or Certification ID is required", success: false });
     }
 
     const user = await User.findById(userId);
@@ -122,6 +166,20 @@ export const removeFromCart = async (req, res) => {
       return res
         .status(404)
         .json({ message: "User not found", success: false });
+    }
+
+    if (certificationId) {
+      user.cartCertifications = (user.cartCertifications || []).filter(
+        (id) => id.toString() !== certificationId
+      );
+      await user.save();
+
+      return res.status(200).json({
+        message: "Certification removed from cart successfully",
+        success: true,
+        cart: user.cart,
+        cartCertifications: user.cartCertifications,
+      });
     }
 
     // Remove the course from the cart array
@@ -132,6 +190,7 @@ export const removeFromCart = async (req, res) => {
       message: "Course removed from cart successfully",
       success: true,
       cart: user.cart,
+      cartCertifications: user.cartCertifications,
     });
   } catch (error) {
     console.error(error);

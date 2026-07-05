@@ -6,6 +6,7 @@ import SearchResult from "./SearchResult";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useGetSearchCourseQuery } from "@/features/api/courseApi";
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const SearchPage = () => {
   const [searchParams] = useSearchParams();
@@ -46,16 +47,20 @@ const SearchPage = () => {
     ));
   }, [isLoading, isError, isEmpty, data, query]);
 
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
+
   return (
     <div className="max-w-7xl mx-auto p-4 md:p-8">
       <header className="my-6 space-y-2">
-        <h1 className="font-bold text-xl md:text-2xl">
+        <h1 className="font-normal text-2xl md:text-3xl">
           Search results for "{query}"
         </h1>
         {query && (
           <p className="text-gray-600 dark:text-gray-400">
             Showing results for{" "}
-            <span className="text-blue-600 dark:text-blue-400 font-semibold italic">
+            <span className="text-blue-600 dark:text-blue-400 font-normal italic">
               {query}
             </span>
           </p>
@@ -85,10 +90,10 @@ const CourseNotFound = ({ searchQuery }) => {
   return (
     <div className="flex flex-col items-center justify-center min-h-64 dark:bg-gray-900 p-6 rounded-lg bg-gray-50">
       <AlertCircle className="text-red-500 h-16 w-16 mb-4" />
-      <h1 className="font-bold text-2xl md:text-4xl text-gray-800 dark:text-gray-200 mb-2 text-center">
+      <h1 className="font-normal text-3xl md:text-5xl text-gray-800 dark:text-gray-200 mb-2 text-center">
         {searchQuery ? "No courses found" : "Search for courses"}
       </h1>
-      <p className="text-lg text-gray-600 dark:text-gray-400 mb-4 text-center">
+      <p className="text-xl text-gray-600 dark:text-gray-400 mb-4 text-center">
         {searchQuery 
           ? `We couldn't find any courses matching "${searchQuery}"`
           : "Try searching for topics, categories, or instructors"}
@@ -106,10 +111,10 @@ const ErrorState = () => {
   return (
     <div className="flex flex-col items-center justify-center min-h-64 dark:bg-gray-900 p-6 rounded-lg bg-gray-50">
       <AlertCircle className="text-red-500 h-16 w-16 mb-4" />
-      <h1 className="font-bold text-2xl md:text-4xl text-gray-800 dark:text-gray-200 mb-2">
+      <h1 className="font-normal text-3xl md:text-5xl text-gray-800 dark:text-gray-200 mb-2">
         Error Loading Results
       </h1>
-      <p className="text-lg text-gray-600 dark:text-gray-400 mb-4">
+      <p className="text-xl text-gray-600 dark:text-gray-400 mb-4">
         We encountered an issue while loading search results.
       </p>
       <Button 

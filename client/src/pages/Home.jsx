@@ -3,6 +3,7 @@ import { useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import GuestHome from "./Home/GuestHome";
 import WelcomeBanner from "./Home/WelcomeBanner";
+import LoadingSpinner from "@/components/LoadingSpinner";
 import { useGetMyLearningCoursesQuery, useLoadUserQuery } from "@/features/api/authApi";
 import { useGetPublishedCourseQuery } from "@/features/api/courseApi";
 import { useGetRecommendedCourseQuery, useGetTrendingCourseQuery } from "@/features/api/recommendedApi";
@@ -108,6 +109,11 @@ console.log("Learning course", learningData);
 
   if (!isAuthenticated) {
     return <GuestHome />;
+  }
+
+  const isHomeLoading = isLoadingLearning || isLoadingRecommended || isLoadingTrending || isLoadingPublished;
+  if (isHomeLoading) {
+    return <LoadingSpinner />;
   }
 
   const learningCourses = learningData?.courses || [];
@@ -311,31 +317,35 @@ console.log("Learning course", learningData);
           </div>
 
           {/* Slider 1: Recommended for you */}
-          <div className="space-y-3">
-            <h3 className="text-2xl font-normal text-[#1c1d1f]">
-              Recommended for you
-            </h3>
-            {isLoadingRecommended ? (
-              <div className="flex gap-4">
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <Skeleton key={i} className="h-44 w-[230px] bg-gray-100" />
-                ))}
-              </div>
-            ) : (
-              <CourseSlider courses={recommendedCourses} />
-            )}
-          </div>
+          {(isLoadingRecommended || (recommendedCourses && recommendedCourses.length > 0)) && (
+            <div className="space-y-3">
+              <h3 className="text-2xl font-normal text-[#1c1d1f]">
+                Recommended for you
+              </h3>
+              {isLoadingRecommended ? (
+                <div className="flex gap-4">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <Skeleton key={i} className="h-44 w-[230px] bg-gray-100" />
+                  ))}
+                </div>
+              ) : (
+                <CourseSlider courses={recommendedCourses} />
+              )}
+            </div>
+          )}
 
           {/* Slider 2: Based on your recent searches */}
-          <div className="space-y-3">
-            <h3 className="text-xl font-normal text-[#1c1d1f]">
-              Based on your recent searches
-            </h3>
-            <CourseSlider courses={recentSearchesCourses} />
-          </div>
+          {recentSearchesCourses && recentSearchesCourses.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-xl font-normal text-[#1c1d1f]">
+                Based on your recent searches
+              </h3>
+              <CourseSlider courses={recentSearchesCourses} />
+            </div>
+          )}
 
           {/* Slider 3: Because you viewed "..." */}
-          {lastViewedCourse && (
+          {lastViewedCourse && becauseYouViewedCourses && becauseYouViewedCourses.length > 0 && (
             <div className="space-y-3">
               <h3 className="text-xl font-normal text-[#1c1d1f]">
                 Because you viewed &ldquo;
@@ -349,37 +359,41 @@ console.log("Learning course", learningData);
           )}
 
           {/* Slider 4: Popular for [Occupation] */}
-          <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <h3 className="text-xl font-normal text-[#1c1d1f]">
-                Popular for {occupation}
-              </h3>
-              <button
-                onClick={() => navigate("/personalize")}
-                className="text-sm font-normal text-[#5624d0] hover:underline"
-              >
-                Edit occupation
-              </button>
+          {popularForOccupationCourses && popularForOccupationCourses.length > 0 && (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3">
+                <h3 className="text-xl font-normal text-[#1c1d1f]">
+                  Popular for {occupation}
+                </h3>
+                <button
+                  onClick={() => navigate("/personalize")}
+                  className="text-sm font-normal text-[#5624d0] hover:underline"
+                >
+                  Edit occupation
+                </button>
+              </div>
+              <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
+                <span className="bg-[#d5ffd6] text-[#1c6f21] px-1.5 py-0.5 rounded font-normal text-[10px] uppercase">
+                  New
+                </span>
+                <span>Inspired by your selections</span>
+              </div>
+              <CourseSlider courses={popularForOccupationCourses} />
             </div>
-            <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
-              <span className="bg-[#d5ffd6] text-[#1c6f21] px-1.5 py-0.5 rounded font-normal text-[10px] uppercase">
-                New
-              </span>
-              <span>Inspired by your selections</span>
-            </div>
-            <CourseSlider courses={popularForOccupationCourses} />
-          </div>
+          )}
 
           {/* Slider 5: Trending courses */}
-          <div className="space-y-3">
-            <h3 className="text-xl font-normal text-[#1c1d1f]">
-              Trending courses
-            </h3>
-            <CourseSlider courses={trendingCourses.slice(0, 8)} />
-          </div>
+          {trendingCourses && trendingCourses.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-xl font-normal text-[#1c1d1f]">
+                Trending courses
+              </h3>
+              <CourseSlider courses={trendingCourses.slice(0, 8)} />
+            </div>
+          )}
 
           {/* Slider 6: Because you wishlisted "..." */}
-          {lastWishlistedCourse && (
+          {lastWishlistedCourse && becauseYouWishlistedCourses && becauseYouWishlistedCourses.length > 0 && (
             <div className="space-y-3">
               <h3 className="text-xl font-normal text-[#1c1d1f]">
                 Because you wishlisted &ldquo;
@@ -393,58 +407,64 @@ console.log("Learning course", learningData);
           )}
 
           {/* Slider 7: Recommended to you based on ratings */}
-          <div className="space-y-3">
-            <h3 className="text-xl font-normal text-[#1c1d1f]">
-              Recommended to you based on ratings
-            </h3>
-            <CourseSlider courses={basedOnRatingsCourses.slice(0, 8)} />
-          </div>
+          {basedOnRatingsCourses && basedOnRatingsCourses.length > 0 && (
+            <div className="space-y-3">
+              <h3 className="text-xl font-normal text-[#1c1d1f]">
+                Recommended to you based on ratings
+              </h3>
+              <CourseSlider courses={basedOnRatingsCourses.slice(0, 8)} />
+            </div>
+          )}
 
           {/* Section 8: Featured courses Tab Section */}
-          <div className="space-y-4 pt-4 border-t border-gray-100">
-            <h3 className="text-2xl font-normal text-[#1c1d1f]">
-              Featured courses
-            </h3>
-            
-            {/* Tabs */}
-            <div className="flex border-b border-gray-200 text-sm font-normal gap-6">
-              {["Most popular", "New", "Intermediate & advanced"].map((tab) => (
-                <button
-                  key={tab}
-                  onClick={() => setActiveFeaturedTab(tab)}
-                  className={`pb-3 focus:outline-none transition-colors border-b-2 ${
-                    activeFeaturedTab === tab
-                      ? "border-[#1c1d1f] text-[#1c1d1f]"
-                      : "border-transparent text-gray-500 hover:text-[#1c1d1f]"
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
+          {featuredCourses && featuredCourses.length > 0 && (
+            <div className="space-y-4 pt-4 border-t border-gray-100">
+              <h3 className="text-2xl font-normal text-[#1c1d1f]">
+                Featured courses
+              </h3>
+              
+              {/* Tabs */}
+              <div className="flex border-b border-gray-200 text-sm font-normal gap-6">
+                {["Most popular", "New", "Intermediate & advanced"].map((tab) => (
+                  <button
+                    key={tab}
+                    onClick={() => setActiveFeaturedTab(tab)}
+                    className={`pb-3 focus:outline-none transition-colors border-b-2 ${
+                      activeFeaturedTab === tab
+                        ? "border-[#1c1d1f] text-[#1c1d1f]"
+                        : "border-transparent text-gray-500 hover:text-[#1c1d1f]"
+                    }`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
 
-            <div className="pt-2">
-              <CourseSlider courses={featuredCourses} />
+              <div className="pt-2">
+                <CourseSlider courses={featuredCourses} />
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Section 9: Topics recommended for you */}
-          <div className="space-y-4 pt-4 border-t border-gray-100">
-            <h3 className="text-2xl font-normal text-[#1c1d1f]">
-              Topics recommended for you
-            </h3>
-            <div className="flex flex-wrap gap-3">
-              {recommendedTopics.map((topic, i) => (
-                <button
-                  key={i}
-                  onClick={() => navigate(`/course/search?query=${encodeURIComponent(topic.query)}`)}
-                  className="border border-gray-300 hover:bg-gray-50 text-[#1c1d1f] font-normal text-sm px-5 py-3.5 transition-all select-none"
-                >
-                  {topic.label}
-                </button>
-              ))}
+          {recommendedTopics && recommendedTopics.length > 0 && (
+            <div className="space-y-4 pt-4 border-t border-gray-100">
+              <h3 className="text-2xl font-normal text-[#1c1d1f]">
+                Topics recommended for you
+              </h3>
+              <div className="flex flex-wrap gap-3">
+                {recommendedTopics.map((topic, i) => (
+                  <button
+                    key={i}
+                    onClick={() => navigate(`/course/search?query=${encodeURIComponent(topic.query)}`)}
+                    className="border border-gray-300 hover:bg-gray-50 text-[#1c1d1f] font-normal text-sm px-5 py-3.5 transition-all select-none"
+                  >
+                    {topic.label}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
+          )}
 
         </div>
 

@@ -168,6 +168,7 @@ export const uploadVideo = async (req, res) => {
     await Lecture.findByIdAndUpdate(lectureId, {
       status: "transcoding",
       videoUrl: null,
+      originalName: req.file.originalname || "",
     });
 
     // Respond now — transcoding runs in the background
@@ -218,12 +219,37 @@ export const uploadVideo = async (req, res) => {
         console.error("[uploadVideo] Transcription error:", trErr.message);
       }
 
+      // Generate thumbnail from the raw upload (still available at this point)
+      let thumbnailUrl = "";
+      try {
+        const thumbFilename = "thumb.jpg";
+        const thumbPath = path.join(outputDir, thumbFilename);
+        await new Promise((resolve, reject) => {
+          const proc = spawn(ffmpegStatic, [
+            "-i", rawPath,
+            "-ss", "00:00:02",
+            "-vframes", "1",
+            "-vf", "scale=320:-1",
+            "-y",
+            thumbPath,
+          ]);
+          proc.on("close", (code) => (code === 0 ? resolve() : reject(new Error("thumb failed"))));
+          proc.on("error", reject);
+        });
+        const bUrl = process.env.BACKEND_URI || "http://localhost:8080";
+        thumbnailUrl = `${bUrl}/hls/${lectureId}/${thumbFilename}`;
+        console.log(`[uploadVideo] Thumbnail generated: ${thumbnailUrl}`);
+      } catch (thumbErr) {
+        console.error("[uploadVideo] Thumbnail generation error:", thumbErr.message);
+      }
+
       await Lecture.findByIdAndUpdate(lectureId, {
         videoUrl: masterUrl,
         status: "ready",
         durationInSeconds: Math.round(metadata.duration),
         resolution: `${metadata.width}x${metadata.height}`,
         transcript: transcriptText,
+        thumbnail: thumbnailUrl,
       });
 
       const updatedLecture = await Lecture.findById(lectureId).populate({
@@ -318,6 +344,22 @@ export const updateLecture = async (req, res) => {
       update.isPreview = isPreview;
     }
 
+    if (req.body.videoUrl !== undefined) {
+      update.videoUrl = req.body.videoUrl;
+    }
+
+    if (req.body.status !== undefined) {
+      update.status = req.body.status;
+    }
+
+    if (req.body.durationInSeconds !== undefined) {
+      update.durationInSeconds = Number(req.body.durationInSeconds);
+    }
+
+    if (req.body.downloadable !== undefined) {
+      update.downloadable = req.body.downloadable;
+    }
+
     const lecture = await Lecture.findByIdAndUpdate(lectureId, update, {
       new: true,
     });
@@ -378,6 +420,95 @@ export const getLectureById = async (req, res) => {
         .json({ success: false, message: "Lecture not found" });
     }
     res.json({ success: true, lecture });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ─── Captions Management ──────────────────────────────────────────────────────
+
+export const uploadCaption = async (req, res) => {
+  try {
+    const { lectureId } = req.params;
+    const { language } = req.body;
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No subtitle file uploaded" });
+    }
+
+    const lecture = await Lecture.findById(lectureId);
+    if (!lecture) {
+      fs.rmSync(req.file.path, { force: true });
+      return res.status(404).json({ success: false, message: "Lecture not found" });
+    }
+
+    const backendUrl = process.env.BACKEND_URI || "http://localhost:8080";
+    const captionUrl = `${backendUrl}/uploads/captions/${req.file.filename}`;
+
+    // Remove existing caption for the same language if present
+    lecture.captions = lecture.captions.filter(c => c.language !== language);
+
+    lecture.captions.push({
+      language: language || "English (US)",
+      url: captionUrl,
+      filename: req.file.originalname,
+    });
+
+    await lecture.save();
+
+    res.json({ success: true, message: "Caption uploaded successfully", lecture });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const toggleCaptionsDisable = async (req, res) => {
+  try {
+    const { lectureId } = req.params;
+    const { disabled } = req.body;
+
+    const lecture = await Lecture.findByIdAndUpdate(
+      lectureId,
+      { captionsDisabled: disabled === true || disabled === "true" },
+      { new: true }
+    );
+
+    if (!lecture) {
+      return res.status(404).json({ success: false, message: "Lecture not found" });
+    }
+
+    res.json({ success: true, message: "Captions visibility toggled", lecture });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const deleteCaption = async (req, res) => {
+  try {
+    const { lectureId, captionId } = req.params;
+
+    const lecture = await Lecture.findById(lectureId);
+    if (!lecture) {
+      return res.status(404).json({ success: false, message: "Lecture not found" });
+    }
+
+    const caption = lecture.captions.id(captionId);
+    if (caption) {
+      try {
+        const relativePath = caption.url.split("/uploads/")[1];
+        if (relativePath) {
+          const filePath = path.join(process.cwd(), "uploads", relativePath);
+          fs.rmSync(filePath, { force: true });
+        }
+      } catch (err) {
+        console.error("Failed to delete subtitle file on disk:", err);
+      }
+      
+      lecture.captions.pull(captionId);
+      await lecture.save();
+    }
+
+    res.json({ success: true, message: "Caption deleted successfully", lecture });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

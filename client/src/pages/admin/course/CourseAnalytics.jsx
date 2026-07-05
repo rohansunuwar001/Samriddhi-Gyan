@@ -48,11 +48,11 @@ const COLORS = [
 const StatCard = ({ title, value, icon: Icon, prefix = "" }) => (
   <Card>
     <CardHeader className="flex flex-row items-center justify-between pb-2">
-      <CardTitle className="text-sm font-medium">{title}</CardTitle>
+      <CardTitle className="text-lg font-light">{title}</CardTitle>
       <Icon className="h-4 w-4 text-muted-foreground" />
     </CardHeader>
     <CardContent>
-      <div className="text-2xl font-bold">
+      <div className="text-4xl font-normal">
         <CountUp
           start={0}
           end={value}
@@ -174,7 +174,7 @@ const CourseAnalytics = () => {
   return (
     <div className="flex-1 space-y-6 p-8 pt-6 bg-slate-50 min-h-screen">
       <header>
-        <h2 className="text-3xl font-bold tracking-tight">Your Analytics</h2>
+        <h2 className="text-5xl font-normal tracking-tight">Your Analytics</h2>
         <p className="text-muted-foreground">
           An overview of your performance as an instructor.
         </p>
@@ -285,7 +285,7 @@ const CourseAnalytics = () => {
                   {data.analytics.map((course) => (
                     <TableRow key={course.courseId}>
                       <TableCell>
-                        <div className="font-medium">{course.courseTitle}</div>
+                        <div className="font-light">{course.courseTitle}</div>
                       </TableCell>
                       <TableCell>{course.enrolledCount}</TableCell>
                       <TableCell>{course.purchaseCount}</TableCell>
@@ -329,7 +329,7 @@ const CourseAnalytics = () => {
                             <TableCell>
                               {new Date(p.purchasedAt).toLocaleDateString()}
                             </TableCell>
-                            <TableCell className="text-right font-medium">
+                            <TableCell className="text-right font-light">
                               $
                               {p.courses
                                 .find(

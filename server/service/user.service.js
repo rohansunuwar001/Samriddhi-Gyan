@@ -97,22 +97,50 @@ export const getUserProfile = async (userId) => {
  * FIX: The original used wrong field names (courseTitle, coursePrice etc.)
  *      Your Course model uses: title, thumbnail, price, ratings, numOfReviews
  */
-export const getPublicProfile = async (instructorId) => {
-  const user = await User.findById(instructorId).select(
-    "name headline photoUrl description links role"
-  );
+export const getPublicProfile = async (idOrSlug) => {
+  const isObjectId = /^[0-9a-fA-F]{24}$/.test(idOrSlug);
+  let query = {};
+  if (isObjectId) {
+    query = { _id: idOrSlug };
+  } else {
+    const match = idOrSlug.match(/-([0-9a-fA-F]{24})$/);
+    if (match) {
+      query = { _id: match[1] };
+    } else {
+      const slugPattern = idOrSlug.split("-").join("[\\s-]*");
+      query = { name: { $regex: new RegExp(`^${slugPattern}$`, "i") } };
+    }
+  }
+
+  const user = await User.findOne(query)
+    .select("name headline photoUrl description links role enrolledCourses wishlist")
+    .populate({
+      path: "enrolledCourses",
+      select: "title subtitle level thumbnail price ratings numOfReviews creator",
+      populate: { path: "creator", select: "name headline" }
+    })
+    .populate({
+      path: "wishlist",
+      select: "title subtitle level thumbnail price ratings numOfReviews creator",
+      populate: { path: "creator", select: "name headline" }
+    });
 
   if (!user) {
-    const error = new Error("Instructor not found.");
+    const error = new Error("User not found.");
     error.statusCode = 404;
     throw error;
   }
 
-  const courses = await Course.find({
-    creator: instructorId,
-    isPublished: true,
-  }).select("title thumbnail price ratings numOfReviews enrolledStudents");
-  //          ^^^^^ FIXED: was courseTitle, courseThumbnail, coursePrice
+  // If instructor/admin, fetch courses created by them
+  let courses = [];
+  if (user.role === "instructor" || user.role === "admin") {
+    courses = await Course.find({
+      creator: user._id,
+      isPublished: true,
+    })
+    .select("title subtitle level thumbnail price ratings creator numOfReviews enrolledStudents")
+    .populate({ path: "creator", select: "name headline" });
+  }
 
   return { user, courses };
 };
@@ -123,7 +151,7 @@ export const getPublicProfile = async (instructorId) => {
  * Returns the updated user document.
  */
 export const updateUserInfo = async (userId, fields) => {
-  const { name, headline, description, links, occupation, interests } = fields;
+  const { name, headline, description, links, occupation, interests, language, privacy } = fields;
 
   const updateData = {};
 
@@ -132,13 +160,24 @@ export const updateUserInfo = async (userId, fields) => {
   if (description)             updateData.description = description;
   if (occupation !== undefined) updateData.occupation = occupation;
   if (interests  !== undefined) updateData.interests  = interests;
+  if (language)                updateData.language    = language;
 
   // Update nested link fields individually so we don't overwrite the whole object
   if (links && typeof links === "object") {
-    const linkFields = ["website", "facebook", "instagram", "twitter", "linkedin"];
+    const linkFields = ["website", "facebook", "instagram", "twitter", "linkedin", "tiktok", "youtube"];
     linkFields.forEach((key) => {
       if (links[key] !== undefined) {
         updateData[`links.${key}`] = links[key];
+      }
+    });
+  }
+
+  // Update nested privacy fields individually
+  if (privacy && typeof privacy === "object") {
+    const privacyFields = ["showProfileToLoggedIn", "showCoursesTaking"];
+    privacyFields.forEach((key) => {
+      if (privacy[key] !== undefined) {
+        updateData[`privacy.${key}`] = privacy[key];
       }
     });
   }

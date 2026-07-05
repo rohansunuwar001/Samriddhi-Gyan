@@ -10,20 +10,26 @@ export const cartApi = apiSlice.injectEndpoints({
       providesTags: ["Cart"], // Use "Cart" tag for automatic refetching
     }),
     addToCart: builder.mutation({
-      query: (courseId) => ({
-        url: "/cart/add",
-        method: "POST",
-        body: { courseId },
-      }),
-      invalidatesTags: ["Cart"], // When we add, invalidate the cart to trigger a refetch
+      query: (arg) => {
+        const body = typeof arg === "string" ? { courseId: arg } : arg;
+        return {
+          url: "/cart/add",
+          method: "POST",
+          body,
+        };
+      },
+      invalidatesTags: ["Cart"],
     }),
     removeFromCart: builder.mutation({
-      query: (courseId) => ({
-        url: "/cart/remove",
-        method: "POST",
-        body: { courseId },
-      }),
-      invalidatesTags: ["Cart"], // When we remove, invalidate the cart
+      query: (arg) => {
+        const body = typeof arg === "string" ? { courseId: arg } : arg;
+        return {
+          url: "/cart/remove",
+          method: "POST",
+          body,
+        };
+      },
+      invalidatesTags: ["Cart"],
     }),
   }),
 });

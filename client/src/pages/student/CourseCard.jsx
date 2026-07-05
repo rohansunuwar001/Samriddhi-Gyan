@@ -193,23 +193,23 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
             </div>
           </div>
           <CardHeader className="px-4 pt-4 pb-2">
-            <h3 className="font-normal text-xl leading-tight line-clamp-2">
+            <h3 className="font-normal text-2xl leading-tight line-clamp-2">
               {course.title}
             </h3>
           </CardHeader>
           <CardContent className="px-4 py-2 flex-1">
             <div className="w-full">
-              <span className="text-xs text-gray-500 font-semibold mb-1 block">
+              <span className="text-sm text-gray-500 font-normal mb-1 block">
                 Your Progress
               </span>
               <Progress value={progressPercent} className="h-2 rounded" />
-              <p className="text-xs text-gray-600 mt-1.5">
+              <p className="text-sm text-gray-600 mt-1.5">
                 {progressPercent}% Complete
               </p>
             </div>
           </CardContent>
           <CardFooter className="px-4 pb-4 mt-auto">
-            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-base py-3">
+            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-normal text-lg py-3">
               Continue Learning
             </Button>
           </CardFooter>
@@ -242,14 +242,14 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
             {/* Course details */}
             <div className="pt-2 px-1 pb-2 flex-1 flex flex-col justify-between">
               <div className="space-y-1">
-                <h3 className="font-normal text-sm text-[#1c1d1f] leading-snug line-clamp-2">
+                <h3 className="font-normal text-base text-[#1c1d1f] leading-snug line-clamp-2">
                   {course.title}
                 </h3>
-                <p className="text-xs text-[#6a6f73] line-clamp-1 truncate">
+                <p className="text-sm text-[#6a6f73] line-clamp-1 truncate">
                   {instructorName}
                 </p>
                 <div className="flex items-center flex-wrap">
-                  <span className="text-xs font-normal text-[#b4690e] mr-1">
+                  <span className="text-sm font-normal text-[#b4690e] mr-1">
                     {ratingValue.toFixed(1)}
                   </span>
                   <div className="flex items-center text-[#b4690e]">
@@ -269,11 +269,11 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
                   </span>
                 </div>
                 <div className="flex items-baseline gap-1.5 pt-1">
-                  <span className="font-normal text-sm text-[#1c1d1f]">
+                  <span className="font-normal text-base text-[#1c1d1f]">
                     Rs {course.price?.current}
                   </span>
                   {hasDiscount && (
-                    <span className="text-xs line-through text-[#6a6f73]">
+                    <span className="text-sm line-through text-[#6a6f73]">
                       Rs {course.price?.original}
                     </span>
                   )}
@@ -309,7 +309,7 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
 
         <div className="space-y-4">
           <div>
-            <h4 className="font-normal text-[#2d2f31] text-base leading-snug line-clamp-3">
+            <h4 className="font-normal text-[#2d2f31] text-lg leading-snug line-clamp-3">
               {course.title}
             </h4>
             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
@@ -324,17 +324,17 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
             </div>
           </div>
 
-          <div className="text-xs text-[#6a6f73] space-y-1">
-            <p className="font-semibold text-[#38755b]">{formatUpdatedDate(course.updatedAt)}</p>
+          <div className="text-sm text-[#6a6f73] space-y-1">
+            <p className="font-normal text-[#38755b]">{formatUpdatedDate(course.updatedAt)}</p>
             <p>{totalHours} total hours • {courseLevel} • Subtitles</p>
           </div>
 
-          <p className="text-xs text-[#2d2f31] line-clamp-2 leading-relaxed">
+          <p className="text-sm text-[#2d2f31] line-clamp-2 leading-relaxed">
             {course.subtitle || course.description || "Master this subject with our comprehensive, step-by-step curriculum."}
           </p>
 
           {/* Learnings bullet points */}
-          <ul className="space-y-1.5 text-xs text-[#2d2f31]">
+          <ul className="space-y-1.5 text-sm text-[#2d2f31]">
             {bulletPoints.map((point, index) => (
               <li key={index} className="flex items-start gap-2">
                 <span className="text-gray-500 mt-0.5 font-normal">✓</span>
@@ -348,7 +348,7 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
             <Button
               onClick={handleCartAction}
               disabled={isAddingToCart}
-              className="flex-1 h-11 bg-[#a435f0] text-white hover:bg-[#8710d8] font-normal text-sm rounded-none shadow-none"
+              className="flex-1 h-11 bg-[#a435f0] text-white hover:bg-[#8710d8] font-normal text-base rounded-none shadow-none"
             >
               {isAddingToCart ? (
                 <Loader2 className="animate-spin h-4 w-4" />

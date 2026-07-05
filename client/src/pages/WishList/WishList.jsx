@@ -5,6 +5,7 @@ import { useGetWishlistQuery, useRemoveFromWishlistMutation } from "@/features/a
 import { Loader2, HeartCrack } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner"; // Using a toast library for better UX
+import LoadingSpinner from "@/components/LoadingSpinner";
 
 const WishList = () => {
   // The 'data' object is automatically updated by RTK Query now
@@ -21,11 +22,7 @@ const WishList = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center min-h-[300px]">
-        <Loader2 className="animate-spin h-10 w-10 text-gray-500" />
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   if (isError || !wishlistData) {

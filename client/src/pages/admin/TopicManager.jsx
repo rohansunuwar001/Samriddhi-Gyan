@@ -331,7 +331,7 @@ const TopicManager = () => {
   return (
     <div className="flex-1 space-y-6 p-8 pt-6 bg-slate-50 min-h-screen text-left select-none">
       <header>
-        <h2 className="text-3xl font-bold tracking-tight text-slate-900">Topics & Certifications</h2>
+        <h2 className="text-4xl font-normal tracking-tight text-slate-900">Topics & Certifications</h2>
         <p className="text-muted-foreground">
           Manage dynamic learning topics and professional certifications. Metrics are calculated dynamically based on matching course data.
         </p>
@@ -349,7 +349,7 @@ const TopicManager = () => {
           <form onSubmit={handleCreate} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium">Name</label>
+                <label className="text-base font-light">Name</label>
                 <Input
                   placeholder="e.g., ChatGPT"
                   value={name}
@@ -359,7 +359,7 @@ const TopicManager = () => {
               </div>
 
               <div>
-                <label className="text-sm font-medium">Type</label>
+                <label className="text-base font-light">Type</label>
                 <Select value={type} onValueChange={setType}>
                   <SelectTrigger className="mt-1">
                     <SelectValue placeholder="Select type" />
@@ -375,7 +375,7 @@ const TopicManager = () => {
             {/* 3-Level Category Selector Grid */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border border-slate-100 bg-slate-50/50 p-4 rounded-xl">
               <div>
-                <label className="text-xs font-bold text-slate-700">Category (Parent)</label>
+                <label className="text-sm font-normal text-slate-700">Category (Parent)</label>
                 <Select
                   value={selectedHierarchy.parentId}
                   onValueChange={(val) => {
@@ -401,7 +401,7 @@ const TopicManager = () => {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700">Subcategory (Child)</label>
+                <label className="text-sm font-normal text-slate-700">Subcategory (Child)</label>
                 <Select
                   value={selectedHierarchy.childId}
                   onValueChange={(val) => {
@@ -426,7 +426,7 @@ const TopicManager = () => {
               </div>
 
               <div>
-                <label className="text-xs font-bold text-slate-700">Topic (Sub-child)</label>
+                <label className="text-sm font-normal text-slate-700">Topic (Sub-child)</label>
                 <Select
                   value={selectedHierarchy.subChildId}
                   onValueChange={(val) => {
@@ -453,7 +453,7 @@ const TopicManager = () => {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div>
-                <label className="text-sm font-medium">Banner Title</label>
+                <label className="text-base font-light">Banner Title</label>
                 <Input
                   placeholder="e.g., ChatGPT Courses"
                   value={bannerTitle}
@@ -463,7 +463,7 @@ const TopicManager = () => {
               </div>
 
               <div>
-                <label className="text-sm font-medium">Related Topics (Comma separated)</label>
+                <label className="text-base font-light">Related Topics (Comma separated)</label>
                 <Input
                   placeholder="IT & Software, Business"
                   value={relatedTopics}
@@ -473,7 +473,7 @@ const TopicManager = () => {
               </div>
 
               <div>
-                <label className="text-sm font-medium flex items-center gap-1">
+                <label className="text-base font-light flex items-center gap-1">
                   Logo / Badge
                   {isUploadingLogo && <Loader2 className="h-3 w-3 animate-spin text-purple-600" />}
                 </label>
@@ -482,7 +482,7 @@ const TopicManager = () => {
                     type="file"
                     accept="image/*"
                     onChange={onLogoChange}
-                    className="cursor-pointer file:bg-slate-100 file:border-0 file:rounded-md file:text-xs file:font-semibold"
+                    className="cursor-pointer file:bg-slate-100 file:border-0 file:rounded-md file:text-sm file:font-normal"
                   />
                   {logoPreview && (
                     <Avatar className="h-9 w-9 border border-slate-200">
@@ -495,7 +495,7 @@ const TopicManager = () => {
             </div>
 
             <div>
-              <label className="text-sm font-medium">Description</label>
+              <label className="text-base font-light">Description</label>
               <Textarea
                 placeholder="Topic description..."
                 value={description}
@@ -567,7 +567,7 @@ const TopicManager = () => {
                             <AvatarFallback><ImageIcon className="h-4 w-4 text-slate-300" /></AvatarFallback>
                           </Avatar>
                         </TableCell>
-                        <TableCell className="font-semibold text-slate-900">
+                        <TableCell className="font-normal text-slate-900">
                           {topic.name}
                         </TableCell>
                         <TableCell>
@@ -579,13 +579,13 @@ const TopicManager = () => {
                         <TableCell className="max-w-[180px] truncate text-slate-500">
                           {topic.description || "—"}
                         </TableCell>
-                        <TableCell className="text-right font-medium text-amber-700">
+                        <TableCell className="text-right font-light text-amber-700">
                           {topic.rating ? `${topic.rating} ★` : "—"}
                         </TableCell>
-                        <TableCell className="text-right font-medium">
+                        <TableCell className="text-right font-light">
                           {topic.numLearners?.toLocaleString() || 0}
                         </TableCell>
-                        <TableCell className="text-right font-medium text-slate-600">
+                        <TableCell className="text-right font-light text-slate-600">
                           {topic.handsOnPracticeCount || 0}
                         </TableCell>
                         <TableCell className="text-right">
@@ -618,7 +618,7 @@ const TopicManager = () => {
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent className="max-w-xl bg-white border border-slate-200">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-slate-900">
+            <DialogTitle className="text-2xl font-normal text-slate-900">
               Edit Topic / Certification
             </DialogTitle>
             <DialogDescription>
@@ -629,7 +629,7 @@ const TopicManager = () => {
           <form onSubmit={saveEditing} className="space-y-4 pt-2">
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <Label htmlFor="edit-name" className="text-xs font-bold text-slate-700">Name</Label>
+                <Label htmlFor="edit-name" className="text-sm font-normal text-slate-700">Name</Label>
                 <Input
                   id="edit-name"
                   value={editingName}
@@ -639,7 +639,7 @@ const TopicManager = () => {
               </div>
 
               <div className="space-y-1">
-                <Label htmlFor="edit-type" className="text-xs font-bold text-slate-700">Type</Label>
+                <Label htmlFor="edit-type" className="text-sm font-normal text-slate-700">Type</Label>
                 <Select value={editingType} onValueChange={setEditingType}>
                   <SelectTrigger id="edit-type">
                     <SelectValue placeholder="Select type" />
@@ -653,7 +653,7 @@ const TopicManager = () => {
             </div>
 
             <div className="space-y-1">
-              <Label htmlFor="edit-banner" className="text-xs font-bold text-slate-700">Banner Title</Label>
+              <Label htmlFor="edit-banner" className="text-sm font-normal text-slate-700">Banner Title</Label>
               <Input
                 id="edit-banner"
                 value={editingBannerTitle}
@@ -664,7 +664,7 @@ const TopicManager = () => {
             {/* Edit Category hierarchy selector */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 border border-slate-100 bg-slate-50/50 p-4 rounded-xl">
               <div className="space-y-1">
-                <Label className="text-xs font-bold text-slate-700">Category (Parent)</Label>
+                <Label className="text-sm font-normal text-slate-700">Category (Parent)</Label>
                 <Select
                   value={editingSelectedHierarchy.parentId}
                   onValueChange={(val) => {
@@ -690,7 +690,7 @@ const TopicManager = () => {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-bold text-slate-700">Subcategory (Child)</Label>
+                <Label className="text-sm font-normal text-slate-700">Subcategory (Child)</Label>
                 <Select
                   value={editingSelectedHierarchy.childId}
                   onValueChange={(val) => {
@@ -715,7 +715,7 @@ const TopicManager = () => {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-bold text-slate-700">Topic (Sub-child)</Label>
+                <Label className="text-sm font-normal text-slate-700">Topic (Sub-child)</Label>
                 <Select
                   value={editingSelectedHierarchy.subChildId}
                   onValueChange={(val) => {
@@ -742,7 +742,7 @@ const TopicManager = () => {
 
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-1">
-                <Label htmlFor="edit-related" className="text-xs font-bold text-slate-700">Related Topics (Comma separated)</Label>
+                <Label htmlFor="edit-related" className="text-sm font-normal text-slate-700">Related Topics (Comma separated)</Label>
                 <Input
                   id="edit-related"
                   value={editingRelatedTopics}
@@ -751,7 +751,7 @@ const TopicManager = () => {
               </div>
 
               <div className="space-y-1">
-                <Label className="text-xs font-bold text-slate-700 flex items-center gap-1">
+                <Label className="text-sm font-normal text-slate-700 flex items-center gap-1">
                   Logo / Badge
                   {isUploadingEditLogo && <Loader2 className="h-3 w-3 animate-spin text-purple-600" />}
                 </Label>
@@ -760,7 +760,7 @@ const TopicManager = () => {
                     type="file"
                     accept="image/*"
                     onChange={onEditLogoChange}
-                    className="cursor-pointer file:bg-slate-100 file:border-0 file:rounded-md file:text-xs file:font-semibold"
+                    className="cursor-pointer file:bg-slate-100 file:border-0 file:rounded-md file:text-sm file:font-normal"
                   />
                   {editLogoPreview && (
                     <Avatar className="h-9 w-9 border border-slate-200">
@@ -773,7 +773,7 @@ const TopicManager = () => {
             </div>
 
             <div className="space-y-1">
-              <Label htmlFor="edit-description" className="text-xs font-bold text-slate-700">Description</Label>
+              <Label htmlFor="edit-description" className="text-sm font-normal text-slate-700">Description</Label>
               <Textarea
                 id="edit-description"
                 rows={4}
@@ -800,7 +800,7 @@ const TopicManager = () => {
                 type="submit"
                 size="sm"
                 disabled={isUpdating || isUploadingEditLogo}
-                className="bg-slate-900 hover:bg-black text-white font-semibold flex items-center gap-1.5"
+                className="bg-slate-900 hover:bg-black text-white font-normal flex items-center gap-1.5"
               >
                 {isUpdating && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                 Save Changes

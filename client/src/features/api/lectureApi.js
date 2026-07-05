@@ -25,6 +25,10 @@ export const lectureApi = apiSlice.injectEndpoints({
         title,
         description,
         isPreview,
+        videoUrl,
+        status,
+        durationInSeconds,
+        downloadable,
       }) => ({
         url: `/lectures/${lectureId}`,
         method: "PATCH",
@@ -32,6 +36,10 @@ export const lectureApi = apiSlice.injectEndpoints({
           title,
           description,
           isPreview,
+          videoUrl,
+          status,
+          durationInSeconds,
+          downloadable,
         },
       }),
       invalidatesTags: (result, error, { courseId }) => [
@@ -63,6 +71,38 @@ export const lectureApi = apiSlice.injectEndpoints({
       query: (lectureId) => `/lectures/${lectureId}/status`,
     }),
 
+    uploadCaption: builder.mutation({
+      query: ({ lectureId, formData }) => ({
+        url: `/lectures/${lectureId}/captions`,
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: (result, error, { courseId }) => [
+        { type: "CourseDetail", id: courseId },
+      ],
+    }),
+
+    toggleCaptionsDisable: builder.mutation({
+      query: ({ lectureId, disabled }) => ({
+        url: `/lectures/${lectureId}/captions/toggle-disable`,
+        method: "PUT",
+        body: { disabled },
+      }),
+      invalidatesTags: (result, error, { courseId }) => [
+        { type: "CourseDetail", id: courseId },
+      ],
+    }),
+
+    deleteCaption: builder.mutation({
+      query: ({ lectureId, captionId }) => ({
+        url: `/lectures/${lectureId}/captions/${captionId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, { courseId }) => [
+        { type: "CourseDetail", id: courseId },
+      ],
+    }),
+
   }),
 });
 
@@ -72,4 +112,7 @@ export const {
   useDeleteLectureMutation,
   useGetLectureByIdQuery,
   useGetLectureStatusQuery,
+  useUploadCaptionMutation,
+  useToggleCaptionsDisableMutation,
+  useDeleteCaptionMutation,
 } = lectureApi;

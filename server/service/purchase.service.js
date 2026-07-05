@@ -13,6 +13,8 @@ import { User } from "../models/user.model.js";
 import { Notification } from "../models/notification.model.js";
 import { generateOrderId } from "../helpers/Generateorderid.helper.js";
 import { createNotification } from "./notification.service.js";
+import { Certification } from "../models/certification.model.js";
+import { ExamRegistration } from "../models/examRegistration.model.js";
 
 /**
  * Creates a new pending order OR reuses an existing one if the user
@@ -23,15 +25,16 @@ import { createNotification } from "./notification.service.js";
  */
 export const createPendingOrder = async ({
   userId,
-  courseIds,
+  courseIds = [],
+  certificationIds = [],
   paymentMethod,
 }) => {
   // Fetch course data to lock prices
-  const courses = await Course.find({ _id: { $in: courseIds } }).select(
-    "title thumbnail price",
-  );
+  const courses = courseIds.length > 0
+    ? await Course.find({ _id: { $in: courseIds } }).select("title thumbnail price")
+    : [];
 
-  if (courses.length !== courseIds.length) {
+  if (courseIds.length > 0 && courses.length !== courseIds.length) {
     const error = new Error("One or more courses not found!");
     error.statusCode = 404;
     throw error;
@@ -49,104 +52,191 @@ export const createPendingOrder = async ({
     };
   });
 
-  const totalAmount = purchaseCourses.reduce(
+  // Fetch certifications
+  const certifications = certificationIds.length > 0
+    ? await Certification.find({ _id: { $in: certificationIds } }).select("name badgeUrl examPrice")
+    : [];
+
+  if (certificationIds.length > 0 && certifications.length !== certificationIds.length) {
+    const error = new Error("One or more certifications not found!");
+    error.statusCode = 404;
+    throw error;
+  }
+
+  const purchaseCertifications = await Promise.all(
+    certifications.map(async (cert) => {
+      // Calculate attempt number & reapplying status for discount (same as initializeExamEsewa)
+      const finishedCount = await ExamRegistration.countDocuments({
+        student: userId,
+        certification: cert._id,
+        examStatus: "completed",
+      });
+      const isReapplying = finishedCount > 0;
+      const basePrice = cert.examPrice || 0;
+      const finalPrice = isReapplying ? Math.round(basePrice * 0.75) : basePrice;
+
+      return {
+        certificationId: cert._id,
+        priceAtPurchase: finalPrice,
+      };
+    })
+  );
+
+  const totalCourseAmount = purchaseCourses.reduce(
     (sum, item) => sum + item.priceAtPurchase,
     0,
   );
 
-  // ── Check for an existing recent pending order for the same user + courses ──
-  // "Recent" = created within the last 24 hours (generous window)
-  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const totalCertAmount = purchaseCertifications.reduce(
+    (sum, item) => sum + item.priceAtPurchase,
+    0,
+  );
 
-  const existingPendingOrder = await CoursePurchase.findOne({
-    userId,
-    status: "pending",
-    paymentMethod,
-    createdAt: { $gte: oneDayAgo },
-    // Check that every courseId in the request is in this order
-    "courses.courseId": { $all: courseIds },
-  });
+  const totalAmount = totalCourseAmount + totalCertAmount;
 
-  if (existingPendingOrder) {
-    console.log(
-      `[createPendingOrder] Reusing existing pending order ${existingPendingOrder.orderId} for user ${userId}`,
-    );
-    return {
-      order: existingPendingOrder,
-      courses,
-      totalAmount,
-      purchaseCourses,
-      reused: true,
-    };
+  // Check for an existing recent pending order for courses only
+  if (certificationIds.length === 0 && courseIds.length > 0) {
+    const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    const existingPendingOrder = await CoursePurchase.findOne({
+      userId,
+      status: "pending",
+      paymentMethod,
+      createdAt: { $gte: oneDayAgo },
+      "courses.courseId": { $all: courseIds },
+      certifications: { $size: 0 },
+    });
+
+    if (existingPendingOrder) {
+      console.log(
+        `[createPendingOrder] Reusing existing pending order ${existingPendingOrder.orderId} for user ${userId}`,
+      );
+      return {
+        order: existingPendingOrder,
+        courses,
+        totalAmount,
+        purchaseCourses,
+        purchaseCertifications: [],
+        reused: true,
+      };
+    }
   }
 
-  // ── No existing pending order — create a fresh one ────────────────────────
+  // Create a fresh order
   const order = await CoursePurchase.create({
     orderId: generateOrderId(),
     userId,
     courses: purchaseCourses,
+    certifications: purchaseCertifications,
     totalAmount,
     paymentMethod,
     status: "pending",
     paymentDetails: {},
   });
 
-  return { order, courses, totalAmount, purchaseCourses, reused: false };
+  return { order, courses, totalAmount, purchaseCourses, purchaseCertifications, reused: false };
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
 // 2. COMPLETE AN ORDER (the shared enrollment logic)
 //    Called by: stripeWebhook, completePayment (eSewa)
-//    What it does:
-//      - Marks the order "completed"
-//      - Adds the courses to the user's enrolledCourses
-//      - Adds the user to each course's enrolledStudents
-//      - Removes purchased courses from the user's cart AND wishlist
-//      - Sends an in-app notification
-//    Returns: the completed order document
 // ─────────────────────────────────────────────────────────────────────────────
 export const completeOrder = async (purchase) => {
   if (purchase.status === "completed") return purchase;
- 
+
   purchase.status = "completed";
   await purchase.save();
- 
-  const courseIds = purchase.courses.map((c) => c.courseId);
- 
-  // Fetch titles from DB — courseId is a plain ObjectId, not populated
-  const courseDetails = await Course.find({ _id: { $in: courseIds } })
-    .select("title")
-    .lean();
-  const courseTitles = courseDetails.map((c) => c.title).join('", "');
- 
-  await User.findByIdAndUpdate(purchase.userId, {
-    $addToSet: { enrolledCourses: { $each: courseIds } },
-    $pull: {
-      cart: { $in: courseIds },
-      wishlist: { $in: courseIds },
-    },
-  });
 
-  const updatedUser = await User.findById(purchase.userId)
-  .select("enrolledCourses")
-  .lean();
+  const courseIds = (purchase.courses || []).map((c) => c.courseId);
+  const certItems = purchase.certifications || [];
 
-console.log("Updated User:", updatedUser);
- 
-  await Course.updateMany(
-    { _id: { $in: courseIds } },
-    { $addToSet: { enrolledStudents: purchase.userId } }
-  );
- 
-  await createNotification(
-    purchase.userId,
-    courseDetails.length === 1
-      ? `Your purchase was successful! You are now enrolled in "${courseTitles}".`
-      : `Your purchase was successful! You are now enrolled in: "${courseTitles}".`,
-    "/my-learning",
-    "course_enrollment"
-  );
- 
+  // 1. Process course enrollments
+  if (courseIds.length > 0) {
+    const courseDetails = await Course.find({ _id: { $in: courseIds } })
+      .select("title")
+      .lean();
+    const courseTitles = courseDetails.map((c) => c.title).join('", "');
+
+    await User.findByIdAndUpdate(purchase.userId, {
+      $addToSet: { enrolledCourses: { $each: courseIds } },
+      $pull: {
+        cart: { $in: courseIds },
+        wishlist: { $in: courseIds },
+      },
+    });
+
+    await Course.updateMany(
+      { _id: { $in: courseIds } },
+      { $addToSet: { enrolledStudents: purchase.userId } }
+    );
+
+    await createNotification(
+      purchase.userId,
+      `Your purchase was successful! You are now enrolled in: "${courseTitles}".`,
+      "/my-learning",
+      "course_enrollment"
+    );
+  }
+
+  // 2. Process certification vouchers
+  if (certItems.length > 0) {
+    const certIds = certItems.map((c) => c.certificationId);
+
+    // Pull from user's cartCertifications
+    await User.findByIdAndUpdate(purchase.userId, {
+      $pull: {
+        cartCertifications: { $in: certIds },
+      },
+    });
+
+    for (const certItem of certItems) {
+      const certId = certItem.certificationId;
+      const pricePaid = certItem.priceAtPurchase;
+
+      const cert = await Certification.findById(certId).lean();
+      if (cert) {
+        const finishedCount = await ExamRegistration.countDocuments({
+          student: purchase.userId,
+          certification: certId,
+          examStatus: "completed",
+        });
+        const attemptNumber = finishedCount + 1;
+
+        // Check if there is a pending registration and update it, or create a new completed registration
+        let reg = await ExamRegistration.findOne({
+          student: purchase.userId,
+          certification: certId,
+          paymentStatus: "pending",
+        });
+
+        if (reg) {
+          reg.paymentStatus = "completed";
+          reg.examStatus = "registered";
+          reg.amountPaid = pricePaid;
+          reg.paymentMethod = purchase.paymentMethod;
+          reg.attemptNumber = attemptNumber;
+          await reg.save();
+        } else {
+          await ExamRegistration.create({
+            student: purchase.userId,
+            certification: certId,
+            paymentStatus: "completed",
+            examStatus: "registered",
+            amountPaid: pricePaid,
+            paymentMethod: purchase.paymentMethod,
+            attemptNumber: attemptNumber,
+          });
+        }
+
+        await createNotification(
+          purchase.userId,
+          `Your purchase was successful! Exam voucher for "${cert.name}" is now active.`,
+          `/certification/${cert.slug}`,
+          "exam_registration"
+        );
+      }
+    }
+  }
+
   return purchase;
 };
 

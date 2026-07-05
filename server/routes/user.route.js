@@ -62,7 +62,7 @@ router.route("/unarchive/:courseId").post(isAuthenticated, unarchiveCourseContro
 // ── Public routes ────────────────────────────────────────────────────────────
 router
   .route("/instructor-profile/:id")
-  .get(isAuthenticated, getPublicUserProfile);
+  .get(getPublicUserProfile);
 
 // ── Google OAuth routes ──────────────────────────────────────────────────────
 router

@@ -55,6 +55,15 @@ const BolaVideoPlayer = ({ src, onPlay, onEnded }) => {
     hasEndedRef.current = false;
     if (!src || !videoRef.current) return;
 
+    const isHls = src.toLowerCase().includes(".m3u8");
+
+    if (!isHls) {
+      // Stream raw video directly (full quality)
+      videoRef.current.src = src;
+      setCurrentLevelLabel("1080p (Full Quality)");
+      return;
+    }
+
     if (!Hls.isSupported()) {
       if (videoRef.current.canPlayType("application/vnd.apple.mpegurl")) {
         videoRef.current.src = src;
@@ -274,16 +283,16 @@ const BolaVideoPlayer = ({ src, onPlay, onEnded }) => {
         </div>
 
         {/* Dynamic Action Buttons Layout */}
-        <div className="flex items-center justify-between text-sm font-medium">
+        <div className="flex items-center justify-between text-base font-light">
           <div className="flex items-center space-x-4">
             <button
               onClick={togglePlay}
               className="hover:text-red-500 transition-colors"
             >
               {isPlaying ? (
-                <FaPause className="text-base" />
+                <FaPause className="text-lg" />
               ) : (
-                <FaPlay className="text-base" />
+                <FaPlay className="text-lg" />
               )}
             </button>
             <button className="hover:text-gray-300 transition-colors hidden sm:block">
@@ -296,9 +305,9 @@ const BolaVideoPlayer = ({ src, onPlay, onEnded }) => {
             <div className="flex items-center space-x-2 group/volume">
               <button onClick={toggleMute} className="hover:text-gray-300">
                 {isMuted ? (
-                  <FaVolumeXmark className="text-base" />
+                  <FaVolumeXmark className="text-lg" />
                 ) : (
-                  <FaVolumeHigh className="text-base" />
+                  <FaVolumeHigh className="text-lg" />
                 )}
               </button>
               <input
@@ -312,7 +321,7 @@ const BolaVideoPlayer = ({ src, onPlay, onEnded }) => {
               />
             </div>
 
-            <div className="text-xs text-gray-200 tracking-wide">
+            <div className="text-sm text-gray-200 tracking-wide">
               {formatTime(currentTime)} / {formatTime(duration)}
             </div>
           </div>
@@ -323,21 +332,21 @@ const BolaVideoPlayer = ({ src, onPlay, onEnded }) => {
               onClick={() => setShowSettings(!showSettings)}
               className={`hover:text-red-500 transition-colors flex items-center space-x-1.5 ${showSettings ? "text-red-500" : ""}`}
             >
-              <FaGear className="text-lg" />
+              <FaGear className="text-xl" />
 
               {/* Dynamic Badge: Only shows if the ACTIVE playing quality is HD, 2K, or 4K */}
               {currentLevelLabel.includes("(HD)") && (
-                <span className="text-[9px] bg-red-600 px-1 rounded text-white font-bold tracking-tighter">
+                <span className="text-[9px] bg-red-600 px-1 rounded text-white font-normal tracking-tighter">
                   HD
                 </span>
               )}
               {currentLevelLabel.includes("(2K)") && (
-                <span className="text-[9px] bg-cyan-600 px-1 rounded text-white font-bold tracking-tighter">
+                <span className="text-[9px] bg-cyan-600 px-1 rounded text-white font-normal tracking-tighter">
                   2K
                 </span>
               )}
               {currentLevelLabel.includes("(4K)") && (
-                <span className="text-[9px] bg-amber-500 px-1 rounded text-white font-bold tracking-tighter">
+                <span className="text-[9px] bg-amber-500 px-1 rounded text-white font-normal tracking-tighter">
                   4K
                 </span>
               )}
@@ -345,13 +354,13 @@ const BolaVideoPlayer = ({ src, onPlay, onEnded }) => {
 
             {/* Quality Modal Panel Overlay Menu */}
             {showSettings && (
-              <div className="absolute bottom-8 right-0 bg-neutral-900/95 border border-neutral-800 text-white p-2 rounded-lg shadow-xl w-44 flex flex-col z-30 font-sans text-xs">
-                <div className="px-2 py-1 text-gray-400 border-b border-neutral-800 font-semibold mb-1">
+              <div className="absolute bottom-8 right-0 bg-neutral-900/95 border border-neutral-800 text-white p-2 rounded-lg shadow-xl w-44 flex flex-col z-30 font-sans text-sm">
+                <div className="px-2 py-1 text-gray-400 border-b border-neutral-800 font-normal mb-1">
                   Quality
                 </div>
                 <button
                   onClick={() => changeQuality(-1)}
-                  className={`w-full text-left px-2 py-1.5 rounded hover:bg-neutral-800 transition ${qualitySelection === -1 ? "text-red-500 font-bold bg-neutral-800/50" : ""}`}
+                  className={`w-full text-left px-2 py-1.5 rounded hover:bg-neutral-800 transition ${qualitySelection === -1 ? "text-red-500 font-normal bg-neutral-800/50" : ""}`}
                 >
                   Auto (BOLA){" "}
                   {qualitySelection === -1 && `[${currentLevelLabel}]`}
@@ -365,7 +374,7 @@ const BolaVideoPlayer = ({ src, onPlay, onEnded }) => {
                       qualitySelection === index ||
                       (qualitySelection === -1 &&
                         currentLevelLabel === getQualityLabel(level.height))
-                        ? "text-red-500 font-bold bg-neutral-800/50"
+                        ? "text-red-500 font-normal bg-neutral-800/50"
                         : ""
                     }`}
                   >
@@ -380,9 +389,9 @@ const BolaVideoPlayer = ({ src, onPlay, onEnded }) => {
               className="hover:text-red-500 transition-colors"
             >
               {isFullscreen ? (
-                <FaCompress className="text-base" />
+                <FaCompress className="text-lg" />
               ) : (
-                <FaExpand className="text-base" />
+                <FaExpand className="text-lg" />
               )}
             </button>
           </div>
@@ -400,7 +409,7 @@ const BolaVideoPlayer = ({ src, onPlay, onEnded }) => {
       {/* Diagnostic Stream Layer Display */}
       {showDebug && (
         <div className="absolute top-8 left-2 bg-black/80 text-green-400 font-mono text-[10px] p-3 rounded-lg max-w-xs space-y-0.5 z-10 pointer-events-none">
-          <div className="text-green-300 font-semibold mb-1">
+          <div className="text-green-300 font-normal mb-1">
             BOLA-BASIC Debug
           </div>
           <div className="text-yellow-400">
@@ -420,7 +429,7 @@ const BolaVideoPlayer = ({ src, onPlay, onEnded }) => {
                   className={
                     levels[i] &&
                     currentLevelLabel === getQualityLabel(levels[i].height)
-                      ? "text-yellow-400 font-bold"
+                      ? "text-yellow-400 font-normal"
                       : ""
                   }
                 >

@@ -12,10 +12,10 @@ const LmsShowcase = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-3xl font-bold tracking-tight sm:text-4xl text-gray-900 dark:text-white">
+          <h2 className="text-4xl font-normal tracking-tight sm:text-5xl text-gray-900 dark:text-white">
             Elevate Your Learning Experience
           </h2>
-          <p className="mt-4 max-w-2xl text-xl text-gray-600 dark:text-gray-300 mx-auto">
+          <p className="mt-4 max-w-2xl text-2xl text-gray-600 dark:text-gray-300 mx-auto">
             Everything you need to succeed in your learning journey
           </p>
         </div>
@@ -68,7 +68,7 @@ const LmsShowcase = () => {
           <TabsContent value="benefits">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mt-8">
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-3">
+                <h3 className="text-2xl font-normal mb-4 flex items-center gap-3">
                   <GraduationCap className="text-blue-600 dark:text-blue-400" />
                   What You`ll Get
                 </h3>
@@ -97,7 +97,7 @@ const LmsShowcase = () => {
               </div>
 
               <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-200 dark:border-gray-700">
-                <h3 className="text-xl font-bold mb-4 flex items-center gap-3">
+                <h3 className="text-2xl font-normal mb-4 flex items-center gap-3">
                   <Users className="text-blue-600 dark:text-blue-400" />
                   Community & Support
                 </h3>
@@ -157,7 +157,7 @@ const LmsShowcase = () => {
 
         {/* Stats Section */}
         <div className="mt-16 bg-blue-600 dark:bg-blue-800 rounded-2xl p-8 text-white">
-          <h3 className="text-2xl font-bold text-center mb-8">Our Learning Community in Numbers</h3>
+          <h3 className="text-3xl font-normal text-center mb-8">Our Learning Community in Numbers</h3>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             <StatItem value="50,000+" label="Active Learners" />
             <StatItem value="500+" label="Expert Instructors" />
@@ -168,8 +168,8 @@ const LmsShowcase = () => {
 
         {/* CTA */}
         <div className="mt-16 text-center">
-          <h3 className="text-2xl font-bold mb-4">Ready to start learning?</h3>
-          <p className="text-lg text-gray-600 dark:text-gray-300 mb-6 max-w-2xl mx-auto">
+          <h3 className="text-3xl font-normal mb-4">Ready to start learning?</h3>
+          <p className="text-xl text-gray-600 dark:text-gray-300 mb-6 max-w-2xl mx-auto">
             Join thousands of students advancing their careers with our courses
           </p>
           <div className="flex gap-4 justify-center">
@@ -201,7 +201,7 @@ const FeatureCard = ({ icon, title, description }) => (
         <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg text-blue-600 dark:text-blue-400">
           {icon}
         </div>
-        <CardTitle className="text-lg">{title}</CardTitle>
+        <CardTitle className="text-xl">{title}</CardTitle>
       </div>
     </CardHeader>
     <CardContent>
@@ -226,12 +226,12 @@ const TestimonialCard = ({ name, role, avatar, quote, stats }) => (
           <AvatarFallback>{name.charAt(0)}</AvatarFallback>
         </Avatar>
         <div>
-          <h4 className="font-semibold">{name}</h4>
-          <p className="text-sm text-gray-500 dark:text-gray-400">{role}</p>
+          <h4 className="font-normal">{name}</h4>
+          <p className="text-base text-gray-500 dark:text-gray-400">{role}</p>
         </div>
       </div>
       <p className="italic mb-4">`{quote}`</p>
-      <p className="text-sm text-gray-500 dark:text-gray-400">{stats}</p>
+      <p className="text-base text-gray-500 dark:text-gray-400">{stats}</p>
     </CardContent>
   </Card>
 );
@@ -246,7 +246,7 @@ TestimonialCard.propTypes = {
 
 const StatItem = ({ value, label }) => (
   <div>
-    <p className="text-3xl font-bold mb-2">{value}</p>
+    <p className="text-4xl font-normal mb-2">{value}</p>
     <p className="text-blue-100">{label}</p>
   </div>
 );

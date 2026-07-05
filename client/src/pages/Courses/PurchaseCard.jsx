@@ -26,13 +26,16 @@ import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { toast } from "sonner";
+import BolaVideoPlayer from "@/pages/admin/lecture/BolaVideoPlayer";
 
 const PurchaseCard = ({ course }) => {
   const navigate = useNavigate();
-  const { isAuthenticated } = useSelector((store) => store.auth);
+  const { isAuthenticated, user } = useSelector((store) => store.auth);
+  const isAdmin = user?.role === "admin";
   const [selectedPlan, setSelectedPlan] = useState(
     course?.includedInSubscription ? "subscription" : "individual"
   );
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   useEffect(() => {
     setSelectedPlan(course?.includedInSubscription ? "subscription" : "individual");
@@ -200,6 +203,13 @@ const PurchaseCard = ({ course }) => {
     >
       <button
         type="button"
+        onClick={() => {
+          if (course.promoVideoStatus === "ready" && course.promoVideoUrl) {
+            setIsPreviewOpen(true);
+          } else {
+            toast.info("No promotional preview video available for this course.");
+          }
+        }}
         className="group relative block w-full cursor-pointer text-left"
       >
         <img
@@ -422,35 +432,72 @@ const PurchaseCard = ({ course }) => {
   );
 
   return (
-    <aside className="overflow-hidden border border-[#d1d7dc] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.16)] transition-all duration-200">
-      {renderPreview()}
+    <>
+      <aside className="overflow-hidden border border-[#d1d7dc] bg-white shadow-[0_2px_12px_rgba(0,0,0,0.16)] transition-all duration-200">
+        {renderPreview()}
 
-      {isPurchased ? (
-        <div className="space-y-5 p-7 text-center">
-          <div className="flex items-center justify-center gap-2">
-            <CheckCircle2 className="h-5 w-5 text-green-600" />
-            <p className="font-bold text-gray-800">
-              You have access to this course
-            </p>
+        {isAdmin ? (
+          <div className="space-y-4 p-7 text-center">
+            <div className="flex flex-col items-center justify-center gap-2 border border-violet-200 bg-violet-50/20 p-4 rounded text-violet-800">
+              <Info className="h-6 w-6 text-[#5624d0]" />
+              <p className="font-semibold text-sm">
+                Administrator Mode
+              </p>
+              <p className="text-xs text-slate-500 font-light leading-relaxed">
+                As an administrator, you cannot enroll, purchase, or subscribe to courses.
+              </p>
+            </div>
           </div>
-          <Button
-            type="button"
-            className="h-12 w-full rounded-md bg-purple-700 text-base font-semibold hover:bg-purple-800"
-            onClick={(e) => {
-              e.stopPropagation();
-              navigate(`/course-detail/${course._id}/content`);
-            }}
+        ) : isPurchased ? (
+          <div className="space-y-5 p-7 text-center">
+            <div className="flex items-center justify-center gap-2">
+              <CheckCircle2 className="h-5 w-5 text-green-600" />
+              <p className="font-bold text-gray-800">
+                You have access to this course
+              </p>
+            </div>
+            <Button
+              type="button"
+              className="h-12 w-full rounded-md bg-purple-700 text-base font-semibold hover:bg-purple-800"
+              onClick={(e) => {
+                e.stopPropagation();
+                navigate(`/course-detail/${course._id}/content`);
+              }}
+            >
+              <PlayCircle className="mr-2 h-5 w-5" />
+              Go to Course
+            </Button>
+          </div>
+        ) : selectedPlan === "individual" ? (
+          renderIndividualSelected()
+        ) : (
+          renderSubscriptionSelected()
+        )}
+      </aside>
+
+      {/* ── HLS PROMO VIDEO PREVIEW MODAL ── */}
+      {isPreviewOpen && course.promoVideoUrl && (
+        <div
+          onClick={() => setIsPreviewOpen(false)}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4"
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="relative w-full max-w-3xl bg-black border border-[#3e4143] shadow-2xl"
           >
-            <PlayCircle className="mr-2 h-5 w-5" />
-            Go to Course
-          </Button>
+            <button
+              onClick={() => setIsPreviewOpen(false)}
+              className="absolute -top-9 right-0 text-white hover:text-gray-300 text-base font-light flex items-center gap-1"
+            >
+              Close ×
+            </button>
+            <div className="aspect-video w-full">
+              <BolaVideoPlayer src={course.promoVideoUrl} />
+            </div>
+          </div>
         </div>
-      ) : selectedPlan === "individual" ? (
-        renderIndividualSelected()
-      ) : (
-        renderSubscriptionSelected()
       )}
-    </aside>
+    </>
   );
 };
 

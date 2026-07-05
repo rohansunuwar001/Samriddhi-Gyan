@@ -79,16 +79,16 @@ const MyLearningCourseCard = ({ course, isArchived = false }) => {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-white border border-[#d1d7dc] rounded-none p-1 shadow-lg text-[#2d2f31] z-30">
-              <DropdownMenuItem className="text-base py-2 px-3 focus:bg-[#f7f9fa] cursor-pointer font-normal rounded-none">
+              <DropdownMenuItem className="text-lg py-2 px-3 focus:bg-[#f7f9fa] cursor-pointer font-normal rounded-none">
                 <Share2 className="h-3.5 w-3.5 mr-2" /> Share course
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-base py-2 px-3 focus:bg-[#f7f9fa] cursor-pointer font-normal rounded-none">
+              <DropdownMenuItem className="text-lg py-2 px-3 focus:bg-[#f7f9fa] cursor-pointer font-normal rounded-none">
                 <ListPlus className="h-3.5 w-3.5 mr-2" /> Add to lists
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-[#d1d7dc]" />
               <DropdownMenuItem 
                 onClick={handleArchiveToggle}
-                className={`text-base py-2 px-3 focus:bg-[#f7f9fa] cursor-pointer font-normal rounded-none ${
+                className={`text-lg py-2 px-3 focus:bg-[#f7f9fa] cursor-pointer font-normal rounded-none ${
                   isArchived ? "text-[#5624d0]" : "text-red-600"
                 }`}
               >
@@ -110,10 +110,10 @@ const MyLearningCourseCard = ({ course, isArchived = false }) => {
       {/* Info Body */}
       <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
         <div className="space-y-1">
-          <h3 className="text-base sm:text-lg font-normal text-[#2d2f31] leading-snug line-clamp-2 hover:text-[#5624d0] transition-colors">
+          <h3 className="text-lg sm:text-xl font-normal text-[#2d2f31] leading-snug line-clamp-2 hover:text-[#5624d0] transition-colors">
             {title}
           </h3>
-          <p className="text-base text-[#6a6f73] font-normal truncate">
+          <p className="text-lg text-[#6a6f73] font-normal truncate">
             {instructorName}
           </p>
         </div>
@@ -130,12 +130,12 @@ const MyLearningCourseCard = ({ course, isArchived = false }) => {
 
           {progress === 0 ? (
             /* Unstarted Course option */
-            <div className="flex justify-between items-center text-base font-normal text-[#5624d0] hover:text-[#3b1990] pt-1">
+            <div className="flex justify-between items-center text-lg font-normal text-[#5624d0] hover:text-[#3b1990] pt-1">
               <span>START COURSE</span>
             </div>
           ) : (
             /* In-progress course option */
-            <div className="flex items-center justify-between gap-2 text-xs text-[#6a6f73]">
+            <div className="flex items-center justify-between gap-2 text-sm text-[#6a6f73]">
               <span className="font-normal text-gray-500">{progress}% complete</span>
               
               {/* Star interactive feedback */}
@@ -158,7 +158,7 @@ const MyLearningCourseCard = ({ course, isArchived = false }) => {
                     />
                   </button>
                 ))}
-                <span className="text-base font-normal text-[#5624d0] ml-1 hover:underline cursor-pointer">
+                <span className="text-lg font-normal text-[#5624d0] ml-1 hover:underline cursor-pointer">
                   Leave a rating
                 </span>
               </div>

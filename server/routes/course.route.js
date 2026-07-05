@@ -9,9 +9,30 @@
 // RULE: Always define specific/static routes BEFORE parameterised routes (/:id).
 
 import express from "express";
+import path from "path";
+import fs from "fs";
+import multer from "multer";
 import { isAuthenticated, authorizeRoles } from "../middlewares/isAuthenticated.js";
 import loadUserIfAuthenticated from "../middlewares/loadUserIfAuthenticated.js";
 import upload from "../utils/multer.js";
+
+const bulkStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(process.cwd(), "uploads", "library");
+    fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    const ext = path.extname(file.originalname).toLowerCase() || ".mp4";
+    cb(null, `video-${uniqueSuffix}${ext}`);
+  },
+});
+
+const uploadBulk = multer({
+  storage: bulkStorage,
+  limits: { fileSize: 4 * 1024 * 1024 * 1024 },
+});
 
 import {
   createCourse,
@@ -27,6 +48,9 @@ import {
   getCoursesWithEnrolledStudentsAndReviews,
   getPaidCoursesWithEnrolledStudentsAndPayments,
   getCourseAnalytics,
+  bulkUploadCourseVideos,
+  deletePromoVideo,
+  listAllCoursesBrief,
 } from "../controllers/course.controller.js";
 
 import { getRecommendedCourses } from "../controllers/recommendation.controller.js";
@@ -42,12 +66,13 @@ router.post("/create", isAuthenticated, createCourse);
 
 // Browse & search
 router.get("/published",     loadUserIfAuthenticated, getPublishedCourse);
-router.get("/search",        isAuthenticated,         searchCourse);
+router.get("/search",        loadUserIfAuthenticated, searchCourse);
 router.get("/search-vector", loadUserIfAuthenticated, getSearchResults);  // semantic/vector search
 router.get("/recommendations", getRecommendedCourses); // public — no auth
 
 // Creator's own courses
 router.get("/creator", isAuthenticated, getCreatorCourses);
+router.get("/list-brief", isAuthenticated, listAllCoursesBrief);
 
 // Instructor dashboard routes
 router.get("/courses-with-students",          isAuthenticated, getCoursesWithEnrolledStudents);
@@ -66,9 +91,19 @@ router.get("/course-purchases", isAuthenticated, authorizeRoles("admin"), getAll
 router.get("/:courseId", loadUserIfAuthenticated, getCourseById);
 
 // Edit, publish toggle, delete — all require auth
-router.put(   "/:courseId", isAuthenticated, upload.single("courseThumbnail"), editCourse);
+router.put(
+  "/:courseId",
+  isAuthenticated,
+  upload.fields([
+    { name: "courseThumbnail", maxCount: 1 },
+    { name: "coursePromoVideo", maxCount: 1 }
+  ]),
+  editCourse
+);
+router.post(  "/:courseId/bulk-upload", isAuthenticated, uploadBulk.array("videos", 10), bulkUploadCourseVideos);
 // router.patch( "/:courseId", isAuthenticated, togglePublishCourse);
 router.delete("/:courseId", isAuthenticated, removeCourse);
+router.delete("/:courseId/promo-video", isAuthenticated, deletePromoVideo);
 
 // Explicit publish route (in case frontend uses this URL pattern)
 router.patch("/:courseId/publish", isAuthenticated, togglePublishCourse);

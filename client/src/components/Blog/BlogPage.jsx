@@ -18,6 +18,7 @@ import CategoriesNavBar from './CategoryNavbar';
 import ArticleCard from './ArticleCard';
 import ArticleSection from './ArticleSection';
 import CtaSection from './CtaSection';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 // Register GSAP Plugin
 gsap.registerPlugin(ScrollTrigger);
@@ -83,17 +84,19 @@ const BlogPage = () => {
 
     const isLoading = isLoadingArticles || isLoadingCategories;
 
+    if (isLoading) {
+        return <LoadingSpinner />;
+    }
+
     return (
         <div ref={componentRef} className="bg-gray-100 dark:bg-gray-900">
             <div className="animate-on-scroll"><BlogHeroSection /></div>
 
-            {!isLoadingCategories && (
-                <CategoriesNavBar
-                    categories={allCategories}
-                    selectedCategory={selectedCategory}
-                    onSelectCategory={setSelectedCategory}
-                />
-            )}
+            <CategoriesNavBar
+                categories={allCategories}
+                selectedCategory={selectedCategory}
+                onSelectCategory={setSelectedCategory}
+            />
 
             <main className="py-12">
                 <div className="container mx-auto px-6 mb-12 animate-on-scroll">
@@ -102,7 +105,7 @@ const BlogPage = () => {
                         <Input
                             type="text"
                             placeholder="Search articles by title..."
-                            className="pl-12 pr-4 py-3 text-base h-14 w-full"
+                            className="pl-12 pr-4 py-3 text-lg h-14 w-full"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
@@ -119,10 +122,7 @@ const BlogPage = () => {
                     </div>
                 )}
 
-                {isLoading ? (
-                    <BlogGridSkeleton />
-                ) : (
-                    <AnimatePresence mode="wait">
+                <AnimatePresence mode="wait">
                         <motion.div
                             key={selectedCategory}
                             initial={{ opacity: 0 }}
@@ -132,7 +132,7 @@ const BlogPage = () => {
                         >
                             {selectedCategory === 'All' && !searchQuery && popularArticles.length > 0 && (
                                 <section className="container mx-auto px-6 animate-on-scroll">
-                                    <h2 className="text-3xl font-bold text-gray-900 dark:text-white mb-8">Popular Articles</h2>
+                                    <h2 className="text-4xl font-normal text-gray-900 dark:text-white mb-8">Popular Articles</h2>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
                                         <AnimatePresence>
                                             {popularArticles.map(article => (
@@ -156,7 +156,6 @@ const BlogPage = () => {
                             ))}
                         </motion.div>
                     </AnimatePresence>
-                )}
 
                 {/* "No results" message with animation */}
                 <AnimatePresence>
@@ -167,7 +166,7 @@ const BlogPage = () => {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0 }}
                         >
-                            <h3 className="text-2xl font-semibold">No articles found for &quot;{searchQuery}&quot;</h3>
+                            <h3 className="text-3xl font-normal">No articles found for &quot;{searchQuery}&quot;</h3>
                             <p className="mt-2">Try searching for something else or clearing your search.</p>
                         </motion.div>
                     )}

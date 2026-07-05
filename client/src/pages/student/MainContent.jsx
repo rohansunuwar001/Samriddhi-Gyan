@@ -16,7 +16,8 @@ import {
   ArrowLeft,
   Bot,
   Check,
-  BookOpen
+  BookOpen,
+  Download,
 } from "lucide-react";
 import ReviewsSection from "../Reviews/ReviewSection";
 import BolaVideoPlayer from "../admin/lecture/BolaVideoPlayer";
@@ -332,12 +333,26 @@ const MainContent = ({
                 alt={course.title}
                 className="max-h-32 opacity-40 rounded mb-4"
               />
-              <div className="font-normal text-base text-gray-300">
+              <div className="font-normal text-lg text-gray-300">
                 {selectedLecture?.title || "Select a lecture from the sidebar"}
               </div>
             </div>
           )}
         </div>
+
+        {/* Download Lecture Video if downloadable is true */}
+        {selectedLecture?.videoUrl && selectedLecture.downloadable && (
+          <a
+            href={selectedLecture.videoUrl}
+            download
+            target="_blank"
+            rel="noopener noreferrer"
+            className="absolute top-4 left-4 bg-black/60 hover:bg-black/90 text-white px-3 py-1.5 rounded-sm flex items-center gap-1.5 text-sm z-30 transition-all font-normal shadow-md"
+            title="Download Lecture Video"
+          >
+            <Download className="w-3.5 h-3.5" /> Download
+          </a>
+        )}
 
         {/* Previous Lecture Skip Overlay Control */}
         {prevLecture && (
@@ -381,7 +396,7 @@ const MainContent = ({
             {tabs.map((tab) => (
               <button
                 key={tab.id}
-                className={`py-3 px-1 border-b-2 text-base font-normal transition-all whitespace-nowrap ${
+                className={`py-3 px-1 border-b-2 text-lg font-normal transition-all whitespace-nowrap ${
                   selectedTab === tab.id
                     ? "border-[#2d2f31] text-[#2d2f31]"
                     : "border-transparent text-[#6a6f73] hover:text-[#2d2f31]"
@@ -399,18 +414,18 @@ const MainContent = ({
           {selectedTab === "overview" && (
             <article className="space-y-6">
               <div>
-                <h1 className="text-xl font-normal text-[#2d2f31] leading-tight">
+                <h1 className="text-2xl font-normal text-[#2d2f31] leading-tight">
                   About this course
                 </h1>
-                <p className="text-base mt-2 text-[#6a6f73] font-normal leading-relaxed">
+                <p className="text-lg mt-2 text-[#6a6f73] font-normal leading-relaxed">
                   {course.subtitles || "Master this subject step-by-step."}
                 </p>
               </div>
 
               {/* Course Meta Info row */}
-              <div className="flex items-center gap-x-6 gap-y-2 flex-wrap text-sm text-[#2d2f31]">
+              <div className="flex items-center gap-x-6 gap-y-2 flex-wrap text-base text-[#2d2f31]">
                 <div className="flex items-center gap-1">
-                  <span className="font-extrabold text-[#b4690e]">{ratings.toFixed(1)}</span>
+                  <span className="font-normal text-[#b4690e]">{ratings.toFixed(1)}</span>
                   <div className="flex items-center text-[#b4690e]">
                     <FaStar className="h-3 w-3 fill-current" />
                   </div>
@@ -419,17 +434,17 @@ const MainContent = ({
                   </span>
                 </div>
                 <div>
-                  <span className="font-bold">{studentCount}</span> students
+                  <span className="font-normal">{studentCount}</span> students
                 </div>
                 <div>
-                  <span className="font-bold">{formatDurationString(totalDuration)}</span> total
+                  <span className="font-normal">{formatDurationString(totalDuration)}</span> total
                 </div>
               </div>
 
               <div className="h-px bg-[#d1d7dc]" />
 
               {/* Detailed specs */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8 text-sm text-[#2d2f31]">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-4 gap-x-8 text-base text-[#2d2f31]">
                 <div className="space-y-1">
                   <span className="text-[#6a6f73] block">By the numbers</span>
                   <p>Skill level: {level}</p>
@@ -451,9 +466,9 @@ const MainContent = ({
 
               {/* Description */}
               <div className="space-y-3">
-                <h2 className="text-lg font-normal text-[#2d2f31]">Description</h2>
+                <h2 className="text-xl font-normal text-[#2d2f31]">Description</h2>
                 <div
-                  className="text-sm text-[#2d2f31] leading-relaxed prose max-w-none"
+                  className="text-base text-[#2d2f31] leading-relaxed prose max-w-none"
                   dangerouslySetInnerHTML={{ __html: course.description }}
                 />
               </div>
@@ -462,7 +477,7 @@ const MainContent = ({
 
               {/* Instructor Section */}
               <div className="space-y-4">
-                <h2 className="text-lg font-normal text-[#2d2f31]">Instructor</h2>
+                <h2 className="text-xl font-normal text-[#2d2f31]">Instructor</h2>
                 <div className="flex items-start gap-4">
                   <img
                     src={instructorPhoto}
@@ -470,10 +485,10 @@ const MainContent = ({
                     className="rounded-full w-14 h-14 object-cover border border-gray-200"
                   />
                   <div className="space-y-1">
-                    <h3 className="text-lg font-normal text-[#5624d0] hover:underline cursor-pointer">
+                    <h3 className="text-xl font-normal text-[#5624d0] hover:underline cursor-pointer">
                       {instructorName}
                     </h3>
-                    <p className="text-sm text-[#6a6f73]">{instructorHeadline}</p>
+                    <p className="text-base text-[#6a6f73]">{instructorHeadline}</p>
                     <div className="flex space-x-3 pt-2">
                       {instructorLinks.facebook && (
                         <a
@@ -520,46 +535,46 @@ const MainContent = ({
                 <div className="space-y-5">
                   <button
                     onClick={() => setSelectedQuestion(null)}
-                    className="flex items-center gap-2 text-lg font-normal text-[#5624d0] hover:underline"
+                    className="flex items-center gap-2 text-xl font-normal text-[#5624d0] hover:underline"
                   >
                     <ArrowLeft className="h-4 w-4" /> Back to all questions
                   </button>
 
                   <div className="border border-[#d1d7dc] p-5 space-y-4">
                     <div className="flex items-start gap-3">
-                      <div className="h-9 w-9 rounded-full bg-[#2d2f31] text-white flex items-center justify-center font-normal text-sm">
+                      <div className="h-9 w-9 rounded-full bg-[#2d2f31] text-white flex items-center justify-center font-normal text-base">
                         {selectedQuestion.userId?.name?.slice(0, 2).toUpperCase() || "ST"}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-base font-normal">{selectedQuestion.title}</h3>
-                        <p className="text-sm text-gray-500">
+                        <h3 className="text-lg font-normal">{selectedQuestion.title}</h3>
+                        <p className="text-base text-gray-500">
                           Asked by {selectedQuestion.userId?.name || "Student"}{" "}
                           {selectedQuestion.lectureId && `• ${selectedQuestion.lectureId.title}`}
                         </p>
-                        <p className="text-sm pt-3 leading-relaxed whitespace-pre-wrap">{selectedQuestion.content}</p>
+                        <p className="text-base pt-3 leading-relaxed whitespace-pre-wrap">{selectedQuestion.content}</p>
                       </div>
                     </div>
                   </div>
 
                   {/* Answers thread */}
                   <div className="space-y-4 pl-6 border-l-2 border-[#d1d7dc]">
-                    <h4 className="text-sm font-normal uppercase tracking-wider text-gray-500">
+                    <h4 className="text-base font-normal uppercase tracking-wider text-gray-500">
                       Replies ({selectedQuestion.answers?.length || 0})
                     </h4>
 
                     {selectedQuestion.answers?.map((ans, idx) => (
                       <div key={idx} className="bg-gray-50 p-4 border border-[#e4e8eb] flex gap-3">
-                        <div className="h-8 w-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-normal text-sm">
+                        <div className="h-8 w-8 rounded-full bg-purple-600 text-white flex items-center justify-center font-normal text-base">
                           {ans.userId?.name?.slice(0, 2).toUpperCase() || "ST"}
                         </div>
                         <div className="flex-1 min-w-0">
-                          <p className="text-sm font-normal text-[#2d2f31]">
+                          <p className="text-base font-normal text-[#2d2f31]">
                             {ans.userId?.name || "Student"}
                           </p>
-                          <p className="text-xs text-gray-500">
+                          <p className="text-sm text-gray-500">
                             {new Date(ans.createdAt).toLocaleDateString()}
                           </p>
-                          <p className="text-sm pt-2 leading-relaxed whitespace-pre-wrap">{ans.content}</p>
+                          <p className="text-base pt-2 leading-relaxed whitespace-pre-wrap">{ans.content}</p>
                         </div>
                       </div>
                     ))}
@@ -572,11 +587,11 @@ const MainContent = ({
                       value={newAnswerText}
                       onChange={(e) => setNewAnswerText(e.target.value)}
                       rows={3}
-                      className="w-full border border-[#d1d7dc] p-3 text-sm outline-none focus:border-[#2d2f31]"
+                      className="w-full border border-[#d1d7dc] p-3 text-base outline-none focus:border-[#2d2f31]"
                     />
                     <button
                       type="submit"
-                      className="bg-[#2d2f31] hover:bg-black text-white px-4 py-2.5 text-sm font-normal transition-colors"
+                      className="bg-[#2d2f31] hover:bg-black text-white px-4 py-2.5 text-base font-normal transition-colors"
                     >
                       Post Answer
                     </button>
@@ -585,38 +600,38 @@ const MainContent = ({
               ) : isAsking ? (
                 /* Ask Question Screen */
                 <form onSubmit={handleAskSubmit} className="space-y-4">
-                  <h3 className="text-lg font-normal">Ask a new question</h3>
+                  <h3 className="text-xl font-normal">Ask a new question</h3>
                   <div className="space-y-1">
-                    <label className="text-sm font-normal block text-gray-600">Question Title</label>
+                    <label className="text-base font-normal block text-gray-600">Question Title</label>
                     <input
                       type="text"
                       placeholder="Be specific. e.g. Why does my state hook trigger twice?"
                       value={newTitle}
                       onChange={(e) => setNewTitle(e.target.value)}
-                      className="w-full border border-[#d1d7dc] px-3.5 py-2.5 text-sm outline-none focus:border-[#2d2f31]"
+                      className="w-full border border-[#d1d7dc] px-3.5 py-2.5 text-base outline-none focus:border-[#2d2f31]"
                     />
                   </div>
                   <div className="space-y-1">
-                    <label className="text-sm font-normal block text-gray-600">Details</label>
+                    <label className="text-base font-normal block text-gray-600">Details</label>
                     <textarea
                       rows={5}
                       placeholder="Describe what you tried, what went wrong, and include any error logs or code snippets..."
                       value={newContent}
                       onChange={(e) => setNewContent(e.target.value)}
-                      className="w-full border border-[#d1d7dc] p-3.5 text-sm outline-none focus:border-[#2d2f31]"
+                      className="w-full border border-[#d1d7dc] p-3.5 text-base outline-none focus:border-[#2d2f31]"
                     />
                   </div>
                   <div className="flex gap-3">
                     <button
                       type="submit"
-                      className="bg-[#a435f0] hover:bg-[#8710d8] text-white px-5 py-2.5 text-sm font-normal"
+                      className="bg-[#a435f0] hover:bg-[#8710d8] text-white px-5 py-2.5 text-base font-normal"
                     >
                       Publish Question
                     </button>
                     <button
                       type="button"
                       onClick={() => setIsAsking(false)}
-                      className="border border-[#d1d7dc] text-[#2d2f31] hover:bg-gray-100 px-5 py-2.5 text-sm font-normal"
+                      className="border border-[#d1d7dc] text-[#2d2f31] hover:bg-gray-100 px-5 py-2.5 text-base font-normal"
                     >
                       Cancel
                     </button>
@@ -628,17 +643,17 @@ const MainContent = ({
                   {/* Purple Banner trigger helper */}
                   <div className="bg-[#f3ebfc] border border-[#ecebfa] p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                     <div className="space-y-1">
-                      <h4 className="text-base font-normal flex items-center gap-1.5 text-[#2d2f31]">
+                      <h4 className="text-lg font-normal flex items-center gap-1.5 text-[#2d2f31]">
                         <Sparkles className="h-4 w-4 text-[#a435f0] fill-current" />
                         Get an instant answer from the assistant
                       </h4>
-                      <p className="text-sm text-[#6a6f73] font-normal leading-relaxed">
+                      <p className="text-base text-[#6a6f73] font-normal leading-relaxed">
                         Our AI uses context from the course to help answer most questions immediately.
                       </p>
                     </div>
                     <button
                       onClick={() => setShowAiModal(true)}
-                      className="bg-[#a435f0] hover:bg-[#8710d8] text-white px-4 py-2.5 text-sm font-normal transition-colors flex items-center gap-1.5 shrink-0"
+                      className="bg-[#a435f0] hover:bg-[#8710d8] text-white px-4 py-2.5 text-base font-normal transition-colors flex items-center gap-1.5 shrink-0"
                     >
                       <Sparkles className="h-3.5 w-3.5" /> Get an instant answer
                     </button>
@@ -652,7 +667,7 @@ const MainContent = ({
                         placeholder="Search all course questions"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        className="flex-grow border border-[#d1d7dc] px-3.5 py-2.5 text-sm outline-none focus:border-[#2d2f31] bg-white h-10 min-w-0"
+                        className="flex-grow border border-[#d1d7dc] px-3.5 py-2.5 text-base outline-none focus:border-[#2d2f31] bg-white h-10 min-w-0"
                       />
                       <button className="h-10 w-10 bg-[#5624d0] hover:bg-[#3b1990] text-white flex items-center justify-center shrink-0">
                         <Search className="h-4 w-4" />
@@ -662,11 +677,11 @@ const MainContent = ({
                     <div className="flex flex-wrap items-center gap-4">
                       {/* Filter by lecture */}
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-normal text-gray-500">Filters:</span>
+                        <span className="text-base font-normal text-gray-500">Filters:</span>
                         <select
                           value={lectureFilter}
                           onChange={(e) => setLectureFilter(e.target.value)}
-                          className="border border-[#d1d7dc] px-3.5 py-2 text-sm outline-none bg-white h-10 cursor-pointer"
+                          className="border border-[#d1d7dc] px-3.5 py-2 text-base outline-none bg-white h-10 cursor-pointer"
                         >
                           <option value="all">All lectures</option>
                           <option value="current">Current lecture</option>
@@ -675,18 +690,18 @@ const MainContent = ({
 
                       {/* Sort by */}
                       <div className="flex items-center gap-2">
-                        <span className="text-sm font-normal text-gray-500">Sort by:</span>
+                        <span className="text-base font-normal text-gray-500">Sort by:</span>
                         <select
                           value={sortBy}
                           onChange={(e) => setSortBy(e.target.value)}
-                          className="border border-[#d1d7dc] px-3.5 py-2 text-sm outline-none bg-white h-10 cursor-pointer"
+                          className="border border-[#d1d7dc] px-3.5 py-2 text-base outline-none bg-white h-10 cursor-pointer"
                         >
                           <option value="recommended">Sort by recommended</option>
                           <option value="recent">Sort by recent</option>
                         </select>
                       </div>
 
-                      <button className="border border-[#d1d7dc] hover:bg-gray-50 px-4 h-10 text-sm font-normal transition-colors">
+                      <button className="border border-[#d1d7dc] hover:bg-gray-50 px-4 h-10 text-base font-normal transition-colors">
                         Filter questions
                       </button>
                     </div>
@@ -694,7 +709,7 @@ const MainContent = ({
 
                   {/* List items block */}
                   <div className="space-y-4 pt-2">
-                    <h3 className="text-lg font-normal">
+                    <h3 className="text-xl font-normal">
                       All questions in this course ({filteredQuestions.length})
                     </h3>
 
@@ -703,7 +718,7 @@ const MainContent = ({
                         <Loader2 className="h-6 w-6 animate-spin text-[#a435f0]" />
                       </div>
                     ) : filteredQuestions.length === 0 ? (
-                      <p className="py-8 text-center text-sm text-gray-500 font-normal">
+                      <p className="py-8 text-center text-base text-gray-500 font-normal">
                         No questions found. Be the first to start a conversation!
                       </p>
                     ) : (
@@ -719,16 +734,16 @@ const MainContent = ({
                               className="py-5 flex items-start gap-4 cursor-pointer hover:bg-gray-50/50 transition-all"
                             >
                               {/* Avatar */}
-                              <div className="h-10 w-10 rounded-full bg-[#2d2f31] text-white flex items-center justify-center font-normal text-sm shrink-0">
+                              <div className="h-10 w-10 rounded-full bg-[#2d2f31] text-white flex items-center justify-center font-normal text-base shrink-0">
                                 {initial}
                               </div>
 
                               {/* Details */}
                               <div className="flex-grow min-w-0 pr-4 space-y-1">
-                                <h4 className="text-sm font-normal text-[#2d2f31] line-clamp-1 hover:text-[#5624d0]">
+                                <h4 className="text-base font-normal text-[#2d2f31] line-clamp-1 hover:text-[#5624d0]">
                                   {q.title}
                                 </h4>
-                                <p className="text-xs text-gray-500 line-clamp-1 font-normal">
+                                <p className="text-sm text-gray-500 line-clamp-1 font-normal">
                                   {q.userId?.name || "Student"}{" "}
                                   {q.lectureId && (
                                     <span className="text-[#5624d0]">
@@ -740,7 +755,7 @@ const MainContent = ({
                               </div>
 
                               {/* Stats counts */}
-                              <div className="flex items-center gap-4 shrink-0 text-sm text-[#2d2f31]">
+                              <div className="flex items-center gap-4 shrink-0 text-base text-[#2d2f31]">
                                 <button
                                   onClick={(e) => handleUpvoteClick(q._id, e)}
                                   className={`flex flex-col items-center gap-0.5 hover:text-[#a435f0] ${
@@ -766,13 +781,13 @@ const MainContent = ({
                   <div className="flex gap-4 pt-4">
                     <button
                       onClick={() => setShowAiModal(true)}
-                      className="bg-[#a435f0] hover:bg-[#8710d8] text-white px-5 py-2.5 text-sm font-normal transition-all flex items-center gap-1.5"
+                      className="bg-[#a435f0] hover:bg-[#8710d8] text-white px-5 py-2.5 text-base font-normal transition-all flex items-center gap-1.5"
                     >
                       <Sparkles className="h-3.5 w-3.5" /> Get an instant answer
                     </button>
                     <button
                       onClick={() => setIsAsking(true)}
-                      className="border border-[#2d2f31] text-[#2d2f31] hover:bg-gray-100 px-5 py-2.5 text-sm font-normal transition-all"
+                      className="border border-[#2d2f31] text-[#2d2f31] hover:bg-gray-100 px-5 py-2.5 text-base font-normal transition-all"
                     >
                       Ask a new question
                     </button>
@@ -785,7 +800,7 @@ const MainContent = ({
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
                   <div className="bg-white max-w-lg w-full p-6 space-y-4 rounded-none border border-[#d1d7dc] shadow-2xl">
                     <div className="flex justify-between items-center">
-                      <h3 className="text-base font-normal flex items-center gap-1.5 text-[#a435f0]">
+                      <h3 className="text-lg font-normal flex items-center gap-1.5 text-[#a435f0]">
                         <Bot className="h-5 w-5" /> Ask AI Learning Assistant
                       </h3>
                       <button
@@ -794,14 +809,14 @@ const MainContent = ({
                           setAiPrompt("");
                           setAiResponse("");
                         }}
-                        className="text-gray-400 hover:text-[#2d2f31] text-xl font-normal"
+                        className="text-gray-400 hover:text-[#2d2f31] text-2xl font-normal"
                       >
                         ✕
                       </button>
                     </div>
 
                     <form onSubmit={handleAiAsk} className="space-y-3">
-                      <p className="text-sm text-[#6a6f73] leading-relaxed font-normal">
+                      <p className="text-base text-[#6a6f73] leading-relaxed font-normal">
                         Type any question regarding this course, lectures, or full-stack technologies to get a response.
                       </p>
                       <input
@@ -809,19 +824,19 @@ const MainContent = ({
                         placeholder="e.g. Can you explain the difference between REST and GraphQL?"
                         value={aiPrompt}
                         onChange={(e) => setAiPrompt(e.target.value)}
-                        className="w-full border border-[#d1d7dc] px-3 py-2 text-sm outline-none focus:border-[#2d2f31]"
+                        className="w-full border border-[#d1d7dc] px-3 py-2 text-base outline-none focus:border-[#2d2f31]"
                       />
                       <button
                         type="submit"
                         disabled={aiLoading || !aiPrompt.trim()}
-                        className="w-full bg-[#a435f0] hover:bg-[#8710d8] text-white py-2 text-sm font-normal disabled:opacity-50"
+                        className="w-full bg-[#a435f0] hover:bg-[#8710d8] text-white py-2 text-base font-normal disabled:opacity-50"
                       >
                         {aiLoading ? "Thinking..." : "Generate Answer"}
                       </button>
                     </form>
 
                     {aiResponse && (
-                      <div className="mt-3 p-4 bg-gray-50 border border-[#d1d7dc] text-sm leading-relaxed max-h-60 overflow-y-auto whitespace-pre-wrap">
+                      <div className="mt-3 p-4 bg-gray-50 border border-[#d1d7dc] text-base leading-relaxed max-h-60 overflow-y-auto whitespace-pre-wrap">
                         <span className="font-normal block mb-1 text-[#a435f0]">AI Answer:</span>
                         {aiResponse}
                       </div>
@@ -898,7 +913,7 @@ const MainContent = ({
               if (!activeCard) return null;
               return (
                 <div className="space-y-6 max-w-xl mx-auto text-left">
-                  <div className="flex justify-between items-center text-sm text-gray-500 font-normal">
+                  <div className="flex justify-between items-center text-base text-gray-500 font-normal">
                     <span>Session: {activeCardIdx + 1} of {dueCards.length} due</span>
                     <button
                       onClick={() => {
@@ -919,22 +934,22 @@ const MainContent = ({
                   >
                     {!cardFlipped ? (
                       <div className="space-y-4">
-                        <span className="inline-block px-2.5 py-0.5 bg-purple-100 text-purple-700 text-xs font-normal rounded-full uppercase tracking-wider">
+                        <span className="inline-block px-2.5 py-0.5 bg-purple-100 text-purple-700 text-sm font-normal rounded-full uppercase tracking-wider">
                           Question
                         </span>
-                        <p className="text-lg sm:text-xl font-normal text-slate-800 leading-snug px-4">
+                        <p className="text-xl sm:text-2xl font-normal text-slate-800 leading-snug px-4">
                           {activeCard.question}
                         </p>
-                        <p className="text-sm text-purple-600 font-semibold animate-pulse pt-2">
+                        <p className="text-base text-purple-600 font-normal animate-pulse pt-2">
                           Click card to reveal answer
                         </p>
                       </div>
                     ) : (
                       <div className="space-y-4 w-full">
-                        <span className="inline-block px-2.5 py-0.5 bg-emerald-100 text-emerald-700 text-xs font-normal rounded-full uppercase tracking-wider">
+                        <span className="inline-block px-2.5 py-0.5 bg-emerald-100 text-emerald-700 text-sm font-normal rounded-full uppercase tracking-wider">
                           Answer
                         </span>
-                        <p className="text-lg font-medium text-slate-700 leading-relaxed px-4 max-h-[140px] overflow-y-auto">
+                        <p className="text-xl font-light text-slate-700 leading-relaxed px-4 max-h-[140px] overflow-y-auto">
                           {activeCard.answer}
                         </p>
                       </div>
@@ -944,7 +959,7 @@ const MainContent = ({
                   {/* Score Button Bar */}
                   {cardFlipped && (
                     <div className="space-y-3 pt-2">
-                      <p className="text-xs text-center text-slate-400 font-normal uppercase tracking-wider">
+                      <p className="text-sm text-center text-slate-400 font-normal uppercase tracking-wider">
                         How well did you recall this answer?
                       </p>
                       <div className="grid grid-cols-4 gap-2">
@@ -957,7 +972,7 @@ const MainContent = ({
                           <button
                             key={btn.val}
                             onClick={() => handleScoreReview(activeCard._id, btn.val)}
-                            className={`py-2.5 border text-sm font-normal rounded-xl transition-all shadow-sm ${btn.color}`}
+                            className={`py-2.5 border text-base font-normal rounded-xl transition-all shadow-sm ${btn.color}`}
                           >
                             {btn.label}
                           </button>
@@ -975,20 +990,20 @@ const MainContent = ({
                 <div className="space-y-6">
                   <div className="bg-slate-50 border border-slate-200/60 p-6 rounded-2xl flex flex-col items-start gap-4">
                     <div className="space-y-1">
-                      <h3 className="text-lg font-normal text-slate-800">Spaced Repetitive Cards</h3>
-                      <p className="text-sm text-slate-500 leading-relaxed font-normal">
+                      <h3 className="text-xl font-normal text-slate-800">Spaced Repetitive Cards</h3>
+                      <p className="text-base text-slate-500 leading-relaxed font-normal">
                         Our adaptive system automatically schedules review times for your cards using the SuperMemo-2 spaced recall algorithm to maximize retention.
                       </p>
                     </div>
 
                     <div className="py-2">
                       {hasDue ? (
-                        <div className="flex items-center gap-3 bg-purple-50 border border-purple-100 px-4 py-2.5 rounded-xl text-sm font-normal text-purple-700">
+                        <div className="flex items-center gap-3 bg-purple-50 border border-purple-100 px-4 py-2.5 rounded-xl text-base font-normal text-purple-700">
                           <BookOpen className="w-4 h-4" />
                           <span>You have {dueCards.length} flashcards due for study today!</span>
                         </div>
                       ) : (
-                        <div className="flex items-center gap-3 bg-slate-100 border border-slate-200/40 px-4 py-2.5 rounded-xl text-sm font-normal text-slate-600">
+                        <div className="flex items-center gap-3 bg-slate-100 border border-slate-200/40 px-4 py-2.5 rounded-xl text-base font-normal text-slate-600">
                           <Check className="w-4 h-4 text-emerald-600" />
                           <span>All caught up! No flashcards due for review today.</span>
                         </div>
@@ -1013,18 +1028,18 @@ const MainContent = ({
                   {selectedLecture && (
                     <div className="border border-purple-100 bg-[#fbf8ff] p-6 rounded-2xl space-y-4">
                       <div className="space-y-1">
-                        <h4 className="text-base font-normal text-slate-800 flex items-center gap-1.5">
+                        <h4 className="text-lg font-normal text-slate-800 flex items-center gap-1.5">
                           <Sparkles className="w-4 h-4 text-purple-600 fill-current" />
                           Generate Cards with Gemini AI
                         </h4>
-                        <p className="text-sm text-slate-500 font-normal leading-relaxed">
+                        <p className="text-base text-slate-500 font-normal leading-relaxed">
                           Let AI analyze the current lecture <strong className="text-purple-700">"{selectedLecture.title}"</strong> and create a set of custom study flashcards instantly.
                         </p>
                       </div>
                       <Button
                         onClick={handleAIGenerate}
                         disabled={aiGenerating}
-                        className="bg-slate-900 hover:bg-slate-800 text-white font-normal h-10 px-5 rounded-xl gap-2 disabled:opacity-50 text-sm"
+                        className="bg-slate-900 hover:bg-slate-800 text-white font-normal h-10 px-5 rounded-xl gap-2 disabled:opacity-50 text-base"
                       >
                         {aiGenerating ? (
                           <>
@@ -1044,12 +1059,12 @@ const MainContent = ({
 
                 {/* Manual flashcard creation sidebar */}
                 <aside className="border border-slate-200 p-6 rounded-2xl bg-white space-y-4 h-fit">
-                  <h3 className="text-base font-normal text-slate-800 border-b border-slate-100 pb-2">
+                  <h3 className="text-lg font-normal text-slate-800 border-b border-slate-100 pb-2">
                     Create Flashcard
                   </h3>
                   <form onSubmit={handleManualCreate} className="space-y-4">
                     <div className="space-y-1">
-                      <label className="text-xs font-normal text-slate-500 uppercase tracking-wider">
+                      <label className="text-sm font-normal text-slate-500 uppercase tracking-wider">
                         Question
                       </label>
                       <textarea
@@ -1057,11 +1072,11 @@ const MainContent = ({
                         placeholder="e.g. What is state?"
                         value={manualQuestion}
                         onChange={(e) => setManualQuestion(e.target.value)}
-                        className="w-full border border-slate-200 p-3 rounded-lg text-sm outline-none focus:border-purple-500 bg-slate-50/50"
+                        className="w-full border border-slate-200 p-3 rounded-lg text-base outline-none focus:border-purple-500 bg-slate-50/50"
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs font-normal text-slate-500 uppercase tracking-wider">
+                      <label className="text-sm font-normal text-slate-500 uppercase tracking-wider">
                         Answer
                       </label>
                       <textarea
@@ -1069,12 +1084,12 @@ const MainContent = ({
                         placeholder="e.g. State is a component's memory..."
                         value={manualAnswer}
                         onChange={(e) => setManualAnswer(e.target.value)}
-                        className="w-full border border-slate-200 p-3 rounded-lg text-sm outline-none focus:border-purple-500 bg-slate-50/50"
+                        className="w-full border border-slate-200 p-3 rounded-lg text-base outline-none focus:border-purple-500 bg-slate-50/50"
                       />
                     </div>
                     <Button
                       type="submit"
-                      className="w-full bg-[#a435f0] hover:bg-[#8710d8] text-white font-normal h-10 rounded-xl text-sm"
+                      className="w-full bg-[#a435f0] hover:bg-[#8710d8] text-white font-normal h-10 rounded-xl text-base"
                     >
                       Add Flashcard
                     </Button>
@@ -1085,13 +1100,13 @@ const MainContent = ({
           })()}
 
           {selectedTab === "notes" && (
-            <div className="p-4 bg-gray-50 border border-dashed border-gray-300 text-center text-sm text-gray-500">
+            <div className="p-4 bg-gray-50 border border-dashed border-gray-300 text-center text-base text-gray-500">
               Create and manage study notes to keep track of key concepts during lectures.
             </div>
           )}
 
           {selectedTab === "announcements" && (
-            <div className="p-4 bg-gray-50 border border-dashed border-gray-300 text-center text-sm text-gray-500">
+            <div className="p-4 bg-gray-50 border border-dashed border-gray-300 text-center text-base text-gray-500">
               No course announcements posted yet. Check back later for updates from the instructor.
             </div>
           )}
@@ -1108,25 +1123,25 @@ const MainContent = ({
               {isAddingReminder ? (
                 /* Add Reminder Form */
                 <form onSubmit={handleAddReminder} className="border border-[#d1d7dc] p-5 space-y-4 max-w-md">
-                  <h3 className="text-base font-normal">Add a learning reminder</h3>
+                  <h3 className="text-lg font-normal">Add a learning reminder</h3>
 
                   {/* Time picker */}
                   <div className="space-y-1">
-                    <label className="text-sm font-normal block text-gray-600">Select Time</label>
+                    <label className="text-base font-normal block text-gray-600">Select Time</label>
                     <div className="flex items-center gap-2 border border-[#d1d7dc] px-3.5 py-2">
                       <Clock className="h-4 w-4 text-gray-400" />
                       <input
                         type="time"
                         value={reminderTime}
                         onChange={(e) => setReminderTime(e.target.value)}
-                        className="text-sm outline-none bg-transparent w-full"
+                        className="text-base outline-none bg-transparent w-full"
                       />
                     </div>
                   </div>
 
                   {/* Day Picker */}
                   <div className="space-y-1">
-                    <label className="text-sm font-normal block text-gray-600">Select Days</label>
+                    <label className="text-base font-normal block text-gray-600">Select Days</label>
                     <div className="flex flex-wrap gap-2 pt-1">
                       {daysOfWeek.map((day) => {
                         const selected = reminderDays.includes(day);
@@ -1135,9 +1150,9 @@ const MainContent = ({
                             type="button"
                             key={day}
                             onClick={() => toggleDaySelection(day)}
-                            className={`px-3 py-1.5 text-sm font-normal border transition-all ${
+                            className={`px-3 py-1.5 text-base font-normal border transition-all ${
                               selected
-                                ? "bg-[#2d2f31] border-[#2d2f31] text-white font-semibold"
+                                ? "bg-[#2d2f31] border-[#2d2f31] text-white font-normal"
                                 : "border-[#d1d7dc] text-gray-600 hover:bg-gray-100"
                             }`}
                           >
@@ -1150,11 +1165,11 @@ const MainContent = ({
 
                   {/* Frequency selection */}
                   <div className="space-y-1">
-                    <label className="text-sm font-normal block text-gray-600">Frequency</label>
+                    <label className="text-base font-normal block text-gray-600">Frequency</label>
                     <select
                       value={reminderFrequency}
                       onChange={(e) => setReminderFrequency(e.target.value)}
-                      className="w-full border border-[#d1d7dc] px-3.5 py-2.5 text-sm outline-none bg-white font-normal"
+                      className="w-full border border-[#d1d7dc] px-3.5 py-2.5 text-base outline-none bg-white font-normal"
                     >
                       <option value="Daily">Daily</option>
                       <option value="Weekly">Weekly</option>
@@ -1165,14 +1180,14 @@ const MainContent = ({
                   <div className="flex gap-3 pt-2">
                     <button
                       type="submit"
-                      className="bg-[#5624d0] hover:bg-[#3b1990] text-white px-4 py-2.5 text-sm font-normal"
+                      className="bg-[#5624d0] hover:bg-[#3b1990] text-white px-4 py-2.5 text-base font-normal"
                     >
                       Save reminder
                     </button>
                     <button
                       type="button"
                       onClick={() => setIsAddingReminder(false)}
-                      className="border border-[#d1d7dc] text-gray-700 hover:bg-gray-100 px-4 py-2.5 text-sm font-normal"
+                      className="border border-[#d1d7dc] text-gray-700 hover:bg-gray-100 px-4 py-2.5 text-base font-normal"
                     >
                       Cancel
                     </button>
@@ -1182,8 +1197,8 @@ const MainContent = ({
                 /* Main Tools view matching Picture 5 */
                 <div className="space-y-6">
                   <div className="space-y-1.5">
-                    <h3 className="text-xl font-normal">Learning reminders</h3>
-                    <p className="text-sm text-[#6a6f73] font-normal leading-relaxed">
+                    <h3 className="text-2xl font-normal">Learning reminders</h3>
+                    <p className="text-base text-[#6a6f73] font-normal leading-relaxed">
                       Set up push notifications or calendar events to stay on track for your learning goals.
                     </p>
                   </div>
@@ -1191,7 +1206,7 @@ const MainContent = ({
                   {/* Display saved reminders list */}
                   {courseReminders && courseReminders.length > 0 && (
                     <div className="space-y-3 max-w-md pt-2">
-                      <h4 className="text-sm font-normal uppercase tracking-wider text-gray-500">
+                      <h4 className="text-base font-normal uppercase tracking-wider text-gray-500">
                         Active Reminders
                       </h4>
                       <div className="divide-y divide-[#d1d7dc]">
@@ -1200,10 +1215,10 @@ const MainContent = ({
                             <div className="flex items-start gap-3">
                               <Calendar className="h-5 w-5 text-[#5624d0] mt-0.5" />
                               <div className="space-y-0.5">
-                                <p className="text-sm font-normal text-[#2d2f31]">
+                                <p className="text-base font-normal text-[#2d2f31]">
                                   {rem.days.map((d) => d.slice(0, 3)).join(", ")} at {rem.time}
                                 </p>
-                                <p className="text-xs text-gray-500 font-normal">
+                                <p className="text-sm text-gray-500 font-normal">
                                   {rem.frequency} Reminder
                                 </p>
                               </div>
@@ -1224,7 +1239,7 @@ const MainContent = ({
                   <div className="pt-2">
                     <button
                       onClick={() => setIsAddingReminder(true)}
-                      className="bg-[#5624d0] hover:bg-[#3b1990] text-white px-5 py-3 text-sm font-normal transition-all flex items-center gap-1.5"
+                      className="bg-[#5624d0] hover:bg-[#3b1990] text-white px-5 py-3 text-base font-normal transition-all flex items-center gap-1.5"
                     >
                       <Plus className="h-4 w-4" /> Add a learning reminder
                     </button>

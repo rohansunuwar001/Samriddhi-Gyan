@@ -28,15 +28,6 @@ const Cart = () => {
     toast.success("Coupon applied successfully!");
   };
 
-  const handleRemove = async (courseId) => {
-    try {
-      await removeFromCart(courseId).unwrap();
-      toast.success("Course removed from cart.");
-    } catch (error) {
-      toast.error(error?.data?.message || "Failed to remove course.");
-    }
-  };
-
   if (isCartLoading) {
     return (
       <div className="flex justify-center items-center min-h-[400px]">
@@ -53,13 +44,21 @@ const Cart = () => {
     );
   }
 
-  const { cart } = data;
+  const cart = data?.cart || [];
+  const cartCertifications = data?.cartCertifications || [];
+  const totalItems = cart.length + cartCertifications.length;
 
-  const subtotal = cart.reduce((acc, c) => acc + (c.price?.current ?? 0), 0);
-  const originalTotal = cart.reduce(
+  const coursesSubtotal = cart.reduce((acc, c) => acc + (c.price?.current ?? 0), 0);
+  const certsSubtotal = cartCertifications.reduce((acc, c) => acc + (c.examPrice ?? 0), 0);
+  const subtotal = coursesSubtotal + certsSubtotal;
+
+  const coursesOriginalTotal = cart.reduce(
     (acc, c) => acc + (c.price?.original ?? c.price?.current ?? 0),
     0
   );
+  const certsOriginalTotal = cartCertifications.reduce((acc, c) => acc + (c.examPrice ?? 0), 0);
+  const originalTotal = coursesOriginalTotal + certsOriginalTotal;
+
   const discountPct =
     originalTotal > subtotal && originalTotal > 0
       ? Math.round(100 - (subtotal / originalTotal) * 100)
@@ -81,20 +80,38 @@ const Cart = () => {
     </div>
   );
 
+  const handleRemove = async (courseId) => {
+    try {
+      await removeFromCart({ courseId }).unwrap();
+      toast.success("Course removed from cart.");
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to remove course.");
+    }
+  };
+
+  const handleRemoveCertification = async (certificationId) => {
+    try {
+      await removeFromCart({ certificationId }).unwrap();
+      toast.success("Exam voucher removed from cart.");
+    } catch (error) {
+      toast.error(error?.data?.message || "Failed to remove exam voucher.");
+    }
+  };
+
   return (
     <div className="bg-white text-[#2d2f31] min-h-screen">
       <div className="mx-auto max-w-[1400px] px-6 py-12 sm:px-8 lg:px-10">
         <h1 className="text-4xl font-extrabold tracking-tight text-[#2d2f31] mb-2">Shopping Cart</h1>
         <p className="text-base font-bold text-[#2d2f31] mb-8">
-          {cart.length} Course{cart.length !== 1 ? "s" : ""} in Cart
+          {totalItems} Item{totalItems !== 1 ? "s" : ""} in Cart
         </p>
 
-        {cart.length === 0 ? (
+        {totalItems === 0 ? (
           <div className="text-center py-20 flex flex-col justify-center items-center bg-[#f7f9fa] rounded border border-[#d1d7dc]">
             <ShoppingCart className="h-20 w-20 text-[#6a6f73] mb-6" />
             <h2 className="text-2xl font-extrabold text-[#2d2f31] mb-2">Your cart is empty</h2>
             <p className="text-[#6a6f73] mb-8 text-base">
-              Looks like you haven&apos;t added any courses to your cart yet.
+              Looks like you haven&apos;t added any items to your cart yet.
             </p>
             <Link to="/courses">
               <Button className="h-12 px-8 bg-[#a435f0] text-white hover:bg-[#8710d8] font-bold text-base rounded-none">
@@ -208,6 +225,62 @@ const Cart = () => {
                           </span>
                         </div>
                       )}
+                    </div>
+                  </div>
+                );
+              })}
+              {cartCertifications.map((cert) => {
+                const current = cert.examPrice ?? 0;
+                const issuerName = cert.issuer?.name ?? "Professional Board";
+                const badge = cert.badgeUrl || "/placeholder.jpg";
+
+                return (
+                  <div
+                    key={cert._id}
+                    className="flex flex-col md:flex-row items-start justify-between gap-6 py-6"
+                  >
+                    {/* Certification Card Details */}
+                    <div className="flex items-start gap-4 min-w-0 flex-1">
+                      <img
+                        src={badge}
+                        alt={cert.name}
+                        className="w-20 h-20 object-contain border border-[#d1d7dc] flex-shrink-0 bg-slate-50 p-2 rounded-xl"
+                      />
+                      <div className="min-w-0 space-y-1">
+                        <Link
+                          to={`/certification/${cert.slug}`}
+                          className="font-bold text-[#2d2f31] text-base leading-snug hover:text-[#5624d0] line-clamp-2"
+                        >
+                          {cert.name} Exam Voucher
+                        </Link>
+                        <p className="text-xs text-[#6a6f73]">
+                          Issuer: {issuerName}
+                        </p>
+                        <div className="text-xs text-[#6a6f73] flex flex-wrap gap-2 pt-1">
+                          <span>Verified Credential</span>
+                          <span>•</span>
+                          <span>Official Exam Attempt</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Actions Panel */}
+                    <div className="flex md:flex-col items-center md:items-end gap-4 text-xs font-bold text-[#5624d0] md:min-w-[120px]">
+                      <button
+                        onClick={() => handleRemoveCertification(cert._id)}
+                        disabled={isRemoving}
+                        className="hover:text-[#3b189f] underline"
+                      >
+                        Remove
+                      </button>
+                    </div>
+
+                    {/* Price panel */}
+                    <div className="text-right flex-shrink-0 md:min-w-[100px]">
+                      <div className="flex items-center justify-end gap-1.5 text-[#5624d0] font-extrabold text-lg">
+                        <span>Rs {current.toLocaleString()}</span>
+                        <Tag className="h-4 w-4" />
+                      </div>
                     </div>
                   </div>
                 );

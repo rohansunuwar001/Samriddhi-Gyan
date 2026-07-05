@@ -13,13 +13,14 @@ import { ChevronRight, Share2 } from 'lucide-react';
 
 // --- Real Data Source ---
 import { useGetArticleBySlugQuery, useGetAllArticlesQuery } from '@/features/api/articleApi';
+import LoadingSpinner from '@/components/LoadingSpinner';
 
 //================================================================================
 // 1. Reusable Sub-Components with PropTypes
 //================================================================================
 
 const Breadcrumbs = ({ category, title }) => (
-  <nav className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+  <nav className="flex items-center text-base text-gray-500 dark:text-gray-400">
     <Link to="/blog" className="hover:underline">Blog Home</Link>
     <ChevronRight className="h-4 w-4 mx-1" />
     {category?.slug && (
@@ -38,11 +39,11 @@ Breadcrumbs.propTypes = {
 
 const ArticleHeader = ({ category, title, lastUpdated }) => (
   <header className="mt-6">
-    <p className="text-indigo-600 dark:text-indigo-400 font-semibold">{category?.name}</p>
-    <h1 className="mt-2 text-4xl md:text-5xl font-bold font-serif text-gray-900 dark:text-white leading-tight">
+    <p className="text-indigo-600 dark:text-indigo-400 font-normal">{category?.name}</p>
+    <h1 className="mt-2 text-5xl md:text-6xl font-normal font-serif text-gray-900 dark:text-white leading-tight">
       {title}
     </h1>
-    <p className="mt-4 text-sm text-gray-500 dark:text-gray-400">
+    <p className="mt-4 text-base text-gray-500 dark:text-gray-400">
       Page Last Updated: {lastUpdated}
     </p>
   </header>
@@ -57,9 +58,9 @@ const AuthorInfo = ({ author }) => (
   <div className="my-8 flex items-center justify-between border-y border-gray-200 dark:border-gray-700 py-4">
     <div className="flex items-center gap-3">
       <img src={author.avatar} alt={author.name} className="w-10 h-10 rounded-full" />
-      <span className="font-semibold text-gray-800 dark:text-gray-200">{author.name}</span>
+      <span className="font-normal text-gray-800 dark:text-gray-200">{author.name}</span>
     </div>
-    <button className="flex items-center gap-2 text-sm font-semibold text-indigo-600 dark:text-indigo-400 border border-indigo-600/50 dark:border-indigo-400/50 px-4 py-2 rounded-full hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors">
+    <button className="flex items-center gap-2 text-base font-normal text-indigo-600 dark:text-indigo-400 border border-indigo-600/50 dark:border-indigo-400/50 px-4 py-2 rounded-full hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-colors">
       Share this article
       <Share2 className="h-4 w-4" />
     </button>
@@ -77,7 +78,7 @@ const ArticleBody = ({ content }) => {
     switch (item.type) {
       case 'heading': {
         const Tag = `h${item.level}`;
-        return <Tag key={index} className="text-2xl md:text-3xl font-bold font-serif text-gray-900 dark:text-white mt-10 mb-4">{item.text}</Tag>;
+        return <Tag key={index} className="text-3xl md:text-4xl font-normal font-serif text-gray-900 dark:text-white mt-10 mb-4">{item.text}</Tag>;
       }
       case 'paragraph':
         return <p key={index} className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">{item.text}</p>;
@@ -99,15 +100,15 @@ const AuthorBio = ({ author, recentArticles }) => (
     <div className="bg-gray-50 dark:bg-gray-800/50 rounded-lg p-6 flex flex-col sm:flex-row items-center gap-6">
       <img src={author.avatar} alt={author.name} className="w-20 h-20 rounded-full flex-shrink-0" />
       <div>
-        <h4 className="font-bold text-lg text-gray-900 dark:text-white">{author.name}</h4>
-        <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">{author.bio}</p>
+        <h4 className="font-normal text-xl text-gray-900 dark:text-white">{author.name}</h4>
+        <p className="mt-1 text-base text-gray-600 dark:text-gray-400">{author.bio}</p>
         {recentArticles.length > 0 && (
           <div className="mt-4">
-            <h5 className="font-semibold text-sm text-gray-800 dark:text-gray-200 mb-2">Recent Articles by {author.name}</h5>
+            <h5 className="font-normal text-base text-gray-800 dark:text-gray-200 mb-2">Recent Articles by {author.name}</h5>
             <ul className="list-disc list-inside space-y-1">
               {recentArticles.map(article => (
                 <li key={article._id}>
-                  <Link to={`/blog/${article.slug}`} className="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">{article.title}</Link>
+                  <Link to={`/blog/${article.slug}`} className="text-base text-indigo-600 dark:text-indigo-400 hover:underline">{article.title}</Link>
                 </li>
               ))}
             </ul>
@@ -171,13 +172,13 @@ const SingleBlogPage = () => {
   }, [article]);
 
   if (isLoading) {
-    return <SingleBlogSkeleton />;
+    return <LoadingSpinner />;
   }
 
   if (isError || !article) {
     return (
       <div className="text-center py-20 min-h-screen flex flex-col items-center justify-center">
-        <h1 className="text-4xl font-bold">404 - Article Not Found</h1>
+        <h1 className="text-5xl font-normal">404 - Article Not Found</h1>
         <p className="mt-4 text-gray-600">Sorry, we couldn&apos;t find the article you were looking for.</p>
         <Button asChild className="mt-6">
           <Link to="/blog">Back to Blog Home</Link>
