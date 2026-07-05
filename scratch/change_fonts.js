@@ -21,6 +21,7 @@ function processFile(filePath) {
     console.log(`File not found: ${filePath}`);
     return;
   }
+  
   let content = fs.readFileSync(filePath, 'utf8');
 
   // Replace text size classes from largest to smallest to avoid double transformation
