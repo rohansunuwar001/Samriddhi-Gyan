@@ -24,6 +24,7 @@ import CourseCurriculumTab from "../CourseCurriculumTab";
 import CourseLandingPageTab from "./CourseLandingPageTab";
 import CaptionsTab from "./CaptionsTab";
 import PricingTab from "./PricingTab";
+import InstructorAssignments from "./InstructorAssignments";
 
 /* ─── sidebar menu definition ─── */
 const SIDEBAR_SECTIONS = [
@@ -40,6 +41,7 @@ const SIDEBAR_SECTIONS = [
     items: [
       { id: "film-edit", label: "Film & edit" },
       { id: "curriculum", label: "Curriculum" },
+      { id: "assignments", label: "Assignments" },
       { id: "captions", label: "Captions (optional)" },
       { id: "accessibility", label: "Accessibility (optional)" },
     ],
@@ -924,7 +926,10 @@ function PlaceholderPanel({ title }) {
 const EditCourse = () => {
   const { courseId } = useParams();
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState("intended-learners");
+  const [activeSection, setActiveSection] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get("tab") || "intended-learners";
+  });
   const [showSettings, setShowSettings] = useState(false);
   const [isValid, setIsValid] = useState(false);
 
@@ -1137,6 +1142,8 @@ const EditCourse = () => {
             <FilmEditPanel />
           ) : activeSection === "curriculum" ? (
             <CourseCurriculumTab />
+          ) : activeSection === "assignments" ? (
+            <InstructorAssignments />
           ) : activeSection === "captions" ? (
             <CaptionsTab />
           ) : activeSection === "landing-page" ? (

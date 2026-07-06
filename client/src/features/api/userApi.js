@@ -12,8 +12,18 @@ export const userApi = apiSlice.injectEndpoints({
             query: (instructorId) => `/user/instructor-profile/${instructorId}`,
             providesTags: (result, error, id) => [{ type: 'InstructorProfile', id }],
         }),
+        getNearbyTutors: builder.query({
+            query: ({ lat, lon }) => `/user/nearby-tutors?lat=${lat}&lon=${lon}`,
+        }),
+        getNearbyPeers: builder.query({
+            query: ({ lat, lon }) => `/user/nearby-peers?lat=${lat}&lon=${lon}`,
+        }),
     }),
 });
 
-// --- EXPORT THE NEW HOOK ---
-export const { useGetInstructorProfileQuery, ...otherHooks } = userApi;
+// --- EXPORT THE HOOKS ---
+export const { 
+    useGetInstructorProfileQuery,
+    useGetNearbyTutorsQuery,
+    useGetNearbyPeersQuery,
+} = userApi;

@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useRegisterUserMutation } from "@/features/api/authApi";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { FaFacebookF, FaApple, FaEye, FaEyeSlash } from "react-icons/fa"; // Added Eye icons
+import { FaFacebookF, FaApple, FaEye, FaEyeSlash, FaCheckCircle, FaTimesCircle } from "react-icons/fa"; // Added Eye + match icons
 import { FcGoogle } from "react-icons/fc";
 import { FiLoader } from "react-icons/fi";
 import { PasswordStrengthMeter } from "@/components/ui/password-strength-meter"; // Assuming this component exists
@@ -176,6 +176,31 @@ const Signup = () => {
                     {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
                   </button>
                 </div>
+
+                {/* NEW: Reuse the same strength meter so both fields show strength */}
+                <PasswordStrengthMeter password={confirmPassword} />
+
+                {/* NEW: Live match indicator */}
+                {confirmPassword && (
+                  <p
+                    className={`mt-1 text-sm flex items-center gap-1 ${
+                      password === confirmPassword
+                        ? "text-green-600"
+                        : "text-red-600"
+                    }`}
+                  >
+                    {password === confirmPassword ? (
+                      <>
+                        <FaCheckCircle /> Passwords match
+                      </>
+                    ) : (
+                      <>
+                        <FaTimesCircle /> Passwords do not match
+                      </>
+                    )}
+                  </p>
+                )}
+
                 {errors.confirmPassword && (
                   <p className="mt-1 text-sm text-red-600">
                     {errors.confirmPassword}

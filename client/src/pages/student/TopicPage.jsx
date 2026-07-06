@@ -29,6 +29,16 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
+const getCourseNumericPrice = (course) => {
+  if (!course) return 0;
+  if (course.price === undefined || course.price === null) return 0;
+  if (typeof course.price === "number") return course.price;
+  if (typeof course.price === "object") {
+    return course.price.current !== undefined ? course.price.current : 0;
+  }
+  return 0;
+};
+
 const TopicPage = () => {
   const { topicSlug } = useParams();
   const navigate = useNavigate();
@@ -106,9 +116,9 @@ const TopicPage = () => {
 
     // Filter by Price
     if (selectedPrice === "free") {
-      list = list.filter((c) => !c.price || c.price === 0);
+      list = list.filter((c) => getCourseNumericPrice(c) === 0);
     } else if (selectedPrice === "paid") {
-      list = list.filter((c) => c.price > 0);
+      list = list.filter((c) => getCourseNumericPrice(c) > 0);
     }
 
     // Sort
@@ -117,7 +127,7 @@ const TopicPage = () => {
     } else if (sortBy === "newest") {
       list.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     } else if (sortBy === "price-desc") {
-      list.sort((a, b) => (b.price || 0) - (a.price || 0));
+      list.sort((a, b) => getCourseNumericPrice(b) - getCourseNumericPrice(a));
     }
 
     return list;
@@ -344,7 +354,9 @@ const TopicPage = () => {
                           </div>
                         </div>
                         <div className="p-5 pt-0 flex justify-between items-center text-xs border-t mt-auto">
-                          <span className="font-extrabold text-purple-700 text-sm">Rs {c.price?.current || c.price || "Free"}</span>
+                          <span className="font-extrabold text-purple-700 text-sm">
+                            {getCourseNumericPrice(c) > 0 ? `Rs ${getCourseNumericPrice(c)}` : "Free"}
+                          </span>
                           <span className="text-slate-400 font-semibold">{c.enrolledStudents?.length || 0} students</span>
                         </div>
                       </div>
@@ -1061,7 +1073,7 @@ const TopicPage = () => {
                         <div className="flex flex-col items-start md:items-end justify-center gap-3 border-t md:border-t-0 pt-4 md:pt-0 border-slate-100">
                           <div className="text-right">
                             <span className="text-2xl font-normal text-slate-900">
-                              {course.price > 0 ? `Rs ${course.price}` : "Free"}
+                              {getCourseNumericPrice(course) > 0 ? `Rs ${getCourseNumericPrice(course)}` : "Free"}
                             </span>
                           </div>
                           

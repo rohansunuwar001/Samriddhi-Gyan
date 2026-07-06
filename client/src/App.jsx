@@ -103,6 +103,10 @@ import AdminCertifications from "./pages/admin/certificate/AdminCertifications";
 import CertificationDetail from "./pages/student/CertificationDetail";
 import ExamEnvironment from "./pages/student/ExamEnvironment";
 import CareerRoadmap from "./pages/student/CareerRoadmap";
+import AlgorithmPlayground from "./pages/student/AlgorithmPlayground";
+import NearbyHub from "./pages/student/NearbyHub";
+import StudentAssignments from "./pages/student/StudentAssignments";
+import InstructorAssignments from "./pages/admin/course/InstructorAssignments";
 
 // --- LAYOUT WRAPPER COMPONENT ---
 const MainLayoutWithScroll = () => (
@@ -268,10 +272,26 @@ const appRouter = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
+      {
+        path: "/playground",
+        element: (
+          <ProtectedRoute>
+            <AlgorithmPlayground />
+          </ProtectedRoute>
+        ),
+      },
 
       {
         path: "/ai-assistant",
         element: <AIAssistant />,
+      },
+      {
+        path: "/nearby-hub",
+        element: (
+          <ProtectedRoute>
+            <NearbyHub />
+          </ProtectedRoute>
+        ),
       },
       {
         path: "/instructor-profile/:instructorId", // The path must match the Link
@@ -509,6 +529,7 @@ const appRouter = createBrowserRouter([
           { path: "course/create", element: <Navigate to="/instructor/course/create/1" replace /> }, // redirect bare /create → step 1
           { path: "course/create/:step", element: <AddCourse /> }, // 4-step wizard
           { path: "course/:courseId", element: <EditCourse /> }, // The new central hub for editing
+          { path: "course/:courseId/assignments", element: <InstructorAssignments /> },
 
           // C. Lecture management route (simplified and corrected)
           // The old "/course/:courseId/lecture" route for creating is REMOVED.
@@ -657,6 +678,17 @@ const appRouter = createBrowserRouter([
         <PurchaseCourseProtectedRoute>
           <ScrollToTop />
           <CourseProgress />
+        </PurchaseCourseProtectedRoute>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/course-detail/:courseId/assignments",
+    element: (
+      <ProtectedRoute>
+        <PurchaseCourseProtectedRoute>
+          <ScrollToTop />
+          <StudentAssignments />
         </PurchaseCourseProtectedRoute>
       </ProtectedRoute>
     ),
