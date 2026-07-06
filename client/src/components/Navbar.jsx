@@ -13,7 +13,8 @@ import {
   User,
   ChevronRight,
   TrendingUp,
-  Globe
+  Globe,
+  Compass
 } from "lucide-react";
 import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
@@ -512,6 +513,37 @@ const UserAvatar = ({ user, onLogout, t, cartCount = 0 }) => {
                 </Link>
               </div>
 
+              {/* Section 2.5: Student Features */}
+              <div className="py-2 flex flex-col">
+                <span className="px-4 py-1 text-[11px] font-bold text-gray-400 uppercase tracking-wider select-none">
+                  Features
+                </span>
+                <Link 
+                  to="/nearby-hub" 
+                  onClick={() => setIsOpen(false)}
+                  className="px-4 py-2 text-[14px] text-slate-750 hover:text-[#5624d0] hover:bg-slate-50 transition-colors flex items-center gap-1.5 font-medium"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Nearby Hub
+                </Link>
+                <Link 
+                  to="/career-roadmap" 
+                  onClick={() => setIsOpen(false)}
+                  className="px-4 py-2 text-[14px] text-slate-750 hover:text-[#5624d0] hover:bg-slate-50 transition-colors flex items-center gap-1.5 font-medium"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
+                  Career Roadmap
+                </Link>
+                <Link 
+                  to="/playground" 
+                  onClick={() => setIsOpen(false)}
+                  className="px-4 py-2 text-[14px] text-slate-750 hover:text-[#5624d0] hover:bg-slate-50 transition-colors flex items-center gap-1.5 font-medium"
+                >
+                  <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
+                  Alg Playgrounds
+                </Link>
+              </div>
+
               {/* Section 3: Notifications, Messages */}
               <div className="py-2 flex flex-col">
                 <Link 
@@ -946,7 +978,7 @@ const Navbar = () => {
           {!isDashboardPage && (
             <button onClick={handleLogoClick} className="focus:outline-none">
               <img
-                src="/samriddhi_logo1.png"
+                src="/rohan1.png"
                 alt="Samriddhi Logo"
                 width="82"
                 height="34"
@@ -1283,15 +1315,7 @@ const Navbar = () => {
             {user ? (
               <div className="flex items-center gap-6">
 
-                {/* Career Roadmap - students only */}
-                {user?.role === "student" && !isDashboardPage && (
-                  <Link
-                    to="/career-roadmap"
-                    className="text-base font-light text-gray-700 hover:text-[#a435f0] transition-colors"
-                  >
-                    Career Roadmap
-                  </Link>
-                )}
+
 
                 {/* My Learning - students only, non-dashboard pages */}
                 {user?.role === "student" && !isDashboardPage && (
@@ -1436,9 +1460,20 @@ const Navbar = () => {
                   <BookOpen size={16} /> {t("navbar.courses_heading")}
                 </Link>
                 {user?.role === "student" && (
-                  <Link to="/home/my-courses/learning" className="flex items-center gap-3 rounded-lg px-3 py-2 text-xl font-light hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
-                    <BookOpen size={16} /> {t("navbar.my_learning")}
-                  </Link>
+                  <>
+                    <Link to="/home/my-courses/learning" className="flex items-center gap-3 rounded-lg px-3 py-2 text-xl font-light hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
+                      <BookOpen size={16} /> {t("navbar.my_learning")}
+                    </Link>
+                    <Link to="/career-roadmap" className="flex items-center gap-3 rounded-lg px-3 py-2 text-xl font-light hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
+                      <Compass size={16} /> Career Roadmap
+                    </Link>
+                    <Link to="/playground" className="flex items-center gap-3 rounded-lg px-3 py-2 text-xl font-light hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
+                      <Compass size={16} /> Alg Playgrounds
+                    </Link>
+                    <Link to="/nearby-hub" className="flex items-center gap-3 rounded-lg px-3 py-2 text-xl font-light hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
+                      <Globe size={16} /> Nearby Hub
+                    </Link>
+                  </>
                 )}
                 <Link to="/about" className="flex items-center gap-3 rounded-lg px-3 py-2 text-xl font-light hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
                   {t("navbar.about")}

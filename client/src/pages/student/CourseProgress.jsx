@@ -231,6 +231,14 @@ const CourseProgress = () => {
 
         {/* Right: Actions */}
         <div className="flex items-center gap-4 text-lg font-normal text-[#d1d7dc]">
+          {/* Assignments/Tasks Link */}
+          <Link
+            to={`/course-detail/${courseId}/assignments`}
+            className="flex items-center gap-1.5 hover:text-white transition-colors border border-[#8a8d91] hover:border-white px-3 py-1.5 rounded-none shrink-0 font-normal text-xs"
+          >
+            Assignments
+          </Link>
+
           {/* Leave a Rating */}
           <Dialog open={isRatingOpen} onOpenChange={setIsRatingOpen}>
             <DialogTrigger asChild>

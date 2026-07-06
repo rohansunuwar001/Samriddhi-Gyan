@@ -516,3 +516,94 @@ export const getArchivedCourses = async (userId) => {
 
   return coursesWithProgress;
 };
+
+// =============================================================================
+// GEOSPATIAL SERVICES
+// =============================================================================
+
+// Helper function to calculate great-circle distance between two coordinates in km
+const calculateHaversineDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371; // Earth's radius in km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon / 2) * Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c; // Distance in km
+};
+
+// Retrieve nearby instructors with precise locations (high-value / public)
+export const getNearbyTutors = async (lat, lon) => {
+  const tutors = await User.find({
+    role: "instructor",
+    "locationDetails.latitude": { $exists: true, $ne: null },
+    "locationDetails.longitude": { $exists: true, $ne: null },
+  })
+    .select("name email photoUrl description headline locationDetails")
+    .lean();
+
+  const tutorsWithDistance = tutors
+    .map((tutor) => {
+      const dist = calculateHaversineDistance(
+        lat,
+        lon,
+        tutor.locationDetails.latitude,
+        tutor.locationDetails.longitude
+      );
+      return { ...tutor, distance: parseFloat(dist.toFixed(1)) };
+    })
+    .sort((a, b) => a.distance - b.distance);
+
+  return tutorsWithDistance;
+};
+
+// Retrieve nearby student peers with fuzzed distance range and hidden coordinates (low-risk / private)
+export const getNearbyPeers = async (currentUserId, lat, lon) => {
+  const peers = await User.find({
+    role: "student",
+    _id: { $ne: currentUserId },
+    "locationDetails.latitude": { $exists: true, $ne: null },
+    "locationDetails.longitude": { $exists: true, $ne: null },
+  })
+    .select("name photoUrl headline locationDetails.city locationDetails.country locationDetails.latitude locationDetails.longitude")
+    .lean();
+
+  const fuzzedPeers = peers
+    .map((peer) => {
+      const dist = calculateHaversineDistance(
+        lat,
+        lon,
+        peer.locationDetails.latitude,
+        peer.locationDetails.longitude
+      );
+
+      // Fuzzing logic to protect student privacy:
+      let relativeRange = "";
+      if (dist <= 2) {
+        relativeRange = "Within 2 km";
+      } else if (dist <= 5) {
+        relativeRange = "Within 5 km";
+      } else if (dist <= 15) {
+        relativeRange = "Within 15 km";
+      } else {
+        relativeRange = `${Math.round(dist / 10) * 10}+ km`;
+      }
+
+      return {
+        name: peer.name,
+        photoUrl: peer.photoUrl,
+        headline: peer.headline,
+        city: peer.locationDetails.city,
+        country: peer.locationDetails.country,
+        range: relativeRange,
+        distanceScore: dist,
+      };
+    })
+    .sort((a, b) => a.distanceScore - b.distanceScore)
+    // Remove precise internal sorting score
+    .map(({ distanceScore, ...safePeer }) => safePeer);
+
+  return fuzzedPeers;
+};

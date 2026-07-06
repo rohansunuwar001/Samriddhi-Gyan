@@ -22,6 +22,8 @@ import {
   archiveCourse,
   unarchiveCourse,
   getArchivedCourses,
+  getNearbyTutors,
+  getNearbyPeers,
 } from "../service/user.service.js";
 import { validateEmail, validatePassword, validateRequiredFields } from "../helpers/validate.helper.js";
 
@@ -317,5 +319,41 @@ export const getArchivedCoursesController = async (req, res) => {
       success: false,
       message: error.message || "Failed to load archived courses.",
     });
+  }
+};
+
+// Get nearby tutors (precise coordinates)
+export const getNearbyTutorsController = async (req, res) => {
+  try {
+    const lat = parseFloat(req.query.lat);
+    const lon = parseFloat(req.query.lon);
+
+    if (isNaN(lat) || isNaN(lon)) {
+      return res.status(400).json({ success: false, message: "Valid 'lat' and 'lon' query parameters are required." });
+    }
+
+    const tutors = await getNearbyTutors(lat, lon);
+    return res.status(200).json({ success: true, tutors });
+  } catch (error) {
+    console.error("getNearbyTutorsController error:", error.message);
+    return res.status(500).json({ success: false, message: "Failed to load nearby tutors." });
+  }
+};
+
+// Get nearby student peers (fuzzed coordinates for safety)
+export const getNearbyPeersController = async (req, res) => {
+  try {
+    const lat = parseFloat(req.query.lat);
+    const lon = parseFloat(req.query.lon);
+
+    if (isNaN(lat) || isNaN(lon)) {
+      return res.status(400).json({ success: false, message: "Valid 'lat' and 'lon' query parameters are required." });
+    }
+
+    const peers = await getNearbyPeers(req.user._id, lat, lon);
+    return res.status(200).json({ success: true, peers });
+  } catch (error) {
+    console.error("getNearbyPeersController error:", error.message);
+    return res.status(500).json({ success: false, message: "Failed to load nearby study circles." });
   }
 };

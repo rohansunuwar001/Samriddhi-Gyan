@@ -27,6 +27,8 @@ import {
   archiveCourseController,
   unarchiveCourseController,
   getArchivedCoursesController,
+  getNearbyTutorsController,
+  getNearbyPeersController,
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
@@ -58,6 +60,10 @@ router.route("/my-learning").get(isAuthenticated, getMyLearningCoursesController
 router.route("/archived").get(isAuthenticated, getArchivedCoursesController);
 router.route("/archive/:courseId").post(isAuthenticated, archiveCourseController);
 router.route("/unarchive/:courseId").post(isAuthenticated, unarchiveCourseController);
+
+// ── Geospatial Proximity routes ──────────────────────────────────────────────
+router.route("/nearby-tutors").get(isAuthenticated, getNearbyTutorsController);
+router.route("/nearby-peers").get(isAuthenticated, getNearbyPeersController);
 
 // ── Public routes ────────────────────────────────────────────────────────────
 router
