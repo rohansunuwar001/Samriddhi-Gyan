@@ -2,6 +2,9 @@ import { StrictMode, Suspense } from "react";
 import ReactDOM from "react-dom/client";
 import { Provider } from "react-redux";
 import App from "./App.jsx";
+import { runBrowserAlgorithmsSimulation } from "./utils/browserAlgorithmSimulator.js";
+
+runBrowserAlgorithmsSimulation();
 
 import { Toaster } from "./components/ui/sonner";
 import "./i18n";

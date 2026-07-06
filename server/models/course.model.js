@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { generateEmbedding } from "../service/embedding.service.js";
 import { slugify } from "../utils/slugify.js";
+import { AhoCorasickTagger } from "../utils/ahoCorasick.js";
 
 const courseSchema = new mongoose.Schema(
   {
@@ -43,8 +44,8 @@ const courseSchema = new mongoose.Schema(
 
     // --- PRICING & METADATA ---
     price: {
-      original: { type: Number, required: true },
-      current: { type: Number, required: true },
+      original: { type: Number, default: 0 },
+      current: { type: Number, default: 0 },
     },
     thumbnail: {
       type: String,
@@ -142,6 +143,12 @@ const courseSchema = new mongoose.Schema(
         ref: "Certification",
       },
     ],
+    prerequisites: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Course",
+      },
+    ],
     isPublished: {
       type: Boolean,
       default: false,
@@ -213,6 +220,39 @@ courseSchema.pre("save", async function (next) {
     }
 
     this.slug = candidate;
+  }
+  next();
+});
+
+// Step 1.5: Auto-tag topics using Aho-Corasick Multi-Pattern Search
+courseSchema.pre("save", async function (next) {
+  if (this.isNew || this.isModified("title") || this.isModified("subtitle") || this.isModified("description")) {
+    try {
+      const CategoryModel = mongoose.model("Category");
+      const dbCategories = await CategoryModel.find().select("name").lean();
+      const categoryNames = dbCategories.map(c => c.name);
+
+      const TECH_TOPICS = [
+        "React", "Angular", "Vue", "JavaScript", "HTML", "CSS", "Sass", "TypeScript",
+        "Node.js", "Express", "Django", "Flask", "Ruby on Rails", "Laravel", "Spring Boot",
+        "SQL", "MongoDB", "PostgreSQL", "MySQL", "Redis", "Docker", "Kubernetes",
+        "AWS", "Google Cloud", "Azure", "Python", "Java", "C++", "C#", "Go", "Rust", "Swift"
+      ];
+
+      const combinedDict = Array.from(new Set([...TECH_TOPICS, ...categoryNames]));
+      const tagger = new AhoCorasickTagger(combinedDict);
+
+      const textToScan = `${this.title || ""} ${this.subtitle || ""} ${this.description || ""}`;
+      const matched = tagger.tagText(textToScan);
+
+      if (matched.length > 0) {
+        const currentTopics = new Set(this.topics || []);
+        matched.forEach(t => currentTopics.add(t));
+        this.topics = Array.from(currentTopics);
+      }
+    } catch (err) {
+      console.warn("Aho-Corasick auto-tagging failed:", err.message);
+    }
   }
   next();
 });

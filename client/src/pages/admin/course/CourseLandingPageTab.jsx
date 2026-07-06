@@ -735,38 +735,61 @@ const CourseLandingPageTab = () => {
             ) : certificationsList.length === 0 ? (
               <p className="text-sm text-slate-400">No certifications categories found in Admin panel.</p>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-w-2xl">
-                {certificationsList.map((cert) => {
-                  const isChecked = details.relatedCertificates?.includes(cert._id);
-                  return (
-                    <label
-                      key={cert._id}
-                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
-                        isChecked
-                          ? "bg-purple-50/70 border-purple-500 text-purple-950"
-                          : "border-slate-200 hover:border-slate-300 hover:bg-slate-50/50"
-                      }`}
-                    >
-                      <input
-                        type="checkbox"
-                        checked={isChecked}
-                        onChange={() => {
-                          setDetails((prev) => {
-                            const nextCerts = prev.relatedCertificates?.includes(cert._id)
-                              ? prev.relatedCertificates.filter((id) => id !== cert._id)
-                              : [...(prev.relatedCertificates || []), cert._id];
-                            return { ...prev, relatedCertificates: nextCerts };
-                          });
-                        }}
-                        className="accent-purple-600 w-4 h-4"
-                      />
-                      <div>
-                        <p className="font-semibold text-sm">{cert.name}</p>
-                        <p className="text-[10px] text-slate-400">{cert.issuer?.name}</p>
+              <div className="space-y-4">
+                <div className="max-w-md">
+                  <select
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      if (!val) return;
+                      setDetails((prev) => {
+                        const exists = prev.relatedCertificates?.includes(val);
+                        if (exists) return prev;
+                        return {
+                          ...prev,
+                          relatedCertificates: [...(prev.relatedCertificates || []), val]
+                        };
+                      });
+                      e.target.value = ""; // Reset dropdown selection
+                    }}
+                    className="w-full border border-[#6a6f73] px-4 py-3 text-lg font-normal bg-white outline-none focus:border-[#1c1d1f] transition-colors"
+                  >
+                    <option value="">-- Select Certification --</option>
+                    {certificationsList.map((cert) => (
+                      <option key={cert._id} value={cert._id}>
+                        {cert.name} ({cert.issuer?.name || "Generic"})
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Selected Certifications Tags */}
+                <div className="flex flex-wrap gap-2">
+                  {(details.relatedCertificates || []).map((certId) => {
+                    const cert = certificationsList.find(c => c._id === certId);
+                    if (!cert) return null;
+                    return (
+                      <div
+                        key={certId}
+                        className="flex items-center gap-2 bg-purple-50 border border-purple-300 text-purple-950 text-sm font-medium px-3 py-1.5 rounded-full shadow-sm"
+                      >
+                        <span>{cert.name}</span>
+                        <span className="text-xs text-slate-400">({cert.issuer?.name})</span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setDetails((prev) => ({
+                              ...prev,
+                              relatedCertificates: prev.relatedCertificates.filter(id => id !== certId)
+                            }));
+                          }}
+                          className="flex h-4 w-4 items-center justify-center rounded-full hover:bg-purple-200 text-purple-700 hover:text-purple-950 font-bold text-xs"
+                        >
+                          &times;
+                        </button>
                       </div>
-                    </label>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>

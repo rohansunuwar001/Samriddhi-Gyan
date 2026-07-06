@@ -1283,6 +1283,16 @@ const Navbar = () => {
             {user ? (
               <div className="flex items-center gap-6">
 
+                {/* Career Roadmap - students only */}
+                {user?.role === "student" && !isDashboardPage && (
+                  <Link
+                    to="/career-roadmap"
+                    className="text-base font-light text-gray-700 hover:text-[#a435f0] transition-colors"
+                  >
+                    Career Roadmap
+                  </Link>
+                )}
+
                 {/* My Learning - students only, non-dashboard pages */}
                 {user?.role === "student" && !isDashboardPage && (
                   <div

@@ -5,6 +5,7 @@ import { useSelector } from 'react-redux';
 import Footer from '@/components/Footer';
 import Navbar from '@/components/Navbar';
 import DiscountBannerBar from '@/components/DiscountBannerBar';
+import CookieConsentBanner from '@/components/CookieConsentBanner';
 
 // --- NEW: Import the necessary hook and spinner component ---
 import { useLoadUserQuery } from '@/features/api/authApi'; // Adjust path if needed
@@ -29,6 +30,7 @@ const MainLayout = () => {
       </main>
       
       {!isInstructor && <Footer />}
+      <CookieConsentBanner />
     </div>
   );
 };

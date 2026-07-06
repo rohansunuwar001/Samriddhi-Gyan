@@ -1,23 +1,18 @@
 // server/controllers/recommendation.controller.js
 //
-// CHANGES FROM ORIGINAL:
-//   1. Removed the inline getEnrolledIds() function (lines 13-22 in original).
-//      It was a duplicate of courseFilter.helper.js and read JWT manually instead
-//      of using req.user — which only works if loadUserIfAuthenticated middleware
-//      is on the route (see recommended.route.js change).
-//   2. Imported getEnrolledIds from the shared helper instead.
-//   3. No logic changes to getTrendingCourses, getFeaturedCourses, or
-//      getRecommendedCourses — they already had the correct $nin filtering.
+// CHANGES:
+//   1. Imported SVD, Review, and CourseProgress for collaborative recommendations.
+//   2. Updated getRecommendedCourses to train a local SVD model and blend predicted ratings.
 
 import mongoose from "mongoose";
 import { Course } from "../models/course.model.js";
 import { User } from "../models/user.model.js";
 import { CoursePurchase } from "../models/coursePurchase.model.js";
+import { Review } from "../models/review.model.js";
+import { CourseProgress } from "../models/courseProgress.model.js";
 import { buildUserVectorFromEnrolled, cosineSimilarity } from "../utils/embedding.js";
 import { getEnrolledIds } from "../helpers/courseFilter.helper.js";
-
-
-// jwt import removed — no longer needed here since the helper handles token resolution
+import { SVD } from "../utils/svd.js";
 
 const populateCreator = { path: "creator", select: "name email photoUrl role" };
 
@@ -251,8 +246,6 @@ export const getTrendingCourses = async (req, res) => {
 };
 
 // ─── Recommended Courses ──────────────────────────────────────────────────────
-// No changes below this line — getRecommendedCourses reads its own JWT directly
-// because it needs userId for the personalization logic, not just enrollment filtering.
 
 export const getRecommendedCourses = async (req, res) => {
   try {
@@ -318,7 +311,7 @@ export const getRecommendedCourses = async (req, res) => {
       );
     }
 
-    // Collaborative filtering
+    // Collaborative filtering (Candidates matching peer enrollments)
     const similarUsers = await User.find({
       _id: { $ne: userId },
       enrolledCourses: { $in: enrolledCourseIds },
@@ -356,19 +349,88 @@ export const getRecommendedCourses = async (req, res) => {
     const userVector     = await buildUserVectorFromEnrolled(enrolledCourses);
     const enrolledTagSet = new Set(enrolledTags.map((t) => String(t)));
 
+    // --- Matrix Factorization (SVD Collaborative Rating Predictions) ---
+    const ratingsDataset = [];
+
+    // 1. Gather explicit review rating records
+    const dbReviews = await Review.find().select("user course rating").lean();
+    dbReviews.forEach((rev) => {
+      if (rev.user && rev.course) {
+        ratingsDataset.push({
+          userId: rev.user.toString(),
+          courseId: rev.course.toString(),
+          rating: Number(rev.rating)
+        });
+      }
+    });
+
+    // 2. Gather user course progress logs to form implicit ratings
+    const dbProgresses = await CourseProgress.find()
+      .populate({ path: "courseId", select: "totalLectures" })
+      .lean();
+    dbProgresses.forEach((prog) => {
+      if (prog.userId && prog.courseId) {
+        const total = prog.courseId.totalLectures || 0;
+        const viewed = (prog.lectureProgress || []).filter(lp => lp.viewed).length;
+        const percent = total > 0 ? (viewed / total) * 100 : 0;
+        // Map percent [0, 100] to implicit rating [3.0, 5.0]
+        const implicit = 3.0 + 2.0 * (percent / 100);
+
+        const hasExplicit = ratingsDataset.some(
+          rd => rd.userId === prog.userId.toString() && rd.courseId === prog.courseId._id.toString()
+        );
+        if (!hasExplicit) {
+          ratingsDataset.push({
+            userId: prog.userId.toString(),
+            courseId: prog.courseId._id.toString(),
+            rating: implicit
+          });
+        }
+      }
+    });
+
+    // 3. Gather plain course purchases/enrollments as standard 4.0 fallback rating
+    const dbUsers = await User.find().select("enrolledCourses").lean();
+    dbUsers.forEach((u) => {
+      const uIdStr = u._id.toString();
+      (u.enrolledCourses || []).forEach((ec) => {
+        const cIdStr = ec.toString();
+        const hasRating = ratingsDataset.some(
+          rd => rd.userId === uIdStr && rd.courseId === cIdStr
+        );
+        if (!hasRating) {
+          ratingsDataset.push({
+            userId: uIdStr,
+            courseId: cIdStr,
+            rating: 4.0
+          });
+        }
+      });
+    });
+
+    // Train local SVD model
+    const svd = new SVD();
+    svd.train(ratingsDataset);
+
+    // Score candidates using weights: 20% Category + 10% Tags + 10% Popularity + 30% Embeddings + 30% SVD
     const scored = uniqueCandidates.map((course) => {
       let score = 0;
-      if (categories.includes(course.category)) score += 0.3;
+      if (categories.includes(course.category)) score += 0.2;
 
       const overlap = (course.tags || []).filter((t) => enrolledTagSet.has(String(t))).length;
-      if (overlap > 0) score += 0.2;
+      if (overlap > 0) score += 0.1;
 
       score += ((course.enrolledStudents?.length || 0) / 10000) * 0.1;
 
       const embeddingScore = userVector ? cosineSimilarity(userVector, course.embedding) : 0;
-      score += embeddingScore * 0.4;
+      score += embeddingScore * 0.3;
 
-      return { ...course, score, embeddingScore };
+      // Predict user course rating via trained SVD model
+      const predictedRating = svd.predict(userId, course._id);
+      const svdScore = (predictedRating / 5) * 0.3; // Normalize to [0, 0.3]
+      score += svdScore;
+
+      return { ...course, score, embeddingScore, predictedRating };
     });
 
     const ranked = scored
@@ -393,7 +455,7 @@ export const getRecommendedCourses = async (req, res) => {
     }
 
     return res.json({
-      message: "Personalized recommendations (category/tag + collaborative + embeddings)",
+      message: "Personalized recommendations (hybrid content + SVD matrix factorization)",
       recommendedCourses: ranked,
     });
 
