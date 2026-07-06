@@ -45,7 +45,7 @@ export const getDueFlashcards = async (req, res) => {
   }
 };
 
-// Submit a review score and update the SM2 properties
+// Submit a review score and update the FSRS spaced repetition properties
 export const reviewFlashcard = async (req, res) => {
   try {
     const { cardId, quality } = req.body;
@@ -60,36 +60,62 @@ export const reviewFlashcard = async (req, res) => {
       return res.status(404).json({ success: false, message: "Flashcard not found." });
     }
 
-    let { repetitions, interval, easeFactor } = card;
+    let { repetitions, interval: stability, easeFactor: difficulty } = card;
 
-    if (q >= 3) {
-      // Success review
-      if (repetitions === 0) {
-        interval = 1;
-      } else if (repetitions === 1) {
-        interval = 6;
-      } else {
-        interval = Math.round(interval * easeFactor);
+    // Map quality score q (0-5) to FSRS rating (1: Again, 2: Hard, 3: Good, 4: Easy)
+    let rating = 3; // default Good
+    if (q <= 2) rating = 1;       // Again (Forgot)
+    else if (q === 3) rating = 2; // Hard (Struggled to recall)
+    else if (q === 4) rating = 3; // Good (Standard correct recall)
+    else if (q === 5) rating = 4; // Easy (Recalled effortlessly)
+
+    if (repetitions === 0) {
+      // First review initialization
+      switch (rating) {
+        case 1:
+          stability = 0.5;
+          difficulty = 8.0;
+          break;
+        case 2:
+          stability = 1.2;
+          difficulty = 6.0;
+          break;
+        case 3:
+          stability = 2.5;
+          difficulty = 4.5;
+          break;
+        case 4:
+          stability = 5.0;
+          difficulty = 3.0;
+          break;
       }
-      repetitions += 1;
+      repetitions = 1;
     } else {
-      // Failed review
-      repetitions = 0;
-      interval = 1;
+      // Subsequent review steps
+      if (rating === 1) {
+        // Forgot the card (Again)
+        stability = Math.max(0.1, stability * 0.15);
+        difficulty = Math.min(10.0, difficulty + 1.5);
+        repetitions = 0; // Reset consecutive successes
+      } else {
+        // Recalled successfully
+        const dFactor = rating === 2 ? 1.0 : (rating === 3 ? 0.0 : -1.0);
+        difficulty = Math.min(10.0, Math.max(1.0, difficulty + dFactor));
+
+        const recallBonus = rating === 4 ? 1.3 : 1.0;
+        stability = stability * (1 + 0.8 * Math.pow(difficulty, -0.4) * Math.pow(stability, 0.1) * recallBonus);
+        repetitions += 1;
+      }
     }
 
-    // Adjust EF
-    easeFactor = easeFactor + (0.1 - (5 - q) * (0.08 + (5 - q) * 0.02));
-    if (easeFactor < 1.3) {
-      easeFactor = 1.3;
-    }
+    const nextInterval = Math.max(1, Math.round(stability));
 
     card.repetitions = repetitions;
-    card.interval = interval;
-    card.easeFactor = easeFactor;
+    card.interval = nextInterval;
+    card.easeFactor = difficulty;
 
     const nextDate = new Date();
-    nextDate.setDate(nextDate.getDate() + interval);
+    nextDate.setDate(nextDate.getDate() + nextInterval);
     card.nextReviewDate = nextDate;
 
     await card.save();

@@ -75,12 +75,44 @@ const PurchaseCard = ({ course }) => {
   const isPurchased =
     course.isEnrolled || course.purchaseStatus === "completed";
 
-  const currentPrice = course.price?.current ?? 0;
+  const [banditDiscount, setBanditDiscount] = useState(0);
+
+  useEffect(() => {
+    if (course?._id) {
+      import("js-cookie").then(({ default: Cookies }) => {
+        const cookieKey = `bandit_discount_${course._id}`;
+        const cachedDiscount = Cookies.get(cookieKey);
+
+        if (cachedDiscount !== undefined) {
+          setBanditDiscount(Number(cachedDiscount));
+        } else {
+          const apiBase = import.meta.env.VITE_BASE_URL || "http://localhost:10000";
+          fetch(`${apiBase}/api/v1/bandit-pricing/${course._id}`)
+            .then((res) => res.json())
+            .then((data) => {
+              if (data.success && typeof data.discountPercent === "number") {
+                setBanditDiscount(data.discountPercent);
+                // Save chosen discount in guest cookies for 7 days to persist price integrity
+                Cookies.set(cookieKey, data.discountPercent, { expires: 7 });
+              }
+            })
+            .catch((err) => console.warn("Failed to fetch bandit pricing:", err.message));
+        }
+      });
+    }
+  }, [course?._id]);
+
   const originalPrice = course.price?.original ?? 0;
-  const discountPercent =
-    originalPrice > currentPrice
-      ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
+  const staticDiscount =
+    originalPrice > (course.price?.current ?? 0)
+      ? Math.round(((originalPrice - (course.price?.current ?? 0)) / originalPrice) * 100)
       : 0;
+
+  const discountPercent = banditDiscount > 0 ? banditDiscount : staticDiscount;
+  const currentPrice =
+    discountPercent > 0
+      ? Math.round(originalPrice * (1 - discountPercent / 100))
+      : (course.price?.current ?? 0);
   const subscriptionPrice = Math.max(
     Math.round((currentPrice || 750) * 0.75),
     1

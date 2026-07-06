@@ -102,6 +102,7 @@ import CertificateForm from "./pages/admin/certificate/CertificateForm";
 import AdminCertifications from "./pages/admin/certificate/AdminCertifications";
 import CertificationDetail from "./pages/student/CertificationDetail";
 import ExamEnvironment from "./pages/student/ExamEnvironment";
+import CareerRoadmap from "./pages/student/CareerRoadmap";
 
 // --- LAYOUT WRAPPER COMPONENT ---
 const MainLayoutWithScroll = () => (
@@ -256,6 +257,14 @@ const appRouter = createBrowserRouter([
         element: (
           <ProtectedRoute>
             <PersonalizeWizard />
+          </ProtectedRoute>
+        ),
+      },
+      {
+        path: "/career-roadmap",
+        element: (
+          <ProtectedRoute>
+            <CareerRoadmap />
           </ProtectedRoute>
         ),
       },

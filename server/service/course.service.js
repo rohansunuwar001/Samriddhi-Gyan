@@ -135,11 +135,20 @@ const validateTopics = async (topics, category) => {
   const invalid = cleaned.filter((t) => !validNames.has(t));
 
   if (invalid.length > 0) {
-    const error = new Error(
-      `These topics don't match any existing category or topic: ${invalid.join(", ")}. Please create the topic first or choose from the existing list.`
-    );
-    error.statusCode = 400;
-    throw error;
+    // Automatically create missing topics in the database on-the-fly instead of throwing an error
+    for (const name of invalid) {
+      const slug = name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+      try {
+        await Topic.create({
+          name: name.trim(),
+          slug,
+          type: "topic",
+          description: `Explore courses related to ${name}.`
+        });
+      } catch (err) {
+        console.warn(`Auto-creating topic "${name}" failed (possibly duplicate slug):`, err.message);
+      }
+    }
   }
 
   return cleaned;
@@ -148,19 +157,13 @@ const validateTopics = async (topics, category) => {
 export const createCourse = async ({ userId, courseData }) => {
   const { title, category, price, language, level, subtitle, description, learnings, topics } = courseData;
 
-  if (
-    !title ||
-    !category ||
-    price?.original === undefined ||
-    price?.original === null ||
-    price?.current === undefined ||
-    price?.current === null
-  ) {
-    const error = new Error("Title, category, and a full price object (original, current) are required.");
+  if (!title || !category) {
+    const error = new Error("Title and category are required.");
     error.statusCode = 400;
     throw error;
   }
 
+  const coursePrice = price || { original: 0, current: 0 };
   const validatedTopics = await validateTopics(topics, category);
 
   const course = await Course.create({
@@ -168,7 +171,7 @@ export const createCourse = async ({ userId, courseData }) => {
     category,
     language: language || "English",
     level: level || "All Levels",
-    price,
+    price: coursePrice,
     subtitle,
     description,
     learnings,
@@ -444,13 +447,11 @@ export const getPublishedCourses = async (userId = null, enrolledIds = []) => {
     );
   }
  
-  // Logged-in users: attach real progress.
-  // isPurchased is always false here because enrolled courses were filtered out above,
-  // but we keep the field so the API shape stays consistent.
+  // Logged-in users: Since enrolled courses were filtered out above, progress is guaranteed to be 0
+  // and isPurchased is always false. This avoids dozens of redundant DB queries on the homepage.
   const enriched = await Promise.all(
     courses.map(async (course) => {
-      const progress = await getCourseProgressPercent(course._id, userId);
-      return attachCategoryDisplayInfo({ ...course, isPurchased: false, progress });
+      return attachCategoryDisplayInfo({ ...course, isPurchased: false, progress: 0 });
     })
   );
  
@@ -558,32 +559,114 @@ export const getSearchResults = async (query, enrolledIds = []) => {
 // ─────────────────────────────────────────────────────────────────────────────
 // 9. TEXT SEARCH + FILTER (the browse/search page)
 // ─────────────────────────────────────────────────────────────────────────────
-export const searchCourse = async ({ query, categories, sortByPrice, enrolledIds = [] }) => {
-  const searchCriteria = {
-    isPublished: true,
-    $or: [
-      { title:    { $regex: query || "", $options: "i" } },
-      { subtitle: { $regex: query || "", $options: "i" } },
-      { category: { $regex: query || "", $options: "i" } },
-    ],
+// Helper Soundex functions for phonetic query fallbacks in main search
+function getSoundex(word) {
+  const clean = word.toUpperCase().replace(/[^A-Z]/g, '');
+  if (!clean) return "0000";
+  const codes = {
+    B: 1, F: 1, P: 1, V: 1,
+    C: 2, G: 2, J: 2, K: 2, Q: 2, S: 2, X: 2, Z: 2,
+    D: 3, T: 3,
+    L: 4,
+    M: 5, N: 5,
+    R: 6
   };
+  let out = clean[0];
+  for (let i = 1; i < clean.length; i++) {
+    const code = codes[clean[i]];
+    if (code && code !== codes[clean[i-1]]) {
+      out += code;
+    }
+  }
+  return (out + "0000").slice(0, 4);
+}
 
-  if (categories?.length > 0) searchCriteria.category = { $in: categories };
+function checkPhoneticMatch(queryWords, textToMatch) {
+  if (!textToMatch) return false;
+  const matchWords = textToMatch.split(/\s+/).filter(Boolean);
+  const matchPhonetics = matchWords.map(getSoundex);
+  return queryWords.some(qw => matchPhonetics.includes(getSoundex(qw)));
+}
+
+export const searchCourse = async ({ query, categories, sortByPrice, enrolledIds = [] }) => {
+  const cleanQuery = (query || "").trim();
+  const queryWords = cleanQuery.split(/\s+/).filter(Boolean);
+
+  // Setup search regex
+  const sanitizedQuery = cleanQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const searchRegex = new RegExp(sanitizedQuery, 'i');
+
+  // Build basic criteria
+  const searchCriteria = { isPublished: true };
+
+  if (categories?.length > 0) {
+    searchCriteria.category = { $in: categories };
+  }
 
   if (Array.isArray(enrolledIds) && enrolledIds.length > 0) {
     searchCriteria._id = { $nin: enrolledIds.map((id) => new mongoose.Types.ObjectId(id)) };
   }
 
-  const sortOptions = {};
-  if (sortByPrice === "low")  sortOptions["price.current"] = 1;
-  if (sortByPrice === "high") sortOptions["price.current"] = -1;
+  // Fetch all candidate courses
+  const [queryEmbedding, allCourses] = await Promise.all([
+    cleanQuery ? createEmbeddingForText(cleanQuery).catch(() => null) : null,
+    Course.find(searchCriteria)
+      .populate({ path: "creator", select: "name photoUrl" })
+      .lean()
+  ]);
 
-  const courses = await Course.find(searchCriteria)
-    .populate({ path: "creator", select: "name photoUrl" })
-    .sort(sortOptions)
-    .lean();
+  // Compute matches and scores
+  const scoredCourses = allCourses.map((course) => {
+    // 1. Semantic Cosine Similarity (Weight: 50%)
+    const similarity = course.embedding && course.embedding.length > 0 && queryEmbedding
+      ? cosineSimilarity(queryEmbedding, course.embedding)
+      : 0;
 
-  return courses;
+    // 2. Keyword/Regex Match Bonus (Weight: 30%)
+    const creatorName = course.creator?.name || "";
+    const titleMatch = course.title && searchRegex.test(course.title);
+    const subtitleMatch = course.subtitle && searchRegex.test(course.subtitle);
+    const categoryMatch = course.category && searchRegex.test(course.category);
+    const topicsMatch = Array.isArray(course.topics) && course.topics.some(t => searchRegex.test(t));
+    const creatorMatch = creatorName && searchRegex.test(creatorName);
+
+    const hasKeywordMatch = titleMatch || subtitleMatch || categoryMatch || topicsMatch || creatorMatch;
+    const keywordBonus = hasKeywordMatch ? 0.3 : 0.0;
+
+    // 3. Phonetic Match Bonus (Weight: 20%)
+    const phoneticMatch = checkPhoneticMatch(queryWords, course.title) || 
+                          checkPhoneticMatch(queryWords, course.category) ||
+                          (Array.isArray(course.topics) && course.topics.some(t => checkPhoneticMatch(queryWords, t)));
+    const phoneticBonus = phoneticMatch ? 0.2 : 0.0;
+
+    // Combined score
+    const score = similarity * 0.5 + keywordBonus + phoneticBonus;
+
+    return {
+      ...course,
+      score,
+      hasKeywordMatch,
+      phoneticMatch
+    };
+  });
+
+  // Filter out completely irrelevant courses (only keep if matches regex, phonetics, or exceeds semantic threshold of 0.25)
+  let matchedCourses = scoredCourses.filter((c) => {
+    if (!cleanQuery) return true; // If search is blank, keep all
+    return c.score > 0.25 || c.hasKeywordMatch || c.phoneticMatch;
+  });
+
+  // Sort logic
+  if (sortByPrice === "low") {
+    matchedCourses.sort((a, b) => (a.price?.current || 0) - (b.price?.current || 0));
+  } else if (sortByPrice === "high") {
+    matchedCourses.sort((a, b) => (b.price?.current || 0) - (a.price?.current || 0));
+  } else {
+    // Default: Sort by combined match score descending
+    matchedCourses.sort((a, b) => b.score - a.score);
+  }
+
+  return matchedCourses;
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
