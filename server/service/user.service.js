@@ -182,6 +182,16 @@ export const updateUserInfo = async (userId, fields) => {
     });
   }
 
+  // Update nested locationDetails fields individually
+  if (fields.locationDetails && typeof fields.locationDetails === "object") {
+    const locationFields = ["country", "city", "formattedAddress", "latitude", "longitude"];
+    locationFields.forEach((key) => {
+      if (fields.locationDetails[key] !== undefined) {
+        updateData[`locationDetails.${key}`] = fields.locationDetails[key];
+      }
+    });
+  }
+
   if (Object.keys(updateData).length === 0) {
     const error = new Error("No update information provided.");
     error.statusCode = 400;
