@@ -2,9 +2,13 @@ import { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import { ShieldCheck, Cookie, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useSelector } from "react-redux";
+import { useUpdateUserInfoMutation } from "@/features/api/authApi";
 
 const CookieConsentBanner = () => {
   const [showBanner, setShowBanner] = useState(false);
+  const [updateUserInfo] = useUpdateUserInfoMutation();
+  const { isAuthenticated } = useSelector((store) => store.auth);
 
   useEffect(() => {
     // Check if user has already given/declined consent
@@ -35,11 +39,49 @@ const CookieConsentBanner = () => {
   const initializeGeospatialTracking = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
+        async (position) => {
           const { latitude, longitude } = position.coords;
           // Store user coordinates in guest cookies for 30 days
           Cookies.set("user_coordinates", JSON.stringify({ latitude, longitude }), { expires: 30 });
           console.log("Geospatial coordinates successfully stored in cookies:", latitude, longitude);
+
+          try {
+            // Reverse geocode via OpenStreetMap Nominatim API
+            const response = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?lat=${latitude}&lon=${longitude}&format=json`,
+              {
+                headers: {
+                  "Accept-Language": "en"
+                }
+              }
+            );
+
+            if (response.ok) {
+              const data = await response.json();
+              const address = data.address || {};
+              const locationDetails = {
+                country: address.country || "",
+                city: address.city || address.town || address.village || address.suburb || "",
+                formattedAddress: data.display_name || "",
+                latitude,
+                longitude
+              };
+
+              // Store detailed location in cookies
+              Cookies.set("user_location", JSON.stringify(locationDetails), { expires: 30 });
+              console.log("Geospatial location resolved and stored in cookies:", locationDetails);
+
+              // If user is authenticated, update their profile on the backend
+              if (isAuthenticated) {
+                await updateUserInfo({ locationDetails }).unwrap();
+                console.log("User profile updated with geospatial details on backend.");
+              }
+            } else {
+              console.warn("Failed to reverse geocode coordinates using Nominatim API.");
+            }
+          } catch (geocodeErr) {
+            console.error("Error resolving geospatial coordinates address details:", geocodeErr);
+          }
         },
         (err) => {
           console.warn("Geospatial tracking permission was declined by user:", err.message);

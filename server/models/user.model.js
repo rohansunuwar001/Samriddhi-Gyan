@@ -80,6 +80,13 @@ const userSchema = new mongoose.Schema({
         showProfileToLoggedIn: { type: Boolean, default: true },
         showCoursesTaking: { type: Boolean, default: true },
     },
+    locationDetails: {
+        country: { type: String, default: "" },
+        city: { type: String, default: "" },
+        formattedAddress: { type: String, default: "" },
+        latitude: { type: Number },
+        longitude: { type: Number },
+    },
     occupation: {
         type: String,
         default: ""
