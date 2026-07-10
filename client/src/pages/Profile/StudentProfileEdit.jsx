@@ -346,7 +346,7 @@ const StudentProfileEdit = () => {
                         </span>
                       </div>
                       <p className="text-sm text-gray-500">
-                        Add a professional headline like, "Instructor at Samriddhi Gyan" or "Architect."
+                        Add a professional headline like, "Instructor at Skillera" or "Architect."
                       </p>
                     </div>
                   </div>
@@ -435,7 +435,7 @@ const StudentProfileEdit = () => {
                             className="flex-1 border border-[#d1d7dc] px-3 py-2.5 text-base focus:outline-none focus:border-[#1c1d1f]"
                           />
                         </div>
-                        <p className="text-sm text-gray-500 mt-1">Input your LinkedIn public profile URL (e.g. in/johnsmith, company/Samriddhi Gyan).</p>
+                        <p className="text-sm text-gray-500 mt-1">Input your LinkedIn public profile URL (e.g. in/johnsmith, company/Skillera).</p>
                       </div>
                       <div>
                         <div className="flex">
@@ -649,7 +649,7 @@ const StudentProfileEdit = () => {
               <div>
                 <div className="pb-5 mb-8">
                   <h1 className="text-4xl font-normal">Subscriptions</h1>
-                  <p className="text-base text-gray-500 mt-1">Manage your Samriddhi Gyan subscriptions</p>
+                  <p className="text-base text-gray-500 mt-1">Manage your Skillera subscriptions</p>
                 </div>
 
                 <div className="mb-10">
@@ -927,10 +927,10 @@ const StudentProfileEdit = () => {
                   <div>
                     <h2 className="text-2xl font-normal mb-3">Affiliate API</h2>
                     <p className="text-base text-gray-600 leading-relaxed mb-4">
-                      The Samriddhi Gyan Affiliate API exposes functionalities of Samriddhi Gyan to help developers build
-                      client applications and integrations with Samriddhi Gyan. To see more details, please visit{" "}
+                      The Skillera Affiliate API exposes functionalities of Skillera to help developers build
+                      client applications and integrations with Skillera. To see more details, please visit{" "}
                       <a href="#" className="text-[#5624d0] underline font-light">
-                        Samriddhi Gyan Affiliate API
+                        Skillera Affiliate API
                       </a>
                     </p>
 
@@ -964,7 +964,7 @@ const StudentProfileEdit = () => {
                     <span className="text-[#b32d0f] font-normal">Warning:</span> If you close your account, you will be unsubscribed from all <span className="font-normal">0</span> of your courses and will lose access to your account and data associated with your account forever, even if you choose to create a new account using the same email address in the future.
                   </p>
                   <p className="text-base text-gray-650 leading-relaxed">
-                    Please note, if you want to reinstate your account after submitting a deletion request, you will have 14 days after the initial submission date to reach out to <a href="mailto:privacy@Samriddhi Gyan.com" className="text-[#5624d0] hover:underline">privacy@Samriddhi Gyan.com</a> to cancel this request.
+                    Please note, if you want to reinstate your account after submitting a deletion request, you will have 14 days after the initial submission date to reach out to <a href="mailto:privacy@Skillera.com" className="text-[#5624d0] hover:underline">privacy@Skillera.com</a> to cancel this request.
                   </p>
 
                   <button

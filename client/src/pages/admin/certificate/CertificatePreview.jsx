@@ -4,7 +4,7 @@ import { QRCodeSVG } from "qrcode.react";
 
 const CertificatePreview = forwardRef(({ data = {} }, ref) => {
   const {
-    organizationName = "Samriddhi Gyan",
+    organizationName = "Skillera",
     organizationLogo,
     certificateTitle = "Certificate of Completion",
     certificateStatement = "This is to certify that the above-named individual has successfully completed the course.",

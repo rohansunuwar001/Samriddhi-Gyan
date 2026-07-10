@@ -88,7 +88,7 @@ const MyLearningDropdown = ({ navigate }) => {
                     onClick={() => navigate(`/course-progress/${course._id}`)}
                     className="w-full flex items-start gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors text-left group"
                   >
-                    {/* Thumbnail — large square tile matching Samriddhi Gyan style */}
+                    {/* Thumbnail — large square tile matching Skillera style */}
                     <div className="w-[72px] h-[72px] rounded overflow-hidden shrink-0 bg-gray-100 border border-gray-100">
                       {thumbnail ? (
                         <img
@@ -976,12 +976,13 @@ const Navbar = () => {
         <div className="flex items-center gap-4 shrink-0">
           {/* Logo: hide only on instructor/admin dashboard pages, show everywhere else */}
           {!isDashboardPage && (
-            <button onClick={handleLogoClick} className="focus:outline-none">
+            <button onClick={handleLogoClick} className="focus:outline-none flex items-center justify-center -translate-y-[2px]">
               <img
                 src="/rohan1.png"
                 alt="Samriddhi Logo"
                 width="82"
                 height="34"
+                className="block object-contain"
               />
             </button>
           )}
@@ -1180,9 +1181,9 @@ const Navbar = () => {
         {!isDashboardPage && (
           <div
             ref={searchContainerRef}
-            className="flex-1 hidden md:block mx-6 relative"
+            className="flex-1 hidden md:flex items-center mx-6 relative"
           >
-            <form onSubmit={handleSearchSubmit} className="w-full">
+            <form onSubmit={handleSearchSubmit} className="w-full relative flex items-center">
               <Search className="absolute top-1/2 left-4 transform -translate-y-1/2 text-gray-400 z-10 w-4.5 h-4.5" />
               <input
                 type="text"
@@ -1311,7 +1312,7 @@ const Navbar = () => {
               </Link>
             </div>
           )}
-          <div className="h-10 min-w-[220px] flex items-center justify-end">
+          <div className="h-full min-w-[220px] flex items-center justify-end">
             {user ? (
               <div className="flex items-center gap-6">
 

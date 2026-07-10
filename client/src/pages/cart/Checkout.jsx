@@ -218,7 +218,7 @@ const Checkout = () => {
                 </div>
               </div>
               <p className="text-xs text-[#6a6f73] leading-relaxed">
-                Samriddhi Gyan is required by law to collect applicable transaction taxes for purchases made in certain tax jurisdictions.
+                Skillera is required by law to collect applicable transaction taxes for purchases made in certain tax jurisdictions.
               </p>
             </div>
 

@@ -1,14 +1,14 @@
 import React, { useState, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
-import GuestHome from "./Home/GuestHome";
-import WelcomeBanner from "./Home/WelcomeBanner";
+import GuestHome from "./GuestHome";
+import WelcomeBanner from "./WelcomeBanner";
 import LoadingSpinner from "@/components/LoadingSpinner";
 import { useGetMyLearningCoursesQuery, useLoadUserQuery } from "@/features/api/authApi";
 import { useGetPublishedCourseQuery } from "@/features/api/courseApi";
 import { useGetRecommendedCourseQuery, useGetTrendingCourseQuery } from "@/features/api/recommendedApi";
 import { useGetAllCategoriesQuery } from "@/features/api/categoryApi";
-import CourseCard from "./student/CourseCard";
+import CourseCard from "../student/CourseCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Play, ChevronLeft, ChevronRight } from "lucide-react";
 

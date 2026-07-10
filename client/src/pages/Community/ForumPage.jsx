@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Label } from './ui/label';
+import { Label } from '@/components/ui/label';
 
 // Mock data - replace with your actual data fetching logic
 const discussions = [

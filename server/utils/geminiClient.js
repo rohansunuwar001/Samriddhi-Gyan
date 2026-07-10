@@ -56,7 +56,7 @@ export const generateGeminiResponse = async (promptText, context = {}) => {
 
     const schemaInfo = await getModelSchemas();
     const enhancedPrompt = `
-    You are an AI assistant for an LMS platform named Samriddhi Gyan. Below is the database schema, user context, and current course/lecture context.
+    You are an AI assistant for an LMS platform named Skillera. Below is the database schema, user context, and current course/lecture context.
 
     Database Schema:
     ${schemaInfo}
@@ -89,7 +89,7 @@ export const generateGeminiResponse = async (promptText, context = {}) => {
     1. Provide accurate and helpful responses based on the provided Course Context and Lecture Context.
     2. If the user asks about the course curriculum, content, or relevance to careers (e.g. web developer, jobs), use the course title, description, learnings, and requirements.
     3. If the user asks about the current lecture, explain the concept using the lecture title, description, and transcript text if available.
-    4. Speak directly, concisely, and encouragingly as an expert instructor or learning assistant at Samriddhi Gyan.
+    4. Speak directly, concisely, and encouragingly as an expert instructor or learning assistant at Skillera.
     5. If a query is unrelated to the course and schema, you can still answer general programming/concepts helpfully, but relate it to full stack development when possible.
 
     Response:

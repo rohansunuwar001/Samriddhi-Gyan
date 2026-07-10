@@ -301,7 +301,7 @@ let CourseTable = () => {
               <Info className="w-5 h-5 text-[#5624d0] shrink-0 mt-0.5" />
               <div className="flex-1">
                 <p className="text-lg font-normal text-[#1c1d1f]">
-                  Get a better mobile experience with the Samriddhi Gyan app.
+                  Get a better mobile experience with the Skillera app.
                 </p>
                 <p className="text-base text-[#5624d0] mt-0.5">
                   View key course metrics, reply to your students, and get instant

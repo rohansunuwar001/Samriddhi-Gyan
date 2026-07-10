@@ -883,12 +883,12 @@ const SupAdmAllRevenueDetails = () => {
               <CardHeader className="bg-purple-50/40 border-b border-purple-100">
                 <CardTitle className="text-base font-bold text-purple-950 flex items-center gap-2">
                   <Award className="h-5 w-5 text-purple-600" />
-                  Samriddhi Gyan Model Split logic
+                  Skillera Model Split logic
                 </CardTitle>
               </CardHeader>
               <CardContent className="pt-4 space-y-4 text-xs text-slate-600">
                 <p>
-                  Samriddhi Gyan watch-time payouts are distributed using engagement metrics:
+                  Skillera watch-time payouts are distributed using engagement metrics:
                 </p>
                 <div className="space-y-2.5 border-t border-slate-100 pt-3">
                   <div className="flex justify-between font-semibold">
@@ -1018,7 +1018,7 @@ const SupAdmAllRevenueDetails = () => {
                   Subscription Revenue Distribution
                 </CardTitle>
                 <CardDescription>
-                  Samriddhi Gyan Model: 15% watch-time instructor pool / 85% Admin platform share
+                  Skillera Model: 15% watch-time instructor pool / 85% Admin platform share
                 </CardDescription>
               </CardHeader>
               <CardContent className="h-[280px] flex items-center justify-center pt-4">
