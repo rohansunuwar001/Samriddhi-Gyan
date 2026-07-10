@@ -30,7 +30,7 @@ export const apiSlice = createApi({
         'Notification', 'CourseAnalytics','AdminStats', 'Question', 'Reminder', 'Flashcard',
         'DiscountBanner', 'GetOfferPromo', 'SubscriptionNavbar', 'subscriptionPlans', 'subscriptions', 'PayoutSummary', 'PaymentMethods',
         'Certificate', 'CertStudents', 'CertIssued', 'CertReceived', 'CourseDetail',
-        'CertificationIssuer', 'Certification', 'ExamRegistration'
+        'CertificationIssuer', 'Certification', 'ExamRegistration', 'CarouselSlide', 'CompanyLogo', 'PromoBanner'
     ],
     baseQuery,
     endpoints: builder => ({}),

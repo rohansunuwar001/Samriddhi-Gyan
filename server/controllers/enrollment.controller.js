@@ -144,7 +144,7 @@ export const updateLectureProgress = async (req, res) => {
         [updateOperator]: { completedLectures: lectureId },
         $set: { lastViewedLecture: lectureId }, // Always update the last viewed lecture
       },
-      { new: true } // Return the updated document
+      { returnDocument: 'after' } // Return the updated document
     ).populate("courseId", "totalLectures"); // Populate for progress calculation
 
     if (!enrollment) {

@@ -70,7 +70,7 @@ export const updateIssuer = async (req, res) => {
     const issuer = await CertificationIssuer.findByIdAndUpdate(
       req.params.id,
       { name, type, description },
-      { new: true }
+      { returnDocument: 'after' }
     );
     if (!issuer) return res.status(404).json({ success: false, message: "Issuer not found." });
     return res.status(200).json({ success: true, issuer });
@@ -326,7 +326,7 @@ export const updateCertification = async (req, res) => {
         duration: duration || 90,
         questions: parsedQuestions || [],
       },
-      { new: true }
+      { returnDocument: 'after' }
     );
 
     if (!cert) return res.status(404).json({ success: false, message: "Certification not found." });

@@ -3,6 +3,7 @@ import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
 import session from "express-session";
+import MongoStore from "connect-mongo";
 import morgan from "morgan";
 import passport from "passport";
 import { stripeWebhook } from "./controllers/coursePurchase.controller.js";
@@ -42,6 +43,7 @@ import banditPricingRouter from "./routes/banditPricing.route.js";
 import pathwaysRouter from "./routes/pathways.route.js";
 import evaluationRouter from "./routes/evaluation.route.js";
 import assignmentRouter from "./routes/assignment.route.js";
+import analyticsRouter from "./routes/analytics.route.js";
 import path from 'path';
 import { fileURLToPath } from 'url';
 dotenv.config({});
@@ -57,6 +59,10 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+      mongoUrl: process.env.MONGO_URI,
+      ttl: 24 * 60 * 60, // 1 day
+    }),
     cookie: { maxAge: 24 * 60 * 60 * 1000 },
   })
 );
@@ -140,4 +146,5 @@ app.use("/api/v1/bandit-pricing", banditPricingRouter);
 app.use("/api/v1/pathways", pathwaysRouter);
 app.use("/api/v1/evaluation", evaluationRouter);
 app.use("/api/v1/assignment", assignmentRouter);
+app.use("/api/v1/analytics", analyticsRouter);
 export default app;

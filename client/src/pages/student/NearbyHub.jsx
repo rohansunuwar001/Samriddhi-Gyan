@@ -419,6 +419,39 @@ const NearbyHub = () => {
   const [locLoading, setLocLoading] = useState(false);
   const [locError, setLocError] = useState(null);
 
+  const [mapLoaded, setMapLoaded] = useState(!!window.google);
+  const [scriptError, setScriptError] = useState(false);
+
+  useEffect(() => {
+    if (window.google) {
+      setMapLoaded(true);
+      return;
+    }
+
+    const scriptId = "google-maps-sdk";
+    let script = document.getElementById(scriptId);
+
+    if (!script) {
+      script = document.createElement("script");
+      script.id = scriptId;
+      script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyAaLiekr0uzBF_Ei5Q4dYJL9Uv2IrRHOBQ&libraries=geometry";
+      script.async = true;
+      script.defer = true;
+      document.head.appendChild(script);
+    }
+
+    const handleLoad = () => setMapLoaded(true);
+    const handleError = () => setScriptError(true);
+
+    script.addEventListener("load", handleLoad);
+    script.addEventListener("error", handleError);
+
+    return () => {
+      script.removeEventListener("load", handleLoad);
+      script.removeEventListener("error", handleError);
+    };
+  }, []);
+
   // Initialize coordinates from cookie if present
   useEffect(() => {
     const coordsCookie = getCookie("user_coordinates");
@@ -571,17 +604,31 @@ const NearbyHub = () => {
           </CardHeader>
           
           <CardContent className="relative flex-1 flex items-center justify-center p-0 overflow-hidden min-h-[480px]">
-            <div className="w-full h-full relative z-0">
-              <LiveTrackingMap 
-                userCoords={coords} 
-                tutors={tutorsData?.tutors || []} 
-                peers={peersData?.peers || []} 
-                activeTab={activeTab}
-                onUserMove={handleUserMove}
-                visualMode={visualMode}
-                activeRouteTarget={activeRouteTarget}
-                setActiveRouteTarget={setActiveRouteTarget}
-              />
+            <div className="w-full h-full relative z-0 flex items-center justify-center">
+              {mapLoaded ? (
+                <LiveTrackingMap 
+                  userCoords={coords} 
+                  tutors={tutorsData?.tutors || []} 
+                  peers={peersData?.peers || []} 
+                  activeTab={activeTab}
+                  onUserMove={handleUserMove}
+                  visualMode={visualMode}
+                  activeRouteTarget={activeRouteTarget}
+                  setActiveRouteTarget={setActiveRouteTarget}
+                />
+              ) : scriptError ? (
+                <div className="flex flex-col items-center justify-center p-8 text-center text-rose-500 font-sans">
+                  <ShieldAlert className="h-10 w-10 mb-2" />
+                  <p className="font-semibold text-sm">Failed to load Google Maps SDK</p>
+                  <p className="text-xs text-muted-foreground mt-1">Please check your network connection and reload.</p>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center p-8 text-center text-slate-500 font-sans">
+                  <RefreshCw className="h-8 w-8 mb-2 animate-spin text-indigo-600" />
+                  <p className="font-semibold text-sm">Loading Map Engine...</p>
+                  <p className="text-xs text-muted-foreground mt-1">Fetching secure spatial API client...</p>
+                </div>
+              )}
             </div>
           </CardContent>
         </Card>

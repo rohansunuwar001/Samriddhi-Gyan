@@ -63,7 +63,7 @@ export const updateSection = async (req, res) => {
         const section = await Section.findByIdAndUpdate(
             sectionId,
             updatePayload,
-            { new: true }
+            { returnDocument: 'after' }
         );
 
         if (!section) {
