@@ -1,4 +1,5 @@
 import {
+  getActiveDiscountBannerService,
   getCarouselSlidesService,
   createCarouselSlideService,
   updateCarouselSlideService,
@@ -12,6 +13,17 @@ import {
   updatePromoBannerService,
   deletePromoBannerService,
 } from "../service/cms.service.js";
+
+// --- Discount Banner Controllers ---
+
+export const getActiveDiscountBanner = async (req, res) => {
+  try {
+    const banner = await getActiveDiscountBannerService();
+    return res.status(200).json({ success: true, banner: banner || null });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 // --- Carousel Slide Controllers ---
 

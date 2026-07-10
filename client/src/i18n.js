@@ -14,7 +14,7 @@ i18n
   .init({
     // The default language
     fallbackLng: 'en',
-    debug: true, // Set to false in production
+    debug: false, // Never log in production
     
     // Options for language detection
     detection: {
@@ -22,6 +22,9 @@ i18n
       order: ['localStorage', 'navigator'],
       // Cache user language in localStorage
       caches: ['localStorage'],
+      // Normalize detected locale (e.g. 'en-US' -> 'en') when no exact match exists
+      lookupLocalStorage: 'i18nextLng',
+      convertDetectedLanguage: (lng) => lng.split('-')[0],
     },
 
     interpolation: {

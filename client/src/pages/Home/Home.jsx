@@ -74,7 +74,7 @@ const Home = () => {
     isLoading: isLoadingLearning,
     isError: isErrorLearning,
   } = useGetMyLearningCoursesQuery(undefined, { skip: !isAuthenticated });
-console.log("Learning course", learningData);
+
 
   // Fetch recommended courses
   const {
@@ -82,7 +82,7 @@ console.log("Learning course", learningData);
     isLoading: isLoadingRecommended,
     isError: isErrorRecommended,
   } = useGetRecommendedCourseQuery(undefined, { skip: !isAuthenticated });
-  console.log("Recommended course", recommendedData);
+
 
   // Fetch trending courses
   const {
@@ -90,7 +90,7 @@ console.log("Learning course", learningData);
     isLoading: isLoadingTrending,
     isError: isErrorTrending,
   } = useGetTrendingCourseQuery(undefined, { skip: !isAuthenticated });
-  console.log("Trending course", trendingData);
+
 
   // Fetch published courses (used for featured, fallbacks, searches, etc.)
   const {
@@ -100,7 +100,7 @@ console.log("Learning course", learningData);
   } = useGetPublishedCourseQuery(undefined, { skip: !isAuthenticated });
 
 
-  console.log("published course",publishedData);
+
 
   // Fetch categories dynamically
   const { data: categoriesData } = useGetAllCategoriesQuery(undefined, { skip: !isAuthenticated });

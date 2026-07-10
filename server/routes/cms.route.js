@@ -1,5 +1,6 @@
 import express from "express";
 import {
+  getActiveDiscountBanner,
   getCarouselSlides,
   createCarouselSlide,
   updateCarouselSlide,
@@ -18,6 +19,7 @@ import { isAuthenticated, authorizeRoles } from "../middlewares/isAuthenticated.
 const router = express.Router();
 
 // Public routes (used to render on the guest landing homepage)
+router.route("/active-discount-banner").get(getActiveDiscountBanner);
 router.route("/carousel").get(getCarouselSlides);
 router.route("/logos").get(getCompanyLogos);
 router.route("/promo").get(getPromoBanners);

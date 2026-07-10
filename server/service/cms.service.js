@@ -1,6 +1,13 @@
 import { CarouselSlide } from "../models/carouselSlide.model.js";
 import { CompanyLogo } from "../models/companyLogo.model.js";
 import { PromoBanner } from "../models/promoBanner.model.js";
+import DiscountBanner from "../models/discountBanner.model.js";
+
+// --- Discount Banner Service Functions ---
+
+export const getActiveDiscountBannerService = async () => {
+  return await DiscountBanner.findOne({ isActive: true }).sort({ updatedAt: -1 });
+};
 
 // --- Carousel Slide Service Functions ---
 

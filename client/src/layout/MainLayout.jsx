@@ -13,9 +13,10 @@ import { useLoadUserQuery } from '@/features/api/authApi'; // Adjust path if nee
 import LoadingSpinner from '@/components/LoadingSpinner'; // Adjust path if needed
 
 const MainLayout = () => {
-  // Call the hook to check for a logged-in user on initial app load.
-  // We only need the `isLoading` state for this component's logic.
-  const { isLoading } = useLoadUserQuery();
+  // Only call loadUser when a token exists — calling without a token hits a protected
+  // endpoint and produces a 401 for every unauthenticated visitor.
+  const hasToken = !!localStorage.getItem('authToken');
+  const { isLoading } = useLoadUserQuery(undefined, { skip: !hasToken });
   const { user } = useSelector((store) => store.auth);
   const isInstructor = user?.role === 'instructor';
   const showBanner = !user || user.role === 'student';
