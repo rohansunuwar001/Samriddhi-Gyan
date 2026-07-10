@@ -97,7 +97,7 @@ app.use(morgan("dev"));
 // --- Root route ---
 app.get("/", (req, res) => {
   res.json({ 
-    message: "Samriddhi Gyan API is running",
+    message: "Skillera API is running",
     version: "v1",
     endpoints: "/api/v1/*"
   });

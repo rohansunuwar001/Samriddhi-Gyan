@@ -458,7 +458,7 @@ const MainContent = ({
                 </div>
                 <div className="space-y-1">
                   <span className="text-[#6a6f73] block">Certificates</span>
-                  <p>Get Samriddhi Gyan certificate by completing entire course</p>
+                  <p>Get Skillera certificate by completing entire course</p>
                 </div>
               </div>
 

@@ -314,7 +314,7 @@ const PersonalizeWizard = () => {
                   <div>
                     <h4 className="font-normal text-base text-slate-800">You're in the right place!</h4>
                     <p className="text-sm text-slate-500 mt-0.5">
-                      <strong>{totalLearners.toLocaleString()}</strong> people learn <strong>{selectedOccupation.name}</strong> on Samriddhi Gyan.
+                      <strong>{totalLearners.toLocaleString()}</strong> people learn <strong>{selectedOccupation.name}</strong> on Skillera.
                     </p>
                   </div>
                 </div>

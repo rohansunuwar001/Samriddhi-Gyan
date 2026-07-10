@@ -120,7 +120,7 @@ const SectionManager = ({ section, courseId, index = 1 }) => {
   return (
     <div className="border border-[#d1d7dc] bg-[#f7f9fa] mb-6 relative">
       
-      {/* ── SECTION HEADER (Samriddhi Gyan Style) ── */}
+      {/* ── SECTION HEADER (Skillera Style) ── */}
       <div className="flex items-center justify-between p-4 bg-[#f7f9fa] border-b border-[#d1d7dc]">
         
         {isEditingTitle ? (
@@ -290,7 +290,7 @@ const SectionManager = ({ section, courseId, index = 1 }) => {
             <Plus className="w-3.5 h-3.5" /> Curriculum item
           </button>
 
-          {/* Dropdown Menu (Samriddhi Gyan Design matching photo 4 & 5) */}
+          {/* Dropdown Menu (Skillera Design matching photo 4 & 5) */}
           {isMenuOpen && (
             <>
               {/* Back drop to close menu */}

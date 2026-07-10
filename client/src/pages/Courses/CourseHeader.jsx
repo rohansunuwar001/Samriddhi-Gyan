@@ -138,7 +138,7 @@ const CourseHeader = ({ course, purchasePanel }) => {
 
                     <div className="flex min-h-28 items-center px-6 py-5 text-lg leading-relaxed text-[#1f2937]">
                         <p>
-                            Access top-rated courses with Samriddhi Gyan{' '}
+                            Access top-rated courses with Skillera{' '}
                             <Link to="/courses" className="text-[#5624d0] underline underline-offset-2">
                                 Personal Plan.
                             </Link>

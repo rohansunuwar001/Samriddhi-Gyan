@@ -449,7 +449,7 @@ export const submitExam = async (req, res) => {
         completionDate: new Date(),
         certificateId: reg.certificateId,
         verificationUrl: `/verify/${reg.certificateId}`,
-        instructorName: "Samriddhi Gyan Examiner Board",
+        instructorName: "Skillera Examiner Board",
       });
     }
 

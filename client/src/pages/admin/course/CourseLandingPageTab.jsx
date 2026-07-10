@@ -20,7 +20,7 @@ import { toast } from "sonner";
 const levels = ["Beginner", "Intermediate", "Advanced", "All Levels"];
 const LANGUAGES = ["English (US)", "Spanish", "French", "German", "Nepali", "Hindi"];
 
-/* ─── Small reusable Samriddhi Gyan-style character-counted input ─── */
+/* ─── Small reusable Skillera-style character-counted input ─── */
 function LimitedTextInput({ label, name, value, onChange, maxLen, placeholder, hint, className = "" }) {
   const len = value?.length || 0;
   return (
@@ -43,7 +43,7 @@ function LimitedTextInput({ label, name, value, onChange, maxLen, placeholder, h
   );
 }
 
-/* ─── Placeholder illustration matching Samriddhi Gyan's dashed media box ─── */
+/* ─── Placeholder illustration matching Skillera's dashed media box ─── */
 function MediaPlaceholder() {
   return (
     <div className="flex items-center justify-center w-full h-full min-h-[200px] bg-[#f7f9fa] border border-[#d1d7dc]">
@@ -863,7 +863,7 @@ const CourseLandingPageTab = () => {
                 </div>
               ) : (
                 <div className="p-4 text-center text-sm font-light text-[#6a6f73] leading-relaxed bg-white h-full w-full flex items-center justify-center">
-                  Save the changes in order to complete the upload of your file. Once you save it, we will process it to ensure it works smoothly on Samriddhi Gyan.
+                  Save the changes in order to complete the upload of your file. Once you save it, we will process it to ensure it works smoothly on Skillera.
                 </div>
               )}
             </div>

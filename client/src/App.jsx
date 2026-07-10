@@ -6,7 +6,7 @@ import {
 } from "react-router-dom";
 
 // --- CORE LAYOUT & UTILITY IMPORTS ---
-import AnimatedErrorPage from "./AnimatedErrorPage";
+import AnimatedErrorPage from "./pages/Error/AnimatedErrorPage";
 import ScrollToTop from "./components/ScrollToTop";
 import MainLayout from "./layout/MainLayout";
 
@@ -23,15 +23,15 @@ import PurchaseCourseProtectedRoute from "./components/PurchaseCourseProtectedRo
 // --- ALL PAGE COMPONENT IMPORTS ---
 
 // Public & Static Pages
-import HowItWorks from "./components/HowItWorks"; // Example of other static pages
+import HowItWorks from "./pages/HowItWorks/HowItWorks"; // Example of other static pages
 import About from "./pages/About/About";
-import Home from "./pages/Home";
+import Home from "./pages/Home/Home";
 //... (add all your other page components like Blog, Forum, etc.)
 
 // Authentication Pages
-import GoogleSuccess from "./pages/GoogleSuccess";
-import Login from "./pages/Login";
-import Signup from "./pages/Signup";
+import GoogleSuccess from "./pages/Auth/GoogleSuccess";
+import Login from "./pages/Auth/Login";
+import Signup from "./pages/Auth/Signup";
 
 // User Profile Pages
 import Profile from "./pages/Profile/Profile";
@@ -59,14 +59,14 @@ import AddCourse from "./pages/admin/course/AddCourse";
 import CourseTable from "./pages/admin/course/CourseTable";
 import EditCourse from "./pages/admin/course/EditCourse"; // This is the new tabbed Course Manager
 
-import InstructorProfile from "./pages/admin/course/InstructorProfile";
-import InstructorAccount from "./pages/admin/course/InstructorAccount";
+import InstructorProfile from "./pages/Profile/InstructorProfile";
+import InstructorAccount from "./pages/Profile/InstructorAccount";
 
 // Lecture Management Imports (Refined)
-import AIAssistant from "./components/AIAssistant";
-import BlogPage from "./components/Blog/BlogPage";
-import SingleBlogPage from "./components/Blog/SingleBlogPage";
-import ForumPage from "./components/ForumPage";
+import AIAssistant from "./pages/AIAssistant/AIAssistant";
+import BlogPage from "./pages/Blog/BlogPage";
+import SingleBlogPage from "./pages/Blog/SingleBlogPage";
+import ForumPage from "./pages/Community/ForumPage";
 import CourseAnalytics from "./pages/admin/course/CourseAnalytics";
 import CoursePayout from "./pages/admin/course/CoursePayout";
 import CourseReviews from "./pages/admin/course/CourseReviews";
@@ -77,7 +77,7 @@ import Checkout from "./pages/cart/Checkout";
 import Contact from "./pages/Contact/Contact";
 import CourseDetailPage from "./pages/Courses/CourseDetailPage";
 import HomeCms from "./pages/pageCms/HomeCms";
-import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentSuccess from "./pages/Payment/PaymentSuccess";
 import InstructorProfilePage from "./pages/Profile/InstructorProfilePage";
 import SupAdmAllRevenueDetails from "./pages/superAdmin/SupAdmAllRevenueDetails";
 import SupAdmAllUser from "./pages/superAdmin/SupAdmAllUser";
@@ -86,17 +86,17 @@ import SupAdmDashboard from "./pages/superAdmin/SupAdmDashboard";
 import SupAdmSubscriptions from "./pages/superAdmin/SupAdmSubscriptions";
 import CategoryManager from "./pages/admin/CategoryManager";
 import TopicSearchResultsPage from "./pages/Courses/TopicSearchResultsPage";
-import PaymentFailed from "./pages/PaymentFailed";
+import PaymentFailed from "./pages/Payment/PaymentFailed";
 import BlogImporter from "./pages/admin/blog/BlogImporter";
 import TopicPage from "./pages/student/TopicPage";
 import TopicManager from "./pages/admin/TopicManager";
 import DiscountManager from "./pages/admin/DiscountManager";
 import SubscribePage from "./pages/student/SubscribePage";
-import Terms from "./pages/Terms";
+import Terms from "./pages/Terms/Terms";
 import PersonalizeWizard from "./pages/student/PersonalizeWizard";
-import NotificationsPage from "./pages/NotificationsPage";
-import PurchaseHistoryPage from "./pages/PurchaseHistoryPage";
-import PaymentMethodsPage from "./pages/PaymentMethodsPage";
+import NotificationsPage from "./pages/Notifications/NotificationsPage";
+import PurchaseHistoryPage from "./pages/Payment/PurchaseHistoryPage";
+import PaymentMethodsPage from "./pages/Payment/PaymentMethodsPage";
 import CertificateManager from "./pages/admin/certificate/CertificateManager";
 import CertificateForm from "./pages/admin/certificate/CertificateForm";
 import AdminCertifications from "./pages/admin/certificate/AdminCertifications";

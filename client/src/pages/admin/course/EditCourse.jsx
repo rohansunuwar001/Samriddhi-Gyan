@@ -469,7 +469,7 @@ function CourseStructurePanel() {
         <h3 className="text-2xl font-normal text-[#1c1d1f] mb-4">Resources</h3>
         <div className="space-y-4">
           <div>
-            <span className="font-normal text-lg text-[#5624d0] hover:underline cursor-pointer block">Samriddhi Gyan Trust & Safety</span>
+            <span className="font-normal text-lg text-[#5624d0] hover:underline cursor-pointer block">Skillera Trust & Safety</span>
             <span className="text-base text-[#6a6f73]">Our policies for instructors and students</span>
           </div>
           <div>
@@ -477,8 +477,8 @@ function CourseStructurePanel() {
             <span className="text-base text-[#6a6f73]">A place to connect with other instructors</span>
           </div>
           <div>
-            <span className="font-normal text-lg text-[#5624d0] hover:underline cursor-pointer block">Official Samriddhi Gyan Course: How to Create an Online Course</span>
-            <span className="text-base text-[#6a6f73]">Learn about course creation from the Samriddhi Gyan Instructor Team and experienced instructors</span>
+            <span className="font-normal text-lg text-[#5624d0] hover:underline cursor-pointer block">Official Skillera Course: How to Create an Online Course</span>
+            <span className="text-base text-[#6a6f73]">Learn about course creation from the Skillera Instructor Team and experienced instructors</span>
           </div>
         </div>
       </div>
@@ -594,7 +594,7 @@ function SetupTestVideoPanel() {
             <span className="text-base text-[#6a6f73]">Make a home studio on a budget</span>
           </div>
           <div>
-            <span className="font-normal text-lg text-[#5624d0] hover:underline cursor-pointer block">Samriddhi Gyan Trust & Safety</span>
+            <span className="font-normal text-lg text-[#5624d0] hover:underline cursor-pointer block">Skillera Trust & Safety</span>
             <span className="text-base text-[#6a6f73]">Our policies for instructors and students</span>
           </div>
           <div>
@@ -636,7 +636,7 @@ function FilmEditPanel() {
           </div>
           <h4 className="font-normal text-[#1c1d1f] text-lg mb-2">You're in good company</h4>
           <p className="text-base text-[#6a6f73] mb-4">
-            Chat and get production help with other Samriddhi Gyan instructors.
+            Chat and get production help with other Skillera instructors.
           </p>
           <button className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-normal text-base py-2.5 px-4 transition-colors">
             Join the community
@@ -835,7 +835,7 @@ function SettingsPanel({ courseId, courseData, onDelete }) {
         </div>
         <p className="text-lg text-[#6a6f73] mb-5">
           {enrollment === "public"
-            ? "Public courses show up in search results and are available for anyone to take on Samriddhi Gyan."
+            ? "Public courses show up in search results and are available for anyone to take on Skillera."
             : enrollment === "private-invite"
             ? "Only students with an invitation link can enroll in this course."
             : "Students can enroll with a password that you set and share with them."}

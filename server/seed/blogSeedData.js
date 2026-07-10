@@ -133,7 +133,7 @@ export const articles = [
         type: "paragraph",
         text: "Mega-influencers are well-known social media stars and celebrities, such as Alix Earle or Kim Kardashian, who have over 1 million followers. They often partner with major brands and could receive tens of thousands of dollars (or even millions) for a single ad.",
       },
-      { type: "heading", level: 2, text: "Become an Influencer With Samriddhi Gyan" },
+      { type: "heading", level: 2, text: "Become an Influencer With Skillera" },
       {
         type: "paragraph",
         text: "We offer several courses to help you kickstart your career. The Be a Social Media Influencer course teaches you how to navigate the entire process, including finding your niche, developing your brand, building an audience, and dealing with online trolls.",

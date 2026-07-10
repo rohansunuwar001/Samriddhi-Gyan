@@ -175,7 +175,7 @@ const GuestHome = () => {
             Learn essential career and life skills
           </h2>
           <p className="text-base sm:text-lg text-gray-600 mt-2">
-            Samriddhi Gyan helps you build in-demand skills fast and advance your career in a changing job market.
+            Skillera helps you build in-demand skills fast and advance your career in a changing job market.
           </p>
         </div>
 

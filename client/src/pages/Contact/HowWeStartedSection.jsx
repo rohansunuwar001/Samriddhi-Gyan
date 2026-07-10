@@ -213,7 +213,7 @@ HowWeStartedSection.propTypes = {
 // --- IMPORTANT: Default props now include the '&mute=1' parameter in the URL ---
 HowWeStartedSection.defaultProps = {
   title: "How we started",
-  description: "From an early age, Samriddhi Gyan founder Eren Bali knew learning was the key to unlocking opportunity.",
+  description: "From an early age, Skillera founder Eren Bali knew learning was the key to unlocking opportunity.",
   thumbnailSrc: "/r4.jpg", // Make sure this image exists in your `public` folder
   videoUrl: "https://www.youtube.com/embed/dQw4w9WgXcQ?autoplay=1&mute=1&controls=1",
 };
