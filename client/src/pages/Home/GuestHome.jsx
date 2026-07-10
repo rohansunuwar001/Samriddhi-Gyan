@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useGetPublishedCourseQuery } from "@/features/api/courseApi";
+import { useGetCarouselSlidesQuery, useGetPromoBannersQuery } from "@/features/api/cmsApi";
 import CourseCard from "../student/CourseCard";
 import TrustedBySection from "@/components/home/TrustedBySction";
 import { Button } from "@/components/ui/button";
@@ -17,14 +18,18 @@ const GuestHome = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
 
   const { data, isLoading, isError } = useGetPublishedCourseQuery();
+  const { data: carouselData } = useGetCarouselSlidesQuery({ active: "true" });
+  const userCategoryInterest = localStorage.getItem("last_interacted_category") || "";
+  const { data: promoData } = useGetPromoBannersQuery({ active: "true", category: userCategoryInterest });
 
-  const slides = [
+  const defaultSlides = [
     {
       title: "Get AI-ready from Rs 999",
       description: "Gain job-ready AI skills to stand out at work. Offer ends July 2.",
       image: "/guest_hero_student.png",
       bgColor: "bg-gradient-to-r from-orange-50 via-amber-50 to-orange-100",
       textColor: "text-amber-900",
+      link: "/course/search"
     },
     {
       title: "Skills for your future",
@@ -32,8 +37,23 @@ const GuestHome = () => {
       image: "/guest_hero_student.png",
       bgColor: "bg-gradient-to-r from-purple-50 via-indigo-50 to-purple-100",
       textColor: "text-indigo-900",
+      link: "/course/search"
     },
   ];
+
+  const slides = carouselData?.slides?.length > 0 ? carouselData.slides : defaultSlides;
+
+  const defaultPromo = {
+    title: "Reimagine your career in the AI era",
+    description: "Future-proof your skills with Personal Plan. Get access to a variety of fresh content from real-world experts to fast-track your success.",
+    image: "/guest_promo_instructor.png",
+    primaryBtnText: "Learn AI and more",
+    primaryBtnLink: "/course/search",
+    secondaryBtnText: "Prep for a certification",
+    secondaryBtnLink: "/course/search"
+  };
+
+  const promo = promoData?.banners?.[0] || defaultPromo;
 
   // ⚠️ All hooks MUST be called before any conditional returns
   useEffect(() => {
@@ -92,17 +112,15 @@ const GuestHome = () => {
       <section className="relative overflow-hidden py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto relative rounded-2xl overflow-hidden shadow-sm border border-gray-100">
           <div
-            className={`flex transition-transform duration-700 ease-in-out`}
+            className="flex transition-transform duration-700 ease-in-out w-full"
             style={{
               transform: `translateX(-${currentSlide * 100}%)`,
-              width: `${slides.length * 100}%`,
             }}
           >
             {slides.map((slide, index) => (
               <div
                 key={index}
                 className={`${slide.bgColor} flex-shrink-0 w-full min-h-[380px] sm:min-h-[440px] md:min-h-[480px] lg:min-h-[500px] flex items-center relative p-6 sm:p-12`}
-                style={{ width: `${100 / slides.length}%` }}
               >
                 {/* Float Card Content */}
                 <div className="bg-white border border-gray-100 rounded-xl p-6 sm:p-10 max-w-sm sm:max-w-md shadow-xl text-left z-10 transition-all duration-300 hover:shadow-2xl">
@@ -113,7 +131,7 @@ const GuestHome = () => {
                     {slide.description}
                   </p>
                   <Button
-                    onClick={() => navigate("/course/search")}
+                    onClick={() => navigate(slide.link || "/course/search")}
                     className="bg-[#a435f0] hover:bg-[#8710d8] text-white font-normal px-6 py-3 rounded-md text-base transition-all duration-200"
                   >
                     Explore Courses
@@ -292,30 +310,30 @@ const GuestHome = () => {
         <div className="bg-[#1c1d1f] text-white rounded-2xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 gap-8 items-center p-8 sm:p-12 shadow-xl relative">
           <div className="lg:col-span-7 text-left space-y-6">
             <h2 className="text-3xl sm:text-4xl font-extrabold tracking-tight leading-tight">
-              Reimagine your career in the AI era
+              {promo.title}
             </h2>
             <p className="text-base sm:text-lg text-gray-300 leading-relaxed">
-              Future-proof your skills with Personal Plan. Get access to a variety of fresh content from real-world experts to fast-track your success.
+              {promo.description}
             </p>
             <div className="flex flex-wrap gap-4 pt-2">
               <Button
-                onClick={() => navigate("/course/search")}
+                onClick={() => navigate(promo.primaryBtnLink || "/course/search")}
                 className="bg-[#a435f0] hover:bg-[#8710d8] text-white font-normal px-6 py-3 rounded-md text-base transition-all duration-200"
               >
-                Learn AI and more
+                {promo.primaryBtnText}
               </Button>
               <Button
-                onClick={() => navigate("/course/search")}
+                onClick={() => navigate(promo.secondaryBtnLink || "/course/search")}
                 variant="outline"
                 className="border-white text-white hover:bg-white hover:text-black font-normal px-6 py-3 rounded-md text-base transition-all duration-200"
               >
-                Prep for a certification
+                {promo.secondaryBtnText}
               </Button>
             </div>
           </div>
           <div className="lg:col-span-5 h-64 sm:h-80 w-full relative select-none pointer-events-none hidden lg:block">
             <img
-              src="/guest_promo_instructor.png"
+              src={promo.image}
               alt="Promo illustration"
               className="w-full h-full object-contain filter drop-shadow-2xl"
             />

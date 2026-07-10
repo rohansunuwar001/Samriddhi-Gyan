@@ -1,3 +1,4 @@
+import { lazy } from "react";
 import { useSelector } from "react-redux";
 import {
   createBrowserRouter,
@@ -23,90 +24,89 @@ import PurchaseCourseProtectedRoute from "./components/PurchaseCourseProtectedRo
 // --- ALL PAGE COMPONENT IMPORTS ---
 
 // Public & Static Pages
-import HowItWorks from "./pages/HowItWorks/HowItWorks"; // Example of other static pages
-import About from "./pages/About/About";
-import Home from "./pages/Home/Home";
-//... (add all your other page components like Blog, Forum, etc.)
+const HowItWorks = lazy(() => import("./pages/HowItWorks/HowItWorks"));
+const About = lazy(() => import("./pages/About/About"));
+const Home = lazy(() => import("./pages/Home/Home"));
 
 // Authentication Pages
-import GoogleSuccess from "./pages/Auth/GoogleSuccess";
-import Login from "./pages/Auth/Login";
-import Signup from "./pages/Auth/Signup";
+const GoogleSuccess = lazy(() => import("./pages/Auth/GoogleSuccess"));
+const Login = lazy(() => import("./pages/Auth/Login"));
+const Signup = lazy(() => import("./pages/Auth/Signup"));
 
 // User Profile Pages
-import Profile from "./pages/Profile/Profile";
-import StudentProfileEdit from "./pages/Profile/StudentProfileEdit";
+const Profile = lazy(() => import("./pages/Profile/Profile"));
+const StudentProfileEdit = lazy(() => import("./pages/Profile/StudentProfileEdit"));
 
 // Student-Facing Course Pages
-import CourseProgress from "./pages/student/CourseProgress";
-import Courses from "./pages/student/Courses";
-// import MyLearning from "./pages/student/MyLearning";
-import Archived from "./pages/student/my-courses/Archived";
-import Certifications from "./pages/student/my-courses/Certifications";
-import Learning from "./pages/student/my-courses/Learning";
-import LearningTools from "./pages/student/my-courses/LearningTools";
-import Lists from "./pages/student/my-courses/Lists";
-import MyCoursesLayout from "./pages/student/my-courses/MyCoursesLayout";
-import Wishlist from "./pages/student/my-courses/Wishlist";
-import SearchPage from "./pages/student/SearchPage";
+const CourseProgress = lazy(() => import("./pages/student/CourseProgress"));
+const Courses = lazy(() => import("./pages/student/Courses"));
+const Archived = lazy(() => import("./pages/student/my-courses/Archived"));
+const Certifications = lazy(() => import("./pages/student/my-courses/Certifications"));
+const Learning = lazy(() => import("./pages/student/my-courses/Learning"));
+const LearningTools = lazy(() => import("./pages/student/my-courses/LearningTools"));
+const Lists = lazy(() => import("./pages/student/my-courses/Lists"));
+const MyCoursesLayout = lazy(() => import("./pages/student/my-courses/MyCoursesLayout"));
+const Wishlist = lazy(() => import("./pages/student/my-courses/Wishlist"));
+const SearchPage = lazy(() => import("./pages/student/SearchPage"));
 
 // --- UPDATED ADMIN/INSTRUCTOR PAGE IMPORTS ---
-import Dashboard from "./pages/admin/Dashboard";
+const Dashboard = lazy(() => import("./pages/admin/Dashboard"));
 import Sidebar from "./pages/admin/Sidebar";
 
 // Course Management Imports (Reflects new workflow)
-import AddCourse from "./pages/admin/course/AddCourse";
-import CourseTable from "./pages/admin/course/CourseTable";
-import EditCourse from "./pages/admin/course/EditCourse"; // This is the new tabbed Course Manager
+const AddCourse = lazy(() => import("./pages/admin/course/AddCourse"));
+const CourseTable = lazy(() => import("./pages/admin/course/CourseTable"));
+const EditCourse = lazy(() => import("./pages/admin/course/EditCourse"));
 
-import InstructorProfile from "./pages/Profile/InstructorProfile";
-import InstructorAccount from "./pages/Profile/InstructorAccount";
+const InstructorProfile = lazy(() => import("./pages/Profile/InstructorProfile"));
+const InstructorAccount = lazy(() => import("./pages/Profile/InstructorAccount"));
 
 // Lecture Management Imports (Refined)
-import AIAssistant from "./pages/AIAssistant/AIAssistant";
-import BlogPage from "./pages/Blog/BlogPage";
-import SingleBlogPage from "./pages/Blog/SingleBlogPage";
-import ForumPage from "./pages/Community/ForumPage";
-import CourseAnalytics from "./pages/admin/course/CourseAnalytics";
-import CoursePayout from "./pages/admin/course/CoursePayout";
-import CourseReviews from "./pages/admin/course/CourseReviews";
-import CourseStudent from "./pages/admin/course/CourseStudent";
-import EditLecture from "./pages/admin/lecture/EditLecture"; // Only EditLecture is needed
-import Cart from "./pages/cart/Cart";
-import Checkout from "./pages/cart/Checkout";
-import Contact from "./pages/Contact/Contact";
-import CourseDetailPage from "./pages/Courses/CourseDetailPage";
-import HomeCms from "./pages/pageCms/HomeCms";
-import PaymentSuccess from "./pages/Payment/PaymentSuccess";
-import InstructorProfilePage from "./pages/Profile/InstructorProfilePage";
-import SupAdmAllRevenueDetails from "./pages/superAdmin/SupAdmAllRevenueDetails";
-import SupAdmAllUser from "./pages/superAdmin/SupAdmAllUser";
-import SupAdmCourseAnalytics from "./pages/superAdmin/SupAdmCourseAnalytics";
-import SupAdmDashboard from "./pages/superAdmin/SupAdmDashboard";
-import SupAdmSubscriptions from "./pages/superAdmin/SupAdmSubscriptions";
-import CategoryManager from "./pages/admin/CategoryManager";
-import TopicSearchResultsPage from "./pages/Courses/TopicSearchResultsPage";
-import PaymentFailed from "./pages/Payment/PaymentFailed";
-import BlogImporter from "./pages/admin/blog/BlogImporter";
-import TopicPage from "./pages/student/TopicPage";
-import TopicManager from "./pages/admin/TopicManager";
-import DiscountManager from "./pages/admin/DiscountManager";
-import SubscribePage from "./pages/student/SubscribePage";
-import Terms from "./pages/Terms/Terms";
-import PersonalizeWizard from "./pages/student/PersonalizeWizard";
-import NotificationsPage from "./pages/Notifications/NotificationsPage";
-import PurchaseHistoryPage from "./pages/Payment/PurchaseHistoryPage";
-import PaymentMethodsPage from "./pages/Payment/PaymentMethodsPage";
-import CertificateManager from "./pages/admin/certificate/CertificateManager";
-import CertificateForm from "./pages/admin/certificate/CertificateForm";
-import AdminCertifications from "./pages/admin/certificate/AdminCertifications";
-import CertificationDetail from "./pages/student/CertificationDetail";
-import ExamEnvironment from "./pages/student/ExamEnvironment";
-import CareerRoadmap from "./pages/student/CareerRoadmap";
-import AlgorithmPlayground from "./pages/student/AlgorithmPlayground";
-import NearbyHub from "./pages/student/NearbyHub";
-import StudentAssignments from "./pages/student/StudentAssignments";
-import InstructorAssignments from "./pages/admin/course/InstructorAssignments";
+const AIAssistant = lazy(() => import("./pages/AIAssistant/AIAssistant"));
+const BlogPage = lazy(() => import("./pages/Blog/BlogPage"));
+const SingleBlogPage = lazy(() => import("./pages/Blog/SingleBlogPage"));
+const ForumPage = lazy(() => import("./pages/Community/ForumPage"));
+const CourseAnalytics = lazy(() => import("./pages/admin/course/CourseAnalytics"));
+const CoursePayout = lazy(() => import("./pages/admin/course/CoursePayout"));
+const CourseReviews = lazy(() => import("./pages/admin/course/CourseReviews"));
+const CourseStudent = lazy(() => import("./pages/admin/course/CourseStudent"));
+const EditLecture = lazy(() => import("./pages/admin/lecture/EditLecture"));
+const Cart = lazy(() => import("./pages/cart/Cart"));
+const Checkout = lazy(() => import("./pages/cart/Checkout"));
+const Contact = lazy(() => import("./pages/Contact/Contact"));
+const CourseDetailPage = lazy(() => import("./pages/Courses/CourseDetailPage"));
+const HomeCms = lazy(() => import("./pages/pageCms/HomeCms"));
+const PaymentSuccess = lazy(() => import("./pages/Payment/PaymentSuccess"));
+const InstructorProfilePage = lazy(() => import("./pages/Profile/InstructorProfilePage"));
+const SupAdmAllRevenueDetails = lazy(() => import("./pages/superAdmin/SupAdmAllRevenueDetails"));
+const SupAdmAllUser = lazy(() => import("./pages/superAdmin/SupAdmAllUser"));
+const SupAdmCourseAnalytics = lazy(() => import("./pages/superAdmin/SupAdmCourseAnalytics"));
+const SupAdmDashboard = lazy(() => import("./pages/superAdmin/SupAdmDashboard"));
+const SupAdmSubscriptions = lazy(() => import("./pages/superAdmin/SupAdmSubscriptions"));
+const CategoryManager = lazy(() => import("./pages/admin/CategoryManager"));
+const TopicSearchResultsPage = lazy(() => import("./pages/Courses/TopicSearchResultsPage"));
+const PaymentFailed = lazy(() => import("./pages/Payment/PaymentFailed"));
+const BlogImporter = lazy(() => import("./pages/admin/blog/BlogImporter"));
+const TopicPage = lazy(() => import("./pages/student/TopicPage"));
+const TopicManager = lazy(() => import("./pages/admin/TopicManager"));
+const DiscountManager = lazy(() => import("./pages/admin/DiscountManager"));
+const SubscribePage = lazy(() => import("./pages/student/SubscribePage"));
+const Terms = lazy(() => import("./pages/Terms/Terms"));
+const PersonalizeWizard = lazy(() => import("./pages/student/PersonalizeWizard"));
+const NotificationsPage = lazy(() => import("./pages/Notifications/NotificationsPage"));
+const PurchaseHistoryPage = lazy(() => import("./pages/Payment/PurchaseHistoryPage"));
+const PaymentMethodsPage = lazy(() => import("./pages/Payment/PaymentMethodsPage"));
+const CertificateManager = lazy(() => import("./pages/admin/certificate/CertificateManager"));
+const CertificateForm = lazy(() => import("./pages/admin/certificate/CertificateForm"));
+const AdminCertifications = lazy(() => import("./pages/admin/certificate/AdminCertifications"));
+const LocationAnalytics = lazy(() => import("./pages/admin/LocationAnalytics"));
+const CertificationDetail = lazy(() => import("./pages/student/CertificationDetail"));
+const ExamEnvironment = lazy(() => import("./pages/student/ExamEnvironment"));
+const CareerRoadmap = lazy(() => import("./pages/student/CareerRoadmap"));
+const AlgorithmPlayground = lazy(() => import("./pages/student/AlgorithmPlayground"));
+const NearbyHub = lazy(() => import("./pages/student/NearbyHub"));
+const StudentAssignments = lazy(() => import("./pages/student/StudentAssignments"));
+const InstructorAssignments = lazy(() => import("./pages/admin/course/InstructorAssignments"));
 
 // --- LAYOUT WRAPPER COMPONENT ---
 const MainLayoutWithScroll = () => (
@@ -596,6 +596,7 @@ const appRouter = createBrowserRouter([
           { path: "certificates", element: <CertificateManager /> },
           { path: "certificates/new", element: <CertificateForm mode="create" /> },
           { path: "certificates/:id/edit", element: <CertificateForm mode="edit" /> },
+          { path: "location-analytics", element: <LocationAnalytics /> },
         ],
       },
       {
@@ -620,6 +621,7 @@ const appRouter = createBrowserRouter([
           { path: "discounts", element: <DiscountManager /> },
           { path: "subscriptions", element: <SupAdmSubscriptions /> },
           { path: "certifications", element: <AdminCertifications /> },
+          { path: "location-analytics", element: <LocationAnalytics /> },
 
           // C. Profile and account settings routes for admin
           {

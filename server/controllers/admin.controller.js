@@ -319,7 +319,7 @@ export const updateCourseByAdmin = async (req, res) => {
         // Update the course with the fields from the request body.
         // `req.body` can contain any field from the courseSchema.
         const updatedCourse = await Course.findByIdAndUpdate(id, req.body, {
-            new: true, // Return the updated document
+            returnDocument: 'after', // Return the updated document
             runValidators: true, // Run schema validators on the update
         });
 

@@ -1,3 +1,4 @@
+import { Suspense } from 'react';
 import { Outlet } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
@@ -26,7 +27,13 @@ const MainLayout = () => {
       
       <main className='flex-grow'>
        
-        {isLoading ? <LoadingSpinner /> : <Outlet />}
+        {isLoading ? (
+          <LoadingSpinner />
+        ) : (
+          <Suspense fallback={<LoadingSpinner />}>
+            <Outlet />
+          </Suspense>
+        )}
       </main>
       
       {!isInstructor && <Footer />}

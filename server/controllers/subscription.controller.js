@@ -42,7 +42,7 @@ export const updatePlans = async (req, res) => {
       await SubscriptionPlan.findOneAndUpdate(
         { key },
         { priceNpr: Number(priceNpr), discountNpr: Number(discountNpr || 0) },
-        { new: true }
+        { returnDocument: 'after' }
       );
     }
 

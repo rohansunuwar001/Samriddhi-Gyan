@@ -346,7 +346,7 @@ export const getCourseDetailWithPurchaseStatus = async (req, res) => {
           await CoursePurchase.findOneAndUpdate(
             { userId, "courses.courseId": courseId },
             { status: "completed" },
-            { new: true }
+            { returnDocument: 'after' }
           ).catch(() => {}); // non-critical — don't block the response
         }
 

@@ -123,6 +123,10 @@ export const adminApi = apiSlice.injectEndpoints({
             }),
             invalidatesTags: ['PayoutSummary'],
         }),
+        getLocationStats: builder.query({
+            query: () => '/analytics/location-stats',
+            providesTags: ['PlatformAnalytics'],
+        }),
 
     }),
 });
@@ -144,4 +148,5 @@ export const {
     useGetRevenueDetailsQuery,
     useGetInstructorPayoutSummaryQuery,
     useCreateInstructorPayoutMutation,
+    useGetLocationStatsQuery,
 } = adminApi;

@@ -252,7 +252,7 @@ export const failOrder = async (purchaseId) => {
   const order = await CoursePurchase.findByIdAndUpdate(
     purchaseId,
     { status: "failed" },
-    { new: true },
+    { returnDocument: 'after' },
   );
   return order;
 };

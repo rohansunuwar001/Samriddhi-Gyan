@@ -17,6 +17,7 @@ import {
     Upload,
     Percent,
     CreditCard,
+    MapPin,
 } from 'lucide-react';
 
 // A single, reusable NavLink component for the dashboard.
@@ -64,6 +65,7 @@ const adminLinks = [
     { to: 'cms', icon: <FilePenLine size={20} />, label: 'CMS' },
     { to: 'discounts', icon: <Percent size={20} />, label: 'Discount CRUD' },
     { to: 'subscriptions', icon: <CreditCard size={20} />, label: 'Subscriptions' },
+    { to: 'location-analytics', icon: <MapPin size={20} />, label: 'Locations' },
 ];
 
 

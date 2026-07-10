@@ -21,7 +21,7 @@ import { extractCloudinaryPublicId } from "../helpers/cloudinary.helper.js";
  * Throws if email already taken.
  * Returns the created user (without password).
  */
-export const registerUser = async ({ name, email, password }) => {
+export const registerUser = async ({ name, email, password, locationDetails }) => {
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     const error = new Error("User already exists with this email.");
@@ -31,7 +31,12 @@ export const registerUser = async ({ name, email, password }) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const user = await User.create({ name, email, password: hashedPassword });
+  const user = await User.create({
+    name,
+    email,
+    password: hashedPassword,
+    locationDetails,
+  });
 
   // Return a safe version — never return the password hash
   return { _id: user._id, name: user.name, email: user.email, role: user.role };
@@ -201,7 +206,7 @@ export const updateUserInfo = async (userId, fields) => {
   const updatedUser = await User.findByIdAndUpdate(
     userId,
     { $set: updateData },
-    { new: true, runValidators: true }
+    { returnDocument: 'after', runValidators: true }
   ).select("-password");
 
   return updatedUser;

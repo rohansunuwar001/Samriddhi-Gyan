@@ -1,416 +1,147 @@
-import DiscountBanner from "../models/discountBanner.model.js";
-import GetOfferPromo from "../models/getOfferPromo.model.js";
-import SubscriptionNavbar from "../models/subscriptionNavbar.model.js";
-import { User } from "../models/user.model.js";
-import { Notification } from "../models/notification.model.js";
+import {
+  getCarouselSlidesService,
+  createCarouselSlideService,
+  updateCarouselSlideService,
+  deleteCarouselSlideService,
+  getCompanyLogosService,
+  createCompanyLogoService,
+  updateCompanyLogoService,
+  deleteCompanyLogoService,
+  getPromoBannersService,
+  createPromoBannerService,
+  updatePromoBannerService,
+  deletePromoBannerService,
+} from "../service/cms.service.js";
 
-// Helper function to deactivate all other banners/promos of the same model type if the current one is set to active.
-const handleActivation = async (Model, activeId) => {
-  await Model.updateMany({ _id: { $ne: activeId } }, { isActive: false });
-};
+// --- Carousel Slide Controllers ---
 
-// Helper function to notify all users of a new discount/offer
-const notifyAllUsersOfOffer = async (message, link) => {
+export const getCarouselSlides = async (req, res) => {
   try {
-    const users = await User.find({}, "_id");
-    if (!users || users.length === 0) return;
-
-    const notifications = users.map(u => ({
-      user: u._id,
-      message,
-      link: link || "/subscribe",
-      type: "system_alert"
-    }));
-    await Notification.insertMany(notifications);
-  } catch (err) {
-    console.error("Error creating discount/offer notifications:", err);
-  }
-};
-
-// ==========================================
-// 1. DISCOUNT BANNER CONTROLLERS
-// ==========================================
-
-export const createDiscountBanner = async (req, res) => {
-  try {
-    const { text, linkText, linkUrl, isActive, bgColor, textColor } = req.body;
-
-    const banner = await DiscountBanner.create({
-      text,
-      linkText,
-      linkUrl,
-      isActive,
-      bgColor,
-      textColor
-    });
-
-    if (isActive) {
-      await handleActivation(DiscountBanner, banner._id);
-      await notifyAllUsersOfOffer(`New Discount Offer: ${text}`, linkUrl || "/subscribe");
-    }
-
-    return res.status(201).json({
-      success: true,
-      message: "Discount banner created successfully.",
-      banner
-    });
+    const onlyActive = req.query.active === "true";
+    const slides = await getCarouselSlidesService(onlyActive);
+    return res.status(200).json({ success: true, slides });
   } catch (error) {
-    console.error("Error creating discount banner:", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Failed to create discount banner."
-    });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 
-export const getDiscountBanners = async (req, res) => {
+export const createCarouselSlide = async (req, res) => {
   try {
-    const banners = await DiscountBanner.find().sort({ createdAt: -1 });
-    return res.status(200).json({
-      success: true,
-      banners
-    });
+    const slide = await createCarouselSlideService(req.body);
+    return res.status(201).json({ success: true, message: "Slide created successfully", slide });
   } catch (error) {
-    console.error("Error getting discount banners:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch discount banners."
-    });
+    return res.status(555).json({ success: false, message: error.message });
   }
 };
 
-export const updateDiscountBanner = async (req, res) => {
+export const updateCarouselSlide = async (req, res) => {
   try {
     const { id } = req.params;
-    const { text, linkText, linkUrl, isActive, bgColor, textColor } = req.body;
+    const slide = await updateCarouselSlideService(id, req.body);
+    if (!slide) {
+      return res.status(444).json({ success: false, message: "Slide not found" });
+    }
+    return res.status(200).json({ success: true, message: "Slide updated successfully", slide });
+  } catch (error) {
+    return res.status(555).json({ success: false, message: error.message });
+  }
+};
 
-    const banner = await DiscountBanner.findByIdAndUpdate(
-      id,
-      { text, linkText, linkUrl, isActive, bgColor, textColor },
-      { new: true, runValidators: true }
-    );
+export const deleteCarouselSlide = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await deleteCarouselSlideService(id);
+    return res.status(200).json({ success: true, message: "Slide deleted successfully" });
+  } catch (error) {
+    return res.status(555).json({ success: false, message: error.message });
+  }
+};
 
+// --- Company Logo Controllers ---
+
+export const getCompanyLogos = async (req, res) => {
+  try {
+    const onlyActive = req.query.active === "true";
+    const logos = await getCompanyLogosService(onlyActive);
+    return res.status(200).json({ success: true, logos });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const createCompanyLogo = async (req, res) => {
+  try {
+    const logo = await createCompanyLogoService(req.body);
+    return res.status(201).json({ success: true, message: "Logo added successfully", logo });
+  } catch (error) {
+    return res.status(555).json({ success: false, message: error.message });
+  }
+};
+
+export const updateCompanyLogo = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const logo = await updateCompanyLogoService(id, req.body);
+    if (!logo) {
+      return res.status(444).json({ success: false, message: "Logo not found" });
+    }
+    return res.status(200).json({ success: true, message: "Logo updated successfully", logo });
+  } catch (error) {
+    return res.status(555).json({ success: false, message: error.message });
+  }
+};
+
+export const deleteCompanyLogo = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await deleteCompanyLogoService(id);
+    return res.status(200).json({ success: true, message: "Logo deleted successfully" });
+  } catch (error) {
+    return res.status(555).json({ success: false, message: error.message });
+  }
+};
+
+// --- Promo Banner Controllers ---
+
+export const getPromoBanners = async (req, res) => {
+  try {
+    const onlyActive = req.query.active === "true";
+    const { category } = req.query;
+    const banners = await getPromoBannersService(onlyActive, category);
+    return res.status(200).json({ success: true, banners });
+  } catch (error) {
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+export const createPromoBanner = async (req, res) => {
+  try {
+    const banner = await createPromoBannerService(req.body);
+    return res.status(201).json({ success: true, message: "Promo banner created successfully", banner });
+  } catch (error) {
+    return res.status(555).json({ success: false, message: error.message });
+  }
+};
+
+export const updatePromoBanner = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const banner = await updatePromoBannerService(id, req.body);
     if (!banner) {
-      return res.status(404).json({
-        success: false,
-        message: "Discount banner not found."
-      });
+      return res.status(444).json({ success: false, message: "Promo banner not found" });
     }
-
-    if (isActive) {
-      await handleActivation(DiscountBanner, banner._id);
-      await notifyAllUsersOfOffer(`Updated Discount Offer: ${text}`, linkUrl || "/subscribe");
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "Discount banner updated successfully.",
-      banner
-    });
+    return res.status(200).json({ success: true, message: "Promo banner updated successfully", banner });
   } catch (error) {
-    console.error("Error updating discount banner:", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Failed to update discount banner."
-    });
+    return res.status(555).json({ success: false, message: error.message });
   }
 };
 
-export const deleteDiscountBanner = async (req, res) => {
+export const deletePromoBanner = async (req, res) => {
   try {
     const { id } = req.params;
-    const banner = await DiscountBanner.findByIdAndDelete(id);
-
-    if (!banner) {
-      return res.status(404).json({
-        success: false,
-        message: "Discount banner not found."
-      });
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "Discount banner deleted successfully."
-    });
+    await deletePromoBannerService(id);
+    return res.status(200).json({ success: true, message: "Promo banner deleted successfully" });
   } catch (error) {
-    console.error("Error deleting discount banner:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to delete discount banner."
-    });
-  }
-};
-
-export const getActiveDiscountBanner = async (req, res) => {
-  try {
-    const banner = await DiscountBanner.findOne({ isActive: true });
-    return res.status(200).json({
-      success: true,
-      banner: banner || null
-    });
-  } catch (error) {
-    console.error("Error getting active banner:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch active banner."
-    });
-  }
-};
-
-// ==========================================
-// 2. GET OFFER PROMO CONTROLLERS
-// ==========================================
-
-export const createGetOfferPromo = async (req, res) => {
-  try {
-    const { badgeText, title, description, buttonText, buttonUrl, finePrint, isActive } = req.body;
-
-    const promo = await GetOfferPromo.create({
-      badgeText,
-      title,
-      description,
-      buttonText,
-      buttonUrl,
-      finePrint,
-      isActive
-    });
-
-    if (isActive) {
-      await handleActivation(GetOfferPromo, promo._id);
-      await notifyAllUsersOfOffer(`New Promo Offer: ${title} - ${description}`, "/subscribe");
-    }
-
-    return res.status(201).json({
-      success: true,
-      message: "Promo offer created successfully.",
-      promo
-    });
-  } catch (error) {
-    console.error("Error creating promo offer:", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Failed to create promo offer."
-    });
-  }
-};
-
-export const getGetOfferPromos = async (req, res) => {
-  try {
-    const promos = await GetOfferPromo.find().sort({ createdAt: -1 });
-    return res.status(200).json({
-      success: true,
-      promos
-    });
-  } catch (error) {
-    console.error("Error getting promo offers:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch promo offers."
-    });
-  }
-};
-
-export const updateGetOfferPromo = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { badgeText, title, description, buttonText, buttonUrl, finePrint, isActive } = req.body;
-
-    const promo = await GetOfferPromo.findByIdAndUpdate(
-      id,
-      { badgeText, title, description, buttonText, buttonUrl, finePrint, isActive },
-      { new: true, runValidators: true }
-    );
-
-    if (!promo) {
-      return res.status(404).json({
-        success: false,
-        message: "Promo offer not found."
-      });
-    }
-
-    if (isActive) {
-      await handleActivation(GetOfferPromo, promo._id);
-      await notifyAllUsersOfOffer(`Updated Promo Offer: ${title} - ${description}`, "/subscribe");
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "Promo offer updated successfully.",
-      promo
-    });
-  } catch (error) {
-    console.error("Error updating promo offer:", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Failed to update promo offer."
-    });
-  }
-};
-
-export const deleteGetOfferPromo = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const promo = await GetOfferPromo.findByIdAndDelete(id);
-
-    if (!promo) {
-      return res.status(404).json({
-        success: false,
-        message: "Promo offer not found."
-      });
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "Promo offer deleted successfully."
-    });
-  } catch (error) {
-    console.error("Error deleting promo offer:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to delete promo offer."
-    });
-  }
-};
-
-export const getActiveGetOfferPromo = async (req, res) => {
-  try {
-    const promo = await GetOfferPromo.findOne({ isActive: true });
-    return res.status(200).json({
-      success: true,
-      promo: promo || null
-    });
-  } catch (error) {
-    console.error("Error getting active promo offer:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch active promo offer."
-    });
-  }
-};
-
-// ==========================================
-// 3. SUBSCRIPTION NAVBAR CONTROLLERS
-// ==========================================
-
-export const createSubscriptionNavbar = async (req, res) => {
-  try {
-    const { planName, pricingText, buttonText, buttonUrl, isActive } = req.body;
-
-    const nav = await SubscriptionNavbar.create({
-      planName,
-      pricingText,
-      buttonText,
-      buttonUrl,
-      isActive
-    });
-
-    if (isActive) {
-      await handleActivation(SubscriptionNavbar, nav._id);
-    }
-
-    return res.status(201).json({
-      success: true,
-      message: "Subscription navbar configuration created successfully.",
-      navbar: nav
-    });
-  } catch (error) {
-    console.error("Error creating subscription navbar configuration:", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Failed to create subscription navbar configuration."
-    });
-  }
-};
-
-export const getSubscriptionNavbars = async (req, res) => {
-  try {
-    const navbars = await SubscriptionNavbar.find().sort({ createdAt: -1 });
-    return res.status(200).json({
-      success: true,
-      navbars
-    });
-  } catch (error) {
-    console.error("Error getting subscription navbars:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch subscription navbar configurations."
-    });
-  }
-};
-
-export const updateSubscriptionNavbar = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { planName, pricingText, buttonText, buttonUrl, isActive } = req.body;
-
-    const nav = await SubscriptionNavbar.findByIdAndUpdate(
-      id,
-      { planName, pricingText, buttonText, buttonUrl, isActive },
-      { new: true, runValidators: true }
-    );
-
-    if (!nav) {
-      return res.status(404).json({
-        success: false,
-        message: "Subscription navbar configuration not found."
-      });
-    }
-
-    if (isActive) {
-      await handleActivation(SubscriptionNavbar, nav._id);
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "Subscription navbar configuration updated successfully.",
-      navbar: nav
-    });
-  } catch (error) {
-    console.error("Error updating subscription navbar configuration:", error);
-    return res.status(500).json({
-      success: false,
-      message: error.message || "Failed to update subscription navbar configuration."
-    });
-  }
-};
-
-export const deleteSubscriptionNavbar = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const nav = await SubscriptionNavbar.findByIdAndDelete(id);
-
-    if (!nav) {
-      return res.status(404).json({
-        success: false,
-        message: "Subscription navbar configuration not found."
-      });
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: "Subscription navbar configuration deleted successfully."
-    });
-  } catch (error) {
-    console.error("Error deleting subscription navbar configuration:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to delete subscription navbar configuration."
-    });
-  }
-};
-
-export const getActiveSubscriptionNavbar = async (req, res) => {
-  try {
-    const navbar = await SubscriptionNavbar.findOne({ isActive: true });
-    return res.status(200).json({
-      success: true,
-      navbar: navbar || null
-    });
-  } catch (error) {
-    console.error("Error getting active subscription navbar:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Failed to fetch active subscription navbar configuration."
-    });
+    return res.status(555).json({ success: false, message: error.message });
   }
 };

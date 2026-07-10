@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import connectDB from "./database/db.js";
 import app from "./app.js";
 import { scheduleOrderCleanup } from "./scripts/cleanupPendingOrders.script.js";
+import { cleanupOrphanedUploads } from "./utils/cleanupOrphanedUploads.js";
+import { cleanupStaleHLS } from "./utils/cleanupStaleHLS.js";
 
 
 dotenv.config({});
@@ -45,6 +47,8 @@ io.on("connection", (socket) => {
 const startServer = async () => {
   try {
     await connectDB();
+    cleanupOrphanedUploads();
+    cleanupStaleHLS();
     scheduleOrderCleanup();
     server.listen(PORT, () => {
       console.log(`Server listening at port ${PORT}`);

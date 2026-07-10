@@ -107,6 +107,108 @@ export const cmsApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["SubscriptionNavbar"],
     }),
+
+    // ------------------------------------------
+    // 4. CAROUSEL SLIDE ENDPOINTS
+    // ------------------------------------------
+    getCarouselSlides: builder.query({
+      query: (params) => ({
+        url: "/cms/carousel",
+        params
+      }),
+      providesTags: ["CarouselSlide"],
+    }),
+    createCarouselSlide: builder.mutation({
+      query: (data) => ({
+        url: "/cms/carousel",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["CarouselSlide"],
+    }),
+    updateCarouselSlide: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `/cms/carousel/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["CarouselSlide"],
+    }),
+    deleteCarouselSlide: builder.mutation({
+      query: (id) => ({
+        url: `/cms/carousel/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["CarouselSlide"],
+    }),
+
+    // ------------------------------------------
+    // 5. COMPANY LOGO ENDPOINTS
+    // ------------------------------------------
+    getCompanyLogos: builder.query({
+      query: (params) => ({
+        url: "/cms/logos",
+        params
+      }),
+      providesTags: ["CompanyLogo"],
+    }),
+    createCompanyLogo: builder.mutation({
+      query: (data) => ({
+        url: "/cms/logos",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["CompanyLogo"],
+    }),
+    updateCompanyLogo: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `/cms/logos/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["CompanyLogo"],
+    }),
+    deleteCompanyLogo: builder.mutation({
+      query: (id) => ({
+        url: `/cms/logos/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["CompanyLogo"],
+    }),
+
+    // ------------------------------------------
+    // 6. PROMO BANNER ENDPOINTS
+    // ------------------------------------------
+    getPromoBanners: builder.query({
+      query: (params) => ({
+        url: "/cms/promo",
+        params
+      }),
+      providesTags: ["PromoBanner"],
+    }),
+    createPromoBanner: builder.mutation({
+      query: (data) => ({
+        url: "/cms/promo",
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["PromoBanner"],
+    }),
+    updatePromoBanner: builder.mutation({
+      query: ({ id, ...data }) => ({
+        url: `/cms/promo/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["PromoBanner"],
+    }),
+    deletePromoBanner: builder.mutation({
+      query: (id) => ({
+        url: `/cms/promo/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["PromoBanner"],
+    }),
   }),
 });
 
@@ -131,4 +233,22 @@ export const {
   useCreateSubscriptionNavbarMutation,
   useUpdateSubscriptionNavbarMutation,
   useDeleteSubscriptionNavbarMutation,
+
+  // Carousel Slide hooks
+  useGetCarouselSlidesQuery,
+  useCreateCarouselSlideMutation,
+  useUpdateCarouselSlideMutation,
+  useDeleteCarouselSlideMutation,
+
+  // Company Logo hooks
+  useGetCompanyLogosQuery,
+  useCreateCompanyLogoMutation,
+  useUpdateCompanyLogoMutation,
+  useDeleteCompanyLogoMutation,
+
+  // Promo Banner hooks
+  useGetPromoBannersQuery,
+  useCreatePromoBannerMutation,
+  useUpdatePromoBannerMutation,
+  useDeletePromoBannerMutation,
 } = cmsApi;

@@ -81,6 +81,7 @@ const userSchema = new mongoose.Schema({
         showCoursesTaking: { type: Boolean, default: true },
     },
     locationDetails: {
+        continent: { type: String, default: "" },
         country: { type: String, default: "" },
         city: { type: String, default: "" },
         formattedAddress: { type: String, default: "" },

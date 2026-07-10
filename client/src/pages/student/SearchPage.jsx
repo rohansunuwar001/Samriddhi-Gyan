@@ -20,6 +20,15 @@ const SearchPage = () => {
     sortByPrice
   });
 
+  React.useEffect(() => {
+    if (data?.courses && data.courses.length > 0) {
+      const primaryCategory = data.courses[0].category;
+      if (primaryCategory) {
+        localStorage.setItem("last_interacted_category", primaryCategory);
+      }
+    }
+  }, [data]);
+
   const isEmpty = !isLoading && !isError && data?.courses?.length === 0;
 
   const handleFilterChange = useCallback((categories, price) => {

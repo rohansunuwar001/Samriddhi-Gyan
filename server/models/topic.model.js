@@ -54,7 +54,7 @@ const topicSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-topicSchema.index({ slug: 1 });
+// index on slug is already created by unique: true field definition above.
 
 const Topic = mongoose.model('Topic', topicSchema);
 

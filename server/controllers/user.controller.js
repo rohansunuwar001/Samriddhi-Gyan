@@ -40,7 +40,19 @@ export const register = async (req, res) => {
     validateEmail(email);
     validatePassword(password);
 
-    await registerUser({ name, email, password }); // ← service
+    // Extract location details from cookie or req.body
+    let locationDetails = null;
+    if (req.body.locationDetails) {
+      locationDetails = req.body.locationDetails;
+    } else if (req.cookies?.user_location) {
+      try {
+        locationDetails = JSON.parse(req.cookies.user_location);
+      } catch (err) {
+        console.warn("Failed to parse user_location cookie in register controller:", err.message);
+      }
+    }
+
+    await registerUser({ name, email, password, locationDetails }); // ← service
 
     return res.status(201).json({
       success: true,

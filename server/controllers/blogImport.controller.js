@@ -36,7 +36,7 @@ export const importBlogData = async (req, res) => {
       const doc = await Category.findOneAndUpdate(
         { slug },
         { name: name.trim(), slug },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
+        { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
       );
       categoryNameToId.set(name.trim(), doc._id);
       results.categories += 1;
@@ -54,7 +54,7 @@ export const importBlogData = async (req, res) => {
       const doc = await Author.findOneAndUpdate(
         { slug },
         { name: author.name.trim(), slug, avatar: author.avatar.trim(), bio: author.bio || "" },
-        { upsert: true, new: true, setDefaultsOnInsert: true }
+        { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
       );
       authorNameToId.set(author.name.trim(), doc._id);
       results.authors += 1;

@@ -33,6 +33,12 @@ const CourseDetailPage = () => {
         }
     }, [courseId, trackCourseView]);
 
+    useEffect(() => {
+        if (course && course.category) {
+            localStorage.setItem("last_interacted_category", course.category);
+        }
+    }, [course]);
+
     if (isLoading) {
         return <LoadingSpinner />;
     }

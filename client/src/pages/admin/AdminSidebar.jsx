@@ -14,6 +14,7 @@ import {
   ChevronRight,
   BookOpen,
   Award,
+  MapPin,
 } from "lucide-react";
 
 const AdminSidebar = () => {
@@ -68,10 +69,11 @@ const AdminSidebar = () => {
       id: "performance",
       label: "Performance",
       icon: <BarChart3 className="w-5 h-5" />,
-      paths: ["/admin/analytics", "/admin/revenue"],
+      paths: ["/admin/analytics", "/admin/revenue", "/admin/location-analytics"],
       subItems: [
         { to: "/admin/analytics", label: "Analytics", icon: <BarChart3 className="w-4 h-4" /> },
-        { to: "/admin/revenue", label: "Revenue", icon: <DollarSign className="w-4 h-4" /> }
+        { to: "/admin/revenue", label: "Revenue", icon: <DollarSign className="w-4 h-4" /> },
+        { to: "/admin/location-analytics", label: "Locations", icon: <MapPin className="w-4 h-4" /> }
       ]
     },
     {
