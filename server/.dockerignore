@@ -1,0 +1,21 @@
+# Exclude heavy directories that Docker doesn't need to copy
+node_modules
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+
+# Exclude local file uploads (these are mounted as Docker volumes)
+uploads/
+public/hls/
+
+# Exclude environment files (pass them via docker-compose env_file)
+.env
+.env.*
+
+# Exclude scratch and dev-only files
+scratch/
+*.md
+
+# Exclude git history
+.git
+.gitignore

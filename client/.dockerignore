@@ -1,0 +1,14 @@
+# Exclude heavy directories
+node_modules
+npm-debug.log
+
+# Exclude build output (not needed during build image creation)
+dist/
+
+# Exclude environment files
+.env
+.env.*
+
+# Exclude git history
+.git
+.gitignore

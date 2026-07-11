@@ -1,0 +1,27 @@
+# Root-level .dockerignore
+# Prevents Docker from including these in the build context
+
+# Git history
+.git
+.gitignore
+.github
+
+# Editor config
+.vscode
+
+# Scratch files
+scratch/
+
+# Documentation
+*.md
+README.md
+
+# Environment files (each service has its own)
+.env
+.env.*
+
+# Node modules (each service installs its own)
+**/node_modules
+
+# Build outputs
+**/dist
