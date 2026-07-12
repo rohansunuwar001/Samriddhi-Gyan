@@ -361,7 +361,7 @@ export const updateLecture = async (req, res) => {
     }
 
     const lecture = await Lecture.findByIdAndUpdate(lectureId, update, {
-      returnDocument: 'after',
+      new: true,
     });
     if (!lecture) {
       return res
@@ -470,7 +470,7 @@ export const toggleCaptionsDisable = async (req, res) => {
     const lecture = await Lecture.findByIdAndUpdate(
       lectureId,
       { captionsDisabled: disabled === true || disabled === "true" },
-      { returnDocument: 'after' }
+      { new: true }
     );
 
     if (!lecture) {

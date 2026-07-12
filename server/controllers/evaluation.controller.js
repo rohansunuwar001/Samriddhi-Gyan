@@ -1,4 +1,5 @@
 import { parseCodeToAST, validateAST } from "../utils/astValidator.js";
+import { detectLanguageWithGemini } from "../utils/geminiClient.js";
 import { checkPlagiarism } from "../utils/plagiarismChecker.js";
 
 // Pre-seeded library of mock student submissions for LSH comparison fallback
@@ -27,22 +28,32 @@ const DEFAULT_REFERENCE_DOCS = [
  */
 export const validateCodeAST = async (req, res) => {
   try {
-    const { code, requiredStructures } = req.body;
+    const { code, requiredStructures, language } = req.body;
 
     if (!code || typeof code !== "string") {
       return res.status(400).json({
         success: false,
-        message: "JavaScript code string is required."
+        message: "Code string is required."
       });
     }
 
     const structures = Array.isArray(requiredStructures) ? requiredStructures : [];
 
+    let detectedLanguage = language || "javascript";
+    try {
+      const geminiLang = await detectLanguageWithGemini(code);
+      if (geminiLang) {
+        detectedLanguage = geminiLang;
+      }
+    } catch (err) {
+      console.warn("Gemini language detection failed, fallback used:", err.message);
+    }
+
     let ast = null;
     let parseError = null;
 
     try {
-      ast = parseCodeToAST(code);
+      ast = parseCodeToAST(code, detectedLanguage);
     } catch (err) {
       parseError = err.message;
     }
@@ -52,6 +63,7 @@ export const validateCodeAST = async (req, res) => {
         success: true,
         isValid: false,
         ast: null,
+        language: detectedLanguage,
         error: `Syntax Parsing Error: ${parseError}`
       });
     }
@@ -62,6 +74,7 @@ export const validateCodeAST = async (req, res) => {
       success: true,
       isValid,
       ast,
+      language: detectedLanguage,
       error: null
     });
   } catch (error) {
@@ -111,6 +124,53 @@ export const checkPlagiarismLSH = async (req, res) => {
     return res.status(500).json({
       success: false,
       message: "Server error during LSH plagiarism evaluation."
+    });
+  }
+};
+
+/**
+ * Performs pair-wise plagiarism checking across a batch of uploaded files
+ * @route POST /api/v1/evaluation/cross-compare-plagiarism
+ */
+export const crossComparePlagiarism = async (req, res) => {
+  try {
+    const { documents, threshold } = req.body;
+
+    if (!Array.isArray(documents) || documents.length < 2) {
+      return res.status(400).json({
+        success: false,
+        message: "At least 2 documents are required for cross-comparison."
+      });
+    }
+
+    const checkThreshold = typeof threshold === "number" ? threshold : 0.5;
+    const results = [];
+
+    // Compare each document pair-wise
+    for (let i = 0; i < documents.length; i++) {
+      const docA = documents[i];
+      const otherDocs = documents
+        .filter((_, idx) => idx !== i)
+        .map(d => ({ id: d.id, text: d.text }));
+
+      const matches = checkPlagiarism(docA.text, otherDocs, checkThreshold);
+
+      results.push({
+        id: docA.id,
+        matches
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      results,
+      threshold: checkThreshold
+    });
+  } catch (error) {
+    console.error("crossComparePlagiarism error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error during cross-plagiarism comparison."
     });
   }
 };

@@ -103,3 +103,51 @@ export const generateGeminiResponse = async (promptText, context = {}) => {
     return "I encountered an error processing your request. Please check back later.";
   }
 };
+
+export const detectLanguageWithGemini = async (code) => {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey || apiKey === "your_api_key_here" || apiKey === "") {
+    console.warn("GEMINI_API_KEY is not set or empty. Falling back to local heuristic detection.");
+    return null;
+  }
+
+  try {
+    const genAI = new GoogleGenerativeAI(apiKey);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash",
+    });
+
+    const prompt = `
+    Analyze the following source code and determine its programming language.
+    Return ONLY a single word in lowercase containing the language identifier.
+    
+    Choose from one of these values if matched:
+    - javascript
+    - python
+    - java
+    - cpp
+    - go
+    - ruby
+    - cobol
+    - php
+    - sql
+    - html
+    
+    If the language is not in the list, choose another short lowercase identifier that fits (e.g. rust, swift, kotlin, csharp, scala, perl, typescript, css, shell).
+    Do NOT include any code block tags, quotes, explanations, or whitespace. Just the identifier.
+
+    Code to analyze:
+    ${code}
+    
+    Response:
+    `;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text().trim().toLowerCase();
+  } catch (error) {
+    console.error("detectLanguageWithGemini error:", error);
+    return null;
+  }
+};

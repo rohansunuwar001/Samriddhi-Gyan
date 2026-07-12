@@ -9,7 +9,7 @@
 // never call Notification.create() directly, because that only saves to DB
 // and skips the real-time socket emit entirely.
 
-import { io, userSocketMap } from '../index.js';
+import { io, userSocketMap } from '../utils/socket.js';
 import { Notification } from '../models/notification.model.js';
 
 /**

@@ -15,6 +15,7 @@ import {
   BookOpen,
   Award,
   MapPin,
+  Wrench,
 } from "lucide-react";
 
 const AdminSidebar = () => {
@@ -85,6 +86,15 @@ const AdminSidebar = () => {
         { to: "/admin/cms", label: "CMS Pages", icon: <FilePenLine className="w-4 h-4" /> },
         { to: "/admin/blog-import", label: "Blog Import", icon: <Upload className="w-4 h-4" /> },
         { to: "/admin/discounts", label: "Discount CRUD", icon: <Percent className="w-4 h-4" /> }
+      ]
+    },
+    {
+      id: "tools",
+      label: "Tools",
+      icon: <Wrench className="w-5 h-5" />,
+      paths: ["/admin/playground"],
+      subItems: [
+        { to: "/admin/playground", label: "Algorithms Playground", icon: <Wrench className="w-4 h-4" /> }
       ]
     }
   ];

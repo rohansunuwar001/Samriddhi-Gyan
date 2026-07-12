@@ -59,7 +59,7 @@ const articleSchema = new mongoose.Schema({
 
 // Auto-generate a unique slug from the title using the shared slugify utility.
 // This keeps slug formatting identical across courses, articles, authors, and categories.
-articleSchema.pre("validate", async function (next) {
+articleSchema.pre("validate", async function () {
   if (this.isNew || this.isModified("title")) {
     const baseSlug = slugify(this.title);
     let candidate = baseSlug;
@@ -79,8 +79,6 @@ articleSchema.pre("validate", async function (next) {
 
     this.slug = candidate;
   }
-
-  next();
 });
 
 const Article = mongoose.model('Article', articleSchema);

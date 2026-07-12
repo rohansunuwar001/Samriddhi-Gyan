@@ -18,6 +18,13 @@ export const evaluationApi = apiSlice.injectEndpoints({
         body,
       }),
     }),
+    crossComparePlagiarism: builder.mutation({
+      query: (body) => ({
+        url: "/evaluation/cross-compare-plagiarism",
+        method: "POST",
+        body,
+      }),
+    }),
   }),
   overrideExisting: false,
 });
@@ -25,4 +32,5 @@ export const evaluationApi = apiSlice.injectEndpoints({
 export const {
   useValidateCodeASTMutation,
   useCheckPlagiarismLSHMutation,
+  useCrossComparePlagiarismMutation,
 } = evaluationApi;

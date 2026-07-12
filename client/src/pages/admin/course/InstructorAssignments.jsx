@@ -26,6 +26,10 @@ import {
   useGetAssignmentSubmissionsQuery,
   useGradeSubmissionMutation
 } from "@/features/api/assignmentApi";
+import {
+  useGetCreatorCourseQuery,
+  useGetCourseByIdQuery
+} from "@/features/api/courseApi";
 
 const AVAILABLE_AST_STRUCTURES = [
   { value: "VariableDeclaration", label: "Variable Declarations (const/let/var)" },
@@ -36,8 +40,22 @@ const AVAILABLE_AST_STRUCTURES = [
 ];
 
 const InstructorAssignments = () => {
-  const { courseId } = useParams();
-  const { data: assignmentsData, isLoading: isAsmsLoading, refetch: refetchAsms } = useGetCourseAssignmentsQuery(courseId);
+  const params = useParams();
+  const [selectedCourseId, setSelectedCourseId] = useState(params.courseId || "");
+  const [selectedSectionId, setSelectedSectionId] = useState("");
+
+  const { data: creatorCoursesData, isLoading: isCoursesLoading } = useGetCreatorCourseQuery(undefined, {
+    skip: !!params.courseId
+  });
+
+  const { data: assignmentsData, isLoading: isAsmsLoading, refetch: refetchAsms } = useGetCourseAssignmentsQuery(selectedCourseId, {
+    skip: !selectedCourseId
+  });
+
+  const { data: courseDetailData } = useGetCourseByIdQuery(selectedCourseId, {
+    skip: !selectedCourseId
+  });
+
   const [createAssignment, { isLoading: isCreating }] = useCreateAssignmentMutation();
   const [gradeSubmission, { isLoading: isGrading }] = useGradeSubmissionMutation();
 
@@ -64,6 +82,13 @@ const InstructorAssignments = () => {
   const assignments = assignmentsData?.assignments || [];
   const submissions = subsData?.submissions || [];
 
+  const handleCourseChange = (e) => {
+    setSelectedCourseId(e.target.value);
+    setActiveAssignmentId("");
+    setSelectedSub(null);
+    setSelectedSectionId("");
+  };
+
   const handleRequiredAstToggle = (value) => {
     if (newRequiredAst.includes(value)) {
       setNewRequiredAst(newRequiredAst.filter((v) => v !== value));
@@ -74,6 +99,10 @@ const InstructorAssignments = () => {
 
   const handleCreateAssignment = async (e) => {
     e.preventDefault();
+    if (!selectedCourseId) {
+      toast.error("Please select a course first.");
+      return;
+    }
     if (!newTitle.trim() || !newDesc.trim() || !newDeadline) {
       toast.error("Please fill in title, description and deadline.");
       return;
@@ -84,7 +113,8 @@ const InstructorAssignments = () => {
         title: newTitle.trim(),
         description: newDesc.trim(),
         type: newType,
-        courseId,
+        courseId: selectedCourseId,
+        sectionId: selectedSectionId || null,
         requiredStructures: newType === "coding" ? newRequiredAst : [],
         maxPoints: Number(newMaxPoints) || 100,
         deadline: new Date(newDeadline).toISOString()
@@ -97,6 +127,7 @@ const InstructorAssignments = () => {
         setNewDeadline("");
         setNewMaxPoints(100);
         setNewRequiredAst([]);
+        setSelectedSectionId("");
         refetchAsms();
       } else {
         toast.error(res.message || "Failed to create assignment.");
@@ -137,84 +168,133 @@ const InstructorAssignments = () => {
       {/* Header */}
       <div className="flex justify-between items-center flex-wrap gap-4 border-b border-slate-200 pb-5 mb-8">
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-900">Assignment Manager</h1>
-          <p className="text-sm text-slate-500">Create course tasks and inspect/grade student submissions with AST and LSH duplication tools.</p>
+          <h1 className="text-4xl font-light text-slate-900">Assignment Manager</h1>
+          <p className="text-base font-light text-slate-500 mt-1">Create course tasks and inspect/grade student submissions with AST and LSH duplication tools.</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      {/* Course Selector (visible only in global context) */}
+      {!params.courseId && (
+        <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm mb-8 space-y-3">
+          <label className="text-lg font-light text-slate-700 block">Select Course to Manage Assignments</label>
+          {isCoursesLoading ? (
+            <div className="flex items-center gap-2 text-sm font-light text-slate-500">
+              <Loader2 className="h-4 w-4 animate-spin text-purple-600" />
+              <span>Loading your courses...</span>
+            </div>
+          ) : (
+            <select
+              value={selectedCourseId}
+              onChange={handleCourseChange}
+              className="w-full max-w-md h-10 px-3 border border-slate-200 rounded-lg text-slate-800 bg-white outline-none focus:border-purple-600 text-sm font-light"
+            >
+              <option value="">-- Choose a Course --</option>
+              {creatorCoursesData?.courses?.map((course) => (
+                <option key={course._id} value={course._id}>
+                  {course.title}
+                </option>
+              ))}
+            </select>
+          )}
+        </div>
+      )}
+
+      {!selectedCourseId ? (
+        <div className="bg-white border border-slate-200 py-16 rounded-xl text-center space-y-3 shadow-sm">
+          <BookOpen className="h-10 w-10 text-slate-350 mx-auto" />
+          <h3 className="text-xl font-light text-slate-750">No Course Selected</h3>
+          <p className="text-sm font-light text-slate-400 max-w-xs mx-auto">Please choose one of your courses from the selector above to start managing assignments.</p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start animate-fade-in">
         {/* Left Column: Create & List Assignments */}
         <div className="lg:col-span-4 space-y-6">
           {/* Assignment Creation Form */}
           <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm space-y-4">
-            <h2 className="text-base font-bold text-slate-800 flex items-center gap-1.5">
-              <Plus className="h-4.5 w-4.5 text-purple-600" />
+            <h2 className="text-2xl font-light text-slate-800 flex items-center gap-1.5">
+              <Plus className="h-5 w-5 text-purple-600 shrink-0" />
               Create New Assignment
             </h2>
-            <form onSubmit={handleCreateAssignment} className="space-y-4 text-xs">
+            <form onSubmit={handleCreateAssignment} className="space-y-4 text-sm font-light">
               <div className="space-y-1">
-                <label className="font-semibold text-slate-700">Assignment Title</label>
+                <label className="text-sm font-light text-slate-700">Assignment Title</label>
                 <input
                   type="text"
                   placeholder="e.g. JavaScript Arrays Exercise"
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
-                  className="w-full h-9 px-3 border border-slate-250 rounded-lg text-slate-800 bg-white outline-none focus:border-purple-600"
+                  className="w-full h-9 px-3 border border-slate-250 rounded-lg text-slate-800 bg-white outline-none focus:border-purple-600 text-sm font-light"
                 />
               </div>
 
               <div className="space-y-1">
-                <label className="font-semibold text-slate-700">Task Description</label>
+                <label className="text-sm font-light text-slate-700">Task Description</label>
                 <textarea
                   placeholder="Explain instructions, parameters, or guidelines..."
                   value={newDesc}
                   onChange={(e) => setNewDesc(e.target.value)}
-                  className="w-full h-20 p-3 border border-slate-250 rounded-lg text-slate-800 bg-white outline-none focus:border-purple-600 resize-none"
+                  className="w-full h-20 p-3 border border-slate-250 rounded-lg text-slate-800 bg-white outline-none focus:border-purple-600 resize-none text-sm font-light"
                 />
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-sm font-light text-slate-700">Target Section (Assign To)</label>
+                <select
+                  value={selectedSectionId}
+                  onChange={(e) => setSelectedSectionId(e.target.value)}
+                  className="w-full h-9 px-2 border border-slate-250 rounded-lg text-slate-800 bg-white focus:border-purple-600 outline-none text-sm font-light"
+                >
+                  <option value="">Course-wide (As Whole / No Section)</option>
+                  {courseDetailData?.course?.sections?.map((sec) => (
+                    <option key={sec._id} value={sec._id}>
+                      Section: {sec.title}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">Task Type</label>
+                  <label className="text-sm font-light text-slate-700">Task Type</label>
                   <select
                     value={newType}
                     onChange={(e) => setNewType(e.target.value)}
-                    className="w-full h-9 px-2 border border-slate-250 rounded-lg text-slate-800 bg-white focus:border-purple-600 outline-none"
+                    className="w-full h-9 px-2 border border-slate-250 rounded-lg text-slate-800 bg-white focus:border-purple-600 outline-none text-sm font-light"
                   >
                     <option value="coding">Coding File</option>
                     <option value="essay">Essay Document</option>
                   </select>
                 </div>
                 <div className="space-y-1">
-                  <label className="font-semibold text-slate-700">Max Points</label>
+                  <label className="text-sm font-light text-slate-700">Max Points</label>
                   <input
                     type="number"
                     value={newMaxPoints}
                     onChange={(e) => setNewMaxPoints(e.target.value)}
-                    className="w-full h-9 px-3 border border-slate-250 rounded-lg text-slate-800 bg-white outline-none focus:border-purple-600"
+                    className="w-full h-9 px-3 border border-slate-250 rounded-lg text-slate-800 bg-white outline-none focus:border-purple-600 text-sm font-light"
                   />
                 </div>
               </div>
 
               <div className="space-y-1">
-                <label className="font-semibold text-slate-700">Deadline</label>
+                <label className="text-sm font-light text-slate-700">Deadline</label>
                 <input
                   type="datetime-local"
                   value={newDeadline}
                   onChange={(e) => setNewDeadline(e.target.value)}
-                  className="w-full h-9 px-3 border border-slate-250 rounded-lg text-slate-800 bg-white outline-none focus:border-purple-600"
+                  className="w-full h-9 px-3 border border-slate-250 rounded-lg text-slate-800 bg-white outline-none focus:border-purple-600 text-sm font-light"
                 />
               </div>
 
               {/* AST checklist if coding is selected */}
               {newType === "coding" && (
                 <div className="space-y-2 border-t border-slate-100 pt-3">
-                  <label className="font-semibold text-slate-700 block mb-1">
+                  <label className="text-sm font-light text-slate-700 block mb-1">
                     Required AST Syntax Rules
                   </label>
                   <div className="space-y-1.5">
                     {AVAILABLE_AST_STRUCTURES.map((struct) => (
-                      <label key={struct.value} className="flex items-center gap-2 text-slate-600">
+                      <label key={struct.value} className="flex items-center gap-2 text-slate-600 text-xs font-light">
                         <input
                           type="checkbox"
                           checked={newRequiredAst.includes(struct.value)}
@@ -231,11 +311,11 @@ const InstructorAssignments = () => {
               <Button
                 type="submit"
                 disabled={isCreating}
-                className="w-full h-9 bg-purple-700 text-white hover:bg-purple-800 font-semibold text-xs flex justify-center items-center gap-1.5 shadow-sm"
+                className="w-full h-9 bg-purple-700 text-white hover:bg-purple-800 font-light text-sm flex justify-center items-center gap-1.5 shadow-sm"
               >
                 {isCreating ? (
                   <>
-                    <Loader2 className="h-3 w-3 animate-spin" />
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
                     Saving Task...
                   </>
                 ) : (
@@ -250,8 +330,8 @@ const InstructorAssignments = () => {
 
           {/* Assignments List */}
           <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm space-y-4">
-            <h2 className="text-base font-bold text-slate-800 flex items-center gap-1.5">
-              <Calendar className="h-4.5 w-4.5 text-slate-500" />
+            <h2 className="text-2xl font-light text-slate-800 flex items-center gap-1.5">
+              <Calendar className="h-5 w-5 text-slate-500 shrink-0" />
               Existing Assignments
             </h2>
             {isAsmsLoading ? (
@@ -259,7 +339,7 @@ const InstructorAssignments = () => {
                 <Loader2 className="h-5 w-5 animate-spin text-purple-600" />
               </div>
             ) : assignments.length === 0 ? (
-              <p className="text-xs text-slate-400 text-center py-4">No assignments created yet.</p>
+              <p className="text-sm font-light text-slate-450 text-center py-4">No assignments created yet.</p>
             ) : (
               <div className="space-y-2">
                 {assignments.map((asm) => (
@@ -276,8 +356,8 @@ const InstructorAssignments = () => {
                     }`}
                   >
                     <div className="flex justify-between items-center text-xs">
-                      <span className="font-bold text-slate-800 truncate max-w-[180px]">{asm.title}</span>
-                      <span className="uppercase text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-100 border text-slate-500">
+                      <span className="text-sm font-light text-slate-800 truncate max-w-[180px]">{asm.title}</span>
+                      <span className="uppercase text-[10px] font-light px-1.5 py-0.5 rounded bg-slate-100 border text-slate-500">
                         {asm.type}
                       </span>
                     </div>
@@ -291,8 +371,8 @@ const InstructorAssignments = () => {
         {/* Center Column: Submissions List */}
         <div className="lg:col-span-4">
           <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm space-y-4 min-h-[500px]">
-            <h2 className="text-base font-bold text-slate-800 flex items-center gap-1.5 border-b border-slate-100 pb-3">
-              <Users className="h-4.5 w-4.5 text-slate-500" />
+            <h2 className="text-2xl font-light text-slate-800 flex items-center gap-1.5 border-b border-slate-100 pb-3">
+              <Users className="h-5 w-5 text-slate-500 shrink-0" />
               Student Submissions
             </h2>
 
@@ -319,18 +399,18 @@ const InstructorAssignments = () => {
                       }`}
                     >
                       <div className="space-y-1">
-                        <span className="font-bold text-slate-800 block">
+                        <span className="text-sm font-light text-slate-800 block">
                           {sub.studentId?.name || "Student"}
                         </span>
-                        <span className="text-[10px] text-slate-400">
+                        <span className="text-[10px] text-slate-400 font-light">
                           {new Date(sub.createdAt).toLocaleDateString()}
                         </span>
                       </div>
                       <Badge
                         className={
                           sub.status === "graded"
-                            ? "bg-emerald-100 text-emerald-800 border-emerald-200 text-[9px]"
-                            : "bg-amber-100 text-amber-800 border-amber-200 text-[9px]"
+                            ? "bg-emerald-100 text-emerald-800 border-emerald-200 text-[9px] font-light"
+                            : "bg-amber-100 text-amber-800 border-amber-200 text-[9px] font-light"
                         }
                       >
                         {sub.status === "graded" ? `Graded: ${sub.grade}` : "Pending"}
@@ -340,8 +420,8 @@ const InstructorAssignments = () => {
                 </div>
               )
             ) : (
-              <div className="text-center py-24 text-slate-400 text-xs space-y-2">
-                <Info className="h-6 w-6 text-slate-300 mx-auto" />
+              <div className="text-center py-24 text-slate-400 text-sm font-light space-y-2">
+                <Info className="h-6 w-6 text-slate-350 mx-auto" />
                 <p>Select an assignment on the left to load student submissions.</p>
               </div>
             )}
@@ -351,17 +431,17 @@ const InstructorAssignments = () => {
         {/* Right Column: Inspect and Grade Dashboard */}
         <div className="lg:col-span-4">
           <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm space-y-5 min-h-[500px]">
-            <h2 className="text-base font-bold text-slate-800 flex items-center gap-1.5 border-b border-slate-100 pb-3">
-              <Eye className="h-4.5 w-4.5 text-slate-600" />
+            <h2 className="text-2xl font-light text-slate-800 flex items-center gap-1.5 border-b border-slate-100 pb-3">
+              <Eye className="h-5 w-5 text-slate-600 shrink-0" />
               Inspection Dashboard
             </h2>
 
             {selectedSub ? (
               <div className="space-y-5">
                 {/* Student details */}
-                <div className="text-xs space-y-1 bg-slate-50 p-3.5 rounded-lg border border-slate-150">
-                  <span className="text-[9px] uppercase font-bold text-purple-600">Student Profile</span>
-                  <div className="font-bold text-slate-800 text-sm">
+                <div className="text-xs space-y-1 bg-slate-50 p-3.5 rounded-lg border border-slate-150 font-light">
+                  <span className="text-[9px] uppercase font-light text-purple-600 block">Student Profile</span>
+                  <div className="text-base font-light text-slate-800">
                     {selectedSub.studentId?.name || "Student"}
                   </div>
                   <div className="text-slate-500">{selectedSub.studentId?.email}</div>
@@ -373,7 +453,7 @@ const InstructorAssignments = () => {
                 {/* AST Status (if coding task) */}
                 {selectedSub.astValid !== null && (
                   <div
-                    className={`p-3.5 rounded-lg text-xs flex gap-2.5 border ${
+                    className={`p-3.5 rounded-lg text-xs flex gap-2.5 border font-light ${
                       selectedSub.astValid
                         ? "bg-emerald-50 border-emerald-200 text-emerald-800"
                         : "bg-amber-50 border-amber-200 text-amber-800"
@@ -383,16 +463,16 @@ const InstructorAssignments = () => {
                       <>
                         <CheckCircle2 className="h-4.5 w-4.5 text-emerald-600 shrink-0" />
                         <div>
-                          <span className="font-bold block">AST Validation Passed</span>
-                          <p className="text-[10px] mt-0.5">Code satisfies structural prerequisites.</p>
+                          <span className="font-normal block text-sm">AST Validation Passed</span>
+                          <p className="text-[11px] font-light mt-0.5">Code satisfies structural prerequisites.</p>
                         </div>
                       </>
                     ) : (
                       <>
                         <XCircle className="h-4.5 w-4.5 text-rose-600 shrink-0" />
                         <div>
-                          <span className="font-bold block">AST Validation Failed</span>
-                          <p className="text-[10px] mt-0.5">Missing one or more required syntax structures.</p>
+                          <span className="font-normal block text-sm">AST Validation Failed</span>
+                          <p className="text-[11px] font-light mt-0.5">Missing one or more required syntax structures.</p>
                         </div>
                       </>
                     )}
@@ -401,16 +481,16 @@ const InstructorAssignments = () => {
 
                 {/* Plagiarism checks */}
                 {selectedSub.plagiarismMatches && selectedSub.plagiarismMatches.length > 0 ? (
-                  <div className="space-y-2 border border-rose-200 bg-rose-50/10 p-3.5 rounded-lg text-xs">
-                    <span className="font-bold text-rose-600 flex items-center gap-1">
+                  <div className="space-y-2 border border-rose-200 bg-rose-50/10 p-3.5 rounded-lg text-xs font-light">
+                    <span className="font-normal text-rose-600 flex items-center gap-1 text-sm">
                       <AlertTriangle className="h-4 w-4 shrink-0" />
                       ⚠️ LSH Duplication Flags Found
                     </span>
                     <div className="space-y-2 mt-1">
                       {selectedSub.plagiarismMatches.map((match, idx) => (
-                        <div key={idx} className="flex justify-between items-center bg-white p-2 rounded border border-rose-100">
-                          <span className="font-semibold text-slate-700 truncate max-w-[140px]">{match.id}</span>
-                          <Badge className="bg-rose-100 text-rose-800 border-rose-200 font-extrabold text-[9px]">
+                        <div key={idx} className="flex justify-between items-center bg-white p-2 rounded border border-rose-100 font-light">
+                          <span className="font-light text-slate-700 truncate max-w-[140px]">{match.id}</span>
+                          <Badge className="bg-rose-100 text-rose-800 border-rose-200 font-light text-[9px]">
                             {(match.similarity * 100).toFixed(0)}% Match
                           </Badge>
                         </div>
@@ -419,11 +499,11 @@ const InstructorAssignments = () => {
                   </div>
                 ) : (
                   selectedSub.status === "graded" && (
-                    <div className="p-3.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs flex gap-2">
+                    <div className="p-3.5 rounded-lg border border-emerald-200 bg-emerald-50 text-emerald-800 text-xs font-light flex gap-2">
                       <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
                       <div>
-                        <span className="font-bold block">LSH Plagiarism Clear</span>
-                        <p className="text-[10px]">No duplicates exceeding the match threshold.</p>
+                        <span className="font-normal block text-sm">LSH Plagiarism Clear</span>
+                        <p className="text-[11px] font-light">No duplicates exceeding the match threshold.</p>
                       </div>
                     </div>
                   )
@@ -431,8 +511,8 @@ const InstructorAssignments = () => {
 
                 {/* Extracted file text block */}
                 {selectedSub.extractedText && (
-                  <div className="space-y-1.5 text-xs">
-                    <span className="font-bold text-slate-700 block">Extracted Text Content</span>
+                  <div className="space-y-1.5 text-sm font-light">
+                    <span className="text-sm font-light text-slate-750 block">Extracted Text Content</span>
                     <div className="border rounded-lg bg-slate-950 text-indigo-300 p-3 max-h-36 overflow-y-auto font-mono text-[10px] leading-relaxed whitespace-pre-wrap">
                       {selectedSub.extractedText}
                     </div>
@@ -440,28 +520,28 @@ const InstructorAssignments = () => {
                 )}
 
                 {/* Grading Form */}
-                <form onSubmit={handleGradeSubmission} className="space-y-4 border-t border-slate-100 pt-4 text-xs">
+                <form onSubmit={handleGradeSubmission} className="space-y-4 border-t border-slate-100 pt-4 text-sm font-light">
                   <div className="grid grid-cols-2 gap-3.5 items-end">
                     <div className="space-y-1">
-                      <label className="font-semibold text-slate-700">Enter Grade</label>
+                      <label className="text-sm font-light text-slate-700">Enter Grade</label>
                       <input
                         type="number"
                         placeholder="e.g. 85"
                         value={grade}
                         onChange={(e) => setGrade(e.target.value)}
-                        className="w-full h-9 px-3 border border-slate-200 rounded-lg text-slate-800 bg-white outline-none focus:border-purple-600"
+                        className="w-full h-9 px-3 border border-slate-200 rounded-lg text-slate-800 bg-white outline-none focus:border-purple-600 text-sm font-light"
                         required
                       />
                     </div>
                     <div className="space-y-1">
-                      <label className="font-semibold text-slate-700 flex justify-between">
+                      <label className="text-sm font-light text-slate-700 flex justify-between">
                         LSH Plag Limit
-                        <span className="text-purple-600 font-bold">{(plagiarismThreshold * 100).toFixed(0)}%</span>
+                        <span className="text-purple-600 font-medium">{(plagiarismThreshold * 100).toFixed(0)}%</span>
                       </label>
                       <select
                         value={plagiarismThreshold}
                         onChange={(e) => setPlagiarismThreshold(Number(e.target.value))}
-                        className="w-full h-9 px-2 border border-slate-200 rounded-lg text-slate-800 bg-white focus:border-purple-600 outline-none"
+                        className="w-full h-9 px-2 border border-slate-200 rounded-lg text-slate-800 bg-white focus:border-purple-600 outline-none text-sm font-light"
                       >
                         <option value="0.2">20% (Sensitive)</option>
                         <option value="0.4">40% (Standard)</option>
@@ -471,19 +551,19 @@ const InstructorAssignments = () => {
                   </div>
 
                   <div className="space-y-1">
-                    <label className="font-semibold text-slate-700">Feedback Comments</label>
+                    <label className="text-sm font-light text-slate-700">Feedback Comments</label>
                     <textarea
                       placeholder="Input feedback, formatting suggestions, or notes..."
                       value={feedback}
                       onChange={(e) => setFeedback(e.target.value)}
-                      className="w-full h-16 p-3 border border-slate-200 rounded-lg text-slate-800 bg-white outline-none focus:border-purple-600 resize-none"
+                      className="w-full h-16 p-3 border border-slate-200 rounded-lg text-slate-800 bg-white outline-none focus:border-purple-600 resize-none text-sm font-light"
                     />
                   </div>
 
                   <Button
                     type="submit"
                     disabled={isGrading}
-                    className="w-full h-9 bg-purple-700 text-white font-semibold text-xs rounded-lg hover:bg-purple-800 flex items-center justify-center gap-1.5 shadow-sm"
+                    className="w-full h-9 bg-purple-700 text-white font-light text-sm rounded-lg hover:bg-purple-800 flex items-center justify-center gap-1.5 shadow-sm"
                   >
                     {isGrading ? (
                       <>
@@ -497,7 +577,7 @@ const InstructorAssignments = () => {
                 </form>
               </div>
             ) : (
-              <div className="text-center py-24 text-slate-400 text-xs space-y-2">
+              <div className="text-center py-24 text-slate-400 text-sm font-light space-y-2">
                 <Info className="h-8 w-8 text-slate-300 mx-auto" />
                 <p>Select a student submission to evaluate, inspect text, and run plagiarism/AST checks.</p>
               </div>
@@ -505,6 +585,7 @@ const InstructorAssignments = () => {
           </div>
         </div>
       </div>
+      )}
     </div>
   );
 };

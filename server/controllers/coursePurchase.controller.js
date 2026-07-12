@@ -340,13 +340,11 @@ export const getCourseDetailWithPurchaseStatus = async (req, res) => {
         course.isEnrolled     = true;
         course.purchaseStatus = "completed";
 
-        // ── If we have a stale purchase doc, fix it now ───────────────────
-        // This self-heals the data so future checks work correctly
         if (!purchase && isDirectlyEnrolled) {
           await CoursePurchase.findOneAndUpdate(
             { userId, "courses.courseId": courseId },
             { status: "completed" },
-            { returnDocument: 'after' }
+            { new: true }
           ).catch(() => {}); // non-critical — don't block the response
         }
 

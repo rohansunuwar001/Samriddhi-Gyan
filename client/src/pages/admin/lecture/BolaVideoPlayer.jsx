@@ -11,12 +11,19 @@ import {
   FaCompress,
   FaBackwardStep,
   FaForwardStep,
+  FaClosedCaptioning,
 } from "react-icons/fa6";
 
 const SEGMENT_DURATION_SECONDS = 6; // must match ffmpeg -hls_time value
 const MAX_BUFFER_SECONDS = 30; // must match hls.js maxBufferLength below
 
-const BolaVideoPlayer = ({ src, onPlay, onEnded }) => {
+const DEFAULT_SUBTITLES = [
+  { start: 1.0, end: 2.5, text: "Hi everyone" },
+  { start: 4.0, end: 6.5, text: "Today we will learn React" },
+  { start: 8.5, end: 11.8, text: "It is a popular frontend library" },
+];
+
+const BolaVideoPlayer = ({ src, subtitles, onPlay, onEnded, offlineMode = false }) => {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const hlsRef = useRef(null);
@@ -33,6 +40,7 @@ const BolaVideoPlayer = ({ src, onPlay, onEnded }) => {
   const [volume, setVolume] = useState(1);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [subtitlesEnabled, setSubtitlesEnabled] = useState(true);
 
   // BOLA & HLS states
   const [currentLevelLabel, setCurrentLevelLabel] = useState("");
@@ -55,7 +63,8 @@ const BolaVideoPlayer = ({ src, onPlay, onEnded }) => {
     hasEndedRef.current = false;
     if (!src || !videoRef.current) return;
 
-    const isHls = src.toLowerCase().includes(".m3u8");
+    // Treat blob: playlist URLs (offline mode) or .m3u8 URLs as HLS
+    const isHls = src.toLowerCase().includes(".m3u8") || (offlineMode && src.startsWith("blob:"));
 
     if (!isHls) {
       // Stream raw video directly (full quality)
@@ -268,6 +277,18 @@ const BolaVideoPlayer = ({ src, onPlay, onEnded }) => {
         }}
       />
 
+      {/* Subtitles Overlay */}
+      {subtitlesEnabled && (() => {
+        const active = (subtitles || DEFAULT_SUBTITLES).find(
+          (s) => currentTime >= s.start && currentTime <= s.end
+        );
+        return active ? (
+          <div className="absolute bottom-16 left-1/2 -translate-x-1/2 bg-black/75 px-4 py-1.5 rounded-sm text-sm font-sans tracking-wide text-white text-center pointer-events-none select-none max-w-[80%] z-10 transition-all font-normal">
+            {active.text}
+          </div>
+        ) : null;
+      })()}
+
       {/* YouTube Style Overlay UI Control Strip */}
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-3 pt-8 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
         {/* Playback Progress Scrubber Track */}
@@ -327,6 +348,17 @@ const BolaVideoPlayer = ({ src, onPlay, onEnded }) => {
           </div>
 
           <div className="flex items-center space-x-4 relative">
+            {/* CC Subtitles Button */}
+            <button
+              onClick={() => setSubtitlesEnabled(!subtitlesEnabled)}
+              className={`hover:text-red-500 transition-colors flex items-center ${
+                subtitlesEnabled ? "text-red-500" : "text-gray-400"
+              }`}
+              title="Toggle Subtitles"
+            >
+              <FaClosedCaptioning className="text-xl" />
+            </button>
+
             {/* Gear Configuration Button (Stable, No Rotation) */}
             <button
               onClick={() => setShowSettings(!showSettings)}

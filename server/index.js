@@ -1,48 +1,22 @@
 import http from "http";
-import { Server } from "socket.io";
 import dotenv from "dotenv";
 import connectDB from "./database/db.js";
 import app from "./app.js";
 import { scheduleOrderCleanup } from "./scripts/cleanupPendingOrders.script.js";
 import { cleanupOrphanedUploads } from "./utils/cleanupOrphanedUploads.js";
 import { cleanupStaleHLS } from "./utils/cleanupStaleHLS.js";
+import { initSocket, io, userSocketMap } from "./utils/socket.js";
 
 
 dotenv.config({});
 
 const server = http.createServer(app);
 
-export const io = new Server(server, {
-  cors: {
-    origin: [process.env.FRONTEND_URL],
-    credentials: true,
-    methods: ["GET", "POST"],
-  },
-});
+initSocket(server);
+
+export { io, userSocketMap };
 
 const PORT = process.env.PORT || 10000;
-
-// Socket.IO logic
-export const userSocketMap = {};
-
-io.on("connection", (socket) => {
-  console.log(`Socket connected: ${socket.id}`);
-  const userId = socket.handshake.query.userId;
-  if (userId && userId !== "undefined") {
-    userSocketMap[userId] = socket.id;
-    console.log(`User connected: ${userId}`);
-  }
-  socket.on("disconnect", () => {
-    console.log(`Socket disconnected: ${socket.id}`);
-    const userIdToRemove = Object.keys(userSocketMap).find(
-      (key) => userSocketMap[key] === socket.id
-    );
-    if (userIdToRemove) {
-      delete userSocketMap[userIdToRemove];
-      console.log(`User disconnected: ${userIdToRemove}`);
-    }
-  });
-});
 
 const startServer = async () => {
   try {

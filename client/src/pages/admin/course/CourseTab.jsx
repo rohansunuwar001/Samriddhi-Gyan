@@ -19,6 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useEditCourseMutation, useGetCourseByIdQuery, usePublishCourseMutation } from "@/features/api/courseApi";
+import { useGetAllCategoriesQuery } from "@/features/api/categoryApi";
 
 import { Loader2 } from "lucide-react";
 import React, { useEffect, useState } from "react";
@@ -64,6 +65,25 @@ const CourseTab = () => {
 
   const [editCourse, { data, isLoading, isSuccess, error }] =
     useEditCourseMutation();
+
+  const { data: categoryData } = useGetAllCategoriesQuery();
+  const dbCategories = categoryData?.categories || [];
+  const defaultCategories = [
+    "Next JS",
+    "Data Science",
+    "Frontend Development",
+    "Fullstack Development",
+    "MERN Stack Development",
+    "Javascript",
+    "Python",
+    "Docker",
+    "MongoDB",
+    "HTML"
+  ];
+  const categoryNames = Array.from(new Set([
+    ...dbCategories.map(c => c.name),
+    ...defaultCategories
+  ]));
 
   const changeEventHandler = (e) => {
     const { name, value } = e.target;
@@ -178,22 +198,11 @@ const CourseTab = () => {
                 <SelectContent>
                   <SelectGroup>
                     <SelectLabel>Category</SelectLabel>
-                    <SelectItem value="Next JS">Next JS</SelectItem>
-                    <SelectItem value="Data Science">Data Science</SelectItem>
-                    <SelectItem value="Frontend Development">
-                      Frontend Development
-                    </SelectItem>
-                    <SelectItem value="Fullstack Development">
-                      Fullstack Development
-                    </SelectItem>
-                    <SelectItem value="MERN Stack Development">
-                      MERN Stack Development
-                    </SelectItem>
-                    <SelectItem value="Javascript">Javascript</SelectItem>
-                    <SelectItem value="Python">Python</SelectItem>
-                    <SelectItem value="Docker">Docker</SelectItem>
-                    <SelectItem value="MongoDB">MongoDB</SelectItem>
-                    <SelectItem value="HTML">HTML</SelectItem>
+                    {categoryNames.map((name) => (
+                      <SelectItem key={name} value={name}>
+                        {name}
+                      </SelectItem>
+                    ))}
                   </SelectGroup>
                 </SelectContent>
               </Select>

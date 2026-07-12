@@ -18,6 +18,7 @@ import PropTypes from "prop-types";
 import { toast } from "sonner";
 import { useGetCourseByIdQuery } from "@/features/api/courseApi";
 import { useUpdateLectureMutation, useDeleteLectureMutation } from "@/features/api/lectureApi";
+import { Link } from "react-router-dom";
 import { BASE_URL } from "@/app/constant";
 import BolaVideoPlayer from "./BolaVideoPlayer";
 
@@ -653,6 +654,13 @@ const LectureItem = ({ lecture, courseId, index }) => {
                     >
                       Edit Content
                     </button>
+                    <span className="text-gray-300 text-[10px] select-none">|</span>
+                    <Link
+                      to={`/instructor/course/${courseId}/lecture/${lecture._id}`}
+                      className="text-[#5624d0] hover:underline text-[11px] font-normal"
+                    >
+                      Subtitles & Aligner
+                    </Link>
                   </div>
                   <span className="text-[10px] text-[#6a6f73] block mt-1">
                     Duration: {formatDuration(lecture.durationInSeconds)}

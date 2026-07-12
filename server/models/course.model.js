@@ -205,7 +205,7 @@ const courseSchema = new mongoose.Schema(
 
 // Step 1: Auto-generate a unique slug from the title whenever it changes.
 // Runs before the embedding hook below so the slug is available if needed elsewhere.
-courseSchema.pre("save", async function (next) {
+courseSchema.pre("save", async function () {
   if (this.isNew || this.isModified("title")) {
     const baseSlug = slugify(this.title);
     let candidate = baseSlug;
@@ -221,11 +221,10 @@ courseSchema.pre("save", async function (next) {
 
     this.slug = candidate;
   }
-  next();
 });
 
 // Step 1.5: Auto-tag topics using Aho-Corasick Multi-Pattern Search
-courseSchema.pre("save", async function (next) {
+courseSchema.pre("save", async function () {
   if (this.isNew || this.isModified("title") || this.isModified("subtitle") || this.isModified("description")) {
     try {
       const CategoryModel = mongoose.model("Category");
@@ -254,11 +253,10 @@ courseSchema.pre("save", async function (next) {
       console.warn("Aho-Corasick auto-tagging failed:", err.message);
     }
   }
-  next();
 });
 
 // Step 2: Add Mongoose middleware to automatically generate embeddings
-courseSchema.pre("save", async function (next) {
+courseSchema.pre("save", async function () {
   // Check if the document is new or if any of the key text fields were modified.
   const fieldsToMonitor = [
     'title',
@@ -302,9 +300,6 @@ courseSchema.pre("save", async function (next) {
       console.error(`ERROR: Failed to generate embedding for course "${this.title}".`, error);
     }
   }
-
-  // Continue with the save operation
-  next();
 });
 
 export const Course = mongoose.model("Course", courseSchema);

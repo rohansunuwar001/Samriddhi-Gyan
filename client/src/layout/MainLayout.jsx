@@ -37,7 +37,7 @@ const MainLayout = () => {
         )}
       </main>
       
-      {!isInstructor && <Footer />}
+      {showBanner && <Footer />}
       <CookieConsentBanner />
     </div>
   );

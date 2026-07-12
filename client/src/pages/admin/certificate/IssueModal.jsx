@@ -57,11 +57,11 @@ const IssueModal = ({ templateId, onClose }) => {
         {/* Header */}
         <div className="flex items-center gap-3 p-6 border-b">
           <div className="p-2 bg-amber-100 rounded-xl">
-            <Award className="text-amber-600" size={22} />
+            <Award className="text-amber-600 shrink-0" size={22} />
           </div>
           <div>
-            <h2 className="font-bold text-gray-800 text-lg">Issue Certificates</h2>
-            <p className="text-sm text-gray-500">Select enrolled students to issue</p>
+            <h2 className="text-2xl font-light text-gray-800">Issue Certificates</h2>
+            <p className="text-sm font-light text-gray-500">Select enrolled students to issue</p>
           </div>
           <button onClick={onClose} className="ml-auto text-gray-400 hover:text-gray-600 transition-colors">
             <XCircle size={22} />
@@ -75,7 +75,7 @@ const IssueModal = ({ templateId, onClose }) => {
               <Loader2 className="animate-spin text-amber-500" size={32} />
             </div>
           ) : students.length === 0 ? (
-            <div className="text-center py-12 text-gray-400">
+            <div className="text-center py-12 text-gray-455 font-light">
               <Users size={40} className="mx-auto mb-2 opacity-40" />
               <p>No enrolled students found.</p>
             </div>
@@ -84,7 +84,7 @@ const IssueModal = ({ templateId, onClose }) => {
               {/* Select all */}
               <button
                 onClick={toggleAll}
-                className="text-sm text-amber-600 hover:underline mb-3 font-medium"
+                className="text-sm text-amber-600 hover:underline mb-3 font-light"
               >
                 {selected.size === students.filter((s) => !alreadyIssued.has(s._id)).length
                   ? "Deselect All"
@@ -97,7 +97,7 @@ const IssueModal = ({ templateId, onClose }) => {
                   return (
                     <label
                       key={s._id}
-                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer ${
+                      className={`flex items-center gap-3 p-3 rounded-xl border transition-all cursor-pointer font-light ${
                         certified
                           ? "bg-gray-50 border-gray-200 opacity-60 cursor-not-allowed"
                           : selected.has(s._id)
@@ -115,16 +115,16 @@ const IssueModal = ({ templateId, onClose }) => {
                       {s.photoUrl ? (
                         <img src={s.photoUrl} alt="" className="w-8 h-8 rounded-full object-cover" />
                       ) : (
-                        <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-bold text-sm">
+                        <div className="w-8 h-8 rounded-full bg-amber-100 flex items-center justify-center text-amber-700 font-light text-sm">
                           {s.name?.[0]?.toUpperCase()}
                         </div>
                       )}
                       <div className="flex-1 min-w-0">
-                        <p className="font-medium text-gray-800 text-sm truncate">{s.name}</p>
-                        <p className="text-xs text-gray-400 truncate">{s.email}</p>
+                        <p className="text-sm font-light text-gray-800 truncate">{s.name}</p>
+                        <p className="text-xs font-light text-gray-400 truncate">{s.email}</p>
                       </div>
                       {certified && (
-                        <span className="flex items-center gap-1 text-xs text-green-600 shrink-0">
+                        <span className="flex items-center gap-1 text-xs text-green-600 shrink-0 font-light">
                           <CheckCircle2 size={14} /> Issued
                         </span>
                       )}
@@ -138,20 +138,20 @@ const IssueModal = ({ templateId, onClose }) => {
 
         {/* Footer */}
         <div className="p-6 border-t flex items-center justify-between gap-3">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm font-light text-gray-500">
             {selected.size} student{selected.size !== 1 ? "s" : ""} selected
           </p>
           <div className="flex gap-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-medium transition-colors"
+              className="px-4 py-2 rounded-xl border border-gray-200 text-gray-600 hover:bg-gray-50 text-sm font-light transition-colors"
             >
               Cancel
             </button>
             <button
               onClick={handleIssue}
               disabled={issuing || selected.size === 0}
-              className="flex items-center gap-2 px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-semibold transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-sm font-light transition-colors disabled:opacity-50"
             >
               {issuing ? (
                 <Loader2 size={15} className="animate-spin" />

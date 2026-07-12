@@ -98,12 +98,24 @@ router.put(
     { name: "courseThumbnail", maxCount: 1 },
     { name: "coursePromoVideo", maxCount: 1 }
   ]),
+  // Multer error handler: when multer calls next(err), Express routes to this
+  // 4-argument handler. Without it, Express forwards the error into editCourse
+  // as (err, req, res) — making `next` the real `res`, hence "next is not a function".
+  (err, req, res, next) => {
+    if (err) {
+      console.error("Multer upload error on PUT /:courseId:", err.message);
+      return res.status(400).json({ success: false, message: `File upload error: ${err.message}` });
+    }
+    next();
+  },
   editCourse
 );
 router.post(  "/:courseId/bulk-upload", isAuthenticated, uploadBulk.array("videos", 10), bulkUploadCourseVideos);
 // router.patch( "/:courseId", isAuthenticated, togglePublishCourse);
-router.delete("/:courseId", isAuthenticated, removeCourse);
+// NOTE: More-specific sub-path routes MUST come before /:courseId or Express
+// will treat the sub-path segment (e.g. "promo-video") as the courseId value.
 router.delete("/:courseId/promo-video", isAuthenticated, deletePromoVideo);
+router.delete("/:courseId", isAuthenticated, removeCourse);
 
 // Explicit publish route (in case frontend uses this URL pattern)
 router.patch("/:courseId/publish", isAuthenticated, togglePublishCourse);

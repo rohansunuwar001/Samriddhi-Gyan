@@ -41,7 +41,6 @@ const SIDEBAR_SECTIONS = [
     items: [
       { id: "film-edit", label: "Film & edit" },
       { id: "curriculum", label: "Curriculum" },
-      { id: "assignments", label: "Assignments" },
       { id: "captions", label: "Captions (optional)" },
       { id: "accessibility", label: "Accessibility (optional)" },
     ],

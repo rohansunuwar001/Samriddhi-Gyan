@@ -28,6 +28,7 @@ export const apiSlice = createApi({
         'User', 'Course', 'Section', 'Lecture', 'Wishlist',
         'Cart', 'Order', 'Purchase', 'AdminData', 'Instructor',
         'Notification', 'CourseAnalytics','AdminStats', 'Question', 'Reminder', 'Flashcard',
+        'CourseProgress',
         'DiscountBanner', 'GetOfferPromo', 'SubscriptionNavbar', 'subscriptionPlans', 'subscriptions', 'PayoutSummary', 'PaymentMethods',
         'Certificate', 'CertStudents', 'CertIssued', 'CertReceived', 'CourseDetail',
         'CertificationIssuer', 'Certification', 'ExamRegistration', 'CarouselSlide', 'CompanyLogo', 'PromoBanner'

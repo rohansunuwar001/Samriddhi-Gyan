@@ -272,14 +272,6 @@ const appRouter = createBrowserRouter([
           </ProtectedRoute>
         ),
       },
-      {
-        path: "/playground",
-        element: (
-          <ProtectedRoute>
-            <AlgorithmPlayground />
-          </ProtectedRoute>
-        ),
-      },
 
       {
         path: "/ai-assistant",
@@ -523,6 +515,7 @@ const appRouter = createBrowserRouter([
           // A. Default admin route and explicit dashboard route
           { path: "", element: <Dashboard /> },
           { path: "dashboard", element: <Dashboard /> },
+          { path: "playground", element: <AlgorithmPlayground /> },
 
           // B. Course management routes
           { path: "course", element: <CourseTable /> }, // View all created courses
@@ -530,6 +523,7 @@ const appRouter = createBrowserRouter([
           { path: "course/create/:step", element: <AddCourse /> }, // 4-step wizard
           { path: "course/:courseId", element: <EditCourse /> }, // The new central hub for editing
           { path: "course/:courseId/assignments", element: <InstructorAssignments /> },
+          { path: "assignments", element: <InstructorAssignments /> },
 
           // C. Lecture management route (simplified and corrected)
           // The old "/course/:courseId/lecture" route for creating is REMOVED.
@@ -610,6 +604,7 @@ const appRouter = createBrowserRouter([
           // A. Default admin route and explicit dashboard route
           { path: "", element: <SupAdmDashboard /> },
           { path: "dashboard", element: <SupAdmDashboard /> },
+          { path: "playground", element: <AlgorithmPlayground /> },
           // B. Course management routes
           { path: "analytics", element: <SupAdmCourseAnalytics /> },
           { path: "users", element: <SupAdmAllUser /> },

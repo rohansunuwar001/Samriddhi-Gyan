@@ -44,7 +44,7 @@ async function upsertCategories() {
     const doc = await Category.findOneAndUpdate(
       { slug },
       { name, slug },
-      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
+      { upsert: true, new: true, setDefaultsOnInsert: true }
     );
     nameToId.set(name, doc._id);
   }
@@ -61,7 +61,7 @@ async function upsertAuthors() {
     const doc = await Author.findOneAndUpdate(
       { slug },
       { name: author.name, slug, avatar: author.avatar, bio: author.bio },
-      { upsert: true, returnDocument: 'after', setDefaultsOnInsert: true }
+      { upsert: true, new: true, setDefaultsOnInsert: true }
     );
     nameToId.set(author.name, doc._id);
   }

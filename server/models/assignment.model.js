@@ -21,6 +21,11 @@ const assignmentSchema = new mongoose.Schema(
       ref: "Course",
       required: true
     },
+    sectionId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Section",
+      required: false
+    },
     requiredStructures: [
       {
         type: String // e.g. "ForStatement", "VariableDeclaration"

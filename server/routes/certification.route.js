@@ -25,7 +25,7 @@ const router = express.Router();
 const cpUpload = upload.fields([{ name: "badgeImage", maxCount: 1 }]);
 
 // ── Admin & Instructor CRUD Routes ────────────────────────────────────────────
-router.get("/registrations", isAuthenticated, authorizeRoles("admin", "instructor"), getRegistrations);
+router.get("/registrations", isAuthenticated, getRegistrations);
 
 // ── Public / Guest-Friendly Routes ──────────────────────────────────────────
 router.get("/issuers", getAllIssuers);
