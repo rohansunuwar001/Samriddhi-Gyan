@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import ReviewsSection from "../Reviews/ReviewSection";
 import BolaVideoPlayer from "../admin/lecture/BolaVideoPlayer";
+import { getCachedVideo, buildOfflinePlaylistUrl, saveVideoToCache, getCacheState, deleteVideo } from "@/utils/videoLruCache";
 import {
   useGetCourseQuestionsQuery,
   useCreateQuestionMutation,
@@ -57,6 +58,134 @@ const MainContent = ({
   setIsSidebarOpen,
 }) => {
   const [selectedTab, setSelectedTab] = useState("overview");
+
+  const [playerSrc, setPlayerSrc] = useState("");
+  const [isOfflineCached, setIsOfflineCached] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
+  const [cacheStateList, setCacheStateList] = useState([]);
+
+  // Check cache status when selected lecture changes
+  React.useEffect(() => {
+    if (selectedLecture?._id) {
+      checkCacheStatus();
+    }
+  }, [selectedLecture]);
+
+  const checkCacheStatus = async () => {
+    if (!selectedLecture?._id) return;
+    const cached = await getCachedVideo(selectedLecture._id);
+    if (cached) {
+      setIsOfflineCached(true);
+      // Rebuild a fully self-contained HLS playlist with blob: segment URLs
+      const offlineUrl = await buildOfflinePlaylistUrl(selectedLecture._id);
+      setPlayerSrc(offlineUrl || selectedLecture.videoUrl);
+    } else {
+      setIsOfflineCached(false);
+      setPlayerSrc(selectedLecture.videoUrl);
+    }
+    const state = await getCacheState();
+    setCacheStateList(state);
+  };
+
+  const handleDownloadOffline = async () => {
+    if (!selectedLecture?._id || !selectedLecture?.videoUrl) return;
+    const url = selectedLecture.videoUrl;
+    setIsDownloading(true);
+    setDownloadProgress(5);
+
+    try {
+      const isHls = url.toLowerCase().includes(".m3u8");
+
+      if (isHls) {
+        // ── Step 1: Master playlist ──────────────────────────────────────────
+        setDownloadProgress(8);
+        const masterRes  = await fetch(url);
+        const masterText = await masterRes.text();
+        const baseUrl    = url.substring(0, url.lastIndexOf("/") + 1);
+
+        // Find first non-comment line → variant playlist URL
+        let variantUrl = null;
+        for (const line of masterText.split("\n")) {
+          const t = line.trim();
+          if (t && !t.startsWith("#")) {
+            variantUrl = t.startsWith("http") ? t : baseUrl + t;
+            break;
+          }
+        }
+        if (!variantUrl) { toast.error("Could not parse HLS variant playlist."); return; }
+
+        // ── Step 2: Variant playlist ─────────────────────────────────────────
+        setDownloadProgress(12);
+        const variantRes  = await fetch(variantUrl);
+        const variantText = await variantRes.text();
+        const variantBase = variantUrl.substring(0, variantUrl.lastIndexOf("/") + 1);
+
+        const segmentUrls = [];
+        for (const line of variantText.split("\n")) {
+          const t = line.trim();
+          if (t && !t.startsWith("#")) {
+            segmentUrls.push(t.startsWith("http") ? t : variantBase + t);
+          }
+        }
+        if (segmentUrls.length === 0) { toast.error("No video segments found in HLS playlist."); return; }
+
+        // ── Step 3: Download each .ts segment as its own ArrayBuffer ─────────
+        const segmentBuffers = [];
+        for (let i = 0; i < segmentUrls.length; i++) {
+          const segRes = await fetch(segmentUrls[i]);
+          const segBuf = await segRes.arrayBuffer();
+          segmentBuffers.push(segBuf);
+          setDownloadProgress(12 + Math.round(((i + 1) / segmentUrls.length) * 82));
+        }
+
+        // ── Step 4: Persist to IndexedDB ─────────────────────────────────────
+        setDownloadProgress(97);
+        const res = await saveVideoToCache(
+          selectedLecture._id,
+          { variantText, segments: segmentBuffers },
+          selectedLecture.title
+        );
+        if (res.success) {
+          toast.success(`"${selectedLecture.title}" saved offline! (${segmentUrls.length} segments)`);
+          if (res.evicted) toast.warning("Cache limit reached (max 3). Oldest lecture evicted.");
+        } else {
+          toast.error("Failed to save offline: " + res.error);
+        }
+
+      } else {
+        // ── Direct MP4 download ───────────────────────────────────────────────
+        setDownloadProgress(30);
+        const response = await fetch(url);
+        setDownloadProgress(70);
+        const blob = await response.blob();
+        setDownloadProgress(90);
+        const res = await saveVideoToCache(
+          selectedLecture._id,
+          { variantText: "", segments: [await blob.arrayBuffer()] },
+          selectedLecture.title
+        );
+        if (res.success) {
+          toast.success(`"${selectedLecture.title}" saved offline!`);
+          if (res.evicted) toast.warning("Cache limit reached (max 3). Oldest lecture evicted.");
+        } else {
+          toast.error("Failed to save offline: " + res.error);
+        }
+      }
+    } catch (err) {
+      toast.error("Download failed: " + err.message);
+    } finally {
+      setIsDownloading(false);
+      setDownloadProgress(0);
+      checkCacheStatus();
+    }
+  };
+
+  const handleDeleteOffline = async (id) => {
+    await deleteVideo(id);
+    toast.info("Offline video deleted.");
+    checkCacheStatus();
+  };
 
   const course = courseData?.course;
   const courseId = course?._id;
@@ -323,7 +452,8 @@ const MainContent = ({
           {selectedLecture?.videoUrl ? (
             <BolaVideoPlayer
               key={selectedLecture._id}
-              src={selectedLecture.videoUrl}
+              src={playerSrc || selectedLecture.videoUrl}
+              offlineMode={isOfflineCached && !!playerSrc}
               onEnded={() => onLectureViewed(selectedLecture._id, true)}
             />
           ) : (
@@ -340,18 +470,30 @@ const MainContent = ({
           )}
         </div>
 
-        {/* Download Lecture Video if downloadable is true */}
-        {selectedLecture?.videoUrl && selectedLecture.downloadable && (
-          <a
-            href={selectedLecture.videoUrl}
-            download
-            target="_blank"
-            rel="noopener noreferrer"
-            className="absolute top-4 left-4 bg-black/60 hover:bg-black/90 text-white px-3 py-1.5 rounded-sm flex items-center gap-1.5 text-sm z-30 transition-all font-normal shadow-md"
-            title="Download Lecture Video"
-          >
-            <Download className="w-3.5 h-3.5" /> Download
-          </a>
+        {/* Offline Cache Download Button */}
+        {selectedLecture?.videoUrl && (
+          <div className="absolute top-4 left-4 z-30 flex items-center gap-2">
+            {isOfflineCached ? (
+              <span className="bg-emerald-600/90 text-white px-3 py-1.5 rounded-none flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider shadow-md">
+                <Check className="w-3.5 h-3.5" /> Offline Cached
+              </span>
+            ) : isDownloading ? (
+              <button
+                disabled
+                className="bg-purple-600/90 text-white px-3 py-1.5 rounded-none flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider shadow-md cursor-not-allowed"
+              >
+                <Loader2 className="w-3.5 h-3.5 animate-spin" /> Down: {downloadProgress}%
+              </button>
+            ) : (
+              <button
+                onClick={handleDownloadOffline}
+                className="bg-black/60 hover:bg-black/90 text-white px-3 py-1.5 rounded-none flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider shadow-md transition-all"
+                title="Download for Offline Playback (LRU Caching)"
+              >
+                <Download className="w-3.5 h-3.5" /> Download Offline
+              </button>
+            )}
+          </div>
         )}
 
         {/* Previous Lecture Skip Overlay Control */}
@@ -1243,6 +1385,48 @@ const MainContent = ({
                     >
                       <Plus className="h-4 w-4" /> Add a learning reminder
                     </button>
+                  </div>
+
+                  {/* Offline Cache Manager */}
+                  <div className="space-y-3 border-t border-[#d1d7dc] pt-6 mt-6">
+                    <div className="space-y-1.5">
+                      <h3 className="text-2xl font-normal">Offline Video Manager (LRU Cache)</h3>
+                      <p className="text-base text-[#6a6f73] font-normal leading-relaxed">
+                        Track and manage your downloaded offline lecture video cache. The system automatically evicts the least-recently played video when the capacity limit of 3 videos is reached.
+                      </p>
+                    </div>
+
+                    {cacheStateList.length === 0 ? (
+                      <div className="p-5 border border-dashed border-[#d1d7dc] text-center text-sm text-slate-500 font-normal">
+                        No videos saved offline yet. Click "Download Offline" on any video to cache it.
+                      </div>
+                    ) : (
+                      <div className="border border-[#d1d7dc] divide-y divide-[#d1d7dc] max-w-xl bg-slate-50">
+                        {cacheStateList.map((item) => (
+                          <div key={item.id} className="p-4 flex items-center justify-between gap-4">
+                            <div className="space-y-1 min-w-0">
+                              <p className="text-sm font-semibold text-[#2d2f31] truncate">
+                                {item.title}
+                              </p>
+                              <span className={`inline-block text-[10px] font-bold px-2 py-0.5 uppercase tracking-wide border ${
+                                item.evictNext
+                                  ? "bg-amber-50 border-amber-200 text-amber-700"
+                                  : "bg-purple-50 border-purple-200 text-purple-700"
+                              }`}>
+                                {item.rank}
+                              </span>
+                            </div>
+                            <button
+                              onClick={() => handleDeleteOffline(item.id)}
+                              className="text-gray-400 hover:text-red-600 transition-colors shrink-0"
+                              title="Evict manually"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

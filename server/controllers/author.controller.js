@@ -56,7 +56,7 @@ export const updateAuthor = async (req, res) => {
       updateData.slug = slugify(name); // Update slug if name changes
     }
 
-    const updatedAuthor = await Author.findByIdAndUpdate(req.params.id, updateData, { returnDocument: 'after', runValidators: true });
+    const updatedAuthor = await Author.findByIdAndUpdate(req.params.id, updateData, { new: true, runValidators: true });
     if (!updatedAuthor) {
       return res.status(404).json({ message: 'Author not found.' });
     }

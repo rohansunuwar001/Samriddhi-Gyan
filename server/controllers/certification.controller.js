@@ -70,7 +70,7 @@ export const updateIssuer = async (req, res) => {
     const issuer = await CertificationIssuer.findByIdAndUpdate(
       req.params.id,
       { name, type, description },
-      { returnDocument: 'after' }
+      { new: true }
     );
     if (!issuer) return res.status(404).json({ success: false, message: "Issuer not found." });
     return res.status(200).json({ success: true, issuer });
@@ -326,7 +326,7 @@ export const updateCertification = async (req, res) => {
         duration: duration || 90,
         questions: parsedQuestions || [],
       },
-      { returnDocument: 'after' }
+      { new: true }
     );
 
     if (!cert) return res.status(404).json({ success: false, message: "Certification not found." });
@@ -352,9 +352,13 @@ export const deleteCertification = async (req, res) => {
 
 export const getRegistrations = async (req, res) => {
   try {
-    const list = await ExamRegistration.find()
+    const query = {};
+    if (req.user.role !== "admin" && req.user.role !== "instructor") {
+      query.student = req.user._id;
+    }
+    const list = await ExamRegistration.find(query)
       .populate("student", "name email photoUrl")
-      .populate("certification", "name slug badgeUrl")
+      .populate("certification", "name slug badgeUrl description amount examDuration questionsCount")
       .sort({ createdAt: -1 })
       .lean();
     return res.status(200).json({ success: true, registrations: list });

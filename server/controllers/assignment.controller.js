@@ -1,5 +1,6 @@
 import { Assignment } from "../models/assignment.model.js";
 import { Course } from "../models/course.model.js";
+import { Submission } from "../models/submission.model.js";
 
 /**
  * Creates a new assignment for a course (Instructors/Admins only)
@@ -7,7 +8,7 @@ import { Course } from "../models/course.model.js";
  */
 export const createAssignment = async (req, res) => {
   try {
-    const { title, description, type, courseId, requiredStructures, maxPoints, deadline } = req.body;
+    const { title, description, type, courseId, sectionId, requiredStructures, maxPoints, deadline } = req.body;
     const userId = req.user._id;
 
     if (!title || !description || !type || !courseId || !deadline) {
@@ -48,6 +49,7 @@ export const createAssignment = async (req, res) => {
       description,
       type,
       courseId,
+      sectionId: sectionId || null,
       requiredStructures: Array.isArray(requiredStructures) ? requiredStructures : [],
       maxPoints: Number(maxPoints) || 100,
       deadline: new Date(deadline)
@@ -74,12 +76,32 @@ export const createAssignment = async (req, res) => {
 export const getCourseAssignments = async (req, res) => {
   try {
     const { courseId } = req.params;
+    const studentId = req.user._id;
 
-    const assignments = await Assignment.find({ courseId }).sort({ deadline: 1 }).lean();
+    const assignments = await Assignment.find({ courseId })
+      .populate("sectionId", "title")
+      .sort({ deadline: 1 })
+      .lean();
+
+    const assignmentIds = assignments.map((a) => a._id);
+    const submissions = await Submission.find({
+      assignmentId: { $in: assignmentIds },
+      studentId
+    }).lean();
+
+    const assignmentsWithSub = assignments.map((asm) => {
+      const sub = submissions.find(
+        (s) => s.assignmentId.toString() === asm._id.toString()
+      );
+      return {
+        ...asm,
+        submission: sub || null
+      };
+    });
 
     return res.status(200).json({
       success: true,
-      assignments
+      assignments: assignmentsWithSub
     });
   } catch (error) {
     console.error("getCourseAssignments error:", error);

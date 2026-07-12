@@ -72,9 +72,11 @@ const InstructorSidebar = () => {
       id: "tools",
       label: "Tools",
       icon: <Wrench className="w-5 h-5" />,
-      paths: ["/instructor/tools"],
+      paths: ["/instructor/tools", "/instructor/assignments", "/instructor/playground"],
       subItems: [
-        { to: "/instructor/dashboard", label: "Instructor Tools", icon: <Wrench className="w-4 h-4" /> }
+        { to: "/instructor/dashboard", label: "Instructor Tools", icon: <Wrench className="w-4 h-4" /> },
+        { to: "/instructor/assignments", label: "Assignment Manager", icon: <Award className="w-4 h-4" /> },
+        { to: "/instructor/playground", label: "Algorithms Playground", icon: <Wrench className="w-4 h-4" /> }
       ]
     },
     {

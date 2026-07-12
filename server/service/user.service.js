@@ -206,7 +206,7 @@ export const updateUserInfo = async (userId, fields) => {
   const updatedUser = await User.findByIdAndUpdate(
     userId,
     { $set: updateData },
-    { returnDocument: 'after', runValidators: true }
+    { new: true, runValidators: true }
   ).select("-password");
 
   return updatedUser;

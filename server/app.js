@@ -83,6 +83,13 @@ app.use('/uploads', (req, res, next) => {
   next();
 }, express.static(path.join(__dirname, 'uploads')));
 
+app.use(
+  cors({
+    origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URI],
+    credentials: true,
+  })
+);
+
 // --- Mount the webhook route BEFORE express.json() ---
 app.use("/api/v1/purchase/webhook", express.raw({ type: "application/json" }), stripeWebhook);
 
@@ -92,12 +99,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(
-  cors({
-    origin: [process.env.FRONTEND_URL, process.env.FRONTEND_URI],
-    credentials: true,
-  })
-);
 app.use(morgan("dev"));
 
 // --- Root route ---

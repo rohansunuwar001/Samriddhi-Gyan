@@ -82,7 +82,7 @@ export const editCourse = async (req, res) => {
     const course = await editCourseService(req.params.courseId, fields, req.files);
     return res.status(200).json({ success: true, course, message: "Course updated successfully." });
   } catch (error) {
-    console.error("editCourse error:", error.message);
+    console.error("editCourse error:", error);
     return res.status(error.statusCode || 500).json({ success: false, message: error.message });
   }
 };

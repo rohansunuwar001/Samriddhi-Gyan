@@ -49,12 +49,7 @@ const NotificationsPage = () => {
 
     // Define tabs based on user role
     const tabs = useMemo(() => {
-        if (userRole === 'admin') {
-            return ['admin', 'instructor', 'student'];
-        } else if (userRole === 'instructor') {
-            return ['instructor', 'student'];
-        }
-        return ['student'];
+        return [userRole];
     }, [userRole]);
 
     // Active tab state - default to first available tab
@@ -95,6 +90,7 @@ const NotificationsPage = () => {
                 n.type === 'course_enrollment' || 
                 n.type === 'password_update' || 
                 n.type === 'course_completion' ||
+                n.type === 'exam_registration' ||
                 (n.type === 'system_alert' && userRole !== 'admin')
             );
         }

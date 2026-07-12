@@ -2,11 +2,91 @@ import { CarouselSlide } from "../models/carouselSlide.model.js";
 import { CompanyLogo } from "../models/companyLogo.model.js";
 import { PromoBanner } from "../models/promoBanner.model.js";
 import DiscountBanner from "../models/discountBanner.model.js";
+import GetOfferPromo from "../models/getOfferPromo.model.js";
+import SubscriptionNavbar from "../models/subscriptionNavbar.model.js";
 
 // --- Discount Banner Service Functions ---
 
+export const getDiscountBannersService = async () => {
+  return await DiscountBanner.find().sort({ createdAt: -1 });
+};
+
 export const getActiveDiscountBannerService = async () => {
   return await DiscountBanner.findOne({ isActive: true }).sort({ updatedAt: -1 });
+};
+
+export const createDiscountBannerService = async (bannerData) => {
+  if (bannerData.isActive === true || bannerData.isActive === "true") {
+    await DiscountBanner.updateMany({}, { isActive: false });
+  }
+  return await DiscountBanner.create(bannerData);
+};
+
+export const updateDiscountBannerService = async (id, bannerData) => {
+  if (bannerData.isActive === true || bannerData.isActive === "true") {
+    await DiscountBanner.updateMany({ _id: { $ne: id } }, { isActive: false });
+  }
+  return await DiscountBanner.findByIdAndUpdate(id, bannerData, { new: true });
+};
+
+export const deleteDiscountBannerService = async (id) => {
+  return await DiscountBanner.findByIdAndDelete(id);
+};
+
+// --- Get Offer Promo Service Functions ---
+
+export const getGetOfferPromosService = async () => {
+  return await GetOfferPromo.find().sort({ createdAt: -1 });
+};
+
+export const getActiveGetOfferPromoService = async () => {
+  return await GetOfferPromo.findOne({ isActive: true }).sort({ updatedAt: -1 });
+};
+
+export const createGetOfferPromoService = async (promoData) => {
+  if (promoData.isActive === true || promoData.isActive === "true") {
+    await GetOfferPromo.updateMany({}, { isActive: false });
+  }
+  return await GetOfferPromo.create(promoData);
+};
+
+export const updateGetOfferPromoService = async (id, promoData) => {
+  if (promoData.isActive === true || promoData.isActive === "true") {
+    await GetOfferPromo.updateMany({ _id: { $ne: id } }, { isActive: false });
+  }
+  return await GetOfferPromo.findByIdAndUpdate(id, promoData, { new: true });
+};
+
+export const deleteGetOfferPromoService = async (id) => {
+  return await GetOfferPromo.findByIdAndDelete(id);
+};
+
+// --- Subscription Navbar Service Functions ---
+
+export const getSubscriptionNavbarsService = async () => {
+  return await SubscriptionNavbar.find().sort({ createdAt: -1 });
+};
+
+export const getActiveSubscriptionNavbarService = async () => {
+  return await SubscriptionNavbar.findOne({ isActive: true }).sort({ updatedAt: -1 });
+};
+
+export const createSubscriptionNavbarService = async (navData) => {
+  if (navData.isActive === true || navData.isActive === "true") {
+    await SubscriptionNavbar.updateMany({}, { isActive: false });
+  }
+  return await SubscriptionNavbar.create(navData);
+};
+
+export const updateSubscriptionNavbarService = async (id, navData) => {
+  if (navData.isActive === true || navData.isActive === "true") {
+    await SubscriptionNavbar.updateMany({ _id: { $ne: id } }, { isActive: false });
+  }
+  return await SubscriptionNavbar.findByIdAndUpdate(id, navData, { new: true });
+};
+
+export const deleteSubscriptionNavbarService = async (id) => {
+  return await SubscriptionNavbar.findByIdAndDelete(id);
 };
 
 // --- Carousel Slide Service Functions ---
@@ -21,7 +101,7 @@ export const createCarouselSlideService = async (slideData) => {
 };
 
 export const updateCarouselSlideService = async (id, slideData) => {
-  return await CarouselSlide.findByIdAndUpdate(id, slideData, { returnDocument: 'after' });
+  return await CarouselSlide.findByIdAndUpdate(id, slideData, { new: true });
 };
 
 export const deleteCarouselSlideService = async (id) => {
@@ -40,7 +120,7 @@ export const createCompanyLogoService = async (logoData) => {
 };
 
 export const updateCompanyLogoService = async (id, logoData) => {
-  return await CompanyLogo.findByIdAndUpdate(id, logoData, { returnDocument: 'after' });
+  return await CompanyLogo.findByIdAndUpdate(id, logoData, { new: true });
 };
 
 export const deleteCompanyLogoService = async (id) => {
@@ -77,7 +157,7 @@ export const createPromoBannerService = async (promoData) => {
 };
 
 export const updatePromoBannerService = async (id, promoData) => {
-  return await PromoBanner.findByIdAndUpdate(id, promoData, { returnDocument: 'after' });
+  return await PromoBanner.findByIdAndUpdate(id, promoData, { new: true });
 };
 
 export const deletePromoBannerService = async (id) => {

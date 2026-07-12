@@ -10,6 +10,7 @@ import { CheckCircle2, AlertCircle, Upload, Film, Loader2, X } from "lucide-reac
 import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
+import SubtitleAlignerTab from "./SubtitleAlignerTab";
 
 const BACKEND_URL = import.meta.env.VITE_BASE_URL ;
 
@@ -55,6 +56,7 @@ const EditLectureForm = () => {
   const { lectureId, courseId } = useParams();
   const navigate = useNavigate();
 
+  const [activeTab, setActiveTab] = useState("info");
   const [title, setTitle]       = useState("");
   const [description, setDescription] = useState("");
   const [isPreview, setIsPreview] = useState(false);
@@ -212,7 +214,35 @@ const EditLectureForm = () => {
   const isProcessing = ["transcoding", "uploading_r2"].includes(processingStatus);
 
   return (
-    <Card>
+    <div className="space-y-6">
+      {/* Tab Switcher */}
+      <div className="flex border border-[#d1d7dc] bg-white p-1 shadow-2xs rounded-none">
+        <button
+          type="button"
+          onClick={() => setActiveTab("info")}
+          className={`flex-1 py-3 text-center text-sm font-semibold tracking-wide border-b-2 transition-all rounded-none ${
+            activeTab === "info"
+              ? "border-[#1c1d1f] text-slate-800"
+              : "border-transparent text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          General Information
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("subtitles")}
+          className={`flex-1 py-3 text-center text-sm font-semibold tracking-wide border-b-2 transition-all rounded-none ${
+            activeTab === "subtitles"
+              ? "border-[#1c1d1f] text-slate-800"
+              : "border-transparent text-slate-500 hover:text-slate-800"
+          }`}
+        >
+          Subtitles & Auto-Aligner
+        </button>
+      </div>
+
+      {activeTab === "info" ? (
+        <Card className="rounded-none border-[#d1d7dc]">
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
@@ -448,6 +478,10 @@ const EditLectureForm = () => {
         </CardFooter>
       </form>
     </Card>
+      ) : (
+        <SubtitleAlignerTab />
+      )}
+    </div>
   );
 };
 

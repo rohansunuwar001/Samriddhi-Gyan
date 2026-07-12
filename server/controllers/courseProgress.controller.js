@@ -11,7 +11,6 @@
 
 import { CourseProgress } from "../models/courseProgress.model.js";
 import { Course } from "../models/course.model.js";
-import { Notification } from "../models/notification.model.js";
 import { createNotification } from "../service/notification.service.js";
 
 // ─────────────────────────────────────────────────────────────────────────────

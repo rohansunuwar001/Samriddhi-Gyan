@@ -53,7 +53,8 @@ const notificationSchema = new mongoose.Schema({
             'course_completion',
             'system_alert',
             'new_review', // Example for instructors
-            'payout_processed' // Example for instructors
+            'payout_processed', // Example for instructors
+            'exam_registration'
         ],
         default: 'system_alert',
     }

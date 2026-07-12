@@ -14,7 +14,8 @@ import {
   ChevronRight,
   TrendingUp,
   Globe,
-  Compass
+  Compass,
+  LayoutDashboard
 } from "lucide-react";
 import PropTypes from "prop-types";
 import { useEffect, useRef, useState } from "react";
@@ -534,14 +535,6 @@ const UserAvatar = ({ user, onLogout, t, cartCount = 0 }) => {
                   <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
                   Career Roadmap
                 </Link>
-                <Link 
-                  to="/playground" 
-                  onClick={() => setIsOpen(false)}
-                  className="px-4 py-2 text-[14px] text-slate-750 hover:text-[#5624d0] hover:bg-slate-50 transition-colors flex items-center gap-1.5 font-medium"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
-                  Alg Playgrounds
-                </Link>
               </div>
 
               {/* Section 3: Notifications, Messages */}
@@ -986,8 +979,8 @@ const Navbar = () => {
               />
             </button>
           )}
-          {/* Show nav links when NOT on a dashboard page (for all roles including instructor/admin) */}
-          {!isDashboardPage && (
+          {/* Show nav links when NOT on a dashboard page (only for students/guests) */}
+          {!isDashboardPage && (!user || user.role === "student") && (
             <div className="hidden lg:flex items-center gap-5 relative z-50">
               {/* Find Courses Hover Menu */}
               <div
@@ -1177,8 +1170,8 @@ const Navbar = () => {
           )}
         </div>
 
-        {/* --- Search Bar: visible for all roles on non-dashboard pages --- */}
-        {!isDashboardPage && (
+        {/* --- Search Bar: visible only for students/guests on non-dashboard pages --- */}
+        {!isDashboardPage && (!user || user.role === "student") && (
           <div
             ref={searchContainerRef}
             className="flex-1 hidden md:flex items-center mx-6 relative"
@@ -1295,8 +1288,8 @@ const Navbar = () => {
 
         {/* --- Right side of Navbar (MAIN CHANGE IS HERE) --- */}
         <div className="hidden md:flex items-center gap-6">
-          {/* Nav links: show for all roles on non-dashboard pages */}
-          {!isDashboardPage && (
+          {/* Nav links: show only for students/guests on non-dashboard pages */}
+          {!isDashboardPage && (!user || user.role === "student") && (
             <div className="hidden lg:flex items-center gap-6">
               <Link to="/about" className="text-lg font-light text-gray-700 hover:text-purple-600 transition-colors">
                 {t("navbar.about")}
@@ -1315,6 +1308,16 @@ const Navbar = () => {
           <div className="h-full min-w-[220px] flex items-center justify-end">
             {user ? (
               <div className="flex items-center gap-6">
+                {isInstructorOrAdmin && (
+                  <Button
+                    variant="outline"
+                    onClick={() => navigate(user.role === "instructor" ? "/instructor/dashboard" : "/admin/dashboard")}
+                    className="text-base font-medium border border-[#1c1d1f] rounded-none hover:border-purple-600 hover:text-purple-600 h-10 px-4 transition-colors shrink-0 flex items-center justify-center gap-2 bg-white"
+                  >
+                    <LayoutDashboard className="w-4 h-4" />
+                    {user.role === "instructor" ? t("navbar.instructor_dashboard") : t("navbar.admin_dashboard") || "Admin Dashboard"}
+                  </Button>
+                )}
 
 
 
@@ -1454,8 +1457,8 @@ const Navbar = () => {
             >
               <Home size={16} /> {t("navbar.home")}
             </button>
-            {/* Show normal nav links on non-dashboard pages for all roles */}
-            {!isDashboardPage && (
+            {/* Show normal nav links on non-dashboard pages only for students/guests */}
+            {!isDashboardPage && (!user || user.role === "student") && (
               <>
                 <Link to="/course/search" className="flex items-center gap-3 rounded-lg px-3 py-2 text-xl font-light hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
                   <BookOpen size={16} /> {t("navbar.courses_heading")}
@@ -1467,9 +1470,6 @@ const Navbar = () => {
                     </Link>
                     <Link to="/career-roadmap" className="flex items-center gap-3 rounded-lg px-3 py-2 text-xl font-light hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
                       <Compass size={16} /> Career Roadmap
-                    </Link>
-                    <Link to="/playground" className="flex items-center gap-3 rounded-lg px-3 py-2 text-xl font-light hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
-                      <Compass size={16} /> Alg Playgrounds
                     </Link>
                     <Link to="/nearby-hub" className="flex items-center gap-3 rounded-lg px-3 py-2 text-xl font-light hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
                       <Globe size={16} /> Nearby Hub
@@ -1495,16 +1495,18 @@ const Navbar = () => {
                 <User size={16} /> {t("navbar.profile")}
               </Link>
             )}
-            {/* Dashboard label in mobile - shown only on dashboard pages */}
-            {isInstructorOrAdmin && isDashboardPage && (
-              <span className="flex flex-col gap-1 px-3 py-2">
-                <span className="font-light text-2xl text-purple-700">
-                  {user?.role === "instructor" ? t("navbar.instructor_dashboard") : t("navbar.admin_dashboard") || "Admin Dashboard"}
-                </span>
-                <span className="font-light text-xl text-gray-700">
-                  Welcome, {user.name}
-                </span>
-              </span>
+            {/* Dashboard button in mobile - shown always for admin/instructor */}
+            {isInstructorOrAdmin && (
+              <button
+                className="flex items-center gap-3 rounded-lg px-3 py-2 text-xl font-light hover:bg-gray-100 text-left w-full"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  navigate(user?.role === "instructor" ? "/instructor/dashboard" : "/admin/dashboard");
+                }}
+              >
+                <LayoutDashboard size={16} />
+                {user?.role === "instructor" ? t("navbar.instructor_dashboard") : t("navbar.admin_dashboard") || "Admin Dashboard"}
+              </button>
             )}
           </nav>
           <div className="mt-auto">
