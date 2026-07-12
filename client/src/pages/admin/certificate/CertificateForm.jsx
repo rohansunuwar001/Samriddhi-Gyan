@@ -206,7 +206,6 @@ const CertificateForm = ({ mode = "create" }) => {
   }
 
   return (
-  return (
     <div className="min-h-screen bg-gray-50">
       {/* Top bar */}
       <div className="bg-white border-b sticky top-0 z-10 px-6 py-4 flex items-center gap-4">
