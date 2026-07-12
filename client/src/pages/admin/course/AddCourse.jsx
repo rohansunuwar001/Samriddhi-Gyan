@@ -1,9 +1,9 @@
-import React, { useState, useMemo, useEffect } from "react";
+import { useGetAllCategoriesQuery } from "@/features/api/categoryApi";
+import { useCreateCourseMutation } from "@/features/api/courseApi";
+import { BookOpen, ClipboardList, Loader2, Play } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
-import { Loader2, Play, ClipboardList, BookOpen } from "lucide-react";
-import { useCreateCourseMutation } from "@/features/api/courseApi";
-import { useGetAllCategoriesQuery } from "@/features/api/categoryApi";
 
 /* ─── progress bar fills per step ─── */
 const STEP_PROGRESS = { 1: 25, 2: 50, 3: 75, 4: 100 };
@@ -284,9 +284,10 @@ const AddCourse = () => {
   }, [step, navigate]);
 
   useEffect(() => {
-    if (isSuccess && data?.course?._id) {
+    if (isSuccess && data?.course) {
+      const courseId = data.course._id || data.course.id;
       toast.success(data.message || "Course created!");
-      navigate(`/instructor/course/${data.course._id}`);
+      navigate(`/instructor/course/${courseId}`);
     }
     if (isError) {
       toast.error(error?.data?.message || "Something went wrong.");
