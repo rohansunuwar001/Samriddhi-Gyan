@@ -5,3 +5,7 @@ client/.env
 
 # Dev scratch scripts
 scratch/
+
+# Refactored server directories
+server2/
+server3/
