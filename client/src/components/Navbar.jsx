@@ -89,7 +89,7 @@ const MyLearningDropdown = ({ navigate }) => {
                     onClick={() => navigate(`/course-progress/${course._id}`)}
                     className="w-full flex items-start gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors text-left group"
                   >
-                    {/* Thumbnail — large square tile matching Skillera style */}
+                    {/* Thumbnail — large square tile matching Samriddhi Gyan style */}
                     <div className="w-[72px] h-[72px] rounded overflow-hidden shrink-0 bg-gray-100 border border-gray-100">
                       {thumbnail ? (
                         <img
@@ -971,7 +971,7 @@ const Navbar = () => {
           {!isDashboardPage && (
             <button onClick={handleLogoClick} className="focus:outline-none flex items-center justify-center -translate-y-[2px]">
               <img
-                src="/rohan1.png"
+                src="/samriddhi_logo1.png"
                 alt="Samriddhi Logo"
                 width="82"
                 height="34"

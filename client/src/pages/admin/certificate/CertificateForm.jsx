@@ -21,7 +21,7 @@ const CERT_TITLES = [
 
 const defaultForm = {
   courseId: "",
-  organizationName: "Skillera",
+  organizationName: "Samriddhi Gyan",
   certificateTitle: "Certificate of Completion",
   certificateStatement:
     "This is to certify that the above-named individual has successfully completed the course.",
@@ -77,7 +77,7 @@ const CertificateForm = ({ mode = "create" }) => {
       const certificate = certData.certificate;
       setForm({
         courseId: certificate.course?._id || "",
-        organizationName: certificate.organizationName || "Skillera",
+        organizationName: certificate.organizationName || "Samriddhi Gyan",
         certificateTitle: certificate.certificateTitle || "Certificate of Completion",
         certificateStatement: certificate.certificateStatement || "",
         courseName: certificate.courseName || "",

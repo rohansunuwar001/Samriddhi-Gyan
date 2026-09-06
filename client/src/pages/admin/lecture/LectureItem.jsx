@@ -249,7 +249,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
   return (
     <div className="border border-[#d1d7dc] bg-white rounded-sm mb-4 overflow-hidden shadow-sm">
       
-      {/* ── LECTURE ROW (Skillera curriculum view) ── */}
+      {/* ── LECTURE ROW (Samriddhi Gyan curriculum view) ── */}
       <div className="flex items-center justify-between p-3.5 hover:bg-[#f7f9fa]/50 transition-colors">
         <div className="flex items-center gap-3 flex-grow min-w-0">
           <PlayCircle className={`w-4.5 h-4.5 ${hasVideo ? "text-[#5624d0]" : "text-[#6a6f73]"} shrink-0`} />

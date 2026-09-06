@@ -61,7 +61,7 @@ export const mockCourseData = {
         'No paid software required - I\'ll teach you how to use PyCharm, Jupyter Notebooks and Google Colab.'
     ],
     descriptionHtml: `
-        <p class="mb-4">Welcome to the 100 Days of Code - The Complete Python Pro Bootcamp, <strong>the only course you need</strong> to learn to code with Python. With over 500,000 <strong>5 STAR reviews</strong> and a 4.8 average, my courses are some of the HIGHEST RATED courses in the history of Skillera!</p>
+        <p class="mb-4">Welcome to the 100 Days of Code - The Complete Python Pro Bootcamp, <strong>the only course you need</strong> to learn to code with Python. With over 500,000 <strong>5 STAR reviews</strong> and a 4.8 average, my courses are some of the HIGHEST RATED courses in the history of Samriddhi Gyan!</p>
         <p>100 days, 1 hour per day, learn to build 1 project per day, this is how you master Python.</p>
     `,
     instructor: {

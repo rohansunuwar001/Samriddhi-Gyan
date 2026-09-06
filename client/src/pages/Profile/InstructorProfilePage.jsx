@@ -68,7 +68,7 @@ const InstructorProfilePage = () => {
                         </h1>
                         <p className="text-xl text-gray-700 dark:text-gray-300 mt-4">{user.headline || "E-Learning Enthusiast"}</p>
                         <Badge className="mt-4 bg-purple-200 text-purple-800 text-sm font-semibold">
-                            Skillera Instructor
+                            Samriddhi Gyan Instructor
                         </Badge>
                     </div>
 

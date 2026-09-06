@@ -46,7 +46,7 @@ class TrieNode {
 
 export function runBrowserAlgorithmsSimulation() {
   console.log("%c============================================================================", "color: #a855f7; font-weight: bold;");
-  console.log("%cSkillera: 20 ADVANCED ALGORITHMS BROWSER SIMULATION RUN", "color: #7c3aed; font-weight: bold; font-size: 14px;");
+  console.log("%cSamriddhi Gyan: 20 ADVANCED ALGORITHMS BROWSER SIMULATION RUN", "color: #7c3aed; font-weight: bold; font-size: 14px;");
   console.log("%c============================================================================", "color: #a855f7; font-weight: bold;");
 
   const results = [];

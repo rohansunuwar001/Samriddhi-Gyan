@@ -72,7 +72,7 @@ export const createCertificate = async (req, res) => {
     const certificate = await Certificate.create({
       instructor: instructorId,
       course: courseId,
-      organizationName: organizationName || "Skillera",
+      organizationName: organizationName || "Samriddhi Gyan",
       organizationLogo,
       certificateTitle: certificateTitle || "Certificate of Completion",
       certificateStatement:

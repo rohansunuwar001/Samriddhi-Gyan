@@ -82,7 +82,7 @@ const Sidebar = () => {
         !location.pathname.startsWith('/instructor/tools') &&
         !location.pathname.startsWith('/instructor/resources');
 
-    // If the user is an instructor, render the custom Skillera-style expandable sidebar
+    // If the user is an instructor, render the custom Samriddhi Gyan-style expandable sidebar
     if (user?.role === 'instructor') {
         return (
             <div className="flex h-screen bg-background">
@@ -95,7 +95,7 @@ const Sidebar = () => {
         );
     }
 
-    // If the user is an admin, render the custom Skillera-style expandable admin sidebar
+    // If the user is an admin, render the custom Samriddhi Gyan-style expandable admin sidebar
     if (user?.role === 'admin') {
         return (
             <div className="flex h-screen bg-background">

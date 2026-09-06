@@ -275,7 +275,7 @@ const CourseSidebar = ({
             {/* Conversation / Suggestion Panel */}
             <div className="flex-1 overflow-y-auto p-5 space-y-5">
               {conversation.length === 0 ? (
-                /* Suggestion Presets Overlay (Skillera style) */
+                /* Suggestion Presets Overlay (Samriddhi Gyan style) */
                 <div className="space-y-5">
                   <div className="space-y-1">
                     <h3 className="text-xl font-normal text-[#2d2f31]">

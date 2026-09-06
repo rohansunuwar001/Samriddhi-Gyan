@@ -132,7 +132,7 @@ const CaptionsTab = () => {
         <div>
           <h4 className="font-normal text-xl text-[#1c1d1f] mb-1">Reach more students with captions</h4>
           <p className="text-lg text-[#6a6f73] font-light">
-            Skillera will add auto-generated captions to your course to make course content more accessible. Captions will be available within 48 hours of publishing your course. You can review and edit your captions on this page once they have been generated.
+            Samriddhi Gyan will add auto-generated captions to your course to make course content more accessible. Captions will be available within 48 hours of publishing your course. You can review and edit your captions on this page once they have been generated.
           </p>
           <p className="text-[#5624d0] hover:underline cursor-pointer text-lg font-normal mt-3">
             Find out more about captions here.

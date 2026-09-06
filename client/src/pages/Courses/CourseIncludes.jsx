@@ -1,6 +1,6 @@
 // src/pages/Courses/CourseIncludes.jsx
 //
-// Renders the "This course includes:" section in Skillera-style two-column layout.
+// Renders the "This course includes:" section in Samriddhi Gyan-style two-column layout.
 // Video hours are auto-computed from course.totalDurationInSeconds.
 // All other stats come from course.courseIncludes (set by instructor).
 

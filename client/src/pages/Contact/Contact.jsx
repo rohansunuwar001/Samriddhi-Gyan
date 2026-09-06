@@ -21,7 +21,7 @@ const Contact = () => {
   const originsData = {
     title: "Our origins",
     paragraphs: [
-      "Growing up in a small Turkish village, Skillera founder Eren Bali had few educational opportunities — until he got a computer. Fueled by his dream to compete in mathematics, he used the internet to learn his way to a silver medal in the International Math Olympiad.",
+      "Growing up in a small Turkish village, Samriddhi Gyan founder Eren Bali had few educational opportunities — until he got a computer. Fueled by his dream to compete in mathematics, he used the internet to learn his way to a silver medal in the International Math Olympiad.",
       "After learning online changed his life, Eren partnered with co-founders Oktay Caglar and Gagan Biyani to achieve a common goal: to make quality education accessible to all."
     ]
   };
