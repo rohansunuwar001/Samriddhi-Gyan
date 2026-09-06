@@ -88,8 +88,8 @@ const Footer = () => {
         <div className="bg-gray-900 border-t border-gray-700">
           <div className="container mx-auto px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-4">
-                  <Link to="/" className="text-3xl font-normal text-white">Skillera</Link>
-                  <p className="text-base text-gray-400">© {new Date().getFullYear()} Skillera</p>
+                  <Link to="/" className="text-3xl font-normal text-white">Samriddhi Gyan</Link>
+                  <p className="text-base text-gray-400">© {new Date().getFullYear()} Samriddhi Gyan</p>
               </div>
               <div className="flex items-center gap-6">
                   <button className="text-base hover:text-white hover:underline">

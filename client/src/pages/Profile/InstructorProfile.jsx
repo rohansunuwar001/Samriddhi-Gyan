@@ -199,7 +199,7 @@ const InstructorProfile = () => {
       {/* Tabs */}
       <div className="flex gap-6 border-b border-[#d1d7dc] mb-8 overflow-x-auto">
         <button onClick={() => handleTabChange("profile")} className={tabClass("profile")}>
-          Skillera profile
+          Samriddhi Gyan profile
         </button>
         <button onClick={() => handleTabChange("photo")} className={tabClass("photo")}>
           Profile picture

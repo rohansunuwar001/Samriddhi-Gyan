@@ -41,6 +41,9 @@ const BolaVideoPlayer = ({ src, subtitles, onPlay, onEnded, offlineMode = false 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
   const [subtitlesEnabled, setSubtitlesEnabled] = useState(true);
+  const [bufferedPercent, setBufferedPercent] = useState(0);
+  const [hoverTime, setHoverTime] = useState(null);
+  const [hoverPosition, setHoverPosition] = useState(0);
 
   // BOLA & HLS states
   const [currentLevelLabel, setCurrentLevelLabel] = useState("");
@@ -164,12 +167,29 @@ const BolaVideoPlayer = ({ src, subtitles, onPlay, onEnded, offlineMode = false 
     };
   }, [src]);
 
+  const updateBufferedAmount = () => {
+    if (!videoRef.current || !videoRef.current.duration) return;
+    const dur = videoRef.current.duration;
+    const current = videoRef.current.currentTime;
+    const buffered = videoRef.current.buffered;
+    if (buffered && buffered.length > 0) {
+      for (let i = buffered.length - 1; i >= 0; i--) {
+        if (buffered.start(i) <= current) {
+          const end = buffered.end(i);
+          setBufferedPercent(Math.min(100, (end / dur) * 100));
+          return;
+        }
+      }
+    }
+  };
+
   // Video Progress Events
   const handleTimeUpdate = () => {
     if (videoRef.current) {
       const current = videoRef.current.currentTime;
       const dur = videoRef.current.duration;
       setCurrentTime(current);
+      updateBufferedAmount();
       if (dur > 0 && dur - current <= 3 && !hasEndedRef.current) {
         hasEndedRef.current = true;
         if (onEnded) onEnded();
@@ -182,7 +202,16 @@ const BolaVideoPlayer = ({ src, subtitles, onPlay, onEnded, offlineMode = false 
   const handleLoadedMetadata = () => {
     if (videoRef.current) {
       setDuration(videoRef.current.duration);
+      updateBufferedAmount();
     }
+  };
+
+  const handleScrubberMouseMove = (e) => {
+    if (!duration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    setHoverPosition(pos * 100);
+    setHoverTime(pos * duration);
   };
 
   // Playback Controls
@@ -256,6 +285,8 @@ const BolaVideoPlayer = ({ src, subtitles, onPlay, onEnded, offlineMode = false 
     return `${mins}:${secs.toString().padStart(2, "0")}`;
   };
 
+  const playedPercent = duration > 0 ? (currentTime / duration) * 100 : 0;
+
   return (
     <div
       ref={containerRef}
@@ -292,14 +323,48 @@ const BolaVideoPlayer = ({ src, subtitles, onPlay, onEnded, offlineMode = false 
       {/* YouTube Style Overlay UI Control Strip */}
       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent p-3 pt-8 opacity-0 group-hover:opacity-100 transition-opacity duration-200 z-20">
         {/* Playback Progress Scrubber Track */}
-        <div className="flex items-center w-full mb-3 group/track relative">
+        <div className="flex items-center w-full mb-3 group/track relative py-1 cursor-pointer">
+          {/* Hover Time Tooltip */}
+          {hoverTime !== null && (
+            <div
+              className="absolute -top-7 transform -translate-x-1/2 bg-black/90 text-white text-xs px-2 py-0.5 rounded shadow pointer-events-none font-mono z-30"
+              style={{ left: `${hoverPosition}%` }}
+            >
+              {formatTime(hoverTime)}
+            </div>
+          )}
+
+          {/* Visual Track Bar Container */}
+          <div className="relative w-full h-1 group-hover/track:h-2 transition-all duration-150 bg-white/20 rounded-full overflow-hidden">
+            {/* Buffered Track (Translucent White) */}
+            <div
+              className="absolute top-0 bottom-0 left-0 bg-white/40 transition-all duration-200 rounded-full"
+              style={{ width: `${bufferedPercent}%` }}
+            />
+            {/* Played Progress Track (Vibrant Red) */}
+            <div
+              className="absolute top-0 bottom-0 left-0 bg-red-600 rounded-full"
+              style={{ width: `${playedPercent}%` }}
+            />
+          </div>
+
+          {/* Interactive Range Input (Invisible overlay for drag/scrubbing) */}
           <input
             type="range"
             min={0}
             max={duration || 100}
+            step="0.1"
             value={currentTime}
             onChange={handleSeek}
-            className="w-full accent-red-600 h-1 hover:h-1.5 transition-all cursor-pointer bg-gray-600 rounded-lg appearance-none"
+            onMouseMove={handleScrubberMouseMove}
+            onMouseLeave={() => setHoverTime(null)}
+            className="absolute inset-0 w-full opacity-0 cursor-pointer accent-red-600 z-10"
+          />
+
+          {/* Scrubber Knob / Thumb */}
+          <div
+            className="absolute h-3.5 w-3.5 bg-red-600 rounded-full shadow-md transform -translate-x-1/2 pointer-events-none scale-0 group-hover/track:scale-100 transition-transform duration-150 z-20"
+            style={{ left: `${playedPercent}%` }}
           />
         </div>
 

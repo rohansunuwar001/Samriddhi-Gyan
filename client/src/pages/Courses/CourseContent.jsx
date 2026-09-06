@@ -4,7 +4,7 @@ import {
     AccordionItem,
     AccordionTrigger,
 } from "@/components/ui/accordion";
-import { ChevronDown, ChevronUp, Download, FileText, PlayCircle } from 'lucide-react';
+import { ChevronDown, ChevronUp, FileText, PlayCircle } from 'lucide-react';
 import PropTypes from 'prop-types';
 import { useState } from 'react';
 
@@ -18,7 +18,7 @@ const formatDurationShort = (seconds) => {
     return `${m}m`;
 };
 
-// Per-lecture form, Skillera style: "3:08", "0:12", "1:05:33"
+// Per-lecture form, Samriddhi Gyan style: "3:08", "0:12", "1:05:33"
 const formatDurationClock = (seconds) => {
     if (!seconds || isNaN(seconds) || seconds <= 0) return "0:00";
     const total = Math.round(seconds);
@@ -70,9 +70,6 @@ const LectureRow = ({ lecture }) => {
                             <PlayCircle className="h-3.5 w-3.5 fill-current" />
                             Preview
                         </span>
-                    )}
-                    {isDownload && (
-                        <Download className="h-4 w-4 text-gray-400" />
                     )}
                     <span className="text-gray-500 text-sm tabular-nums">
                         {formatDurationClock(lecture.durationInSeconds)}

@@ -313,7 +313,7 @@ const CourseCurriculumTab = () => {
         </div>
       )}
 
-      {/* ══ BULK UPLOADER MODAL (Skillera Design) ══ */}
+      {/* ══ BULK UPLOADER MODAL (Samriddhi Gyan Design) ══ */}
       {isBulkOpen && (
         <div className="fixed inset-0 bg-[#1c1d1f]/60 flex items-center justify-center z-[300] p-4">
           <div className="bg-white w-full max-w-[700px] border border-[#d1d7dc] shadow-2xl flex flex-col relative max-h-[90vh]">

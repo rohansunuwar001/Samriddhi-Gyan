@@ -31,7 +31,7 @@ const InstructorAccount = () => {
 
   const [turnOffDirectMessaging, setTurnOffDirectMessaging] = useState(false);
 
-  // API Clients list (mock data matching Skillera's interface)
+  // API Clients list (mock data matching Samriddhi Gyan's interface)
   const [apiClients, setApiClients] = useState([]);
 
   const handleTabChange = (tabId) => {
@@ -155,7 +155,7 @@ const InstructorAccount = () => {
                 className="w-5 h-5 accent-[#a435f0] shrink-0 mt-0.5"
               />
               <div className="text-sm font-normal leading-relaxed text-[#1c1d1f]">
-                <p className="font-bold mb-1">Helpful resources and important updates related to being an instructor on Skillera.</p>
+                <p className="font-bold mb-1">Helpful resources and important updates related to being an instructor on Samriddhi Gyan.</p>
                 <p className="text-gray-550 text-xs">To adjust this preference by course, leave this box checked and go to 'Course Settings' on the course management dashboard to opt in or out of specific notifications.</p>
               </div>
             </div>
@@ -177,8 +177,8 @@ const InstructorAccount = () => {
                 className="w-5 h-5 accent-[#a435f0] shrink-0 mt-0.5"
               />
               <div className="text-sm font-normal leading-relaxed text-gray-550">
-                <p className="font-bold text-[#1c1d1f] mb-1">Promotions, course recommendations, and helpful resources from Skillera.</p>
-                <p className="text-xs">Because you are an instructor, you will not receive course promotional emails from Skillera.</p>
+                <p className="font-bold text-[#1c1d1f] mb-1">Promotions, course recommendations, and helpful resources from Samriddhi Gyan.</p>
+                <p className="text-xs">Because you are an instructor, you will not receive course promotional emails from Samriddhi Gyan.</p>
               </div>
             </div>
 
@@ -272,7 +272,7 @@ const InstructorAccount = () => {
           <div className="space-y-4">
             <h3 className="text-base font-bold font-sans">Affiliate API</h3>
             <p className="text-sm text-gray-650 leading-relaxed font-normal">
-              To request access to the Affiliate API, please read our Affiliate API terms first. If you agree to the terms, click the button below. You can find more information in our <span className="text-[#5624d0] underline cursor-pointer">Skillera Affiliate API documentation</span>.
+              To request access to the Affiliate API, please read our Affiliate API terms first. If you agree to the terms, click the button below. You can find more information in our <span className="text-[#5624d0] underline cursor-pointer">Samriddhi Gyan Affiliate API documentation</span>.
             </p>
             <button
               onClick={() => toast.success("Affiliate API client requested.")}

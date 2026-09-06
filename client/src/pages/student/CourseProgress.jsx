@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import { useGetCourseDetailWithStatusQuery } from "@/features/api/purchaseApi";
 import MainContent from "./MainContent";
 import CourseSidebar from "./CourseSidebar";
@@ -121,25 +121,38 @@ const CourseProgress = () => {
     }
   };
 
-  const searchParams = new URLSearchParams(window.location.search);
-  const queryLectureId = searchParams.get("lecture");
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  const handleSelectLecture = (lecture) => {
+    if (!lecture) return;
+    setSelectedLecture(lecture);
+    if (lecture._id && courseId) {
+      localStorage.setItem(`last_lecture_${courseId}`, lecture._id);
+      setSearchParams({ lecture: lecture._id }, { replace: true });
+    }
+  };
 
   useEffect(() => {
     if (courseData?.course && !selectedLecture) {
-      if (queryLectureId) {
-        let found = null;
+      const savedLectureId = searchParams.get("lecture") || localStorage.getItem(`last_lecture_${courseId}`);
+      let found = null;
+      if (savedLectureId) {
         for (const section of courseData.course.sections) {
-          const lec = section.lectures?.find(l => l._id === queryLectureId);
-          if (lec) { found = lec; break; }
-        }
-        if (found) {
-          setSelectedLecture(found);
-          return;
+          const lec = section.lectures?.find((l) => l._id === savedLectureId);
+          if (lec) {
+            found = lec;
+            break;
+          }
         }
       }
-      setSelectedLecture(getFirstLecture(courseData.course));
+      if (!found) {
+        found = getFirstLecture(courseData.course);
+      }
+      if (found) {
+        handleSelectLecture(found);
+      }
     }
-  }, [courseData, selectedLecture, queryLectureId]);
+  }, [courseData, selectedLecture, courseId]);
 
   // Compute a flat array of all lectures in the course
   const allLectures = React.useMemo(() => {
@@ -161,11 +174,11 @@ const CourseProgress = () => {
       : null;
 
   const goToPrevLecture = () => {
-    if (prevLecture) setSelectedLecture(prevLecture);
+    if (prevLecture) handleSelectLecture(prevLecture);
   };
 
   const goToNextLecture = () => {
-    if (nextLecture) setSelectedLecture(nextLecture);
+    if (nextLecture) handleSelectLecture(nextLecture);
   };
 
   // Handler to mark lecture as viewed
@@ -419,7 +432,7 @@ const CourseProgress = () => {
           <CourseSidebar
             courseData={courseData}
             selectedLecture={selectedLecture}
-            setSelectedLecture={setSelectedLecture}
+            setSelectedLecture={handleSelectLecture}
             progress={Array.isArray(progress) ? progress : []}
             onCloseSidebar={() => setIsSidebarOpen(false)}
             onToggleLectureProgress={handleLectureViewed}

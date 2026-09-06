@@ -31,7 +31,7 @@ const Terms = () => {
             Terms of Service
           </h1>
           <p className="text-sm sm:text-base text-gray-300 max-w-xl font-normal leading-relaxed">
-            Welcome to Skillera. These Terms of Service govern your use of our LMS platform, websites, and online courses.
+            Welcome to Samriddhi Gyan. These Terms of Service govern your use of our LMS platform, websites, and online courses.
           </p>
           <p className="text-xs text-gray-400 font-semibold">
             Last Updated: July 1, 2026
@@ -84,7 +84,7 @@ const Terms = () => {
                 </div>
                 <div className="text-xs sm:text-sm text-[#2d2f31] font-normal leading-relaxed space-y-3">
                   <p>
-                    By registering for, accessing, or using the Skillera LMS platform, you agree to comply with and be bound by these Terms of Service. If you do not agree to these terms, you are prohibited from utilizing our website, platform, and online services.
+                    By registering for, accessing, or using the Samriddhi Gyan LMS platform, you agree to comply with and be bound by these Terms of Service. If you do not agree to these terms, you are prohibited from utilizing our website, platform, and online services.
                   </p>
                   <p>
                     These terms apply to all visitors, registered students, instructors, and any others who access or use our LMS system. We reserve the right, at our sole discretion, to modify or replace these terms at any time.
@@ -102,10 +102,10 @@ const Terms = () => {
                 </div>
                 <div className="text-xs sm:text-sm text-[#2d2f31] font-normal leading-relaxed space-y-3">
                   <p>
-                    When creating an account on Skillera, you must provide accurate, complete, and current information. Failure to do so constitutes a breach of the Terms, which may result in immediate suspension or termination of your account.
+                    When creating an account on Samriddhi Gyan, you must provide accurate, complete, and current information. Failure to do so constitutes a breach of the Terms, which may result in immediate suspension or termination of your account.
                   </p>
                   <p>
-                    You are solely responsible for safeguarding the credentials associated with your account and for any activities or actions performed under your password. You agree to immediately notify Skillera upon becoming aware of any breach of security or unauthorized use of your account.
+                    You are solely responsible for safeguarding the credentials associated with your account and for any activities or actions performed under your password. You agree to immediately notify Samriddhi Gyan upon becoming aware of any breach of security or unauthorized use of your account.
                   </p>
                 </div>
               </section>
@@ -120,10 +120,10 @@ const Terms = () => {
                 </div>
                 <div className="text-xs sm:text-sm text-[#2d2f31] font-normal leading-relaxed space-y-3">
                   <p>
-                    Upon purchasing a course, Skillera grants you a limited, non-exclusive, non-transferable license to access the lecture videos, transcripts, assignments, and reading materials solely for your personal, non-commercial education.
+                    Upon purchasing a course, Samriddhi Gyan grants you a limited, non-exclusive, non-transferable license to access the lecture videos, transcripts, assignments, and reading materials solely for your personal, non-commercial education.
                   </p>
                   <p>
-                    You may not distribute, share, download, modify, resell, or publicly display any course materials or lectures without prior written consent from the author or Skillera. Violation of this license may lead to immediate revocation of course access without refund.
+                    You may not distribute, share, download, modify, resell, or publicly display any course materials or lectures without prior written consent from the author or Samriddhi Gyan. Violation of this license may lead to immediate revocation of course access without refund.
                   </p>
                 </div>
               </section>
@@ -156,7 +156,7 @@ const Terms = () => {
                 </div>
                 <div className="text-xs sm:text-sm text-[#2d2f31] font-normal leading-relaxed space-y-3">
                   <p>
-                    As a user of Skillera, you agree to maintain academic honesty, integrity, and mutual respect. You are strictly prohibited from:
+                    As a user of Samriddhi Gyan, you agree to maintain academic honesty, integrity, and mutual respect. You are strictly prohibited from:
                   </p>
                   <ul className="list-disc pl-5 space-y-1.5 font-normal">
                     <li>Posting offensive, discriminatory, abusive, or harassing content inside the discussion forums or course reviews.</li>
@@ -176,7 +176,7 @@ const Terms = () => {
                 </div>
                 <div className="text-xs sm:text-sm text-[#2d2f31] font-normal leading-relaxed space-y-3">
                   <p>
-                    To the maximum extent permitted by law, Skillera LMS and its affiliates, directors, officers, employees, or content contributors shall not be liable for any direct, indirect, incidental, special, or consequential damages resulting from your use of or inability to access our online services.
+                    To the maximum extent permitted by law, Samriddhi Gyan LMS and its affiliates, directors, officers, employees, or content contributors shall not be liable for any direct, indirect, incidental, special, or consequential damages resulting from your use of or inability to access our online services.
                   </p>
                   <p>
                     We do not guarantee that our platform will always operate error-free or that access will be completely uninterrupted. All services and course materials are provided on an "as is" and "as available" basis.
@@ -197,7 +197,7 @@ const Terms = () => {
                     If you have any questions, disputes, or feedback regarding these Terms of Service, please reach out to our legal compliance and student support teams:
                   </p>
                   <div className="bg-slate-50 border border-gray-200 p-4 space-y-1 font-semibold text-[#2d2f31]">
-                    <p>Skillera LMS Inc.</p>
+                    <p>Samriddhi Gyan LMS Inc.</p>
                     <p>Support Email: legal@samriddhigyan.com</p>
                     <p>Address: Kathmandu, Nepal</p>
                   </div>

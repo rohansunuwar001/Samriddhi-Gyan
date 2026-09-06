@@ -56,7 +56,7 @@ const ChatBot = () => {
   }, []);
 
   const intro =
-    " Welcome to Skillera! We’re here to help. Chat with a live expert or I can show you around.";
+    " Welcome to Samriddhi Gyan! We’re here to help. Chat with a live expert or I can show you around.";
 
   const options = [
     "Learn More",
@@ -91,7 +91,7 @@ const ChatBot = () => {
     // This logic should only run if the chatbot icon is actually shown
     if (!showChatbotIcon) {
       clearInterval(titleToggleInterval.current); // Ensure interval is cleared if icon is hidden
-      document.title = originalTitle.current || "Skillera"; // Reset title
+      document.title = originalTitle.current || "Samriddhi Gyan"; // Reset title
       return;
     }
 
@@ -109,7 +109,7 @@ const ChatBot = () => {
         setHasUnread(false);
       }
       clearInterval(titleToggleInterval.current);
-      document.title = originalTitle.current || "Skillera";
+      document.title = originalTitle.current || "Samriddhi Gyan";
     } else {
       if (unreadMessages > 0 || hasUnread) {
         clearInterval(titleToggleInterval.current);
@@ -122,7 +122,7 @@ const ChatBot = () => {
         setHasUnread(true);
       } else {
         clearInterval(titleToggleInterval.current);
-        document.title = originalTitle.current || "Skillera";
+        document.title = originalTitle.current || "Samriddhi Gyan";
         setHasUnread(false);
       }
     }
@@ -305,7 +305,7 @@ const ChatBot = () => {
                 <ChatbotIcon />
                 </div>
                 <h2 className="logo-text text-[0.8rem] font-semibold text-[#fff]">
-                  Skillera
+                  Samriddhi Gyan
                 </h2>
               </div>
               <button
@@ -327,7 +327,7 @@ const ChatBot = () => {
                   <ChatbotIcon />
                   <div className="bot-container">
                     <div className="bot-header text-[10px] text-black">
-                      Skillera
+                      Samriddhi Gyan
                     </div>
                     <p className="message-text font-lexend animate-slide-in max-w-[75%] transform whitespace-pre-line rounded-bl-[3px] rounded-br-[13px] rounded-tl-[13px] rounded-tr-[13px] bg-[#e1e5e8] px-[9px] py-[5px] text-left text-sm text-black [word-wrap:break-word] lg:text-[0.8rem]">
                       {intro}
