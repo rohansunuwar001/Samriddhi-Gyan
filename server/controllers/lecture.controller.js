@@ -1,4 +1,5 @@
 import { transcodeToHLS } from "../utils/transcoder.js";
+import { uploadHLSToB2, deleteHLSFromB2, isB2Configured } from "../utils/b2Storage.js";
 import fs from "fs";
 import path from "path";
 import { Lecture } from "../models/lecture.model.js";
@@ -206,11 +207,6 @@ export const uploadVideo = async (req, res) => {
         `[uploadVideo] Done. Renditions: ${renditions.map((r) => r.name).join(", ")}`,
       );
 
-      // Build the public URL for the master playlist
-      // Express serves /public/hls/ at the /hls route (see app.js snippet below)
-      const backendUrl = process.env.BACKEND_URI || "http://localhost:8080";
-      const masterUrl = `${backendUrl}/hls/${lectureId}/master.m3u8`;
-
       // Extract and transcribe speech in the background
       let transcriptText = "";
       try {
@@ -219,11 +215,10 @@ export const uploadVideo = async (req, res) => {
         console.error("[uploadVideo] Transcription error:", trErr.message);
       }
 
-      // Generate thumbnail from the raw upload (still available at this point)
-      let thumbnailUrl = "";
+      // Generate thumbnail from the raw upload
+      const thumbFilename = "thumb.jpg";
+      const thumbPath = path.join(outputDir, thumbFilename);
       try {
-        const thumbFilename = "thumb.jpg";
-        const thumbPath = path.join(outputDir, thumbFilename);
         await new Promise((resolve, reject) => {
           const proc = spawn(ffmpegStatic, [
             "-i", rawPath,
@@ -236,11 +231,50 @@ export const uploadVideo = async (req, res) => {
           proc.on("close", (code) => (code === 0 ? resolve() : reject(new Error("thumb failed"))));
           proc.on("error", reject);
         });
-        const bUrl = process.env.BACKEND_URI || "http://localhost:8080";
-        thumbnailUrl = `${bUrl}/hls/${lectureId}/${thumbFilename}`;
-        console.log(`[uploadVideo] Thumbnail generated: ${thumbnailUrl}`);
       } catch (thumbErr) {
         console.error("[uploadVideo] Thumbnail generation error:", thumbErr.message);
+      }
+
+      let masterUrl = "";
+      let thumbnailUrl = "";
+
+      // Upload HLS directory to Backblaze B2 if configured
+      if (isB2Configured()) {
+        setJob({
+          status: "uploading",
+          progress: 80,
+          phase: "Uploading HLS chunks to Backblaze B2…",
+        });
+
+        const b2Result = await uploadHLSToB2(
+          outputDir,
+          `lectures/${lectureId}`,
+          (pct) => {
+            setJob({
+              status: "uploading",
+              progress: 80 + Math.round(pct * 0.18),
+              phase: `Uploading to Backblaze B2… ${pct}%`,
+            });
+          },
+        );
+
+        masterUrl = b2Result.masterUrl;
+        thumbnailUrl = b2Result.thumbnailUrl;
+
+        // Clean up temporary local HLS output directory
+        try {
+          fs.rmSync(outputDir, { recursive: true, force: true });
+          console.log(`[uploadVideo] Cleaned up local HLS directory: ${outputDir}`);
+        } catch (cleanupErr) {
+          console.warn("[uploadVideo] Failed to clean up local HLS dir:", cleanupErr.message);
+        }
+      } else {
+        // Fallback to local static serving if B2 is not configured
+        const backendUrl = process.env.BACKEND_URI || "http://localhost:8080";
+        masterUrl = `${backendUrl}/hls/${lectureId}/master.m3u8`;
+        if (fs.existsSync(thumbPath)) {
+          thumbnailUrl = `${backendUrl}/hls/${lectureId}/${thumbFilename}`;
+        }
       }
 
       await Lecture.findByIdAndUpdate(lectureId, {
@@ -388,7 +422,14 @@ export const deleteLecture = async (req, res) => {
         .json({ success: false, message: "Lecture not found" });
     }
 
-    // Delete HLS files from disk
+    // Delete HLS files from Backblaze B2 if configured
+    try {
+      await deleteHLSFromB2(`lectures/${lectureId}`);
+    } catch (b2Err) {
+      console.error(`[deleteLecture] Failed to delete B2 objects for lecture ${lectureId}:`, b2Err.message);
+    }
+
+    // Delete HLS files from local disk if present
     const hlsDir = path.join(process.cwd(), "public", "hls", lectureId);
     try {
       fs.rmSync(hlsDir, { recursive: true, force: true });

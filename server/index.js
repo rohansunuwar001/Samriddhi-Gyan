@@ -1,5 +1,5 @@
 // server/index.js
-
+import "dotenv/config";
 import app from "./app.js";
 import { ServerApp } from "./core/server.app.js";
 import { io, userSocketMap } from "./utils/socket.js";

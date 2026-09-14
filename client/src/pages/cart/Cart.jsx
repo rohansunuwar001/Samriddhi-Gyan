@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Loader2, ShoppingCart, Trash2, Heart, Tag, Star, ArrowRight } from "lucide-react";
 import { useGetCartQuery, useRemoveFromCartMutation } from "@/features/api/cartApi";
+import { useValidateCouponMutation } from "@/features/api/couponApi";
 import { useState } from "react";
 import YouMightAlsoLike from "../Courses/YouMightAlsoLike";
 
@@ -12,20 +13,36 @@ const Cart = () => {
   const navigate = useNavigate();
   const { data, isLoading: isCartLoading, isError } = useGetCartQuery();
   const [removeFromCart, { isLoading: isRemoving }] = useRemoveFromCartMutation();
+  const [validateCoupon, { isLoading: isValidatingCoupon }] = useValidateCouponMutation();
 
   const [couponCode, setCouponCode] = useState("");
-  const [isCouponApplied, setIsCouponApplied] = useState(false);
-  const [appliedCouponText, setAppliedCouponText] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
 
-  const handleApplyCoupon = () => {
+  const handleApplyCoupon = async (e) => {
+    e?.preventDefault();
     if (!couponCode.trim()) {
       toast.error("Please enter a coupon code.");
       return;
     }
-    // Simulate applying coupon
-    setIsCouponApplied(true);
-    setAppliedCouponText(couponCode.toUpperCase());
-    toast.success("Coupon applied successfully!");
+
+    try {
+      const res = await validateCoupon({
+        code: couponCode.trim(),
+        amount: subtotal,
+      }).unwrap();
+
+      const validData = res.data || res;
+      setAppliedCoupon(validData);
+      toast.success(res.message || "Coupon applied successfully!");
+      setCouponCode("");
+    } catch (err) {
+      toast.error(err?.data?.message || err?.message || "Invalid or expired coupon code.");
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    toast.info("Coupon removed.");
   };
 
   if (isCartLoading) {
@@ -52,6 +69,22 @@ const Cart = () => {
   const certsSubtotal = cartCertifications.reduce((acc, c) => acc + (c.examPrice ?? 0), 0);
   const subtotal = coursesSubtotal + certsSubtotal;
 
+  let couponDiscount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.coupon?.discountType === "percentage") {
+      couponDiscount = Math.round((subtotal * appliedCoupon.coupon.discountValue) / 100);
+      if (appliedCoupon.coupon.maxDiscountAmount && couponDiscount > appliedCoupon.coupon.maxDiscountAmount) {
+        couponDiscount = appliedCoupon.coupon.maxDiscountAmount;
+      }
+    } else if (appliedCoupon.coupon?.discountType === "fixed") {
+      couponDiscount = Math.min(appliedCoupon.coupon.discountValue, subtotal);
+    } else if (appliedCoupon.discountAmount) {
+      couponDiscount = Math.min(appliedCoupon.discountAmount, subtotal);
+    }
+  }
+
+  const finalTotal = Math.max(0, subtotal - couponDiscount);
+
   const coursesOriginalTotal = cart.reduce(
     (acc, c) => acc + (c.price?.original ?? c.price?.current ?? 0),
     0
@@ -60,8 +93,8 @@ const Cart = () => {
   const originalTotal = coursesOriginalTotal + certsOriginalTotal;
 
   const discountPct =
-    originalTotal > subtotal && originalTotal > 0
-      ? Math.round(100 - (subtotal / originalTotal) * 100)
+    originalTotal > finalTotal && originalTotal > 0
+      ? Math.round(100 - (finalTotal / originalTotal) * 100)
       : 0;
 
   const renderStars = (rating = 0, size = "h-3.5 w-3.5") => (
@@ -292,7 +325,12 @@ const Cart = () => {
               <div className="space-y-4">
                 <div className="text-[#2d2f31]">
                   <p className="text-base font-bold text-[#6a6f73]">Total:</p>
-                  <p className="text-4xl font-extrabold mt-1">Rs {subtotal.toLocaleString()}</p>
+                  <p className="text-4xl font-extrabold mt-1">Rs {finalTotal.toLocaleString()}</p>
+                  {couponDiscount > 0 && (
+                    <p className="text-sm font-semibold text-[#38755b] mt-1">
+                      Coupon savings: Rs {couponDiscount.toLocaleString()}
+                    </p>
+                  )}
                   {discountPct > 0 && (
                     <div className="mt-1 flex items-center gap-2">
                       <span className="text-[#6a6f73] line-through text-base">
@@ -324,28 +362,40 @@ const Cart = () => {
               <div className="space-y-3">
                 <h3 className="text-sm font-extrabold text-[#2d2f31]">Promotions</h3>
                 
-                {isCouponApplied && (
-                  <div className="flex items-center justify-between border border-[#8a8d91] bg-[#f7f9fa] px-4 py-2.5 text-sm">
-                    <span className="font-bold text-[#6a6f73]">{appliedCouponText}</span>
-                    <span className="font-bold text-[#38755b]">Applied!</span>
+                {appliedCoupon ? (
+                  <div className="flex items-center justify-between border border-[#38755b] bg-[#e6f4ea] px-4 py-2.5 text-sm">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-[#1e4620]">
+                        {appliedCoupon.coupon?.code || appliedCoupon.code}
+                      </span>
+                      <span className="font-medium text-[#2e6930]">Applied!</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleRemoveCoupon}
+                      className="text-xs font-semibold text-red-600 hover:underline"
+                    >
+                      Remove
+                    </button>
                   </div>
+                ) : (
+                  <form onSubmit={handleApplyCoupon} className="grid grid-cols-[1fr_80px] gap-2">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      placeholder="Enter Coupon"
+                      className="h-10 border border-[#2d2f31] bg-white px-3 text-sm uppercase outline-none focus:border-[#5624d0]"
+                    />
+                    <Button
+                      type="submit"
+                      disabled={isValidatingCoupon}
+                      className="h-10 bg-white border border-[#2d2f31] text-[#2d2f31] hover:bg-[#f7f9fa] font-bold text-sm rounded-none shadow-none"
+                    >
+                      {isValidatingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
+                    </Button>
+                  </form>
                 )}
-
-                <div className="grid grid-cols-[1fr_80px] gap-2">
-                  <input
-                    type="text"
-                    value={couponCode}
-                    onChange={(e) => setCouponCode(e.target.value)}
-                    placeholder="Enter Coupon"
-                    className="h-10 border border-[#2d2f31] bg-white px-3 text-sm outline-none focus:border-[#5624d0]"
-                  />
-                  <Button
-                    onClick={handleApplyCoupon}
-                    className="h-10 bg-white border border-[#2d2f31] text-[#2d2f31] hover:bg-[#f7f9fa] font-bold text-sm rounded-none shadow-none"
-                  >
-                    Apply
-                  </Button>
-                </div>
               </div>
             </div>
           </div>

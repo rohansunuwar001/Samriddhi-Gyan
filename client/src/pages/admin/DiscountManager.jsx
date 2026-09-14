@@ -10,7 +10,8 @@ import {
   Check,
   X,
   Loader2,
-  CreditCard
+  CreditCard,
+  Tag
 } from "lucide-react";
 import {
   useGetDiscountBannersQuery,
@@ -30,6 +31,12 @@ import {
   useGetSubscriptionPlansQuery,
   useUpdateSubscriptionPlansMutation
 } from "@/features/api/subscriptionPlansApi";
+import {
+  useGetCouponsQuery,
+  useCreateCouponMutation,
+  useUpdateCouponMutation,
+  useDeleteCouponMutation,
+} from "@/features/api/couponApi";
 
 const DiscountManager = () => {
   const [activeTab, setActiveTab] = useState("banner");
@@ -43,6 +50,7 @@ const DiscountManager = () => {
   const { data: promoData, isLoading: loadingPromos } = useGetGetOfferPromosQuery();
   const { data: navbarData, isLoading: loadingNavbars } = useGetSubscriptionNavbarsQuery();
   const { data: plansData, isLoading: loadingPlans } = useGetSubscriptionPlansQuery();
+  const { data: couponData, isLoading: loadingCoupons } = useGetCouponsQuery();
 
   // Mutations
   const [createBanner, { isLoading: creatingBanner }] = useCreateDiscountBannerMutation();
@@ -57,6 +65,10 @@ const DiscountManager = () => {
   const [updateNavbarMutation, { isLoading: updatingNavbar }] = useUpdateSubscriptionNavbarMutation();
   const [deleteNavbar] = useDeleteSubscriptionNavbarMutation();
   const [updatePlansMutation, { isLoading: isUpdatingPlans }] = useUpdateSubscriptionPlansMutation();
+
+  const [createCoupon, { isLoading: creatingCoupon }] = useCreateCouponMutation();
+  const [updateCoupon, { isLoading: updatingCoupon }] = useUpdateCouponMutation();
+  const [deleteCoupon] = useDeleteCouponMutation();
 
   const [plansForm, setPlansForm] = useState([]);
 
@@ -100,6 +112,18 @@ const DiscountManager = () => {
     isActive: false
   });
 
+  const [couponForm, setCouponForm] = useState({
+    code: "",
+    discountType: "percentage",
+    discountValue: "",
+    minPurchaseAmount: "",
+    maxDiscountAmount: "",
+    validUntil: "",
+    usageLimit: "",
+    description: "",
+    isActive: true,
+  });
+
   // Open modal for Create
   const handleOpenCreate = () => {
     setEditingItem(null);
@@ -121,6 +145,18 @@ const DiscountManager = () => {
         buttonUrl: "/subscribe",
         finePrint: "",
         isActive: false
+      });
+    } else if (activeTab === "coupons") {
+      setCouponForm({
+        code: "",
+        discountType: "percentage",
+        discountValue: "",
+        minPurchaseAmount: "",
+        maxDiscountAmount: "",
+        validUntil: "",
+        usageLimit: "",
+        description: "",
+        isActive: true,
       });
     } else {
       setNavbarForm({
@@ -156,6 +192,18 @@ const DiscountManager = () => {
         finePrint: item.finePrint || "",
         isActive: item.isActive || false
       });
+    } else if (activeTab === "coupons") {
+      setCouponForm({
+        code: item.code || "",
+        discountType: item.discountType || "percentage",
+        discountValue: item.discountValue !== undefined ? String(item.discountValue) : "",
+        minPurchaseAmount: item.minPurchaseAmount !== undefined ? String(item.minPurchaseAmount) : "",
+        maxDiscountAmount: item.maxDiscountAmount ? String(item.maxDiscountAmount) : "",
+        validUntil: item.validUntil ? new Date(item.validUntil).toISOString().split("T")[0] : "",
+        usageLimit: item.usageLimit !== undefined && item.usageLimit !== null ? String(item.usageLimit) : "",
+        description: item.description || "",
+        isActive: item.isActive ?? true,
+      });
     } else {
       setNavbarForm({
         planName: item.planName || "Personal Plan",
@@ -188,6 +236,26 @@ const DiscountManager = () => {
           await createPromo(promoForm).unwrap();
           toast.success("Promo offer created successfully!");
         }
+      } else if (activeTab === "coupons") {
+        const payload = {
+          code: couponForm.code.trim().toUpperCase(),
+          discountType: couponForm.discountType,
+          discountValue: Number(couponForm.discountValue),
+          minPurchaseAmount: couponForm.minPurchaseAmount ? Number(couponForm.minPurchaseAmount) : 0,
+          maxDiscountAmount: couponForm.maxDiscountAmount ? Number(couponForm.maxDiscountAmount) : null,
+          validUntil: couponForm.validUntil ? couponForm.validUntil : null,
+          usageLimit: couponForm.usageLimit ? Number(couponForm.usageLimit) : null,
+          description: couponForm.description,
+          isActive: couponForm.isActive,
+        };
+
+        if (editingItem) {
+          await updateCoupon({ id: editingItem._id, ...payload }).unwrap();
+          toast.success("Coupon updated successfully!");
+        } else {
+          await createCoupon(payload).unwrap();
+          toast.success("Coupon created successfully!");
+        }
       } else {
         if (editingItem) {
           await updateNavbarMutation({ id: editingItem._id, ...navbarForm }).unwrap();
@@ -199,7 +267,7 @@ const DiscountManager = () => {
       }
       setIsModalOpen(false);
     } catch (err) {
-      toast.error(err.data?.message || "Operation failed.");
+      toast.error(err.data?.message || err.message || "Operation failed.");
     }
   };
 
@@ -230,6 +298,12 @@ const DiscountManager = () => {
           isActive: updatedStatus
         }).unwrap();
         toast.success(updatedStatus ? "Offer activated!" : "Offer deactivated!");
+      } else if (activeTab === "coupons") {
+        await updateCoupon({
+          id: item._id,
+          isActive: updatedStatus,
+        }).unwrap();
+        toast.success(updatedStatus ? "Coupon activated!" : "Coupon deactivated!");
       } else {
         await updateNavbarMutation({
           id: item._id,
@@ -256,6 +330,9 @@ const DiscountManager = () => {
       } else if (activeTab === "promo") {
         await deletePromo(id).unwrap();
         toast.success("Promo offer deleted successfully!");
+      } else if (activeTab === "coupons") {
+        await deleteCoupon(id).unwrap();
+        toast.success("Coupon deleted successfully!");
       } else {
         await deleteNavbar(id).unwrap();
         toast.success("Navbar configuration deleted successfully!");
@@ -328,10 +405,117 @@ const DiscountManager = () => {
         >
           <CreditCard size={16} /> Subscription Plans
         </button>
+        <button
+          onClick={() => setActiveTab("coupons")}
+          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-normal text-base transition-all ${
+            activeTab === "coupons"
+              ? "border-[#a435f0] text-[#a435f0]"
+              : "border-transparent text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          <Tag size={16} /> Coupons & Promo Codes
+        </button>
       </div>
 
       {/* Contents based on active tab */}
       <div className="bg-white dark:bg-[#1c1d1f] border border-gray-200 dark:border-gray-800 rounded-xl overflow-hidden shadow-sm">
+        {/* COUPONS TAB */}
+        {activeTab === "coupons" && (
+          <div>
+            {loadingCoupons ? (
+              <div className="flex justify-center items-center py-20">
+                <Loader2 className="w-8 h-8 animate-spin text-[#a435f0]" />
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-base border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 text-gray-500 uppercase tracking-wider text-sm font-normal">
+                      <th className="px-6 py-4">Coupon Code</th>
+                      <th className="px-6 py-4">Discount</th>
+                      <th className="px-6 py-4">Min Purchase / Cap</th>
+                      <th className="px-6 py-4">Validity & Usage</th>
+                      <th className="px-6 py-4">Status</th>
+                      <th className="px-6 py-4 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
+                    {couponData?.coupons?.length === 0 ? (
+                      <tr>
+                        <td colSpan="6" className="px-6 py-12 text-center text-gray-400">
+                          No coupons created yet. Click "Add New Configuration" to create your first coupon.
+                        </td>
+                      </tr>
+                    ) : (
+                      couponData?.coupons?.map((item) => (
+                        <tr key={item._id} className="hover:bg-gray-50/50 dark:hover:bg-gray-900/20">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <span className="font-mono font-semibold text-base bg-purple-50 dark:bg-purple-950/40 text-[#a435f0] px-3 py-1 rounded border border-purple-200 dark:border-purple-800">
+                                {item.code}
+                              </span>
+                            </div>
+                            {item.description && (
+                              <div className="text-xs text-gray-400 mt-1 max-w-xs truncate">
+                                {item.description}
+                              </div>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white">
+                            {item.discountType === "percentage"
+                              ? `${item.discountValue}% OFF`
+                              : `Rs ${item.discountValue?.toLocaleString()} OFF`}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                            <div>Min: Rs {item.minPurchaseAmount || 0}</div>
+                            {item.maxDiscountAmount && (
+                              <div className="text-xs text-gray-400">Cap: Rs {item.maxDiscountAmount}</div>
+                            )}
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                            <div>
+                              Expiry: {item.validUntil ? new Date(item.validUntil).toLocaleDateString() : "Never"}
+                            </div>
+                            <div className="text-xs text-gray-400">
+                              Used: {item.usedCount || 0} / {item.usageLimit || "Unlimited"}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <button
+                              onClick={() => handleToggleActive(item)}
+                              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-normal transition-all ${
+                                item.isActive
+                                  ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
+                                  : "bg-gray-150 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
+                              }`}
+                            >
+                              <span className={`w-2 h-2 rounded-full ${item.isActive ? "bg-green-500" : "bg-gray-400"}`} />
+                              {item.isActive ? "Active" : "Inactive"}
+                            </button>
+                          </td>
+                          <td className="px-6 py-4 text-right space-x-2">
+                            <button
+                              onClick={() => handleOpenEdit(item)}
+                              className="inline-flex p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-850 text-blue-500 transition-colors"
+                            >
+                              <Edit size={16} />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(item._id)}
+                              className="inline-flex p-1.5 rounded hover:bg-gray-100 dark:hover:bg-gray-850 text-red-500 transition-colors"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
         {/* BANNER TAB */}
         {activeTab === "banner" && (
           <div>
@@ -948,6 +1132,139 @@ const DiscountManager = () => {
                 </div>
               )}
 
+              {/* FORM FIELDS FOR COUPONS */}
+              {activeTab === "coupons" && (
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                        Coupon Code *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={couponForm.code}
+                        onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value.toUpperCase() })}
+                        placeholder="e.g. SAVE20"
+                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base font-mono uppercase focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                        Discount Type
+                      </label>
+                      <select
+                        value={couponForm.discountType}
+                        onChange={(e) => setCouponForm({ ...couponForm, discountType: e.target.value })}
+                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                      >
+                        <option value="percentage">Percentage (%)</option>
+                        <option value="fixed">Fixed Amount (Rs)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                        Discount Value * {couponForm.discountType === "percentage" ? "(%)" : "(Rs)"}
+                      </label>
+                      <input
+                        type="number"
+                        required
+                        min="1"
+                        max={couponForm.discountType === "percentage" ? "100" : undefined}
+                        value={couponForm.discountValue}
+                        onChange={(e) => setCouponForm({ ...couponForm, discountValue: e.target.value })}
+                        placeholder={couponForm.discountType === "percentage" ? "e.g. 20" : "e.g. 200"}
+                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                        Min. Purchase (Rs)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={couponForm.minPurchaseAmount}
+                        onChange={(e) => setCouponForm({ ...couponForm, minPurchaseAmount: e.target.value })}
+                        placeholder="e.g. 500 (0 for none)"
+                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                        Max Cap (Rs, % only)
+                      </label>
+                      <input
+                        type="number"
+                        min="0"
+                        disabled={couponForm.discountType !== "percentage"}
+                        value={couponForm.maxDiscountAmount}
+                        onChange={(e) => setCouponForm({ ...couponForm, maxDiscountAmount: e.target.value })}
+                        placeholder="Optional cap"
+                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0] disabled:opacity-50"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                        Usage Limit
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={couponForm.usageLimit}
+                        onChange={(e) => setCouponForm({ ...couponForm, usageLimit: e.target.value })}
+                        placeholder="e.g. 100 (blank for unlimited)"
+                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                      Expiry Date (Optional)
+                    </label>
+                    <input
+                      type="date"
+                      value={couponForm.validUntil}
+                      onChange={(e) => setCouponForm({ ...couponForm, validUntil: e.target.value })}
+                      className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                      Description / Notes (Optional)
+                    </label>
+                    <input
+                      type="text"
+                      value={couponForm.description}
+                      onChange={(e) => setCouponForm({ ...couponForm, description: e.target.value })}
+                      placeholder="e.g. Special festive promo 20% off"
+                      className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                    />
+                  </div>
+
+                  <div className="flex items-center gap-3 pt-2">
+                    <input
+                      type="checkbox"
+                      id="couponActive"
+                      checked={couponForm.isActive}
+                      onChange={(e) => setCouponForm({ ...couponForm, isActive: e.target.checked })}
+                      className="w-4 h-4 text-[#a435f0] border-gray-300 rounded focus:ring-[#a435f0] cursor-pointer"
+                    />
+                    <label htmlFor="couponActive" className="text-base font-normal select-none cursor-pointer">
+                      Enable and activate this coupon immediately
+                    </label>
+                  </div>
+                </div>
+              )}
+
               {/* ACTION BUTTONS */}
               <div className="flex justify-end gap-3 pt-6 border-t border-gray-200 dark:border-gray-800">
                 <button
@@ -959,10 +1276,10 @@ const DiscountManager = () => {
                 </button>
                 <button
                   type="submit"
-                  disabled={creatingBanner || updatingBanner || creatingPromo || updatingPromo || creatingNavbar || updatingNavbar}
+                  disabled={creatingBanner || updatingBanner || creatingPromo || updatingPromo || creatingNavbar || updatingNavbar || creatingCoupon || updatingCoupon}
                   className="flex items-center justify-center gap-1.5 bg-[#a435f0] hover:bg-[#8720cf] text-white px-5 py-2 rounded-lg font-normal text-base transition-all shadow-md"
                 >
-                  {(creatingBanner || updatingBanner || creatingPromo || updatingPromo || creatingNavbar || updatingNavbar) && (
+                  {(creatingBanner || updatingBanner || creatingPromo || updatingPromo || creatingNavbar || updatingNavbar || creatingCoupon || updatingCoupon) && (
                     <Loader2 className="w-4 h-4 animate-spin" />
                   )}
                   Save Changes

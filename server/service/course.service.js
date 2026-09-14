@@ -16,6 +16,7 @@ import { SearchSuggestion } from "../models/searchSuggestion.js";
 import Category from "../models/category.model.js";
 import Topic from "../models/topic.model.js";
 import { uploadMedia, deleteFromCloudinary } from "../utils/cloudinary.js";
+import { uploadHLSToB2, deleteHLSFromB2, isB2Configured } from "../utils/b2Storage.js";
 import { createEmbeddingForText, cosineSimilarity } from "../utils/embedding.js";
 import { extractCloudinaryPublicId } from "../helpers/cloudinary.helper.js";
 import { upsertSearchSuggestion } from "../helpers/searchSuggestion.helper.js";
@@ -184,29 +185,56 @@ export class CourseService extends BaseService {
           }
         })
         .then(async () => {
-          const backendUrl = process.env.BACKEND_URI || "http://localhost:8080";
-          const masterUrl = `${backendUrl}/hls/promo-${courseId}/master.m3u8`;
           const thumbnailFilename = "thumbnail.jpg";
           const thumbnailDest = path.join(outputDir, thumbnailFilename);
-          let promoVideoThumbnail = "";
           try {
             await extractThumbnail(rawPath, thumbnailDest);
-            promoVideoThumbnail = `${backendUrl}/hls/promo-${courseId}/${thumbnailFilename}`;
           } catch (thumbErr) {
             console.error("[Promo Transcoder] Failed to extract thumbnail:", thumbErr.message);
+          }
+
+          let masterUrl = "";
+          let promoVideoThumbnail = "";
+
+          if (isB2Configured()) {
+            const b2Result = await uploadHLSToB2(
+              outputDir,
+              `promo/promo-${courseId}`,
+              async (pct) => {
+                try {
+                  await Course.findByIdAndUpdate(courseId, {
+                    promoVideoProgress: 80 + Math.round(pct * 0.2),
+                  });
+                } catch (_) {}
+              },
+            );
+            masterUrl = b2Result.masterUrl;
+            promoVideoThumbnail = b2Result.thumbnailUrl;
+
+            // Remove local temp directory
+            try {
+              fs.rmSync(outputDir, { recursive: true, force: true });
+            } catch (_) {}
+          } else {
+            const backendUrl = process.env.BACKEND_URI || "http://localhost:8080";
+            masterUrl = `${backendUrl}/hls/promo-${courseId}/master.m3u8`;
+            if (fs.existsSync(thumbnailDest)) {
+              promoVideoThumbnail = `${backendUrl}/hls/promo-${courseId}/${thumbnailFilename}`;
+            }
           }
 
           await Course.findByIdAndUpdate(courseId, {
             promoVideoStatus: "ready",
             promoVideoUrl: masterUrl,
             promoVideoThumbnail: promoVideoThumbnail,
-            promoVideoProgress: 100
+            promoVideoProgress: 100,
           });
-          try { fs.rmSync(rawPath, { force: true }); } catch(_) {}
+          try { fs.rmSync(rawPath, { force: true }); } catch (_) {}
         })
         .catch(async (err) => {
+          console.error("[Promo Transcoder] Error processing promo video:", err.message);
           await Course.findByIdAndUpdate(courseId, { promoVideoStatus: "failed" });
-          try { fs.rmSync(rawPath, { force: true }); } catch(_) {}
+          try { fs.rmSync(rawPath, { force: true }); } catch (_) {}
         });
       }).catch(err => {
         console.error("Failed to load HLS transcoder:", err);
@@ -273,10 +301,24 @@ export class CourseService extends BaseService {
       if (publicId) await deleteFromCloudinary(publicId).catch(() => {});
     }
 
+    // Clean up promo video from Backblaze B2 and local disk
+    await deleteHLSFromB2(`promo/promo-${courseId}`);
+    const promoDir = path.join(process.cwd(), "public", "hls", `promo-${courseId}`);
+    if (fs.existsSync(promoDir)) {
+      try { fs.rmSync(promoDir, { recursive: true, force: true }); } catch (_) {}
+    }
+
     if (course.sections && course.sections.length > 0) {
       for (const sectionId of course.sections) {
         const section = await Section.findById(sectionId);
         if (section && section.lectures) {
+          for (const lecId of section.lectures) {
+            await deleteHLSFromB2(`lectures/${lecId}`);
+            try {
+              const lecHlsDir = path.join(process.cwd(), "public", "hls", lecId.toString());
+              fs.rmSync(lecHlsDir, { recursive: true, force: true });
+            } catch (_) {}
+          }
           await Lecture.deleteMany({ _id: { $in: section.lectures } });
         }
       }
@@ -294,9 +336,10 @@ export class CourseService extends BaseService {
       throw error;
     }
 
+    await deleteHLSFromB2(`promo/promo-${courseId}`);
     const outputDir = path.join(process.cwd(), "public", "hls", `promo-${courseId}`);
     if (fs.existsSync(outputDir)) {
-      fs.rmSync(outputDir, { recursive: true, force: true });
+      try { fs.rmSync(outputDir, { recursive: true, force: true }); } catch (_) {}
     }
 
     course.promoVideoUrl = "";
