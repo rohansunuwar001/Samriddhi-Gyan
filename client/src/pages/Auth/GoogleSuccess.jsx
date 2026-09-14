@@ -4,8 +4,8 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { userLoggedIn } from "@/features/authSlice";
+import { authApi } from "@/features/api/authApi";
 import { apiSlice } from "@/features/api/apiSlice";
-;
 
 const GoogleSuccess = () => {
   const navigate = useNavigate();
@@ -23,9 +23,9 @@ const GoogleSuccess = () => {
       // 3. Dispatch action to immediately update Redux state (token & isAuthenticated)
       dispatch(userLoggedIn({ token }));
 
-      // 4. Invalidate the 'User' tag. This is crucial. It tells RTK Query to
-      //    run `useLoadUserQuery` to fetch the full user details using the new token.
+      // 4. Invalidate the 'User' tag and initiate user fetch
       dispatch(apiSlice.util.invalidateTags(["User"]));
+      dispatch(authApi.endpoints.loadUser.initiate(undefined, { forceRefetch: true }));
 
       // 5. Navigate to the homepage. The user is now authenticated.
       navigate("/");

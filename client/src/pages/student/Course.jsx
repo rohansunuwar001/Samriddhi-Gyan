@@ -12,19 +12,21 @@ import {
   useGetWishlistQuery,
   useRemoveFromWishlistMutation,
 } from "@/features/api/wishlistApi";
+import { useSelector } from "react-redux";
 import { Popover, PopoverContent, PopoverAnchor } from "@/components/ui/popover";
 import * as PopoverPrimitive from "@radix-ui/react-popover";
 
 const Course = ({ course }) => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useSelector((store) => store.auth);
   const [showDetails, setShowDetails] = useState(false);
   const [popoverSide, setPopoverSide] = useState("right");
   const cardRef = useRef(null);
   const enterTimeoutRef = useRef(null);
   const leaveTimeoutRef = useRef(null);
 
-  const { data: cartData } = useGetCartQuery();
-  const { data: wishlistData } = useGetWishlistQuery();
+  const { data: cartData } = useGetCartQuery(undefined, { skip: !isAuthenticated });
+  const { data: wishlistData } = useGetWishlistQuery(undefined, { skip: !isAuthenticated });
   const [addToCart, { isLoading: isAddingToCart }] = useAddToCartMutation();
   const [addToWishlist] = useAddToWishlistMutation();
   const [removeFromWishlist] = useRemoveFromWishlistMutation();

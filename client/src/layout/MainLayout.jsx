@@ -13,11 +13,11 @@ import { useLoadUserQuery } from '@/features/api/authApi'; // Adjust path if nee
 import LoadingSpinner from '@/components/LoadingSpinner'; // Adjust path if needed
 
 const MainLayout = () => {
+  const { user, token } = useSelector((store) => store.auth);
   // Only call loadUser when a token exists — calling without a token hits a protected
   // endpoint and produces a 401 for every unauthenticated visitor.
-  const hasToken = !!localStorage.getItem('authToken');
+  const hasToken = !!token || !!localStorage.getItem('authToken');
   const { isLoading } = useLoadUserQuery(undefined, { skip: !hasToken });
-  const { user } = useSelector((store) => store.auth);
   const isInstructor = user?.role === 'instructor';
   const showBanner = !user || user.role === 'student';
 
