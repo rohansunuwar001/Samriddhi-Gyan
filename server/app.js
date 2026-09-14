@@ -44,6 +44,7 @@ import pathwaysRouter from "./routes/pathways.route.js";
 import evaluationRouter from "./routes/evaluation.route.js";
 import assignmentRouter from "./routes/assignment.route.js";
 import analyticsRouter from "./routes/analytics.route.js";
+import healthRouter from "./routes/health.route.js";
 import path from 'path';
 import { fileURLToPath } from 'url';
 dotenv.config({});
@@ -101,7 +102,10 @@ app.use(passport.initialize());
 app.use(passport.session());
 app.use(morgan("dev"));
 
-// --- Root route ---
+// --- Root & Health routes ---
+app.use("/health", healthRouter);
+app.use("/api/v1/health", healthRouter);
+
 app.get("/", (req, res) => {
   res.json({ 
     message: "Samriddhi Gyan API is running",
