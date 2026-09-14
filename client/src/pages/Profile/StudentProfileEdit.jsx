@@ -1,9 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
+import { useDispatch } from "react-redux";
+import { userLoggedOut } from "@/features/authSlice";
 import {
   useGetUserInfoQuery,
   useUpdateUserInfoMutation,
   useUpdateUserAvatarMutation,
   useUpdateUserPasswordMutation,
+  useDeleteAccountMutation,
 } from "@/features/api/authApi";
 import { useGetSubscriptionPlansQuery } from "@/features/api/subscriptionPlansApi";
 import { useLocation, useNavigate, Link } from "react-router-dom";
@@ -56,10 +59,12 @@ const StudentProfileEdit = () => {
     setActiveTab(getTabFromPath(location.pathname));
   }, [location.pathname]);
 
+  const dispatch = useDispatch();
   const { data: userData, isLoading, refetch } = useGetUserInfoQuery();
   const [updateUserInfo, { isLoading: isSavingInfo }] = useUpdateUserInfoMutation();
   const [updateUserAvatar, { isLoading: isSavingAvatar }] = useUpdateUserAvatarMutation();
   const [updateUserPassword, { isLoading: isSavingPwd }] = useUpdateUserPasswordMutation();
+  const [deleteAccount, { isLoading: isDeletingAccount }] = useDeleteAccountMutation();
   const { data: plansData } = useGetSubscriptionPlansQuery();
 
   const user = userData?.user;
@@ -969,10 +974,25 @@ const StudentProfileEdit = () => {
 
                   <button
                     type="button"
-                    onClick={() => toast.error("Please contact support to permanently close your account.")}
-                    className="bg-[#a435f0] hover:bg-[#8710d8] text-white text-base font-normal px-5 py-2.5 transition-colors"
+                    disabled={isDeletingAccount}
+                    onClick={async () => {
+                      const confirmed = window.confirm(
+                        "Are you absolutely sure you want to permanently delete your account and personal data? This action cannot be undone."
+                      );
+                      if (!confirmed) return;
+                      try {
+                        await deleteAccount().unwrap();
+                        localStorage.removeItem("authToken");
+                        dispatch(userLoggedOut());
+                        toast.success("Your account and associated personal data have been deleted.");
+                        navigate("/");
+                      } catch (err) {
+                        toast.error(err?.data?.message || "Failed to delete account. Please try again.");
+                      }
+                    }}
+                    className="bg-[#b32d0f] hover:bg-[#8f240c] text-white text-base font-normal px-5 py-2.5 transition-colors disabled:opacity-50"
                   >
-                    Close account
+                    {isDeletingAccount ? "Deleting account..." : "Close account permanently"}
                   </button>
                 </div>
               </div>

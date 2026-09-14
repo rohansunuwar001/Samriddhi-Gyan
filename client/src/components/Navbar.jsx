@@ -78,13 +78,13 @@ const MyLearningDropdown = ({ navigate }) => {
         <div>
           {/* Course list — max 4 */}
           <ul className="divide-y divide-gray-100">
-            {courses.slice(0, 4).map((course) => {
+            {courses.slice(0, 4).map((course, idx) => {
               const progress = course.progress || 0;
               const hasStarted = progress > 0;
               const thumbnail = course.thumbnail;
 
               return (
-                <li key={course._id}>
+                <li key={course._id || course.id || `my-course-${idx}`}>
                   <button
                     onClick={() => navigate(`/course-progress/${course._id}`)}
                     className="w-full flex items-start gap-3 px-4 py-3.5 hover:bg-gray-50 transition-colors text-left group"
@@ -203,7 +203,7 @@ const WishlistDropdown = ({ navigate }) => {
         <div>
           {/* Course list — max 3, each is a self-contained card block */}
           <ul className="divide-y divide-gray-100">
-            {courses.slice(0, 3).map((course) => {
+            {courses.slice(0, 3).map((course, idx) => {
               // Correct nested price fields: price.current & price.original
               const currentPrice = course.price?.current ?? 0;
               const originalPrice = course.price?.original ?? 0;
@@ -211,7 +211,7 @@ const WishlistDropdown = ({ navigate }) => {
               const instructor = course.creator?.name || "Instructor";
 
               return (
-                <li key={course._id} className="px-4 pt-4 pb-3">
+                <li key={course._id || course.id || `wishlist-course-${idx}`} className="px-4 pt-4 pb-3">
                   {/* Row: thumbnail + info */}
                   <div
                     onClick={() => navigate(`/course-detail/${course._id}`)}
@@ -323,7 +323,7 @@ const CartDropdown = ({ navigate }) => {
         <div>
           {/* Course list — max 3 */}
           <ul className="divide-y divide-gray-100 max-h-[300px] overflow-y-auto">
-            {courses.slice(0, 3).map((course) => {
+            {courses.slice(0, 3).map((course, idx) => {
               const currentPrice = course.price?.current ?? 0;
               const originalPrice = course.price?.original ?? 0;
               const hasDiscount = originalPrice > currentPrice && originalPrice > 0;
@@ -331,7 +331,7 @@ const CartDropdown = ({ navigate }) => {
 
               return (
                 <li
-                  key={course._id}
+                  key={course._id || course.id || `cart-course-${idx}`}
                   className="p-4 flex gap-3 hover:bg-gray-50 transition-colors cursor-pointer group"
                   onClick={() => navigate(`/course-detail/${course._id}`)}
                 >
@@ -995,9 +995,9 @@ const Navbar = () => {
                   <div className="absolute top-full left-0 mt-1 bg-white border border-gray-200 shadow-2xl rounded-lg flex z-50 text-slate-800 min-h-[400px] w-[700px] overflow-hidden animate-in fade-in slide-in-from-top-1 duration-200">
                     {/* Column 1: Parent Categories */}
                     <div className="w-56 border-r border-gray-100 py-3 bg-gray-50/50 flex flex-col overflow-y-auto">
-                      {categoryTree.map((parent) => (
+                      {categoryTree.map((parent, pIdx) => (
                         <Link
-                          key={parent._id}
+                          key={parent._id || parent.slug || `cat-parent-${pIdx}`}
                           to={`/topic/${parent.slug}`}
                           onClick={() => {
                             setShowFindCoursesDropdown(false);
@@ -1022,9 +1022,9 @@ const Navbar = () => {
 
                     {/* Column 2: Child Categories */}
                     <div className="w-56 border-r border-gray-100 py-3 flex flex-col overflow-y-auto bg-white">
-                      {activeParent?.children?.map((child) => (
+                      {activeParent?.children?.map((child, cIdx) => (
                         <Link
-                          key={child._id}
+                          key={child._id || child.slug || `cat-child-${cIdx}`}
                           to={`/topic/${child.slug}`}
                           onClick={() => {
                             setShowFindCoursesDropdown(false);
@@ -1055,9 +1055,9 @@ const Navbar = () => {
                         Popular topics
                       </h4>
                       {activeChild?.children?.length > 0 ? (
-                        activeChild.children.map((subChild) => (
+                        activeChild.children.map((subChild, sIdx) => (
                           <Link
-                            key={subChild._id}
+                            key={subChild._id || subChild.slug || `cat-subchild-${sIdx}`}
                             to={`/topic/${subChild.slug}`}
                             onClick={() => {
                               setShowFindCoursesDropdown(false);
@@ -1072,9 +1072,9 @@ const Navbar = () => {
                       ) : activeChild ? (
                         topics
                           .filter((t) => t.type === "topic" && t.parentCategory === activeChild.name)
-                          .map((topic) => (
+                          .map((topic, tIdx) => (
                             <Link
-                              key={topic._id}
+                              key={topic._id || topic.slug || `topic-${tIdx}`}
                               to={`/topic/${topic.slug}`}
                               onClick={() => {
                                 setShowFindCoursesDropdown(false);
@@ -1112,9 +1112,9 @@ const Navbar = () => {
                       <h4 className="px-4 py-1 text-base font-light text-gray-400 uppercase tracking-wider mb-2">
                         Popular Issuers
                       </h4>
-                      {issuersList.map((issuer) => (
+                      {issuersList.map((issuer, iIdx) => (
                         <div
-                          key={issuer._id}
+                          key={issuer._id || issuer.name || `issuer-${iIdx}`}
                           onMouseEnter={() => setActiveIssuer(issuer._id)}
                           className={`px-4 py-2 text-lg font-light cursor-pointer flex items-center justify-between transition-colors ${
                             activeIssuer === issuer._id
@@ -1136,9 +1136,9 @@ const Navbar = () => {
                       {activeIssuer ? (
                         certsList
                           .filter((c) => c.issuer?._id === activeIssuer)
-                          .map((c) => (
+                          .map((c, cIdx) => (
                             <Link
-                              key={c._id}
+                              key={c._id || c.slug || `cert-${cIdx}`}
                               to={`/certification/${c.slug}`}
                               onClick={() => {
                                 setShowGetCertifiedDropdown(false);
@@ -1198,8 +1198,8 @@ const Navbar = () => {
                     </h3>
                     {trendingSuggestions.length > 0 ? (
                       <ul className="py-1">
-                        {trendingSuggestions.map((suggestion) => (
-                          <li key={suggestion}>
+                        {trendingSuggestions.map((suggestion, sIdx) => (
+                          <li key={suggestion ? `trend-${suggestion}-${sIdx}` : `trend-${sIdx}`}>
                             <button
                               type="button"
                               onClick={() => handleSuggestionClick(suggestion)}
@@ -1232,8 +1232,8 @@ const Navbar = () => {
                       )}
                     {results.suggestions.length > 0 && (
                       <ul className="py-1">
-                        {results.suggestions.map((suggestion) => (
-                          <li key={suggestion}>
+                        {results.suggestions.map((suggestion, sIdx) => (
+                          <li key={suggestion ? `sug-${suggestion}-${sIdx}` : `sug-${sIdx}`}>
                             <button
                               onClick={() => handleSuggestionClick(suggestion)}
                               className="w-full flex items-center gap-4 px-3 py-3 text-xl font-light text-gray-800 hover:bg-gray-100 rounded-md"
@@ -1253,8 +1253,8 @@ const Navbar = () => {
                           {t("navbar.courses_heading")}
                         </h3>
                         <ul>
-                          {results.courses.map((course) => (
-                            <li key={course._id}>
+                          {results.courses.map((course, cIdx) => (
+                            <li key={course._id || course.id || `search-course-${cIdx}`}>
                               <Link
                                 to={`/course-detail/${course._id}`}
                                 className="flex items-center gap-3 p-2 rounded-md text-gray-800 hover:bg-gray-100"

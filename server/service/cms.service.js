@@ -1,165 +1,202 @@
+// server/service/cms.service.js
+
 import { CarouselSlide } from "../models/carouselSlide.model.js";
 import { CompanyLogo } from "../models/companyLogo.model.js";
 import { PromoBanner } from "../models/promoBanner.model.js";
 import DiscountBanner from "../models/discountBanner.model.js";
 import GetOfferPromo from "../models/getOfferPromo.model.js";
 import SubscriptionNavbar from "../models/subscriptionNavbar.model.js";
+import { BaseService } from "../core/base.service.js";
 
-// --- Discount Banner Service Functions ---
-
-export const getDiscountBannersService = async () => {
-  return await DiscountBanner.find().sort({ createdAt: -1 });
-};
-
-export const getActiveDiscountBannerService = async () => {
-  return await DiscountBanner.findOne({ isActive: true }).sort({ updatedAt: -1 });
-};
-
-export const createDiscountBannerService = async (bannerData) => {
-  if (bannerData.isActive === true || bannerData.isActive === "true") {
-    await DiscountBanner.updateMany({}, { isActive: false });
+export class CMSService extends BaseService {
+  constructor() {
+    super(null);
   }
-  return await DiscountBanner.create(bannerData);
-};
 
-export const updateDiscountBannerService = async (id, bannerData) => {
-  if (bannerData.isActive === true || bannerData.isActive === "true") {
-    await DiscountBanner.updateMany({ _id: { $ne: id } }, { isActive: false });
+  // --- Discount Banner ---
+  async getDiscountBanners() {
+    return await DiscountBanner.find().sort({ createdAt: -1 });
   }
-  return await DiscountBanner.findByIdAndUpdate(id, bannerData, { new: true });
-};
 
-export const deleteDiscountBannerService = async (id) => {
-  return await DiscountBanner.findByIdAndDelete(id);
-};
-
-// --- Get Offer Promo Service Functions ---
-
-export const getGetOfferPromosService = async () => {
-  return await GetOfferPromo.find().sort({ createdAt: -1 });
-};
-
-export const getActiveGetOfferPromoService = async () => {
-  return await GetOfferPromo.findOne({ isActive: true }).sort({ updatedAt: -1 });
-};
-
-export const createGetOfferPromoService = async (promoData) => {
-  if (promoData.isActive === true || promoData.isActive === "true") {
-    await GetOfferPromo.updateMany({}, { isActive: false });
+  async getActiveDiscountBanner() {
+    return await DiscountBanner.findOne({ isActive: true }).sort({ updatedAt: -1 });
   }
-  return await GetOfferPromo.create(promoData);
-};
 
-export const updateGetOfferPromoService = async (id, promoData) => {
-  if (promoData.isActive === true || promoData.isActive === "true") {
-    await GetOfferPromo.updateMany({ _id: { $ne: id } }, { isActive: false });
+  async createDiscountBanner(bannerData) {
+    if (bannerData.isActive === true || bannerData.isActive === "true") {
+      await DiscountBanner.updateMany({}, { isActive: false });
+    }
+    return await DiscountBanner.create(bannerData);
   }
-  return await GetOfferPromo.findByIdAndUpdate(id, promoData, { new: true });
-};
 
-export const deleteGetOfferPromoService = async (id) => {
-  return await GetOfferPromo.findByIdAndDelete(id);
-};
-
-// --- Subscription Navbar Service Functions ---
-
-export const getSubscriptionNavbarsService = async () => {
-  return await SubscriptionNavbar.find().sort({ createdAt: -1 });
-};
-
-export const getActiveSubscriptionNavbarService = async () => {
-  return await SubscriptionNavbar.findOne({ isActive: true }).sort({ updatedAt: -1 });
-};
-
-export const createSubscriptionNavbarService = async (navData) => {
-  if (navData.isActive === true || navData.isActive === "true") {
-    await SubscriptionNavbar.updateMany({}, { isActive: false });
+  async updateDiscountBanner(id, bannerData) {
+    if (bannerData.isActive === true || bannerData.isActive === "true") {
+      await DiscountBanner.updateMany({ _id: { $ne: id } }, { isActive: false });
+    }
+    return await DiscountBanner.findByIdAndUpdate(id, bannerData, { new: true });
   }
-  return await SubscriptionNavbar.create(navData);
-};
 
-export const updateSubscriptionNavbarService = async (id, navData) => {
-  if (navData.isActive === true || navData.isActive === "true") {
-    await SubscriptionNavbar.updateMany({ _id: { $ne: id } }, { isActive: false });
+  async deleteDiscountBanner(id) {
+    return await DiscountBanner.findByIdAndDelete(id);
   }
-  return await SubscriptionNavbar.findByIdAndUpdate(id, navData, { new: true });
-};
 
-export const deleteSubscriptionNavbarService = async (id) => {
-  return await SubscriptionNavbar.findByIdAndDelete(id);
-};
+  // --- Get Offer Promo ---
+  async getGetOfferPromos() {
+    return await GetOfferPromo.find().sort({ createdAt: -1 });
+  }
 
-// --- Carousel Slide Service Functions ---
+  async getActiveGetOfferPromo() {
+    return await GetOfferPromo.findOne({ isActive: true }).sort({ updatedAt: -1 });
+  }
 
-export const getCarouselSlidesService = async (onlyActive = false) => {
-  const query = onlyActive ? { isActive: true } : {};
-  return await CarouselSlide.find(query).sort({ order: 1, createdAt: -1 });
-};
+  async createGetOfferPromo(promoData) {
+    if (promoData.isActive === true || promoData.isActive === "true") {
+      await GetOfferPromo.updateMany({}, { isActive: false });
+    }
+    return await GetOfferPromo.create(promoData);
+  }
 
-export const createCarouselSlideService = async (slideData) => {
-  return await CarouselSlide.create(slideData);
-};
+  async updateGetOfferPromo(id, promoData) {
+    if (promoData.isActive === true || promoData.isActive === "true") {
+      await GetOfferPromo.updateMany({ _id: { $ne: id } }, { isActive: false });
+    }
+    return await GetOfferPromo.findByIdAndUpdate(id, promoData, { new: true });
+  }
 
-export const updateCarouselSlideService = async (id, slideData) => {
-  return await CarouselSlide.findByIdAndUpdate(id, slideData, { new: true });
-};
+  async deleteGetOfferPromo(id) {
+    return await GetOfferPromo.findByIdAndDelete(id);
+  }
 
-export const deleteCarouselSlideService = async (id) => {
-  return await CarouselSlide.findByIdAndDelete(id);
-};
+  // --- Subscription Navbar ---
+  async getSubscriptionNavbars() {
+    return await SubscriptionNavbar.find().sort({ createdAt: -1 });
+  }
 
-// --- Company Logo Service Functions ---
+  async getActiveSubscriptionNavbar() {
+    return await SubscriptionNavbar.findOne({ isActive: true }).sort({ updatedAt: -1 });
+  }
 
-export const getCompanyLogosService = async (onlyActive = false) => {
-  const query = onlyActive ? { isActive: true } : {};
-  return await CompanyLogo.find(query).sort({ order: 1, createdAt: -1 });
-};
+  async createSubscriptionNavbar(navData) {
+    if (navData.isActive === true || navData.isActive === "true") {
+      await SubscriptionNavbar.updateMany({}, { isActive: false });
+    }
+    return await SubscriptionNavbar.create(navData);
+  }
 
-export const createCompanyLogoService = async (logoData) => {
-  return await CompanyLogo.create(logoData);
-};
+  async updateSubscriptionNavbar(id, navData) {
+    if (navData.isActive === true || navData.isActive === "true") {
+      await SubscriptionNavbar.updateMany({ _id: { $ne: id } }, { isActive: false });
+    }
+    return await SubscriptionNavbar.findByIdAndUpdate(id, navData, { new: true });
+  }
 
-export const updateCompanyLogoService = async (id, logoData) => {
-  return await CompanyLogo.findByIdAndUpdate(id, logoData, { new: true });
-};
+  async deleteSubscriptionNavbar(id) {
+    return await SubscriptionNavbar.findByIdAndDelete(id);
+  }
 
-export const deleteCompanyLogoService = async (id) => {
-  return await CompanyLogo.findByIdAndDelete(id);
-};
+  // --- Carousel Slide ---
+  async getCarouselSlides(onlyActive = false) {
+    const query = onlyActive ? { isActive: true } : {};
+    return await CarouselSlide.find(query).sort({ order: 1, createdAt: -1 });
+  }
 
-// --- Promo Banner Service Functions ---
+  async createCarouselSlide(slideData) {
+    return await CarouselSlide.create(slideData);
+  }
 
-export const getPromoBannersService = async (onlyActive = false, category = "") => {
-  const query = onlyActive ? { isActive: true } : {};
-  const banners = await PromoBanner.find(query).sort({ createdAt: -1 });
+  async updateCarouselSlide(id, slideData) {
+    return await CarouselSlide.findByIdAndUpdate(id, slideData, { new: true });
+  }
 
-  if (onlyActive) {
-    if (category) {
-      const matched = banners.find(
-        (b) => b.categoryName && b.categoryName.trim().toLowerCase() === category.trim().toLowerCase()
-      );
-      if (matched) {
-        // Put matched banner at the beginning
-        return [matched, ...banners.filter((b) => b._id.toString() !== matched._id.toString())];
+  async deleteCarouselSlide(id) {
+    return await CarouselSlide.findByIdAndDelete(id);
+  }
+
+  // --- Company Logo ---
+  async getCompanyLogos(onlyActive = false) {
+    const query = onlyActive ? { isActive: true } : {};
+    return await CompanyLogo.find(query).sort({ order: 1, createdAt: -1 });
+  }
+
+  async createCompanyLogo(logoData) {
+    return await CompanyLogo.create(logoData);
+  }
+
+  async updateCompanyLogo(id, logoData) {
+    return await CompanyLogo.findByIdAndUpdate(id, logoData, { new: true });
+  }
+
+  async deleteCompanyLogo(id) {
+    return await CompanyLogo.findByIdAndDelete(id);
+  }
+
+  // --- Promo Banner ---
+  async getPromoBanners(onlyActive = false, category = "") {
+    const query = onlyActive ? { isActive: true } : {};
+    const banners = await PromoBanner.find(query).sort({ createdAt: -1 });
+
+    if (onlyActive) {
+      if (category) {
+        const matched = banners.find(
+          (b) => b.categoryName && b.categoryName.trim().toLowerCase() === category.trim().toLowerCase()
+        );
+        if (matched) {
+          return [matched, ...banners.filter((b) => b._id.toString() !== matched._id.toString())];
+        }
+      }
+      const generalBanner = banners.find((b) => !b.categoryName || b.categoryName.trim() === "");
+      if (generalBanner) {
+        return [generalBanner, ...banners.filter((b) => b._id.toString() !== generalBanner._id.toString())];
       }
     }
-    // Fallback to the general banner (empty categoryName) if no category match or no category provided
-    const generalBanner = banners.find((b) => !b.categoryName || b.categoryName.trim() === "");
-    if (generalBanner) {
-      return [generalBanner, ...banners.filter((b) => b._id.toString() !== generalBanner._id.toString())];
-    }
+    return banners;
   }
-  return banners;
-};
 
-export const createPromoBannerService = async (promoData) => {
-  return await PromoBanner.create(promoData);
-};
+  async createPromoBanner(promoData) {
+    return await PromoBanner.create(promoData);
+  }
 
-export const updatePromoBannerService = async (id, promoData) => {
-  return await PromoBanner.findByIdAndUpdate(id, promoData, { new: true });
-};
+  async updatePromoBanner(id, promoData) {
+    return await PromoBanner.findByIdAndUpdate(id, promoData, { new: true });
+  }
 
-export const deletePromoBannerService = async (id) => {
-  return await PromoBanner.findByIdAndDelete(id);
-};
+  async deletePromoBanner(id) {
+    return await PromoBanner.findByIdAndDelete(id);
+  }
+}
+
+export const cmsService = new CMSService();
+
+// Backward-compatible named exports
+export const getDiscountBannersService = cmsService.getDiscountBanners.bind(cmsService);
+export const getActiveDiscountBannerService = cmsService.getActiveDiscountBanner.bind(cmsService);
+export const createDiscountBannerService = cmsService.createDiscountBanner.bind(cmsService);
+export const updateDiscountBannerService = cmsService.updateDiscountBanner.bind(cmsService);
+export const deleteDiscountBannerService = cmsService.deleteDiscountBanner.bind(cmsService);
+
+export const getGetOfferPromosService = cmsService.getGetOfferPromos.bind(cmsService);
+export const getActiveGetOfferPromoService = cmsService.getActiveGetOfferPromo.bind(cmsService);
+export const createGetOfferPromoService = cmsService.createGetOfferPromo.bind(cmsService);
+export const updateGetOfferPromoService = cmsService.updateGetOfferPromo.bind(cmsService);
+export const deleteGetOfferPromoService = cmsService.deleteGetOfferPromo.bind(cmsService);
+
+export const getSubscriptionNavbarsService = cmsService.getSubscriptionNavbars.bind(cmsService);
+export const getActiveSubscriptionNavbarService = cmsService.getActiveSubscriptionNavbar.bind(cmsService);
+export const createSubscriptionNavbarService = cmsService.createSubscriptionNavbar.bind(cmsService);
+export const updateSubscriptionNavbarService = cmsService.updateSubscriptionNavbar.bind(cmsService);
+export const deleteSubscriptionNavbarService = cmsService.deleteSubscriptionNavbar.bind(cmsService);
+
+export const getCarouselSlidesService = cmsService.getCarouselSlides.bind(cmsService);
+export const createCarouselSlideService = cmsService.createCarouselSlide.bind(cmsService);
+export const updateCarouselSlideService = cmsService.updateCarouselSlide.bind(cmsService);
+export const deleteCarouselSlideService = cmsService.deleteCarouselSlide.bind(cmsService);
+
+export const getCompanyLogosService = cmsService.getCompanyLogos.bind(cmsService);
+export const createCompanyLogoService = cmsService.createCompanyLogo.bind(cmsService);
+export const updateCompanyLogoService = cmsService.updateCompanyLogo.bind(cmsService);
+export const deleteCompanyLogoService = cmsService.deleteCompanyLogo.bind(cmsService);
+
+export const getPromoBannersService = cmsService.getPromoBanners.bind(cmsService);
+export const createPromoBannerService = cmsService.createPromoBanner.bind(cmsService);
+export const updatePromoBannerService = cmsService.updatePromoBanner.bind(cmsService);
+export const deletePromoBannerService = cmsService.deletePromoBanner.bind(cmsService);

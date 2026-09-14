@@ -29,6 +29,7 @@ import {
   getArchivedCoursesController,
   getNearbyTutorsController,
   getNearbyPeersController,
+  deleteAccountController,
 } from "../controllers/user.controller.js";
 
 const router = express.Router();
@@ -39,12 +40,14 @@ router.route("/login").post(login);
 router.route("/logout").get(isAuthenticated, logout);
 router.route("/check").get(isAuthenticated, checkUser);
 router.route("/me").get(isAuthenticated, loadUser);
+router.route("/account").delete(isAuthenticated, deleteAccountController);
 
 // ── Profile routes ───────────────────────────────────────────────────────────
 router
   .route("/profile")
   .get(isAuthenticated, getUserProfileController)
-  .patch(isAuthenticated, updateUserInfoController);
+  .patch(isAuthenticated, updateUserInfoController)
+  .delete(isAuthenticated, deleteAccountController);
 
 router
   .route("/profile/update-password")

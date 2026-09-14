@@ -7,6 +7,7 @@ import ChatMessage from "./ChatMessage";
 import ChatbotForm from "./ChatbotForm";
 import { companyInfo } from "./companyInfo";
 import { useLoadUserQuery } from "@/features/api/authApi";
+import { BASE_URL } from "@/app/constant";
 
 
 const useUserRole = () => {
@@ -27,11 +28,6 @@ const useUserRole = () => {
 
 const ChatBot = () => {
   const userRole = useUserRole(); // Get the current user's role
-
-
-  useEffect(() => {
-    console.log("ChatBot component rendered. User Role:", userRole);
-  }, [userRole]);
 
   const [chatHistory, setChatHistory] = useState([
     {
@@ -65,25 +61,20 @@ const ChatBot = () => {
   ];
 
   useEffect(() => {
-   
     if (userRole === null) {
-      console.log("User role is still loading...");
       return;
     }
 
     if (userRole === "student") {
-      console.log("User is student. Chatbot icon will appear in 3 seconds.");
       const iconTimer = setTimeout(() => {
         setShowChatbotIcon(true);
         setHasUnread(true);
-        console.log("showChatbotIcon set to true.");
       }, 2000);
 
       return () => clearTimeout(iconTimer);
     } else {
       setShowChatbotIcon(false);
       setShowChatbot(false); // Ensure popup is also hidden for non-students
-      console.log(`User role is '${userRole}'. Chatbot will not appear.`);
     }
   }, [userRole]);
 
@@ -204,27 +195,25 @@ const ChatBot = () => {
       setHasUnread(true);
     };
 
-    history = history.map(({ role, text }) => ({ role, parts: [{ text }] }));
-    const requestOptions = {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ contents: history }),
-    };
+    const formattedHistory = history.map(({ role, text }) => ({ role, parts: [{ text }] }));
+    const backendBase = BASE_URL || import.meta.env.VITE_BASE_URL || "http://localhost:10000";
 
     try {
-      const response = await fetch(
-        "https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=AIzaSyAi2EBvuqyTImNDUuB6VTKwuBHJSf51VIE",
-        requestOptions
-      );
+      const response = await fetch(`${backendBase}/api/v1/ai/ask`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ contents: formattedHistory }),
+      });
       const data = await response.json();
       if (!response.ok)
-        throw new Error(data.error.message || "Something went wrong!");
+        throw new Error(data.error || "Something went wrong!");
 
-      const apiResponseText = data.candidates[0].content.parts[0].text.replace(
+      const apiResponseText = (data.answer || "I am your LMS assistant. How can I help you today?").replace(
         /\*\*(.*?)\*\*/g,
         "$1"
       );
-      const options = data.candidates[0].content.options || [];
+      const options = data.options || [];
       updateHistory(apiResponseText, options);
     } catch (error) {
       updateHistory(error.message, [], true);

@@ -7,9 +7,24 @@ import { Lecture } from "../models/lecture.model.js";
 const router = express.Router();
 
 router.post("/ask", isOptionalAuthenticated, async (req, res) => {
-  const { prompt, courseId, lectureId } = req.body;
+  const { prompt, courseId, lectureId, contents, history } = req.body;
 
-  if (!prompt) {
+  let queryPrompt = prompt;
+  if (!queryPrompt && Array.isArray(contents) && contents.length > 0) {
+    // Find the latest user message in Gemini contents array format [{ role, parts: [{ text }] }]
+    const lastUserItem = [...contents].reverse().find((c) => c.role === "user" && c.parts?.[0]?.text);
+    if (lastUserItem) {
+      queryPrompt = lastUserItem.parts[0].text;
+    } else {
+      const anyItem = [...contents].reverse().find((c) => c.parts?.[0]?.text);
+      queryPrompt = anyItem ? anyItem.parts[0].text : "";
+    }
+  } else if (!queryPrompt && Array.isArray(history) && history.length > 0) {
+    const lastUserItem = [...history].reverse().find((h) => h.role === "user" && h.text);
+    queryPrompt = lastUserItem ? lastUserItem.text : "";
+  }
+
+  if (!queryPrompt || !queryPrompt.trim()) {
     return res.status(400).json({ error: "Prompt is required" });
   }
 
@@ -17,7 +32,7 @@ router.post("/ask", isOptionalAuthenticated, async (req, res) => {
   if (req.user) {
     context.user = {
       name: req.user.name,
-      email: req.user.email,
+      role: req.user.role,
     };
   }
 
@@ -53,8 +68,8 @@ router.post("/ask", isOptionalAuthenticated, async (req, res) => {
   }
 
   try {
-    const answer = await generateGeminiResponse(prompt, context);
-    res.json({ answer });
+    const answer = await generateGeminiResponse(queryPrompt, context);
+    res.json({ answer, options: [] });
   } catch (error) {
     console.error("Gemini API Error:", error);
     res.status(500).json({ error: "AI response failed" });
