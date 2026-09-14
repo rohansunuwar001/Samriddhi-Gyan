@@ -118,8 +118,9 @@ const Profile = () => {
   const navigate = useNavigate();
   const { username } = useParams();
 
+  const { isAuthenticated, token } = useSelector((store) => store.auth);
   // Load currently logged in user to check ownership
-  const { data: loggedInData } = useLoadUserQuery();
+  const { data: loggedInData } = useLoadUserQuery(undefined, { skip: !isAuthenticated && !token });
   const loggedInUser = loggedInData?.user;
 
   // Resolve slug from logged in user name

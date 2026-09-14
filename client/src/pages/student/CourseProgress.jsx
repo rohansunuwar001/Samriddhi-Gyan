@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useParams, Link, useSearchParams } from "react-router-dom";
+import { useSelector } from "react-redux";
 import { useGetCourseDetailWithStatusQuery } from "@/features/api/purchaseApi";
 import MainContent from "./MainContent";
 import CourseSidebar from "./CourseSidebar";
@@ -73,8 +74,9 @@ const CourseProgress = () => {
   // Update progress mutation
   const [updateLectureProgress] = useUpdateLectureProgressMutation();
 
+  const { isAuthenticated, token } = useSelector((store) => store.auth);
   // Load user data to check if this course is archived
-  const { data: userData } = useLoadUserQuery();
+  const { data: userData } = useLoadUserQuery(undefined, { skip: !isAuthenticated && !token });
   const [archiveCourse] = useArchiveCourseMutation();
   const [unarchiveCourse] = useUnarchiveCourseMutation();
 

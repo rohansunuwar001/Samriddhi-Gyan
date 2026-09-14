@@ -6,24 +6,12 @@ import ChatbotIcon from "./ChatbotIcon";
 import ChatMessage from "./ChatMessage";
 import ChatbotForm from "./ChatbotForm";
 import { companyInfo } from "./companyInfo";
-import { useLoadUserQuery } from "@/features/api/authApi";
+import { useSelector } from "react-redux";
 import { BASE_URL } from "@/app/constant";
 
-
 const useUserRole = () => {
-  const { data: userData, isLoading, isError } = useLoadUserQuery();
-
- 
-  if (isLoading) {
-    return null; 
-  }
-
-  if (isError || !userData?.user) {
-    return 'guest';
-  }
-
-
-  return userData.user.role;
+  const { user } = useSelector((state) => state.auth);
+  return user?.role || "guest";
 };
 
 const ChatBot = () => {

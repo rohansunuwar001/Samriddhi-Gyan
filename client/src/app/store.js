@@ -15,9 +15,12 @@ export const appStore = configureStore({
 
 
 const initializeApp = () => {
-    appStore.dispatch(
-        authApi.endpoints.loadUser.initiate() 
-    );
+    const token = localStorage.getItem('authToken');
+    if (token) {
+        appStore.dispatch(
+            authApi.endpoints.loadUser.initiate() 
+        );
+    }
 };
 
 // Execute the app initialization logic as soon as the store is configured.
