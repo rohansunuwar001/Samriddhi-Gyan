@@ -41,7 +41,6 @@ const CareerRoadmap = () => {
         }
       );
       const data = await res.json();
-      console.log("Career roadmap response:", data);
       if (data.success) {
         setRoadmap(data.path);
         toast.success(`Roadmap for ${selectedCategory} generated!`);

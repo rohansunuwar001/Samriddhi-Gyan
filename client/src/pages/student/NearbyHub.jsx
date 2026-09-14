@@ -432,9 +432,10 @@ const NearbyHub = () => {
     let script = document.getElementById(scriptId);
 
     if (!script) {
+      const mapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
       script = document.createElement("script");
       script.id = scriptId;
-      script.src = "https://maps.googleapis.com/maps/api/js?key=AIzaSyAaLiekr0uzBF_Ei5Q4dYJL9Uv2IrRHOBQ&libraries=geometry";
+      script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&libraries=geometry`;
       script.async = true;
       script.defer = true;
       document.head.appendChild(script);
@@ -479,8 +480,6 @@ const NearbyHub = () => {
     isError: tutorsError,
   } = useGetNearbyTutorsQuery(coords || { lat: 0, lon: 0 }, { skip: !coords });
 
-  console.log("Tutors Data:", tutorsData);
-
   const {
     data: peersData,
     isLoading: peersLoading,
@@ -488,8 +487,6 @@ const NearbyHub = () => {
     refetch: refetchPeers,
     isError: peersError,
   } = useGetNearbyPeersQuery(coords || { lat: 0, lon: 0 }, { skip: !coords });
-
-  console.log("Peers Data:", peersData);
 
   const handleUserMove = React.useCallback((newCoords) => {
     setCoords((prev) => {

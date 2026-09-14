@@ -72,32 +72,40 @@ const CoursePayout = () => {
   const filteredPayments = useMemo(() => {
     // Step 1: Flatten the nested data into a single array of payment records
     const allPayments =
-      data?.courses?.flatMap((course) =>
-        course.coursePurchases.flatMap((purchase) =>
-          // A single purchase can contain multiple courses; we need to find the one that matches
-          purchase.courses
-            .filter((pc) => pc.courseId?._id === course.courseId)
+      data?.courses?.flatMap((course) => {
+        const purchases = course.coursePurchases || [];
+        const cId = course.courseId || course._id;
+        const cTitle = course.courseTitle || course.title || "Untitled Course";
+
+        return purchases.flatMap((purchase) => {
+          const coursesList = purchase.courses || [];
+          // A single purchase can contain multiple courses; we match the current course
+          return coursesList
+            .filter((pc) => {
+              const pcId = pc.courseId?._id?.toString() || pc.courseId?.toString() || pc.courseId;
+              return pcId === (cId?.toString() || cId);
+            })
             .map((pc) => ({
               // Create a unique ID for each record
-              paymentId: `${purchase.purchaseId}-${pc.courseId?._id || pc.courseId}`,
-              user: purchase.user,
-              status: purchase.status,
-              purchasedAt: purchase.purchasedAt,
-              priceAtPurchase: pc.priceAtPurchase,
-              courseTitle: course.courseTitle,
-              courseId: course.courseId,
-            }))
-        )
-      ) || [];
+              paymentId: `${purchase.purchaseId || purchase._id || purchase.orderId}-${pc.courseId?._id || pc.courseId || Math.random()}`,
+              user: purchase.user || purchase.userId,
+              status: purchase.status || "completed",
+              purchasedAt: purchase.purchasedAt || purchase.createdAt,
+              priceAtPurchase: pc.priceAtPurchase || 0,
+              courseTitle: cTitle,
+              courseId: cId,
+            }));
+        });
+      }) || [];
 
     // Step 2: Apply filters based on UI state
     return allPayments.filter((payment) => {
       const courseMatch =
-        selectedCourseId === "all" || payment.courseId === selectedCourseId;
+        selectedCourseId === "all" || String(payment.courseId) === String(selectedCourseId);
       const searchMatch =
         !searchQuery ||
-        payment.user?.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        payment.user?.email.toLowerCase().includes(searchQuery.toLowerCase());
+        (payment.user?.name || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (payment.user?.email || "").toLowerCase().includes(searchQuery.toLowerCase());
       return courseMatch && searchMatch;
     });
   }, [data, searchQuery, selectedCourseId]);
@@ -110,7 +118,7 @@ const CoursePayout = () => {
 
   const totalPages = Math.ceil(filteredPayments.length / ITEMS_PER_PAGE);
   const totalRevenue = useMemo(
-    () => filteredPayments.reduce((acc, p) => acc + p.priceAtPurchase, 0),
+    () => filteredPayments.reduce((acc, p) => acc + (p.priceAtPurchase || 0), 0),
     [filteredPayments]
   );
 
@@ -156,11 +164,14 @@ const CoursePayout = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Courses</SelectItem>
-                {data?.courses?.map((course) => (
-                  <SelectItem key={course.courseId} value={course.courseId}>
-                    {course.courseTitle}
-                  </SelectItem>
-                ))}
+                {data?.courses?.map((course, idx) => {
+                  const id = course.courseId || course._id || `course-${idx}`;
+                  return (
+                    <SelectItem key={String(id)} value={String(id)}>
+                      {course.courseTitle || course.title || "Untitled Course"}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
           </div>
@@ -191,20 +202,20 @@ const CoursePayout = () => {
               {isLoading ? (
                 <TableSkeleton />
               ) : paginatedPayments.length > 0 ? (
-                paginatedPayments.map((payment) => (
-                  <TableRow key={payment.paymentId}>
+                paginatedPayments.map((payment, idx) => (
+                  <TableRow key={payment.paymentId || `payment-${idx}`}>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar>
                           <AvatarImage src={payment.user?.photoUrl} />
                           <AvatarFallback>
-                            {payment.user?.name?.slice(0, 2)}
+                            {(payment.user?.name || "ST").slice(0, 2).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-light">{payment.user?.name}</p>
+                          <p className="font-light">{payment.user?.name || "Student"}</p>
                           <p className="text-lg text-muted-foreground">
-                            {payment.user?.email}
+                            {payment.user?.email || "—"}
                           </p>
                         </div>
                       </div>
@@ -226,10 +237,10 @@ const CoursePayout = () => {
                       </Badge>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      {new Date(payment.purchasedAt).toLocaleDateString()}
+                      {payment.purchasedAt ? new Date(payment.purchasedAt).toLocaleDateString() : "—"}
                     </TableCell>
                     <TableCell className="text-right font-normal">
-                      Rs{payment.priceAtPurchase.toFixed(2)}
+                      Rs{(payment.priceAtPurchase || 0).toFixed(2)}
                     </TableCell>
                   </TableRow>
                 ))

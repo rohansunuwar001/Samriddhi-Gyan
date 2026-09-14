@@ -1,99 +1,83 @@
 // server/controllers/notification.controller.js
-//
-// BUGS FIXED:
-// 1. getNotifications:       used req.id → WRONG. isAuthenticated sets req.user, not req.id.
-//                            Fixed to req.user._id. This was why notifications never loaded.
-// 2. markAsRead:             same req.id → req.user._id fix.
-// 3. clearAllNotifications:  same req.id → req.user._id fix.
-// 4. deleteNotification:     compared notification.user.toString() !== userId
-//                            but userId was an ObjectId. Fixed to userId.toString().
 
+import { BaseController } from '../core/base.controller.js';
 import { Notification } from '../models/notification.model.js';
 
-/**
- * GET /api/v1/notifications
- * Returns all notifications for the logged-in user, newest first.
- */
-export const getNotifications = async (req, res) => {
-  try {
-    const userId = req.user._id; // FIX: was req.id — isAuthenticated sets req.user not req.id
-
-    const notifications = await Notification.find({ user: userId })
-      .sort({ createdAt: -1 });
-
-    return res.status(200).json(notifications);
-
-  } catch (error) {
-    console.error("getNotifications error:", error);
-    return res.status(500).json({ message: 'Server Error' });
+export class NotificationController extends BaseController {
+  constructor() {
+    super();
   }
-};
 
-/**
- * POST /api/v1/notifications/read
- * Marks all unread notifications as read for the logged-in user.
- */
-export const markAsRead = async (req, res) => {
-  try {
-    const userId = req.user._id; // FIX: was req.id
+  getNotifications = async (req, res) => {
+    try {
+      const userId = req.user._id;
 
-    await Notification.updateMany(
-      { user: userId, read: false },
-      { $set: { read: true } }
-    );
+      const notifications = await Notification.find({ user: userId })
+        .sort({ createdAt: -1 });
 
-    return res.status(200).json({ success: true, message: 'All notifications marked as read.' });
-
-  } catch (error) {
-    console.error("markAsRead error:", error);
-    return res.status(500).json({ message: 'Server Error' });
-  }
-};
-
-/**
- * DELETE /api/v1/notifications/:id
- * Deletes a single notification — only if it belongs to the logged-in user.
- */
-export const deleteNotification = async (req, res) => {
-  try {
-    const notificationId = req.params.id;
-    const userId = req.user._id;
-
-    const notification = await Notification.findById(notificationId);
-
-    if (!notification) {
-      return res.status(404).json({ message: "Notification not found." });
+      return res.status(200).json(notifications);
+    } catch (error) {
+      console.error("getNotifications error:", error);
+      return this.sendError(res, 'Server Error', 500);
     }
+  };
 
-    // FIX: both sides must be strings for the comparison to work correctly
-    if (notification.user.toString() !== userId.toString()) {
-      return res.status(403).json({ message: "Not authorized to delete this notification." });
+  markAsRead = async (req, res) => {
+    try {
+      const userId = req.user._id;
+
+      await Notification.updateMany(
+        { user: userId, read: false },
+        { $set: { read: true } }
+      );
+
+      return this.sendSuccess(res, {}, 'All notifications marked as read.');
+    } catch (error) {
+      console.error("markAsRead error:", error);
+      return this.sendError(res, 'Server Error', 500);
     }
+  };
 
-    await Notification.findByIdAndDelete(notificationId);
+  deleteNotification = async (req, res) => {
+    try {
+      const notificationId = req.params.id;
+      const userId = req.user._id;
 
-    return res.status(200).json({ success: true, message: "Notification deleted." });
+      const notification = await Notification.findById(notificationId);
+      if (!notification) {
+        return this.sendError(res, "Notification not found.", 404);
+      }
 
-  } catch (error) {
-    console.error("deleteNotification error:", error);
-    return res.status(500).json({ message: 'Server Error' });
-  }
-};
+      if (notification.user.toString() !== userId.toString()) {
+        return this.sendError(res, "Not authorized to delete this notification.", 403);
+      }
 
-/**
- * DELETE /api/v1/notifications
- * Clears ALL notifications for the logged-in user.
- */
-export const clearAllNotifications = async (req, res) => {
-  try {
-    const userId = req.user._id; // FIX: was req.id
+      await Notification.findByIdAndDelete(notificationId);
 
-    await Notification.deleteMany({ user: userId });
+      return this.sendSuccess(res, {}, "Notification deleted.");
+    } catch (error) {
+      console.error("deleteNotification error:", error);
+      return this.sendError(res, 'Server Error', 500);
+    }
+  };
 
-    return res.status(200).json({ success: true, message: "All notifications cleared." });
+  clearAllNotifications = async (req, res) => {
+    try {
+      const userId = req.user._id;
 
-  } catch (error) {
-    console.error("clearAllNotifications error:", error);
-    return res.status(500).json({ message: 'Server Error' });
-  }
-};
+      await Notification.deleteMany({ user: userId });
+
+      return this.sendSuccess(res, {}, "All notifications cleared.");
+    } catch (error) {
+      console.error("clearAllNotifications error:", error);
+      return this.sendError(res, 'Server Error', 500);
+    }
+  };
+}
+
+export const notificationController = new NotificationController();
+
+export const getNotifications = notificationController.getNotifications;
+export const markAsRead = notificationController.markAsRead;
+export const deleteNotification = notificationController.deleteNotification;
+export const clearAllNotifications = notificationController.clearAllNotifications;

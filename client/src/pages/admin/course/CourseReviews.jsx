@@ -99,7 +99,7 @@ const ReplyToReviewDialog = ({ review, isOpen, onClose, onSave }) => {
         </DialogHeader>
         <div className="mt-4">
           <div className="p-4 border rounded-md bg-secondary">
-            <p className="font-normal">{review.user.name}</p>
+            <p className="font-normal">{review.user?.name || "Student"}</p>
             <StarRatingDisplay rating={review.rating} />
             <p className="text-lg text-muted-foreground mt-2 italic">
               "{review.comment}"
@@ -143,19 +143,23 @@ const CourseReviews = () => {
 
   const filteredReviews = useMemo(() => {
     const allReviews =
-      data?.courses?.flatMap((c) =>
-        c.reviews.map((r) => ({
+      data?.courses?.flatMap((c) => {
+        const reviews = c.reviews || [];
+        const cId = c.courseId || c._id;
+        const cTitle = c.courseTitle || c.title || "Untitled Course";
+        return reviews.map((r) => ({
           ...r,
-          courseId: c.courseId,
-          courseTitle: c.courseTitle,
-        }))
-      ) || [];
+          reviewId: r.reviewId || r._id,
+          courseId: cId,
+          courseTitle: cTitle,
+        }));
+      }) || [];
     return allReviews.filter(
       (r) =>
-        (selectedCourseId === "all" || r.courseId === selectedCourseId) &&
+        (selectedCourseId === "all" || String(r.courseId) === String(selectedCourseId)) &&
         (selectedRating === "all" || r.rating === parseInt(selectedRating)) &&
         (!searchQuery ||
-          r.comment.toLowerCase().includes(searchQuery.toLowerCase()))
+          (r.comment || "").toLowerCase().includes(searchQuery.toLowerCase()))
     );
   }, [data, searchQuery, selectedCourseId, selectedRating]);
 
@@ -175,8 +179,9 @@ const CourseReviews = () => {
   };
 
   const handleReplySave = (review, replyText) => {
+    const reviewId = review.reviewId || review._id;
     toast.promise(
-      replyToReview({ reviewId: review.reviewId, reply: replyText }).unwrap(),
+      replyToReview({ reviewId, reply: replyText }).unwrap(),
       {
         loading: "Submitting reply...",
         success: "Reply posted successfully!",
@@ -188,7 +193,8 @@ const CourseReviews = () => {
 
   const confirmDelete = () => {
     if (!selectedReview) return;
-    toast.promise(deleteReview(selectedReview.reviewId).unwrap(), {
+    const reviewId = selectedReview.reviewId || selectedReview._id;
+    toast.promise(deleteReview(reviewId).unwrap(), {
       loading: "Deleting review...",
       success: "Review deleted.",
       error: (err) => err.data?.message || "Failed to delete review.",
@@ -228,11 +234,14 @@ const CourseReviews = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Courses</SelectItem>
-                {data?.courses?.map((c) => (
-                  <SelectItem key={c.courseId} value={c.courseId}>
-                    {c.courseTitle}
-                  </SelectItem>
-                ))}
+                {data?.courses?.map((c, idx) => {
+                  const id = c.courseId || c._id || `course-${idx}`;
+                  return (
+                    <SelectItem key={String(id)} value={String(id)}>
+                      {c.courseTitle || c.title || "Untitled Course"}
+                    </SelectItem>
+                  );
+                })}
               </SelectContent>
             </Select>
             <Select
@@ -248,7 +257,7 @@ const CourseReviews = () => {
               <SelectContent>
                 <SelectItem value="all">All Ratings</SelectItem>
                 {[5, 4, 3, 2, 1].map((r) => (
-                  <SelectItem key={r} value={String(r)}>
+                  <SelectItem key={String(r)} value={String(r)}>
                     {r} Stars
                   </SelectItem>
                 ))}
@@ -286,20 +295,20 @@ const CourseReviews = () => {
                   </TableRow>
                 ))
               ) : paginatedReviews.length > 0 ? (
-                paginatedReviews.map((review) => (
-                  <TableRow key={review.reviewId}>
+                paginatedReviews.map((review, idx) => (
+                  <TableRow key={review.reviewId || review._id || `review-${idx}`}>
                     <TableCell>
                       <div className="flex items-center gap-3">
                         <Avatar>
                           <AvatarImage src={review.user?.photoUrl} />
                           <AvatarFallback>
-                            {review.user?.name.slice(0, 2)}
+                            {(review.user?.name || "ST").slice(0, 2).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-light">{review.user?.name}</p>
+                          <p className="font-light">{review.user?.name || "Student"}</p>
                           <p className="text-lg text-muted-foreground">
-                            {review.user?.email}
+                            {review.user?.email || "—"}
                           </p>
                         </div>
                       </div>

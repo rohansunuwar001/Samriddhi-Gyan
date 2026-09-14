@@ -78,14 +78,13 @@ const CourseMain = () => {
     isError: isErrorRec,
     error: recError,
   } = useGetRecommendedCourseQuery();
-  console.log("Recommended course:",recommendedData);
 
   // Fetch actual server trending data
   const {
     data: trendingData,
     isLoading: isLoadingTrending,
   } = useGetTrendingCourseQuery();
-console.log("Trending course:",trendingData);
+
   // Fetch all published courses for fallbacks & categories grouping
   const {
     data: publishedData,
@@ -94,8 +93,6 @@ console.log("Trending course:",trendingData);
     error: publishedError,
     refetch,
   } = useGetPublishedCourseQuery();
-
-  console.log("Published course:",publishedData);
 
   const { user } = useSelector((state) => state.auth);
 

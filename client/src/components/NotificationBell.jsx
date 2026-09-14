@@ -57,7 +57,6 @@ const NotificationBell = () => {
         };
 
         const handleNewNotification = (notification) => {
-            console.log("[NotificationBell] Real-time notification received:", notification);
             toast.info(notification.message, {
                 description: "Click the bell to view.",
                 duration: 5000,

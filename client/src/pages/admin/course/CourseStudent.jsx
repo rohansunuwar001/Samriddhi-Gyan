@@ -47,21 +47,24 @@ const CourseStudent = () => {
     // Memoize this complex operation to ensure it only runs when data changes.
     const filteredAndPaginatedEnrollments = useMemo(() => {
         // Step 1: Flatten the nested data into a single array of enrollments
-        const allEnrollments = data?.courses?.flatMap(course => 
-            course.students.map(student => ({
+        const allEnrollments = data?.courses?.flatMap(course => {
+            const students = course.students || course.enrolledStudents || [];
+            const cId = course.courseId || course._id;
+            const cTitle = course.courseTitle || course.title || "Untitled Course";
+            return students.map(student => ({
                 ...student, // a student object
-                courseId: course.courseId,
-                courseTitle: course.courseTitle,
-                enrollmentId: `${course.courseId}-${student._id}` // Create a unique key
-            }))
-        ) || [];
+                courseId: cId,
+                courseTitle: cTitle,
+                enrollmentId: `${cId}-${student._id || student.email || Math.random()}` // Create a unique key
+            }));
+        }) || [];
 
         // Step 2: Apply filters based on UI state
         const filtered = allEnrollments.filter(enrollment => {
-            const courseMatch = selectedCourseId === 'all' || enrollment.courseId === selectedCourseId;
+            const courseMatch = selectedCourseId === 'all' || String(enrollment.courseId) === String(selectedCourseId);
             const searchMatch = !searchQuery || 
-                                enrollment.name.toLowerCase().includes(searchQuery.toLowerCase()) || 
-                                enrollment.email.toLowerCase().includes(searchQuery.toLowerCase());
+                                (enrollment.name || "").toLowerCase().includes(searchQuery.toLowerCase()) || 
+                                (enrollment.email || "").toLowerCase().includes(searchQuery.toLowerCase());
             return courseMatch && searchMatch;
         });
         
@@ -114,11 +117,14 @@ const CourseStudent = () => {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="all">All Courses</SelectItem>
-                                {data?.courses?.map(course => (
-                                    <SelectItem key={course.courseId} value={course.courseId}>
-                                        {course.courseTitle}
-                                    </SelectItem>
-                                ))}
+                                {data?.courses?.map((course, idx) => {
+                                    const id = course.courseId || course._id || `course-${idx}`;
+                                    return (
+                                        <SelectItem key={String(id)} value={String(id)}>
+                                            {course.courseTitle || course.title || "Untitled Course"}
+                                        </SelectItem>
+                                    );
+                                })}
                             </SelectContent>
                         </Select>
                     </div>
@@ -136,16 +142,16 @@ const CourseStudent = () => {
                         <TableBody>
                             {isLoading ? <TableSkeleton /> : 
                             enrollments.length > 0 ? (
-                                enrollments.map((enrollment) => (
-                                    <TableRow key={enrollment.enrollmentId}>
+                                enrollments.map((enrollment, idx) => (
+                                    <TableRow key={enrollment.enrollmentId || `enrollment-${idx}`}>
                                         <TableCell>
                                             <div className="flex items-center gap-3">
-                                                <Avatar><AvatarImage src={enrollment.photoUrl} alt={enrollment.name} /><AvatarFallback>{enrollment.name.slice(0, 2).toUpperCase()}</AvatarFallback></Avatar>
-                                                <p className="font-light">{enrollment.name}</p>
+                                                <Avatar><AvatarImage src={enrollment.photoUrl} alt={enrollment.name || "Student"} /><AvatarFallback>{(enrollment.name || "ST").slice(0, 2).toUpperCase()}</AvatarFallback></Avatar>
+                                                <p className="font-light">{enrollment.name || "Anonymous Student"}</p>
                                             </div>
                                         </TableCell>
                                         <TableCell><span className="font-light text-muted-foreground">{enrollment.courseTitle}</span></TableCell>
-                                        <TableCell className="hidden md:table-cell text-muted-foreground">{enrollment.email}</TableCell>
+                                        <TableCell className="hidden md:table-cell text-muted-foreground">{enrollment.email || "—"}</TableCell>
                                     </TableRow>
                                 ))
                             ) : (
