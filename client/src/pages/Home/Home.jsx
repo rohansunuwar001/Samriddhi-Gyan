@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
 import { useNavigate, Link } from "react-router-dom";
 import GuestHome from "./GuestHome";
@@ -106,6 +106,12 @@ const Home = () => {
   const { data: categoriesData } = useGetAllCategoriesQuery(undefined, { skip: !isAuthenticated });
 
   const [activeFeaturedTab, setActiveFeaturedTab] = useState("Most popular");
+
+  useEffect(() => {
+    if (recommendedData) {
+      console.log("🎯 [Home Component] Recommended Courses JSON Data:", recommendedData);
+    }
+  }, [recommendedData]);
 
   if (!isAuthenticated) {
     return <GuestHome />;

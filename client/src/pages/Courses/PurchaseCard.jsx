@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useAddToCartMutation, useGetCartQuery } from "@/features/api/cartApi";
+import { useValidateCouponMutation } from "@/features/api/couponApi";
 import {
   useAddToWishlistMutation,
   useGetWishlistQuery,
@@ -76,6 +77,9 @@ const PurchaseCard = ({ course }) => {
     course.isEnrolled || course.purchaseStatus === "completed";
 
   const [banditDiscount, setBanditDiscount] = useState(0);
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [validateCoupon, { isLoading: isValidatingCoupon }] = useValidateCouponMutation();
 
   useEffect(() => {
     if (course?._id) {
@@ -109,14 +113,60 @@ const PurchaseCard = ({ course }) => {
       : 0;
 
   const discountPercent = banditDiscount > 0 ? banditDiscount : staticDiscount;
-  const currentPrice =
+  const baseCurrentPrice =
     discountPercent > 0
       ? Math.round(originalPrice * (1 - discountPercent / 100))
       : (course.price?.current ?? 0);
+
+  // Apply real coupon discount if active
+  let couponDiscountAmount = 0;
+  if (appliedCoupon) {
+    if (appliedCoupon.coupon?.discountType === "percentage") {
+      const pct = appliedCoupon.coupon.discountValue;
+      couponDiscountAmount = Math.round((baseCurrentPrice * pct) / 100);
+      if (appliedCoupon.coupon.maxDiscountAmount && couponDiscountAmount > appliedCoupon.coupon.maxDiscountAmount) {
+        couponDiscountAmount = appliedCoupon.coupon.maxDiscountAmount;
+      }
+    } else if (appliedCoupon.coupon?.discountType === "fixed") {
+      couponDiscountAmount = Math.min(appliedCoupon.coupon.discountValue, baseCurrentPrice);
+    } else if (appliedCoupon.discountAmount) {
+      couponDiscountAmount = Math.min(appliedCoupon.discountAmount, baseCurrentPrice);
+    }
+  }
+
+  const currentPrice = Math.max(0, baseCurrentPrice - couponDiscountAmount);
   const subscriptionPrice = Math.max(
     Math.round((currentPrice || 750) * 0.75),
     1
   );
+
+  const handleApplyCoupon = async (e) => {
+    e?.preventDefault();
+    if (!couponCode.trim()) {
+      toast.error("Please enter a coupon code.");
+      return;
+    }
+
+    try {
+      const res = await validateCoupon({
+        code: couponCode.trim(),
+        courseId: course._id,
+        amount: baseCurrentPrice,
+      }).unwrap();
+
+      const validData = res.data || res;
+      setAppliedCoupon(validData);
+      toast.success(res.message || "Coupon applied successfully!");
+      setCouponCode("");
+    } catch (err) {
+      toast.error(err?.data?.message || err?.message || "Invalid or expired coupon code.");
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    toast.info("Coupon removed.");
+  };
 
   const handleCartClick = async () => {
     if (!isAuthenticated) {
@@ -133,7 +183,6 @@ const PurchaseCard = ({ course }) => {
     try {
       await addToCart(course._id).unwrap();
       toast.success("Course added to cart!");
-      navigate("/cart");
     } catch (err) {
       toast.error(err?.data?.message || "Failed to add to cart.");
     }
@@ -155,7 +204,7 @@ const PurchaseCard = ({ course }) => {
       }
     }
 
-    navigate("/cart");
+    navigate("/checkout");
   };
 
   const handleWishlistClick = async () => {
@@ -305,37 +354,50 @@ const PurchaseCard = ({ course }) => {
   const renderCouponBox = () => (
     <div className="space-y-3 bg-[#f7f9fa] p-7">
       <div className="flex items-center justify-between">
-        <button
-          type="button"
-          className="text-lg font-extrabold text-[#6a6f73] underline"
-        >
+        <span className="text-lg font-extrabold text-[#2d2f31]">
           Apply Coupon
-        </button>
+        </span>
         <div className="flex items-center gap-4 text-[#2d2f31]">
           <Gift className="h-6 w-6" />
           <Share2 className="h-6 w-6" />
         </div>
       </div>
 
-      <div className="grid grid-cols-[1fr_96px] gap-3">
-        <input
-          type="text"
-          placeholder="Enter Coupon"
-          className="h-12 rounded border border-[#8a8d91] bg-white px-4 text-base outline-none focus:border-[#5624d0]"
-        />
-        <Button
-          type="button"
-          variant="outline"
-          className="h-12 rounded-md border-[#6d28d9] text-lg font-extrabold text-[#6d28d9] hover:bg-[#f5f0ff]"
-        >
-          Apply
-        </Button>
-      </div>
-
-      <div className="flex h-12 items-center justify-between rounded border border-[#8a8d91] bg-white px-4 text-base">
-        <span className="font-medium text-[#6a6f73]">MT260629G1</span>
-        <span className="font-medium text-[#38755b]">Applied!</span>
-      </div>
+      {appliedCoupon ? (
+        <div className="flex h-12 items-center justify-between rounded border border-[#38755b] bg-[#e6f4ea] px-4 text-base">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-[#1e4620]">
+              {appliedCoupon.coupon?.code || appliedCoupon.code}
+            </span>
+            <span className="font-medium text-[#2e6930]">Applied!</span>
+          </div>
+          <button
+            type="button"
+            onClick={handleRemoveCoupon}
+            className="text-sm font-semibold text-red-600 hover:text-red-800 hover:underline"
+          >
+            Remove
+          </button>
+        </div>
+      ) : (
+        <form onSubmit={handleApplyCoupon} className="grid grid-cols-[1fr_96px] gap-3">
+          <input
+            type="text"
+            value={couponCode}
+            onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+            placeholder="Enter Coupon"
+            className="h-12 rounded border border-[#8a8d91] bg-white px-4 text-base uppercase outline-none focus:border-[#5624d0]"
+          />
+          <Button
+            type="submit"
+            variant="outline"
+            disabled={isValidatingCoupon}
+            className="h-12 rounded-md border-[#6d28d9] text-lg font-extrabold text-[#6d28d9] hover:bg-[#f5f0ff]"
+          >
+            {isValidatingCoupon ? <Loader2 className="h-5 w-5 animate-spin" /> : "Apply"}
+          </Button>
+        </form>
+      )}
     </div>
   );
 
@@ -427,7 +489,13 @@ const PurchaseCard = ({ course }) => {
             onClick={handleCartClick}
             disabled={isCartDataLoading || isAddingToCart}
           >
-            {isAddingToCart ? <Loader2 className="animate-spin" /> : "Go to cart"}
+            {isAddingToCart ? (
+              <Loader2 className="animate-spin" />
+            ) : isCourseInCart ? (
+              "Go to cart"
+            ) : (
+              "Add to cart"
+            )}
           </Button>
           {renderWishlistButton()}
         </div>

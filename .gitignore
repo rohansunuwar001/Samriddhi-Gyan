@@ -11,7 +11,7 @@
 !.env.example
 !**/.env.example
 !**/.env.local.example
-
+key.png
 # Client / Server specific environment files
 client/.env
 server/.env

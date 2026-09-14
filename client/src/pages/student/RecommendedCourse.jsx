@@ -1,5 +1,4 @@
-// src/components/RecommendedCourse.jsx
-
+import { useEffect } from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -13,6 +12,12 @@ const RecommendedCourse = () => {
   const { data, isLoading, isError, error, refetch } = useGetRecommendedCourseQuery();
   
   const courses = data?.recommendedCourses || [];
+
+  useEffect(() => {
+    if (data) {
+      console.log("🎯 [RecommendedCourse Component] JSON Data:", data);
+    }
+  }, [data]);
 
   return (
     <div className="bg-white font-sans">
