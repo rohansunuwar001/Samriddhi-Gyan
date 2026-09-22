@@ -126,7 +126,7 @@ const CoursePayout = () => {
     <div className="flex-1 space-y-6 p-8 pt-6 bg-slate-50 min-h-screen">
       <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between">
         <div>
-          <h2 className="text-5xl font-normal tracking-tight">
+          <h2 className="text-6xl font-light tracking-tight">
             Payouts & Revenue
           </h2>
           <p className="text-muted-foreground">
@@ -134,8 +134,8 @@ const CoursePayout = () => {
           </p>
         </div>
         <div className="mt-4 sm:mt-0 p-4 bg-green-100 text-green-800 rounded-lg text-center">
-          <div className="text-lg font-normal">Total Filtered Revenue</div>
-          <div className="text-4xl font-normal">Rs{totalRevenue.toFixed(2)}</div>
+          <div className="text-xl font-light">Total Filtered Revenue</div>
+          <div className="text-5xl font-light">Rs{totalRevenue.toFixed(2)}</div>
         </div>
       </header>
 
@@ -213,15 +213,15 @@ const CoursePayout = () => {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-light">{payment.user?.name || "Student"}</p>
-                          <p className="text-lg text-muted-foreground">
+                          <p className="font-extralight">{payment.user?.name || "Student"}</p>
+                          <p className="text-xl text-muted-foreground">
                             {payment.user?.email || "—"}
                           </p>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className="font-light text-muted-foreground">
+                      <span className="font-extralight text-muted-foreground">
                         {payment.courseTitle}
                       </span>
                     </TableCell>
@@ -239,7 +239,7 @@ const CoursePayout = () => {
                     <TableCell className="hidden md:table-cell">
                       {payment.purchasedAt ? new Date(payment.purchasedAt).toLocaleDateString() : "—"}
                     </TableCell>
-                    <TableCell className="text-right font-normal">
+                    <TableCell className="text-right font-light">
                       Rs{(payment.priceAtPurchase || 0).toFixed(2)}
                     </TableCell>
                   </TableRow>
@@ -259,7 +259,7 @@ const CoursePayout = () => {
 
           {totalPages > 1 && (
             <div className="flex items-center justify-between pt-4">
-              <span className="text-lg text-muted-foreground">
+              <span className="text-xl text-muted-foreground">
                 Showing{" "}
                 <strong>
                   {Math.min(

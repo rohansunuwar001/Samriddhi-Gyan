@@ -1,4 +1,4 @@
-// server/controllers/certification.controller.js
+import mongoose from "mongoose";
 import { CertificationIssuer } from "../models/certificationIssuer.model.js";
 import { Certification } from "../models/certification.model.js";
 import { ExamRegistration } from "../models/examRegistration.model.js";
@@ -11,6 +11,13 @@ import { uploadMedia } from "../utils/cloudinary.js";
 import Category from "../models/category.model.js";
 import crypto from "crypto";
 import { getEsewaPaymentHash, verifyEsewaPayment } from "../utils/esewa.js";
+import { slugify } from "../utils/slugify.js";
+
+const sanitizeObjectId = (val) => {
+  if (!val) return null;
+  if (typeof val === "object" && val._id) val = val._id;
+  return mongoose.Types.ObjectId.isValid(val) ? val : null;
+};
 
 const stripe = stripePackage(process.env.STRIPE_SECRET_KEY);
 
@@ -113,14 +120,30 @@ export const createCertification = async (req, res) => {
       questions,
     } = req.body;
 
-    if (!name || !issuer || !categoryFilterParent) {
+    const validIssuer = sanitizeObjectId(issuer);
+    const validParentCat = sanitizeObjectId(categoryFilterParent);
+    const validChildCat = sanitizeObjectId(categoryFilterChild);
+    const validSubChildCat = sanitizeObjectId(categoryFilterSubChild);
+
+    if (!name?.trim() || !validIssuer || !validParentCat) {
       return res.status(400).json({
         success: false,
-        message: "Name, parent issuer, and Course Parent Category are required.",
+        message: "Certification Name, Parent Issuer, and Prep Course Parent Category are required.",
       });
     }
 
-    const parsedQuestions = typeof questions === "string" ? JSON.parse(questions) : questions;
+    let parsedQuestions = [];
+    if (questions) {
+      if (typeof questions === "string") {
+        try {
+          parsedQuestions = JSON.parse(questions);
+        } catch (err) {
+          parsedQuestions = [];
+        }
+      } else if (Array.isArray(questions)) {
+        parsedQuestions = questions;
+      }
+    }
 
     let finalBadgeUrl = badgeUrl || "";
     if (req.files && req.files.badgeImage && req.files.badgeImage[0]) {
@@ -132,26 +155,33 @@ export const createCertification = async (req, res) => {
     }
 
     const certification = await Certification.create({
-      name,
-      issuer,
+      name: name.trim(),
+      issuer: validIssuer,
       badgeUrl: finalBadgeUrl,
-      description,
-      categoryFilterParent: categoryFilterParent || null,
-      categoryFilterChild: categoryFilterChild || null,
-      categoryFilterSubChild: categoryFilterSubChild || null,
-      examPrice: examPrice || 0,
-      certificatePrice: certificatePrice || 0,
-      passingScore: passingScore || 70,
-      totalMarks: totalMarks || 100,
-      passMarks: passMarks || 40,
+      description: description || "",
+      categoryFilterParent: validParentCat,
+      categoryFilterChild: validChildCat,
+      categoryFilterSubChild: validSubChildCat,
+      examPrice: Number(examPrice) || 0,
+      certificatePrice: Number(certificatePrice) || 0,
+      passingScore: Number(passingScore) || 70,
+      totalMarks: Number(totalMarks) || 100,
+      passMarks: Number(passMarks) || 40,
       grades: grades || "A, B, C, Pass",
-      duration: duration || 90,
-      questions: parsedQuestions || [],
+      duration: Number(duration) || 90,
+      questions: parsedQuestions,
     });
 
     return res.status(201).json({ success: true, certification });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    console.error("createCertification error:", error);
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "A certification with this name already exists.",
+      });
+    }
+    return res.status(500).json({ success: false, message: error.message || "Failed to create certification." });
   }
 };
 
@@ -296,7 +326,23 @@ export const updateCertification = async (req, res) => {
       questions,
     } = req.body;
 
-    const parsedQuestions = typeof questions === "string" ? JSON.parse(questions) : questions;
+    const validIssuer = sanitizeObjectId(issuer);
+    const validParentCat = sanitizeObjectId(categoryFilterParent);
+    const validChildCat = sanitizeObjectId(categoryFilterChild);
+    const validSubChildCat = sanitizeObjectId(categoryFilterSubChild);
+
+    let parsedQuestions = [];
+    if (questions) {
+      if (typeof questions === "string") {
+        try {
+          parsedQuestions = JSON.parse(questions);
+        } catch (err) {
+          parsedQuestions = [];
+        }
+      } else if (Array.isArray(questions)) {
+        parsedQuestions = questions;
+      }
+    }
 
     let finalBadgeUrl = badgeUrl;
     if (req.files && req.files.badgeImage && req.files.badgeImage[0]) {
@@ -307,32 +353,47 @@ export const updateCertification = async (req, res) => {
       }
     }
 
+    const updateData = {
+      badgeUrl: finalBadgeUrl,
+      description: description || "",
+      categoryFilterParent: validParentCat,
+      categoryFilterChild: validChildCat,
+      categoryFilterSubChild: validSubChildCat,
+      examPrice: Number(examPrice) || 0,
+      certificatePrice: Number(certificatePrice) || 0,
+      passingScore: Number(passingScore) || 70,
+      totalMarks: Number(totalMarks) || 100,
+      passMarks: Number(passMarks) || 40,
+      grades: grades || "A, B, C, Pass",
+      duration: Number(duration) || 90,
+      questions: parsedQuestions,
+    };
+
+    if (name?.trim()) {
+      updateData.name = name.trim();
+      updateData.slug = slugify(name.trim());
+    }
+    if (validIssuer) {
+      updateData.issuer = validIssuer;
+    }
+
     const cert = await Certification.findByIdAndUpdate(
       req.params.id,
-      {
-        name,
-        issuer,
-        badgeUrl: finalBadgeUrl,
-        description,
-        categoryFilterParent: categoryFilterParent || null,
-        categoryFilterChild: categoryFilterChild || null,
-        categoryFilterSubChild: categoryFilterSubChild || null,
-        examPrice: examPrice || 0,
-        certificatePrice: certificatePrice || 0,
-        passingScore: passingScore || 70,
-        totalMarks: totalMarks || 100,
-        passMarks: passMarks || 40,
-        grades: grades || "A, B, C, Pass",
-        duration: duration || 90,
-        questions: parsedQuestions || [],
-      },
+      updateData,
       { new: true }
     );
 
     if (!cert) return res.status(404).json({ success: false, message: "Certification not found." });
     return res.status(200).json({ success: true, certification: cert });
   } catch (error) {
-    return res.status(500).json({ success: false, message: error.message });
+    console.error("updateCertification error:", error);
+    if (error.code === 11000) {
+      return res.status(400).json({
+        success: false,
+        message: "A certification with this name already exists.",
+      });
+    }
+    return res.status(500).json({ success: false, message: error.message || "Failed to update certification." });
   }
 };
 

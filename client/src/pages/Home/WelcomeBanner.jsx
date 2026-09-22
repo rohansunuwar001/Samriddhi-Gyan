@@ -19,31 +19,31 @@ const WelcomeBanner = () => {
   const firstName = user.name?.split(" ")[0];
 
   return (
-    <div className="flex items-center gap-4 py-2">
+    <div className="flex items-center gap-4 py-3">
       {user.photoUrl ? (
         <img
           src={user.photoUrl}
           alt={user.name}
-          className="h-16 w-16 rounded-full object-cover flex-shrink-0 border border-slate-100"
+          className="h-14 w-14 rounded-full object-cover flex-shrink-0 border border-gray-200 shadow-sm"
         />
       ) : (
-        <div className="h-16 w-16 rounded-full bg-slate-900 text-white flex items-center justify-center font-normal text-lg flex-shrink-0">
+        <div className="h-14 w-14 rounded-full bg-[#1c1d1f] text-white flex items-center justify-center font-semibold text-xl flex-shrink-0 shadow-sm">
           {initials}
         </div>
       )}
 
       <div>
-        <h1 className="text-2xl font-normal text-[#1c1d1f]">
+        <h1 className="text-3xl sm:text-4xl font-semibold text-[#2d2f31] tracking-tight">
           Welcome back, {firstName}
         </h1>
 
-        <div className="flex items-center gap-3 mt-1 flex-wrap text-sm">
-          <p className="text-slate-500 font-normal">
+        <div className="flex items-center gap-3 mt-1 flex-wrap text-[14px]">
+          <p className="text-[#6a6f73]">
             {user.occupation || "Tell us what you do"}
           </p>
           <button
             onClick={() => navigate("/personalize")}
-            className="text-violet-600 font-normal hover:underline"
+            className="text-[#a435f0] hover:text-[#8710d8] font-semibold hover:underline"
           >
             Edit occupation and interests
           </button>

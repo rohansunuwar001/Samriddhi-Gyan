@@ -28,7 +28,7 @@ const NoCoursesAvailable = ({ isLoggedIn }) => (
       ) : (
         <ShoppingBasket className="h-4 w-4" />
       )}
-      <AlertTitle className="font-normal">
+      <AlertTitle className="font-light">
         {isLoggedIn ? "You're All Caught Up!" : "No Courses Available"}
       </AlertTitle>
       <AlertDescription>

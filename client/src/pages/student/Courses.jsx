@@ -63,10 +63,10 @@ const Courses = () => {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-5xl font-normal tracking-tight text-gray-900 dark:text-white sm:text-6xl">
+          <h2 className="text-6xl font-light tracking-tight text-gray-900 dark:text-white sm:text-7xl">
             Unlock Your Potential
           </h2>
-          <p className="mt-4 max-w-3xl text-2xl text-gray-600 dark:text-gray-300 mx-auto">
+          <p className="mt-4 max-w-3xl text-3xl text-gray-600 dark:text-gray-300 mx-auto">
             Explore a wide range of courses designed to help you master new skills and advance your career.
           </p>
         </motion.div>

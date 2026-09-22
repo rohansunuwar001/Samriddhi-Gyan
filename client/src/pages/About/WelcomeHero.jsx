@@ -13,7 +13,7 @@ const WelcomeHero = () => {
 
             {/* Left Column: Text Content */}
             <div className="relative z-10 w-full lg:w-1/2 text-center lg:text-left">
-              <h1 className="text-4xl sm:text-5xl md:text-6xl font-serif text-gray-900 leading-tight">
+              <h1 className="text-5xl sm:text-6xl md:text-7xl font-serif text-gray-900 leading-tight">
                 Welcome to where
                 <br />
                 possibilities begin
@@ -55,7 +55,7 @@ const WelcomeHero = () => {
             w-full
             bg-gray-900
             text-white
-            font-bold
+            font-semibold
             text-center
             py-4
             hover:bg-gray-800

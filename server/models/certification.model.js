@@ -83,11 +83,10 @@ const certificationSchema = new mongoose.Schema(
 );
 
 // Auto-slugify on save
-certificationSchema.pre("save", function (next) {
+certificationSchema.pre("save", function () {
   if (this.isModified("name") || !this.slug) {
     this.slug = slugify(this.name);
   }
-  next();
 });
 
 export const Certification = mongoose.model("Certification", certificationSchema);

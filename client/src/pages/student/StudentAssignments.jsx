@@ -64,13 +64,13 @@ function DarkTerminal({ filename, content, loading, fileUrl, isEditable, onChang
       <div className="flex items-center shrink-0"
            style={{ background: "#252526", borderBottom: "1px solid #3c3c3c", minHeight: "35px" }}>
         {filename ? (
-          <div className="flex items-center gap-2 px-4 py-1.5 border-r text-xs font-medium"
+          <div className="flex items-center gap-2 px-4 py-1.5 border-r text-sm font-normal"
                style={{ background: "#1e1e1e", borderColor: "#3c3c3c", borderTop: "1px solid #007acc", color: "#cccccc" }}>
             <Code className="h-3.5 w-3.5" style={{ color: "#cccccc" }} />
             <span>{filename}</span>
           </div>
         ) : (
-          <div className="px-4 py-1.5 text-xs" style={{ color: "#555" }}>
+          <div className="px-4 py-1.5 text-sm" style={{ color: "#555" }}>
             No file open
           </div>
         )}
@@ -90,7 +90,7 @@ function DarkTerminal({ filename, content, loading, fileUrl, isEditable, onChang
         {loading ? (
           <div className="flex-1 flex items-center justify-center gap-3">
             <Loader2 className="h-4 w-4 animate-spin" style={{ color: "#007acc" }} />
-            <span className="text-sm font-mono" style={{ color: "#858585" }}>Loading…</span>
+            <span className="text-base font-mono" style={{ color: "#858585" }}>Loading…</span>
           </div>
 
         ) : !filename ? (
@@ -98,14 +98,14 @@ function DarkTerminal({ filename, content, loading, fileUrl, isEditable, onChang
           <div className="flex-1 flex flex-col items-center justify-center gap-5 p-8 select-none">
             <div className="flex flex-col items-center gap-3">
               <TerminalSquare className="h-10 w-10" style={{ color: "#3c3c3c" }} />
-              <p className="text-sm font-medium" style={{ color: "#555" }}>No file open</p>
-              <p className="text-xs text-center leading-relaxed" style={{ color: "#3c3c3c" }}>
+              <p className="text-base font-normal" style={{ color: "#555" }}>No file open</p>
+              <p className="text-sm text-center leading-relaxed" style={{ color: "#3c3c3c" }}>
                 Upload a file on the left to preview<br />its contents here in the editor.
               </p>
             </div>
             <div className="w-full max-w-xs rounded-lg p-4 space-y-2"
                  style={{ background: "#252526", border: "1px solid #3c3c3c" }}>
-              <p className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: "#555" }}>
+              <p className="text-[10px] font-medium uppercase tracking-widest" style={{ color: "#555" }}>
                 Supported formats
               </p>
               <div className="flex flex-wrap gap-1.5 mt-1">
@@ -124,16 +124,16 @@ function DarkTerminal({ filename, content, loading, fileUrl, isEditable, onChang
           <div className="flex-1 flex flex-col items-center justify-center gap-4 p-8 text-center">
             <File className="h-8 w-8" style={{ color: "#3c3c3c" }} />
             <div>
-              <p className="text-sm font-mono" style={{ color: "#858585" }}>
+              <p className="text-base font-mono" style={{ color: "#858585" }}>
                 No preview available for <span style={{ color: "#9cdcfe" }}>.{ext}</span>
               </p>
-              <p className="text-xs mt-1" style={{ color: "#555" }}>
+              <p className="text-sm mt-1" style={{ color: "#555" }}>
                 Binary files cannot be rendered in the editor.
               </p>
             </div>
             {fileUrl && (
               <a href={fileUrl} target="_blank" rel="noopener noreferrer"
-                 className="text-xs hover:underline" style={{ color: "#007acc" }}>
+                 className="text-sm hover:underline" style={{ color: "#007acc" }}>
                 Download file →
               </a>
             )}
@@ -141,7 +141,7 @@ function DarkTerminal({ filename, content, loading, fileUrl, isEditable, onChang
 
         ) : kind === "code" ? (
           /* Code file with scroll-synchronized line numbers */
-          <div className="flex flex-1 overflow-hidden text-sm font-mono"
+          <div className="flex flex-1 overflow-hidden text-base font-mono"
                style={{ lineHeight: "1.6" }}>
             {/* Gutter */}
             <div ref={gutterRef}
@@ -185,7 +185,7 @@ function DarkTerminal({ filename, content, loading, fileUrl, isEditable, onChang
       <div className="flex items-center justify-between px-4 shrink-0 select-none"
            style={{ background: isEditable ? "#6a9955" : "#007acc", height: "22px" }}>
         <div className="flex items-center gap-3">
-          <span className="text-[11px] font-medium text-white/90">
+          <span className="text-[11px] font-normal text-white/90">
             {filename ? `${kind === "code" ? "Code" : kind === "text" ? "Plain Text" : "Binary"} · ${lines.length} lines` : "Ready"}
           </span>
         </div>
@@ -329,7 +329,7 @@ const StudentAssignments = () => {
       {/* Back to course */}
       <button
         onClick={() => navigate(`/course-detail/${courseId}/content`)}
-        className="flex items-center gap-1.5 text-sm font-medium text-slate-400 hover:text-violet-600 transition-colors mb-6"
+        className="flex items-center gap-1.5 text-base font-normal text-slate-400 hover:text-violet-600 transition-colors mb-6"
       >
         <ChevronLeft className="h-4 w-4" />
         Back to Course
@@ -341,8 +341,8 @@ const StudentAssignments = () => {
           <FileCode className="h-5 w-5 text-violet-600" />
         </div>
         <div>
-          <h1 className="text-xl font-semibold text-slate-800">Course Assignments</h1>
-          <p className="text-xs font-light text-slate-400 mt-0.5">
+          <h1 className="text-2xl font-medium text-slate-800">Course Assignments</h1>
+          <p className="text-sm font-extralight text-slate-400 mt-0.5">
             Click a task to open the submission workspace.
           </p>
         </div>
@@ -352,7 +352,7 @@ const StudentAssignments = () => {
       {assignments.length === 0 ? (
         <div className="flex flex-col items-center justify-center gap-3 py-20 border-2 border-dashed border-slate-100 rounded-2xl text-center">
           <Info className="h-6 w-6 text-slate-300" />
-          <p className="text-sm font-light text-slate-400">No assignments found for this course.</p>
+          <p className="text-base font-extralight text-slate-400">No assignments found for this course.</p>
         </div>
       ) : (
         <div className="space-y-3">
@@ -367,7 +367,7 @@ const StudentAssignments = () => {
                 <div className="flex items-start justify-between gap-4">
                   <div className="space-y-2 flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full border ${
+                      <span className={`text-[11px] font-normal px-2.5 py-0.5 rounded-full border ${
                         asm.type === "coding"
                           ? "bg-indigo-50 text-indigo-600 border-indigo-100"
                           : "bg-amber-50 text-amber-600 border-amber-100"
@@ -375,34 +375,34 @@ const StudentAssignments = () => {
                         {asm.type.charAt(0).toUpperCase() + asm.type.slice(1)} Task
                       </span>
                       {isSubmitted && (
-                        <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">
+                        <span className="flex items-center gap-1 text-[11px] font-normal text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full">
                           <CheckCheck className="h-3 w-3" /> Submitted
                         </span>
                       )}
                       {asm.sectionId ? (
-                        <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full border bg-slate-50 text-slate-600 border-slate-200">
+                        <span className="text-[11px] font-normal px-2.5 py-0.5 rounded-full border bg-slate-50 text-slate-600 border-slate-200">
                           Section: {asm.sectionId.title}
                         </span>
                       ) : (
-                        <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full border bg-purple-50 text-purple-600 border-purple-100">
+                        <span className="text-[11px] font-normal px-2.5 py-0.5 rounded-full border bg-purple-50 text-purple-600 border-purple-100">
                           Course-wide Task
                         </span>
                       )}
                     </div>
-                    <h2 className="text-base font-medium text-slate-800 group-hover:text-violet-700 transition-colors">
+                    <h2 className="text-lg font-normal text-slate-800 group-hover:text-violet-700 transition-colors">
                       {asm.title}
                     </h2>
                     {asm.description && (
-                      <p className="text-sm font-light text-slate-400 line-clamp-2 leading-relaxed">
+                      <p className="text-base font-extralight text-slate-400 line-clamp-2 leading-relaxed">
                         {asm.description}
                       </p>
                     )}
                     <div className="flex items-center gap-4 pt-1">
-                      <span className="flex items-center gap-1.5 text-xs font-light text-slate-400">
+                      <span className="flex items-center gap-1.5 text-sm font-extralight text-slate-400">
                         <CalendarDays className="h-3.5 w-3.5" />
                         Due {new Date(asm.deadline).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
                       </span>
-                      <span className="flex items-center gap-1.5 text-xs font-light text-slate-400">
+                      <span className="flex items-center gap-1.5 text-sm font-extralight text-slate-400">
                         <Award className="h-3.5 w-3.5" />
                         {asm.maxPoints} points
                       </span>
@@ -447,15 +447,15 @@ const StudentAssignments = () => {
       <div className="flex items-center gap-3 px-6 py-3.5 bg-white border-b border-slate-100 shrink-0">
         <button
           onClick={goBack}
-          className="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-violet-600 transition-colors"
+          className="flex items-center gap-1.5 text-base font-normal text-slate-500 hover:text-violet-600 transition-colors"
         >
           <ChevronLeft className="h-4 w-4" />
           All Tasks
         </button>
         <span className="text-slate-200">|</span>
-        <span className="text-sm font-medium text-slate-700 truncate">{asm.title}</span>
+        <span className="text-base font-normal text-slate-700 truncate">{asm.title}</span>
         {asm.submission && (
-          <span className="flex items-center gap-1 text-xs font-medium text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full ml-auto shrink-0">
+          <span className="flex items-center gap-1 text-sm font-normal text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full ml-auto shrink-0">
             <CheckCheck className="h-3 w-3" /> Submitted
           </span>
         )}
@@ -471,7 +471,7 @@ const StudentAssignments = () => {
           {/* Assignment meta */}
           <div className="space-y-2 pb-4 border-b border-slate-50">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className={`text-[11px] font-medium px-2.5 py-0.5 rounded-full border ${
+              <span className={`text-[11px] font-normal px-2.5 py-0.5 rounded-full border ${
                 asm.type === "coding"
                   ? "bg-indigo-50 text-indigo-600 border-indigo-100"
                   : "bg-amber-50 text-amber-600 border-amber-100"
@@ -479,35 +479,35 @@ const StudentAssignments = () => {
                 {asm.type.charAt(0).toUpperCase() + asm.type.slice(1)} Task
               </span>
               {asm.sectionId ? (
-                <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full border bg-slate-50 text-slate-600 border-slate-200">
+                <span className="text-[11px] font-normal px-2.5 py-0.5 rounded-full border bg-slate-50 text-slate-600 border-slate-200">
                   Section: {asm.sectionId.title}
                 </span>
               ) : (
-                <span className="text-[11px] font-medium px-2.5 py-0.5 rounded-full border bg-purple-50 text-purple-600 border-purple-100">
+                <span className="text-[11px] font-normal px-2.5 py-0.5 rounded-full border bg-purple-50 text-purple-600 border-purple-100">
                   Course-wide Task
                 </span>
               )}
             </div>
-            <h2 className="text-lg font-semibold text-slate-800">{asm.title}</h2>
+            <h2 className="text-xl font-medium text-slate-800">{asm.title}</h2>
             <div className="flex items-center gap-4">
-              <span className="text-xs font-light text-slate-400 flex items-center gap-1">
+              <span className="text-sm font-extralight text-slate-400 flex items-center gap-1">
                 <Award className="h-3.5 w-3.5" /> {asm.maxPoints} pts
               </span>
-              <span className="text-xs font-light text-slate-400 flex items-center gap-1">
+              <span className="text-sm font-extralight text-slate-400 flex items-center gap-1">
                 <CalendarDays className="h-3.5 w-3.5" />
                 Due {new Date(asm.deadline).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
               </span>
             </div>
             {asm.description && (
-              <p className="text-xs font-light text-slate-500 bg-slate-50 border border-slate-100 rounded-lg px-3 py-2.5 leading-relaxed">
+              <p className="text-sm font-extralight text-slate-500 bg-slate-50 border border-slate-100 rounded-lg px-3 py-2.5 leading-relaxed">
                 {asm.description}
               </p>
             )}
             {asm.type === "coding" && asm.requiredStructures?.length > 0 && (
               <div className="flex flex-wrap items-center gap-2 pt-1">
-                <span className="text-[10px] font-medium text-slate-400">Requires:</span>
+                <span className="text-[10px] font-normal text-slate-400">Requires:</span>
                 {asm.requiredStructures.map((s) => (
-                  <span key={s} className="text-[11px] font-medium px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100">
+                  <span key={s} className="text-[11px] font-normal px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-600 border border-indigo-100">
                     {s}
                   </span>
                 ))}
@@ -521,8 +521,8 @@ const StudentAssignments = () => {
               <div className="flex items-start gap-2.5 bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3.5">
                 <ShieldCheck className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                 <div>
-                  <p className="text-sm font-medium text-emerald-800">Assignment Submitted</p>
-                  <p className="text-xs font-light text-emerald-600 mt-0.5 leading-relaxed">
+                  <p className="text-base font-normal text-emerald-800">Assignment Submitted</p>
+                  <p className="text-sm font-extralight text-emerald-600 mt-0.5 leading-relaxed">
                     Review your file in the terminal on the right.
                   </p>
                 </div>
@@ -533,15 +533,15 @@ const StudentAssignments = () => {
                   <FileText className="h-4 w-4 text-emerald-600" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-medium text-slate-700 truncate">{asm.submission.fileName}</p>
-                  <p className="text-xs font-light text-slate-400 font-mono">{asm.submission.fileType}</p>
+                  <p className="text-base font-normal text-slate-700 truncate">{asm.submission.fileName}</p>
+                  <p className="text-sm font-extralight text-slate-400 font-mono">{asm.submission.fileType}</p>
                 </div>
               </div>
 
               <Button
                 variant="outline"
                 onClick={handleStartEditing}
-                className="w-full h-9 text-xs font-medium border-slate-200 hover:bg-violet-50 hover:text-violet-700 hover:border-violet-200 gap-1.5"
+                className="w-full h-9 text-sm font-normal border-slate-200 hover:bg-violet-50 hover:text-violet-700 hover:border-violet-200 gap-1.5"
               >
                 <Pencil className="h-3.5 w-3.5" /> Edit Submission
               </Button>
@@ -569,10 +569,10 @@ const StudentAssignments = () => {
                   <UploadCloud className={`h-5 w-5 ${dragActive ? "text-violet-600" : "text-slate-400"}`} />
                 </div>
                 <div>
-                  <p className="text-sm font-medium text-slate-700">
+                  <p className="text-base font-normal text-slate-700">
                     Drop file here, or <span className="text-violet-600">browse</span>
                   </p>
-                  <p className="text-xs font-light text-slate-400 mt-0.5">
+                  <p className="text-sm font-extralight text-slate-400 mt-0.5">
                     {asm.type === "coding"
                       ? ".js · .py · .java · .cpp · .ts · .txt"
                       : ".pdf · .docx · .csv · .txt"}
@@ -590,20 +590,20 @@ const StudentAssignments = () => {
                         : <FileText className="h-4 w-4 text-violet-600" />}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-sm font-medium text-slate-700 truncate">{file.name}</p>
-                      <p className="text-xs font-light text-slate-400">{(file.size / 1024).toFixed(1)} KB — preview in terminal →</p>
+                      <p className="text-base font-normal text-slate-700 truncate">{file.name}</p>
+                      <p className="text-sm font-extralight text-slate-400">{(file.size / 1024).toFixed(1)} KB — preview in terminal →</p>
                     </div>
                   </div>
                   <button type="button"
                     onClick={() => { setFile(null); setFilePreviewContent(""); }}
-                    className="text-xs font-medium text-slate-400 hover:text-rose-500 transition-colors shrink-0">
+                    className="text-sm font-normal text-slate-400 hover:text-rose-500 transition-colors shrink-0">
                     Remove
                   </button>
                 </div>
               )}
 
               <Button type="submit" disabled={isSubmitting || !file}
-                className="w-full h-11 bg-violet-600 hover:bg-violet-700 text-white text-sm font-medium rounded-xl shadow-sm shadow-violet-200 gap-2">
+                className="w-full h-11 bg-violet-600 hover:bg-violet-700 text-white text-base font-normal rounded-xl shadow-sm shadow-violet-200 gap-2">
                 {isSubmitting
                   ? <><Loader2 className="h-4 w-4 animate-spin" /> Submitting…</>
                   : "Submit Assignment"}

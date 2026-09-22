@@ -108,7 +108,7 @@ const AddReviewForm = ({ courseId }) => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="font-semibold text-gray-700 dark:text-gray-300">
+              <label className="font-medium text-gray-700 dark:text-gray-300">
                 Your Rating
               </label>
               <StarRatingInput
@@ -121,7 +121,7 @@ const AddReviewForm = ({ courseId }) => {
             <div>
               <label
                 htmlFor="comment"
-                className="font-semibold text-gray-700 dark:text-gray-300"
+                className="font-medium text-gray-700 dark:text-gray-300"
               >
                 Your Comment
               </label>

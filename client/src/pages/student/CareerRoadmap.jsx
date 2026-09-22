@@ -61,10 +61,10 @@ const CareerRoadmap = () => {
         <div className="inline-flex p-3 rounded-full bg-purple-100 text-purple-700">
           <Compass className="h-8 w-8 animate-spin-slow" />
         </div>
-        <h1 className="text-4xl font-extrabold text-slate-900 tracking-tight">
+        <h1 className="text-5xl font-bold text-slate-900 tracking-tight">
           A* Career Skill Roadmap Planner
         </h1>
-        <p className="text-lg text-slate-600 max-w-xl mx-auto">
+        <p className="text-xl text-slate-600 max-w-xl mx-auto">
           Choose your dream technology goal. Our advanced pathfinding algorithm will calculate your optimal prerequisite path.
         </p>
       </div>
@@ -72,7 +72,7 @@ const CareerRoadmap = () => {
       {/* Control Panel */}
       <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm grid grid-cols-1 md:grid-cols-[1fr_auto] gap-4 items-end mb-12">
         <div className="space-y-2">
-          <label htmlFor="target-category" className="text-sm font-semibold text-slate-700">
+          <label htmlFor="target-category" className="text-base font-medium text-slate-700">
             Select Your Target Career Goal
           </label>
           <select
@@ -91,7 +91,7 @@ const CareerRoadmap = () => {
         <Button
           onClick={fetchRoadmap}
           disabled={loading || !selectedCategory}
-          className="h-11 px-6 rounded-lg bg-purple-700 text-white font-semibold hover:bg-purple-800 flex items-center justify-center gap-2"
+          className="h-11 px-6 rounded-lg bg-purple-700 text-white font-medium hover:bg-purple-800 flex items-center justify-center gap-2"
         >
           {loading ? (
             <>
@@ -150,7 +150,7 @@ const CareerRoadmap = () => {
                     <div className="flex justify-between items-start gap-4">
                       <div className="space-y-1.5">
                         <span
-                          className={`inline-block px-2.5 py-0.5 rounded text-xs font-bold uppercase tracking-wider ${
+                          className={`inline-block px-2.5 py-0.5 rounded text-sm font-semibold uppercase tracking-wider ${
                             course.isCompleted
                               ? "bg-green-100 text-green-800"
                               : isLocked
@@ -160,15 +160,15 @@ const CareerRoadmap = () => {
                         >
                           Step {idx + 1}: {course.category}
                         </span>
-                        <h3 className="text-xl font-extrabold text-slate-900 leading-snug group-hover:text-purple-700">
+                        <h3 className="text-2xl font-bold text-slate-900 leading-snug group-hover:text-purple-700">
                           {course.title}
                         </h3>
-                        <p className="text-sm text-slate-500">
+                        <p className="text-base text-slate-500">
                           Estimated Learning Duration: {course.durationInHours} hours
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-1 text-slate-400 group-hover:text-purple-600 font-bold text-sm">
+                      <div className="flex items-center gap-1 text-slate-400 group-hover:text-purple-600 font-semibold text-base">
                         <span>Details</span>
                         <ChevronRight className="h-4 w-4" />
                       </div>
@@ -182,7 +182,7 @@ const CareerRoadmap = () => {
           {roadmap.length > 0 && roadmap.every((c) => c.isCompleted) && (
             <div className="relative group text-center border-2 border-double border-green-200 bg-green-50/10 p-8 rounded-xl shadow-sm flex flex-col items-center gap-3">
               <Award className="h-12 w-12 text-yellow-600" />
-              <h3 className="text-2xl font-extrabold text-slate-900">Career Goal Achieved!</h3>
+              <h3 className="text-3xl font-bold text-slate-900">Career Goal Achieved!</h3>
               <p className="text-slate-600 max-w-sm">
                 You have completed all prerequisite steps in the {selectedCategory} developer learning roadmap!
               </p>
@@ -192,8 +192,8 @@ const CareerRoadmap = () => {
       ) : (
         <div className="border border-slate-200 bg-slate-50/50 p-12 rounded-xl text-center space-y-3">
           <BookOpen className="h-10 w-10 text-slate-400 mx-auto" />
-          <h3 className="text-lg font-bold text-slate-800">No Learning Path Generated Yet</h3>
-          <p className="text-sm text-slate-500 max-w-xs mx-auto">
+          <h3 className="text-xl font-semibold text-slate-800">No Learning Path Generated Yet</h3>
+          <p className="text-base text-slate-500 max-w-xs mx-auto">
             Choose a target category from the dropdown above and click generate to compute your custom roadmap.
           </p>
         </div>

@@ -256,7 +256,7 @@ const ChatBot = () => {
           >
             <span className="xl:h-17 xl:w-17 n9-attendent absolute h-full w-full justify-items-center rounded-[50%] bg-[url('/samriddhi_logo1.png')] bg-cover bg-center bg-no-repeat text-white"></span>
             {hasUnread && !showChatbot && (
-              <span className="absolute right-0 top-0 inline-flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-red-600 text-xs text-white">
+              <span className="absolute right-0 top-0 inline-flex h-5 w-5 items-center justify-center rounded-full border-2 border-white bg-red-600 text-sm text-white">
                 {
                   chatHistory.filter(
                     (msg) => msg.role === "model" && !msg.isRead
@@ -281,7 +281,7 @@ const ChatBot = () => {
                 <div className="rounded-lg">
                 <ChatbotIcon />
                 </div>
-                <h2 className="logo-text text-[0.8rem] font-semibold text-[#fff]">
+                <h2 className="logo-text text-[0.8rem] font-medium text-[#fff]">
                   Samriddhi Gyan
                 </h2>
               </div>
@@ -296,7 +296,7 @@ const ChatBot = () => {
               ref={chatBodyRef}
               className="chat-body flex h-[calc(100vh-6rem)] sm:h-[calc(100vh-17rem)] md:h-[26rem] lg:h-[28rem] 2xl:h-[28rem] flex-shrink flex-grow flex-col gap-[20px] overflow-hidden overflow-y-auto px-[10px] py-[9px] [scrollbar-width:thin] sm:px-[5px] sm:py-[6px] "
             >
-              <div className="text-center font-Lexend text-[0.8rem] font-medium text-black">
+              <div className="text-center font-Lexend text-[0.8rem] font-normal text-black">
                 Today {currentTime}
               </div>
               {showMessage && (
@@ -306,7 +306,7 @@ const ChatBot = () => {
                     <div className="bot-header text-[10px] text-black">
                       Samriddhi Gyan
                     </div>
-                    <p className="message-text font-lexend animate-slide-in max-w-[75%] transform whitespace-pre-line rounded-bl-[3px] rounded-br-[13px] rounded-tl-[13px] rounded-tr-[13px] bg-[#e1e5e8] px-[9px] py-[5px] text-left text-sm text-black [word-wrap:break-word] lg:text-[0.8rem]">
+                    <p className="message-text font-lexend animate-slide-in max-w-[75%] transform whitespace-pre-line rounded-bl-[3px] rounded-br-[13px] rounded-tl-[13px] rounded-tr-[13px] bg-[#e1e5e8] px-[9px] py-[5px] text-left text-base text-black [word-wrap:break-word] lg:text-[0.8rem]">
                       {intro}
                     </p>
                   </div>
@@ -319,7 +319,7 @@ const ChatBot = () => {
                     .map((option, index) => (
                       <button
                         key={index}
-                        className="m-[2px] rounded-lg border-[1px] border-[#25503E] p-[8px] text-sm text-[#25503E] outline-[none] hover:bg-[#25503E] hover:text-[#fff]"
+                        className="m-[2px] rounded-lg border-[1px] border-[#25503E] p-[8px] text-base text-[#25503E] outline-[none] hover:bg-[#25503E] hover:text-[#fff]"
                         onClick={() => handleButtonClick(option)}
                       >
                         {option}

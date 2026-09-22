@@ -80,8 +80,8 @@ const ExamEnvironment = () => {
     return (
       <div className="text-center py-20 text-slate-400 min-h-screen flex flex-col justify-center items-center">
         <AlertTriangle size={48} className="text-amber-500 mb-2" />
-        <p className="font-semibold text-slate-800">Exam questions are not configured yet.</p>
-        <button onClick={() => navigate(-1)} className="mt-4 text-purple-600 font-bold hover:underline">Go Back</button>
+        <p className="font-medium text-slate-800">Exam questions are not configured yet.</p>
+        <button onClick={() => navigate(-1)} className="mt-4 text-purple-600 font-semibold hover:underline">Go Back</button>
       </div>
     );
   }
@@ -92,14 +92,14 @@ const ExamEnvironment = () => {
       <header className="bg-slate-950 px-6 py-4 flex items-center justify-between border-b border-slate-800 shrink-0">
         <div className="flex items-center gap-2">
           <Award className="text-purple-500" />
-          <h2 className="font-bold text-slate-200 truncate max-w-xs md:max-w-md">{cert.name}</h2>
-          <span className="px-2 py-0.5 text-[10px] bg-purple-900/60 text-purple-300 rounded font-semibold">
+          <h2 className="font-semibold text-slate-200 truncate max-w-xs md:max-w-md">{cert.name}</h2>
+          <span className="px-2 py-0.5 text-[10px] bg-purple-900/60 text-purple-300 rounded font-medium">
             Official Exam
           </span>
         </div>
 
         {examState === "active" && (
-          <div className="flex items-center gap-2 px-4 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-purple-400 font-mono text-lg font-bold">
+          <div className="flex items-center gap-2 px-4 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-purple-400 font-mono text-xl font-semibold">
             <Clock size={18} />
             {formatTime(timeLeft)}
           </div>
@@ -113,30 +113,30 @@ const ExamEnvironment = () => {
             <Award size={48} className="animate-pulse" />
           </div>
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-slate-100">Ready to start the exam?</h1>
-            <p className="text-slate-400 text-sm leading-relaxed">
+            <h1 className="text-3xl font-semibold text-slate-100">Ready to start the exam?</h1>
+            <p className="text-slate-400 text-base leading-relaxed">
               You are about to start the official mock exam simulator. Please ensure you have a stable connection. Distraction-free browser mode is recommended.
             </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-4 w-full bg-slate-950 p-4 border border-slate-800 rounded-2xl text-xs">
+          <div className="grid grid-cols-3 gap-4 w-full bg-slate-950 p-4 border border-slate-800 rounded-2xl text-sm">
             <div className="text-center p-2">
-              <p className="text-slate-500 font-semibold mb-0.5">QUESTIONS</p>
-              <p className="text-sm font-bold text-slate-200">{questions.length} Qs</p>
+              <p className="text-slate-500 font-medium mb-0.5">QUESTIONS</p>
+              <p className="text-base font-semibold text-slate-200">{questions.length} Qs</p>
             </div>
             <div className="text-center p-2 border-x border-slate-800">
-              <p className="text-slate-500 font-semibold mb-0.5">TIME</p>
-              <p className="text-sm font-bold text-slate-200">{cert.duration} Min</p>
+              <p className="text-slate-500 font-medium mb-0.5">TIME</p>
+              <p className="text-base font-semibold text-slate-200">{cert.duration} Min</p>
             </div>
             <div className="text-center p-2">
-              <p className="text-slate-500 font-semibold mb-0.5">PASSING</p>
-              <p className="text-sm font-bold text-slate-200">{cert.passingScore}% Score</p>
+              <p className="text-slate-500 font-medium mb-0.5">PASSING</p>
+              <p className="text-base font-semibold text-slate-200">{cert.passingScore}% Score</p>
             </div>
           </div>
 
           <button
             onClick={() => setExamState("active")}
-            className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-2xl transition-all shadow-lg hover:shadow-purple-500/20"
+            className="px-8 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-2xl transition-all shadow-lg hover:shadow-purple-500/20"
           >
             I am Ready, Start Exam
           </button>
@@ -151,10 +151,10 @@ const ExamEnvironment = () => {
             <div className="max-w-2xl mx-auto w-full space-y-8">
               {/* Question card */}
               <div className="space-y-4">
-                <span className="text-xs uppercase font-bold text-purple-400 tracking-widest font-mono">
+                <span className="text-sm uppercase font-semibold text-purple-400 tracking-widest font-mono">
                   Question {currentIdx + 1} of {questions.length}
                 </span>
-                <h2 className="text-lg md:text-xl font-bold leading-snug">
+                <h2 className="text-xl md:text-2xl font-semibold leading-snug">
                   {questions[currentIdx].questionText}
                 </h2>
               </div>
@@ -167,13 +167,13 @@ const ExamEnvironment = () => {
                     <button
                       key={oIdx}
                       onClick={() => handleSelectOption(oIdx)}
-                      className={`flex items-center gap-3 w-full p-4 rounded-2xl border text-left text-sm font-medium transition-all ${
+                      className={`flex items-center gap-3 w-full p-4 rounded-2xl border text-left text-base font-normal transition-all ${
                         selected
                           ? "bg-purple-950/80 border-purple-500 text-purple-200"
                           : "border-slate-800 hover:border-slate-700 hover:bg-slate-800/40 text-slate-300"
                       }`}
                     >
-                      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${selected ? "bg-purple-500 text-white" : "bg-slate-800 text-slate-400 border border-slate-700"}`}>
+                      <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold ${selected ? "bg-purple-500 text-white" : "bg-slate-800 text-slate-400 border border-slate-700"}`}>
                         {String.fromCharCode(65 + oIdx)}
                       </span>
                       <span>{opt}</span>
@@ -188,7 +188,7 @@ const ExamEnvironment = () => {
               <button
                 disabled={currentIdx === 0}
                 onClick={() => setCurrentIdx((prev) => prev - 1)}
-                className="flex items-center gap-1.5 px-4 py-2 border border-slate-800 rounded-xl text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-800/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
+                className="flex items-center gap-1.5 px-4 py-2 border border-slate-800 rounded-xl text-sm text-slate-400 hover:text-slate-200 hover:bg-slate-800/30 transition-all disabled:opacity-30 disabled:cursor-not-allowed"
               >
                 <ArrowLeft size={14} /> Previous
               </button>
@@ -196,7 +196,7 @@ const ExamEnvironment = () => {
               {currentIdx < questions.length - 1 ? (
                 <button
                   onClick={() => setCurrentIdx((prev) => prev + 1)}
-                  className="flex items-center gap-1.5 px-5 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-xs font-semibold text-slate-200 transition-all"
+                  className="flex items-center gap-1.5 px-5 py-2 bg-slate-800 hover:bg-slate-700 rounded-xl text-sm font-medium text-slate-200 transition-all"
                 >
                   Next <ArrowRight size={14} />
                 </button>
@@ -204,7 +204,7 @@ const ExamEnvironment = () => {
                 <button
                   onClick={handleSubmit}
                   disabled={submitting}
-                  className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition-all shadow-md"
+                  className="px-6 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-semibold transition-all shadow-md"
                 >
                   {submitting ? <Loader2 size={13} className="animate-spin" /> : "Submit Exam"}
                 </button>
@@ -215,7 +215,7 @@ const ExamEnvironment = () => {
           {/* Question Bubbles Sidebar */}
           <div className="w-full md:w-80 bg-slate-950 border-t md:border-t-0 md:border-l border-slate-800 p-6 flex flex-col justify-between shrink-0 overflow-y-auto">
             <div>
-              <h3 className="font-bold text-slate-300 text-xs tracking-wider uppercase mb-4">Question Map</h3>
+              <h3 className="font-semibold text-slate-300 text-sm tracking-wider uppercase mb-4">Question Map</h3>
               <div className="grid grid-cols-5 gap-2">
                 {questions.map((_, i) => {
                   const answered = answers[i] !== undefined;
@@ -224,11 +224,11 @@ const ExamEnvironment = () => {
                     <button
                       key={i}
                       onClick={() => setCurrentIdx(i)}
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs transition-all ${
+                      className={`w-10 h-10 rounded-xl flex items-center justify-center font-semibold text-sm transition-all ${
                         active
                           ? "bg-purple-600 text-white ring-2 ring-purple-400 ring-offset-2 ring-offset-slate-950"
                           : answered
-                          ? "bg-purple-950/80 border border-purple-800 text-purple-300 font-bold"
+                          ? "bg-purple-950/80 border border-purple-800 text-purple-300 font-semibold"
                           : "bg-slate-900 border border-slate-800 text-slate-500"
                       }`}
                     >
@@ -240,14 +240,14 @@ const ExamEnvironment = () => {
             </div>
 
             <div className="mt-8 border-t border-slate-800 pt-4 flex flex-col gap-3">
-              <div className="flex items-center justify-between text-xs text-slate-500">
+              <div className="flex items-center justify-between text-sm text-slate-500">
                 <span>Total Answered</span>
                 <span>{Object.keys(answers).length} / {questions.length}</span>
               </div>
               <button
                 onClick={handleSubmit}
                 disabled={submitting}
-                className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition-colors disabled:opacity-50"
+                className="w-full py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-semibold transition-colors disabled:opacity-50"
               >
                 {submitting ? <Loader2 size={15} className="animate-spin" /> : "Submit Examination"}
               </button>
@@ -264,13 +264,13 @@ const ExamEnvironment = () => {
               <div className="w-20 h-20 rounded-full bg-emerald-950 border border-emerald-500 flex items-center justify-center text-emerald-400 shadow-[0_0_24px_rgba(16,185,129,0.3)] mx-auto">
                 <CheckCircle2 size={44} />
               </div>
-              <h1 className="text-3xl font-extrabold text-slate-100">Congratulations, You Passed!</h1>
-              <p className="text-slate-400 text-sm leading-relaxed max-w-md mx-auto">
+              <h1 className="text-4xl font-bold text-slate-100">Congratulations, You Passed!</h1>
+              <p className="text-slate-400 text-base leading-relaxed max-w-md mx-auto">
                 You successfully passed the certification exam. Your digital credentials are now active, and you have earned a verified certificate.
               </p>
               <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl inline-flex flex-col gap-1">
-                <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Verifiable ID</p>
-                <p className="text-sm font-mono text-purple-400 font-semibold">{results.certificateId}</p>
+                <p className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider">Verifiable ID</p>
+                <p className="text-base font-mono text-purple-400 font-medium">{results.certificateId}</p>
               </div>
             </div>
           ) : (
@@ -278,37 +278,37 @@ const ExamEnvironment = () => {
               <div className="w-20 h-20 rounded-full bg-red-950 border border-red-500 flex items-center justify-center text-red-400 shadow-[0_0_24px_rgba(239,68,68,0.3)] mx-auto">
                 <XCircle size={44} />
               </div>
-              <h1 className="text-3xl font-extrabold text-slate-100">Keep Practicing!</h1>
-              <p className="text-slate-400 text-sm leading-relaxed max-w-md mx-auto">
+              <h1 className="text-4xl font-bold text-slate-100">Keep Practicing!</h1>
+              <p className="text-slate-400 text-base leading-relaxed max-w-md mx-auto">
                 You did not achieve the required passing score. Review the course material again and schedule another attempt.
               </p>
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4 w-full bg-slate-950 p-4 border border-slate-800 rounded-2xl text-xs">
+          <div className="grid grid-cols-2 gap-4 w-full bg-slate-950 p-4 border border-slate-800 rounded-2xl text-sm">
             <div className="text-center p-2 border-r border-slate-800">
-              <p className="text-slate-500 font-semibold mb-0.5">YOUR SCORE</p>
-              <p className={`text-lg font-bold ${results.passed ? "text-emerald-500" : "text-red-500"}`}>
+              <p className="text-slate-500 font-medium mb-0.5">YOUR SCORE</p>
+              <p className={`text-xl font-semibold ${results.passed ? "text-emerald-500" : "text-red-500"}`}>
                 {results.score}%
               </p>
             </div>
             <div className="text-center p-2">
-              <p className="text-slate-500 font-semibold mb-0.5">PASSING GRADE</p>
-              <p className="text-lg font-bold text-slate-200">{cert.passingScore}%</p>
+              <p className="text-slate-500 font-medium mb-0.5">PASSING GRADE</p>
+              <p className="text-xl font-semibold text-slate-200">{cert.passingScore}%</p>
             </div>
           </div>
 
           <div className="flex gap-3">
             <button
               onClick={() => navigate("/subscribe")}
-              className="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold rounded-xl text-xs transition-colors"
+              className="px-6 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium rounded-xl text-sm transition-colors"
             >
               Exit Dashboard
             </button>
             {results.passed ? (
               <button
                 onClick={() => navigate("/home/my-courses/certifications")}
-                className="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs transition-colors"
+                className="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl text-sm transition-colors"
               >
                 View Certificate
               </button>
@@ -320,7 +320,7 @@ const ExamEnvironment = () => {
                   setExamState("intro");
                   setResults(null);
                 }}
-                className="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-xs transition-colors"
+                className="px-6 py-2.5 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-xl text-sm transition-colors"
               >
                 Retry Exam
               </button>

@@ -58,7 +58,7 @@ const SubtitleAlignerTab = () => {
     <Card className="rounded-none border-[#d1d7dc] shadow-sm">
       <CardHeader className="space-y-1">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-xl font-bold text-slate-800 tracking-tight">
+          <CardTitle className="text-2xl font-semibold text-slate-800 tracking-tight">
             Subtitle Aligner
           </CardTitle>
           <div className="flex gap-2">
@@ -66,7 +66,7 @@ const SubtitleAlignerTab = () => {
               <Button
                 variant="outline"
                 onClick={handleReset}
-                className="h-9 text-xs rounded-none border-[#1c1d1f]"
+                className="h-9 text-sm rounded-none border-[#1c1d1f]"
               >
                 <RotateCcw className="w-3.5 h-3.5 mr-1" /> Reset
               </Button>
@@ -74,7 +74,7 @@ const SubtitleAlignerTab = () => {
               <Button
                 onClick={handleRunDTW}
                 disabled={aligning}
-                className="h-9 text-xs rounded-none bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-1.5"
+                className="h-9 text-sm rounded-none bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-1.5"
               >
                 <Sparkles className="w-3.5 h-3.5" />
                 {aligning ? "Aligning..." : "Auto-Align using DTW"}
@@ -82,7 +82,7 @@ const SubtitleAlignerTab = () => {
             )}
           </div>
         </div>
-        <CardDescription className="text-xs text-slate-500">
+        <CardDescription className="text-sm text-slate-500">
           Correct sync errors and audio drifts automatically by matching cues against raw vocal transcriptions.
         </CardDescription>
       </CardHeader>
@@ -95,8 +95,8 @@ const SubtitleAlignerTab = () => {
             : "bg-amber-50/60 border-amber-200 text-amber-800"
         }`}>
           <AlertCircle className={`w-5 h-5 shrink-0 ${isAligned ? "text-green-600" : "text-amber-600"}`} />
-          <div className="text-xs space-y-1">
-            <p className="font-bold">
+          <div className="text-sm space-y-1">
+            <p className="font-semibold">
               {isAligned
                 ? "Subtitles Correctly Aligned!"
                 : "Timeline Drift Detected!"}
@@ -111,7 +111,7 @@ const SubtitleAlignerTab = () => {
 
         {/* Cues List & Timelines */}
         <div className="space-y-4">
-          <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+          <h4 className="text-sm font-semibold uppercase tracking-wider text-slate-400">
             Subtitle Cues Timeline
           </h4>
           <div className="space-y-3">
@@ -127,19 +127,19 @@ const SubtitleAlignerTab = () => {
                   className="bg-slate-50 border border-slate-200 p-4 rounded-none space-y-3 hover:border-slate-300 transition-colors"
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-                    <span className="text-sm font-semibold text-slate-800">
+                    <span className="text-base font-medium text-slate-800">
                       "{cue.text}"
                     </span>
                     <div className="flex items-center gap-2">
-                      <span className="text-xs font-mono bg-white border px-2 py-0.5 text-slate-600">
+                      <span className="text-sm font-mono bg-white border px-2 py-0.5 text-slate-600">
                         {cue.start.toFixed(1)}s
                       </span>
-                      <span className="text-xs text-slate-400">to</span>
-                      <span className="text-xs font-mono bg-white border px-2 py-0.5 text-slate-600">
+                      <span className="text-sm text-slate-400">to</span>
+                      <span className="text-sm font-mono bg-white border px-2 py-0.5 text-slate-600">
                         {cue.end.toFixed(1)}s
                       </span>
                       {isAligned && (
-                        <span className="text-[10px] text-green-600 font-bold bg-green-50 border border-green-100 px-1.5 py-0.5 uppercase tracking-wide">
+                        <span className="text-[10px] text-green-600 font-semibold bg-green-50 border border-green-100 px-1.5 py-0.5 uppercase tracking-wide">
                           Synced
                         </span>
                       )}
@@ -156,7 +156,7 @@ const SubtitleAlignerTab = () => {
                         width: `${widthPercent}%`,
                       }}
                     >
-                      <span className="text-[10px] text-purple-800 font-bold px-1 truncate select-none">
+                      <span className="text-[10px] text-purple-800 font-semibold px-1 truncate select-none">
                         Cue {cue.id}
                       </span>
                     </div>
@@ -170,7 +170,7 @@ const SubtitleAlignerTab = () => {
         {/* Word alignment reference list */}
         <div className="space-y-3 border-t pt-4">
           <div className="flex items-center gap-1.5">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            <h4 className="text-sm font-semibold uppercase tracking-wider text-slate-400">
               Vocal Transcription Reference Cues
             </h4>
             <div className="relative group">
@@ -184,9 +184,9 @@ const SubtitleAlignerTab = () => {
             {ACCURATE_AUDIO_WORDS.map((w, idx) => (
               <div
                 key={idx}
-                className="bg-white border text-xs px-2.5 py-1 rounded-none flex items-center gap-1.5 shadow-2xs"
+                className="bg-white border text-sm px-2.5 py-1 rounded-none flex items-center gap-1.5 shadow-2xs"
               >
-                <span className="font-semibold text-slate-700">{w.word}</span>
+                <span className="font-medium text-slate-700">{w.word}</span>
                 <span className="text-[10px] text-slate-400 font-mono">
                   {w.start.toFixed(1)}s
                 </span>

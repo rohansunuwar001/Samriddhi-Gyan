@@ -54,7 +54,7 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
     if (!showDetails) {
       enterTimeoutRef.current = setTimeout(() => {
         setShowDetails(true);
-      }, 400);
+      }, 60);
     }
   };
 
@@ -64,7 +64,7 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
 
     leaveTimeoutRef.current = setTimeout(() => {
       setShowDetails(false);
-    }, 150);
+    }, 80);
   };
 
   useEffect(() => {
@@ -162,13 +162,26 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
         "Learn the latest technologies including React, Node, and Web3."
       ];
 
-  const ratingValue = course.ratings ?? course.rating ?? 4.5;
-  const reviewsCount = course.numOfReviews ?? course.numRatings ?? 2500;
+  const ratingValue =
+    course.avgRating !== undefined && course.avgRating !== null
+      ? Number(course.avgRating)
+      : Array.isArray(course.ratings) && course.ratings.length
+      ? Number((course.ratings.reduce((s, r) => s + r, 0) / course.ratings.length).toFixed(1))
+      : typeof course.ratings === "number"
+      ? course.ratings
+      : typeof course.rating === "number"
+      ? course.rating
+      : 0;
+
+  const reviewsCount =
+    course.reviewCount !== undefined && course.reviewCount !== null
+      ? course.reviewCount
+      : course.numOfReviews ?? course.numRatings ?? (Array.isArray(course.ratings) ? course.ratings.length : 0);
   const instructorName = course.creator?.name ?? course.instructor?.name ?? "Instructor";
   const totalHours = course.totalDurationInSeconds 
     ? Math.round(course.totalDurationInSeconds / 3600) 
-    : 45;
-  const totalLectures = course.totalLectures ?? 120;
+    : (course.lectures?.length ? Math.max(1, Math.round(course.lectures.length * 0.5)) : 0);
+  const totalLectures = course.totalLectures ?? (course.lectures?.length || 0);
   const courseLevel = course.level ?? "All Levels";
 
   // --- Primary Logic Switch ---
@@ -193,23 +206,23 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
             </div>
           </div>
           <CardHeader className="px-4 pt-4 pb-2">
-            <h3 className="font-normal text-2xl leading-tight line-clamp-2">
+            <h3 className="font-light text-3xl leading-tight line-clamp-2">
               {course.title}
             </h3>
           </CardHeader>
           <CardContent className="px-4 py-2 flex-1">
             <div className="w-full">
-              <span className="text-sm text-gray-500 font-normal mb-1 block">
+              <span className="text-base text-gray-500 font-light mb-1 block">
                 Your Progress
               </span>
               <Progress value={progressPercent} className="h-2 rounded" />
-              <p className="text-sm text-gray-600 mt-1.5">
+              <p className="text-base text-gray-600 mt-1.5">
                 {progressPercent}% Complete
               </p>
             </div>
           </CardContent>
           <CardFooter className="px-4 pb-4 mt-auto">
-            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-normal text-lg py-3">
+            <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-light text-xl py-3">
               Continue Learning
             </Button>
           </CardFooter>
@@ -242,38 +255,42 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
             {/* Course details */}
             <div className="pt-2 px-1 pb-2 flex-1 flex flex-col justify-between">
               <div className="space-y-1">
-                <h3 className="font-normal text-base text-[#1c1d1f] leading-snug line-clamp-2">
-                  {course.title}
+                <h3 className="font-semibold text-[15px] text-[#2d2f31] leading-snug line-clamp-2 group-hover:text-[#a435f0] transition-colors">
+                  {course.title || course.courseTitle}
                 </h3>
-                <p className="text-sm text-[#6a6f73] line-clamp-1 truncate">
+                <p className="text-[12px] text-[#6a6f73] line-clamp-1 truncate">
                   {instructorName}
                 </p>
                 <div className="flex items-center flex-wrap">
-                  <span className="text-sm font-normal text-[#b4690e] mr-1">
-                    {ratingValue.toFixed(1)}
-                  </span>
-                  <div className="flex items-center text-[#b4690e]">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-3 w-3 ${
-                          i < Math.round(ratingValue)
-                            ? "fill-current text-[#b4690e]"
-                            : "text-gray-200"
-                        }`}
-                      />
-                    ))}
-                  </div>
-                  <span className="text-[11px] text-[#6a6f73] ml-1">
+                  {ratingValue > 0 && (
+                    <>
+                      <span className="text-[14px] font-semibold text-[#b4690e] mr-1">
+                        {ratingValue.toFixed(1)}
+                      </span>
+                      <div className="flex items-center text-[#b4690e]">
+                        {Array.from({ length: 5 }).map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`h-3 w-3 ${
+                              i < Math.round(ratingValue)
+                                ? "fill-current text-[#b4690e]"
+                                : "text-gray-200"
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </>
+                  )}
+                  <span className="text-[12px] text-[#6a6f73] ml-1">
                     ({reviewsCount.toLocaleString()})
                   </span>
                 </div>
                 <div className="flex items-baseline gap-1.5 pt-1">
-                  <span className="font-normal text-base text-[#1c1d1f]">
-                    Rs {course.price?.current}
+                  <span className="font-semibold text-[16px] text-[#2d2f31]">
+                    Rs {course.price?.current ?? course.coursePrice ?? "Free"}
                   </span>
                   {hasDiscount && (
-                    <span className="text-sm line-through text-[#6a6f73]">
+                    <span className="text-[14px] line-through text-[#6a6f73]">
                       Rs {course.price?.original}
                     </span>
                   )}
@@ -281,15 +298,20 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
               </div>
 
               {/* Badges block */}
-              <div className="flex flex-wrap items-center gap-1.5 pt-1.5">
-                {course.isBestseller || ratingValue >= 4.6 ? (
-                  <span className="inline-block bg-[#f3ca8c] text-[#593d10] font-normal text-[9px] uppercase px-2 py-0.5 rounded-sm">
+              <div className="flex flex-wrap items-center gap-1.5 pt-2">
+                {course.isBestseller || (ratingValue >= 4.6 && reviewsCount > 0) ? (
+                  <span className="inline-block bg-[#eceb98] text-[#3d3c0a] font-semibold text-[12px] px-2 py-0.5 rounded-sm">
                     Bestseller
                   </span>
-                ) : null}
-                <span className="inline-block bg-[#ecebfa] text-[#5624d0] font-normal text-[9px] uppercase px-2 py-0.5 rounded-sm">
-                  Premium
-                </span>
+                ) : course.isHotAndNew ? (
+                  <span className="inline-block bg-[#fbebee] text-[#b32d0f] font-semibold text-[12px] px-2 py-0.5 rounded-sm">
+                    Hot & New
+                  </span>
+                ) : (
+                  <span className="inline-block bg-[#ece5f8] text-[#401b9c] font-semibold text-[12px] px-2 py-0.5 rounded-sm">
+                    Premium
+                  </span>
+                )}
               </div>
             </div>
           </div>
@@ -309,46 +331,49 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
 
         <div className="space-y-4">
           <div>
-            <h4 className="font-normal text-[#2d2f31] text-lg leading-snug line-clamp-3">
+            <h4 className="font-light text-[#2d2f31] text-xl leading-snug line-clamp-3">
               {course.title}
             </h4>
             <div className="flex items-center gap-2 mt-1.5 flex-wrap">
               {course.isBestseller && (
-                <span className="bg-[#ecebfa] text-[#2d2f31] font-normal px-2 py-0.5 rounded text-[10px] uppercase">
+                <span className="bg-[#ecebfa] text-[#2d2f31] font-light px-2 py-0.5 rounded text-[10px] uppercase">
                   Bestseller
                 </span>
               )}
-              <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-normal bg-[#ecebfa] text-[#5624d0]">
+              <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-light bg-[#ecebfa] text-[#5624d0]">
                 Premium
               </span>
             </div>
           </div>
 
-          <div className="text-sm text-[#6a6f73] space-y-1">
-            <p className="font-normal text-[#38755b]">{formatUpdatedDate(course.updatedAt)}</p>
+          <div className="text-base text-[#6a6f73] space-y-1">
+            <p className="font-light text-[#38755b]">{formatUpdatedDate(course.updatedAt)}</p>
             <p>{totalHours} total hours • {courseLevel} • Subtitles</p>
           </div>
 
-          <p className="text-sm text-[#2d2f31] line-clamp-2 leading-relaxed">
+          <p className="text-base text-[#2d2f31] line-clamp-2 leading-relaxed">
             {course.subtitle || course.description || "Master this subject with our comprehensive, step-by-step curriculum."}
           </p>
 
           {/* Learnings bullet points */}
-          <ul className="space-y-1.5 text-sm text-[#2d2f31]">
-            {bulletPoints.map((point, index) => (
-              <li key={index} className="flex items-start gap-2">
-                <span className="text-gray-500 mt-0.5 font-normal">✓</span>
-                <span className="line-clamp-2">{point}</span>
-              </li>
-            ))}
-          </ul>
+          <div className="pt-1">
+            <h5 className="font-semibold text-[14px] text-[#2d2f31] mb-2">What you'll learn</h5>
+            <ul className="space-y-1.5 text-[13px] text-[#2d2f31]">
+              {bulletPoints.map((point, index) => (
+                <li key={index} className="flex items-start gap-2">
+                  <span className="text-[#2d2f31] font-semibold mt-0.5">✓</span>
+                  <span className="line-clamp-2">{point}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
 
           {/* Quick Actions Button Bar */}
           <div className="flex items-center gap-2 pt-2">
             <Button
               onClick={handleCartAction}
               disabled={isAddingToCart}
-              className="flex-1 h-11 bg-[#a435f0] text-white hover:bg-[#8710d8] font-normal text-base rounded-none shadow-none"
+              className="flex-1 h-11 bg-[#a435f0] text-white hover:bg-[#8710d8] font-light text-lg rounded-none shadow-none"
             >
               {isAddingToCart ? (
                 <Loader2 className="animate-spin h-4 w-4" />

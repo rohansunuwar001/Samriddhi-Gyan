@@ -5,7 +5,7 @@ const Alert = React.forwardRef(
     return (
       <div
         ref={ref}
-        className={`rounded-lg border px-4 py-3 text-base ${
+        className={`rounded-lg border px-4 py-3 text-lg ${
           variant === "destructive"
             ? "bg-red-100 border-red-200 text-red-700 dark:bg-red-900/30 dark:border-red-800 dark:text-red-300"
             : "bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/30 dark:border-blue-800 dark:text-blue-300"
@@ -19,7 +19,7 @@ const Alert = React.forwardRef(
 const AlertTitle = React.forwardRef(({ className, ...props }, ref) => (
   <h5
     ref={ref}
-    className={`mb-1 font-light leading-none tracking-tight ${className}`}
+    className={`mb-1 font-extralight leading-none tracking-tight ${className}`}
     {...props}
   />
 ));
@@ -27,7 +27,7 @@ const AlertTitle = React.forwardRef(({ className, ...props }, ref) => (
 const AlertDescription = React.forwardRef(({ className, ...props }, ref) => (
   <div
     ref={ref}
-    className={`text-base [&_p]:leading-relaxed ${className}`}
+    className={`text-lg [&_p]:leading-relaxed ${className}`}
     {...props}
   />
 ));

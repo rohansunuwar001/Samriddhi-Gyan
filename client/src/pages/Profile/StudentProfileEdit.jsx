@@ -265,15 +265,15 @@ const StudentProfileEdit = () => {
       <div className="flex flex-col items-center pb-6 border-b border-gray-200">
         <Avatar className="h-28 w-28 border border-gray-200">
           <AvatarImage src={avatarPreview || user?.photoUrl} alt={user?.name} className="object-cover" />
-          <AvatarFallback className="text-4xl font-normal text-white bg-[#1c1d1f]">{initials}</AvatarFallback>
+          <AvatarFallback className="text-5xl font-light text-white bg-[#1c1d1f]">{initials}</AvatarFallback>
         </Avatar>
-        <p className="mt-3 text-lg font-normal text-[#1c1d1f]">{user?.name}</p>
+        <p className="mt-3 text-xl font-light text-[#1c1d1f]">{user?.name}</p>
       </div>
 
       <nav className="mt-4 flex flex-col">
         <Link
           to={`/user/${usernameSlug}`}
-          className="block px-4 py-2.5 text-base text-[#5624d0] hover:text-[#401b9c] font-light border-b border-gray-100"
+          className="block px-4 py-2.5 text-lg text-[#5624d0] hover:text-[#401b9c] font-extralight border-b border-gray-100"
         >
           View public profile
         </Link>
@@ -291,10 +291,10 @@ const StudentProfileEdit = () => {
           <button
             key={item.id}
             onClick={() => handleTabChange(item.tab)}
-            className={`w-full text-left px-4 py-2.5 text-base transition-colors border-l-[3px] ${
+            className={`w-full text-left px-4 py-2.5 text-lg transition-colors border-l-[3px] ${
               activeTab === item.tab
-                ? "border-[#1c1d1f] bg-[#f7f9fa] font-normal text-[#1c1d1f]"
-                : "border-transparent font-normal text-[#2d2f31] hover:bg-[#f7f9fa]"
+                ? "border-[#1c1d1f] bg-[#f7f9fa] font-light text-[#1c1d1f]"
+                : "border-transparent font-light text-[#2d2f31] hover:bg-[#f7f9fa]"
             }`}
           >
             {item.label}
@@ -315,27 +315,27 @@ const StudentProfileEdit = () => {
             {activeTab === "profile" && (
               <div>
                 <div className="border-b border-gray-200 pb-5 mb-8 text-center">
-                  <h1 className="text-3xl font-normal">Public profile</h1>
-                  <p className="text-base text-gray-500 mt-1">Add information about yourself</p>
+                  <h1 className="text-4xl font-light">Public profile</h1>
+                  <p className="text-lg text-gray-500 mt-1">Add information about yourself</p>
                 </div>
 
                 <form onSubmit={handleSaveProfile} className="space-y-8 max-w-[700px]">
                   <div>
-                    <h2 className="text-base font-normal mb-3">Basics:</h2>
+                    <h2 className="text-lg font-light mb-3">Basics:</h2>
                     <div className="space-y-3">
                       <input
                         type="text"
                         placeholder="First name"
                         value={firstName}
                         onChange={(e) => setFirstName(e.target.value)}
-                        className="w-full border border-[#d1d7dc] px-4 py-2.5 text-base focus:outline-none focus:border-[#1c1d1f]"
+                        className="w-full border border-[#d1d7dc] px-4 py-2.5 text-lg focus:outline-none focus:border-[#1c1d1f]"
                       />
                       <input
                         type="text"
                         placeholder="Last name"
                         value={lastName}
                         onChange={(e) => setLastName(e.target.value)}
-                        className="w-full border border-[#d1d7dc] px-4 py-2.5 text-base focus:outline-none focus:border-[#1c1d1f]"
+                        className="w-full border border-[#d1d7dc] px-4 py-2.5 text-lg focus:outline-none focus:border-[#1c1d1f]"
                       />
                       <div className="relative">
                         <input
@@ -344,38 +344,38 @@ const StudentProfileEdit = () => {
                           value={headline}
                           maxLength={60}
                           onChange={(e) => setHeadline(e.target.value)}
-                          className="w-full border border-[#d1d7dc] px-4 py-2.5 pr-12 text-base focus:outline-none focus:border-[#1c1d1f]"
+                          className="w-full border border-[#d1d7dc] px-4 py-2.5 pr-12 text-lg focus:outline-none focus:border-[#1c1d1f]"
                         />
-                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-gray-400">
+                        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-base text-gray-400">
                           {60 - headline.length}
                         </span>
                       </div>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-base text-gray-500">
                         Add a professional headline like, "Instructor at Samriddhi Gyan" or "Architect."
                       </p>
                     </div>
                   </div>
 
                   <div>
-                    <h2 className="text-base font-normal mb-3">Biography</h2>
+                    <h2 className="text-lg font-light mb-3">Biography</h2>
                     <div className="border border-[#d1d7dc] border-b-0 px-3 py-2 flex gap-3 bg-white">
-                      <button type="button" onClick={() => document.execCommand("bold")} className="font-normal text-base">B</button>
-                      <button type="button" onClick={() => document.execCommand("italic")} className="italic text-base">I</button>
+                      <button type="button" onClick={() => document.execCommand("bold")} className="font-light text-lg">B</button>
+                      <button type="button" onClick={() => document.execCommand("italic")} className="italic text-lg">I</button>
                     </div>
                     <textarea
                       value={biography}
                       onChange={(e) => setBiography(e.target.value)}
                       placeholder="Biography"
                       rows={5}
-                      className="w-full border border-[#d1d7dc] px-4 py-3 text-base focus:outline-none focus:border-[#1c1d1f] resize-none"
+                      className="w-full border border-[#d1d7dc] px-4 py-3 text-lg focus:outline-none focus:border-[#1c1d1f] resize-none"
                     />
                     {!bioMeetsRequirement && biography.trim().length > 0 && (
-                      <p className="text-sm text-[#c91a0f] mt-1">
+                      <p className="text-base text-[#c91a0f] mt-1">
                         Your biography should have at least 50 words, links and coupon codes are not permitted. Current count: {bioWordCount} words.
                       </p>
                     )}
                     {biography.trim().length === 0 && (
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className="text-base text-gray-500 mt-1">
                         Links and coupon codes are not permitted in this section.
                       </p>
                     )}
@@ -385,7 +385,7 @@ const StudentProfileEdit = () => {
                     <select
                       value={language}
                       onChange={(e) => setLanguage(e.target.value)}
-                      className="w-full border border-[#d1d7dc] px-4 py-2.5 text-base focus:outline-none focus:border-[#1c1d1f] bg-white"
+                      className="w-full border border-[#d1d7dc] px-4 py-2.5 text-lg focus:outline-none focus:border-[#1c1d1f] bg-white"
                     >
                       {LANGUAGES.map((l) => (
                         <option key={l} value={l}>{l}</option>
@@ -394,92 +394,92 @@ const StudentProfileEdit = () => {
                   </div>
 
                   <div>
-                    <h2 className="text-base font-normal mb-3">Links:</h2>
+                    <h2 className="text-lg font-light mb-3">Links:</h2>
                     <div className="space-y-3">
                       <input
                         type="url"
                         placeholder="Website (https://...)"
                         value={website}
                         onChange={(e) => setWebsite(e.target.value)}
-                        className="w-full border border-[#d1d7dc] px-4 py-2.5 text-base focus:outline-none focus:border-[#1c1d1f]"
+                        className="w-full border border-[#d1d7dc] px-4 py-2.5 text-lg focus:outline-none focus:border-[#1c1d1f]"
                       />
                       <div>
                         <div className="flex">
-                          <span className="border border-r-0 border-[#d1d7dc] px-3 py-2.5 text-base text-gray-500 bg-gray-50 whitespace-nowrap">facebook.com/</span>
+                          <span className="border border-r-0 border-[#d1d7dc] px-3 py-2.5 text-lg text-gray-500 bg-gray-50 whitespace-nowrap">facebook.com/</span>
                           <input
                             type="text"
                             placeholder="Username"
                             value={facebook}
                             onChange={(e) => setFacebook(e.target.value)}
-                            className="flex-1 border border-[#d1d7dc] px-3 py-2.5 text-base focus:outline-none focus:border-[#1c1d1f]"
+                            className="flex-1 border border-[#d1d7dc] px-3 py-2.5 text-lg focus:outline-none focus:border-[#1c1d1f]"
                           />
                         </div>
-                        <p className="text-sm text-gray-500 mt-1">Input your Facebook username (e.g. johnsmith).</p>
+                        <p className="text-base text-gray-500 mt-1">Input your Facebook username (e.g. johnsmith).</p>
                       </div>
                       <div>
                         <div className="flex">
-                          <span className="border border-r-0 border-[#d1d7dc] px-3 py-2.5 text-base text-gray-500 bg-gray-50 whitespace-nowrap">instagram.com/</span>
+                          <span className="border border-r-0 border-[#d1d7dc] px-3 py-2.5 text-lg text-gray-500 bg-gray-50 whitespace-nowrap">instagram.com/</span>
                           <input
                             type="text"
                             placeholder="Username"
                             value={instagram}
                             onChange={(e) => setInstagram(e.target.value)}
-                            className="flex-1 border border-[#d1d7dc] px-3 py-2.5 text-base focus:outline-none focus:border-[#1c1d1f]"
+                            className="flex-1 border border-[#d1d7dc] px-3 py-2.5 text-lg focus:outline-none focus:border-[#1c1d1f]"
                           />
                         </div>
-                        <p className="text-sm text-gray-500 mt-1">Input your Instagram username (e.g. johnsmith).</p>
+                        <p className="text-base text-gray-500 mt-1">Input your Instagram username (e.g. johnsmith).</p>
                       </div>
                       <div>
                         <div className="flex">
-                          <span className="border border-r-0 border-[#d1d7dc] px-3 py-2.5 text-base text-gray-500 bg-gray-50 whitespace-nowrap">linkedin.com/</span>
+                          <span className="border border-r-0 border-[#d1d7dc] px-3 py-2.5 text-lg text-gray-500 bg-gray-50 whitespace-nowrap">linkedin.com/</span>
                           <input
                             type="text"
                             placeholder="Public Profile URL"
                             value={linkedin}
                             onChange={(e) => setLinkedin(e.target.value)}
-                            className="flex-1 border border-[#d1d7dc] px-3 py-2.5 text-base focus:outline-none focus:border-[#1c1d1f]"
+                            className="flex-1 border border-[#d1d7dc] px-3 py-2.5 text-lg focus:outline-none focus:border-[#1c1d1f]"
                           />
                         </div>
-                        <p className="text-sm text-gray-500 mt-1">Input your LinkedIn public profile URL (e.g. in/johnsmith, company/Samriddhi Gyan).</p>
+                        <p className="text-base text-gray-500 mt-1">Input your LinkedIn public profile URL (e.g. in/johnsmith, company/Samriddhi Gyan).</p>
                       </div>
                       <div>
                         <div className="flex">
-                          <span className="border border-r-0 border-[#d1d7dc] px-3 py-2.5 text-base text-gray-500 bg-gray-50 whitespace-nowrap">tiktok.com/</span>
+                          <span className="border border-r-0 border-[#d1d7dc] px-3 py-2.5 text-lg text-gray-500 bg-gray-50 whitespace-nowrap">tiktok.com/</span>
                           <input
                             type="text"
                             placeholder="@Username"
                             value={tiktok}
                             onChange={(e) => setTiktok(e.target.value)}
-                            className="flex-1 border border-[#d1d7dc] px-3 py-2.5 text-base focus:outline-none focus:border-[#1c1d1f]"
+                            className="flex-1 border border-[#d1d7dc] px-3 py-2.5 text-lg focus:outline-none focus:border-[#1c1d1f]"
                           />
                         </div>
-                        <p className="text-sm text-gray-500 mt-1">Input your TikTok username (e.g. @johnsmith).</p>
+                        <p className="text-base text-gray-500 mt-1">Input your TikTok username (e.g. @johnsmith).</p>
                       </div>
                       <div>
                         <div className="flex">
-                          <span className="border border-r-0 border-[#d1d7dc] px-3 py-2.5 text-base text-gray-500 bg-gray-50 whitespace-nowrap">x.com/</span>
+                          <span className="border border-r-0 border-[#d1d7dc] px-3 py-2.5 text-lg text-gray-500 bg-gray-50 whitespace-nowrap">x.com/</span>
                           <input
                             type="text"
                             placeholder="Username"
                             value={twitter}
                             onChange={(e) => setTwitter(e.target.value)}
-                            className="flex-1 border border-[#d1d7dc] px-3 py-2.5 text-base focus:outline-none focus:border-[#1c1d1f]"
+                            className="flex-1 border border-[#d1d7dc] px-3 py-2.5 text-lg focus:outline-none focus:border-[#1c1d1f]"
                           />
                         </div>
-                        <p className="text-sm text-gray-500 mt-1">Add your X username (e.g. johnsmith).</p>
+                        <p className="text-base text-gray-500 mt-1">Add your X username (e.g. johnsmith).</p>
                       </div>
                       <div>
                         <div className="flex">
-                          <span className="border border-r-0 border-[#d1d7dc] px-3 py-2.5 text-base text-gray-500 bg-gray-50 whitespace-nowrap">youtube.com/</span>
+                          <span className="border border-r-0 border-[#d1d7dc] px-3 py-2.5 text-lg text-gray-500 bg-gray-50 whitespace-nowrap">youtube.com/</span>
                           <input
                             type="text"
                             placeholder="Username"
                             value={youtube}
                             onChange={(e) => setYoutube(e.target.value)}
-                            className="flex-1 border border-[#d1d7dc] px-3 py-2.5 text-base focus:outline-none focus:border-[#1c1d1f]"
+                            className="flex-1 border border-[#d1d7dc] px-3 py-2.5 text-lg focus:outline-none focus:border-[#1c1d1f]"
                           />
                         </div>
-                        <p className="text-sm text-gray-500 mt-1">Input your Youtube username (e.g. johnsmith).</p>
+                        <p className="text-base text-gray-500 mt-1">Input your Youtube username (e.g. johnsmith).</p>
                       </div>
                     </div>
                   </div>
@@ -487,7 +487,7 @@ const StudentProfileEdit = () => {
                   <button
                     type="submit"
                     disabled={isSavingInfo}
-                    className="bg-[#a435f0] hover:bg-[#8710d8] text-white text-base font-normal px-5 py-2.5 flex items-center gap-2 transition-colors"
+                    className="bg-[#a435f0] hover:bg-[#8710d8] text-white text-lg font-light px-5 py-2.5 flex items-center gap-2 transition-colors"
                   >
                     {isSavingInfo && <Loader2 className="w-4 h-4 animate-spin" />}
                     Save
@@ -500,13 +500,13 @@ const StudentProfileEdit = () => {
             {activeTab === "photo" && (
               <div>
                 <div className="border-b border-gray-200 pb-5 mb-8 text-center">
-                  <h1 className="text-3xl font-normal">Photo</h1>
-                  <p className="text-base text-gray-500 mt-1">Add a nice photo of yourself for your profile.</p>
+                  <h1 className="text-4xl font-light">Photo</h1>
+                  <p className="text-lg text-gray-500 mt-1">Add a nice photo of yourself for your profile.</p>
                 </div>
 
                 <form onSubmit={handleSavePhoto} className="max-w-[700px] space-y-6">
                   <div>
-                    <p className="text-base font-normal mb-3">Image preview</p>
+                    <p className="text-lg font-light mb-3">Image preview</p>
                     <div className="border border-[#d1d7dc] bg-[#f7f9fa] flex items-center justify-center h-52 w-full max-w-sm">
                       {avatarPreview ? (
                         <img src={avatarPreview} alt="Preview" className="h-full w-full object-cover" />
@@ -517,18 +517,18 @@ const StudentProfileEdit = () => {
                   </div>
 
                   <div>
-                    <p className="text-base font-normal mb-3">Add / Change Image</p>
+                    <p className="text-lg font-light mb-3">Add / Change Image</p>
                     <div className="flex">
                       <input
                         type="text"
                         readOnly
                         value={avatarFile ? avatarFile.name : "No file selected"}
-                        className="flex-1 border border-r-0 border-[#d1d7dc] px-4 py-2.5 text-base text-gray-500 bg-white focus:outline-none"
+                        className="flex-1 border border-r-0 border-[#d1d7dc] px-4 py-2.5 text-lg text-gray-500 bg-white focus:outline-none"
                       />
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="border border-[#a435f0] text-[#a435f0] hover:bg-purple-50 px-4 py-2.5 text-base font-normal flex items-center gap-2 transition-colors whitespace-nowrap"
+                        className="border border-[#a435f0] text-[#a435f0] hover:bg-purple-50 px-4 py-2.5 text-lg font-light flex items-center gap-2 transition-colors whitespace-nowrap"
                       >
                         Upload image
                       </button>
@@ -545,7 +545,7 @@ const StudentProfileEdit = () => {
                   <button
                     type="submit"
                     disabled={isSavingAvatar || !avatarFile}
-                    className="bg-[#a435f0] hover:bg-[#8710d8] disabled:opacity-50 text-white text-base font-normal px-5 py-2.5 flex items-center gap-2 transition-colors"
+                    className="bg-[#a435f0] hover:bg-[#8710d8] disabled:opacity-50 text-white text-lg font-light px-5 py-2.5 flex items-center gap-2 transition-colors"
                   >
                     {isSavingAvatar && <Loader2 className="w-4 h-4 animate-spin" />}
                     Save
@@ -558,16 +558,16 @@ const StudentProfileEdit = () => {
             {activeTab === "security" && (
               <div>
                 <div className="border-b border-gray-200 pb-5 mb-8 text-center">
-                  <h1 className="text-3xl font-normal">Account</h1>
-                  <p className="text-base text-gray-500 mt-1">Edit your account settings and change your password here.</p>
+                  <h1 className="text-4xl font-light">Account</h1>
+                  <p className="text-lg text-gray-500 mt-1">Edit your account settings and change your password here.</p>
                 </div>
 
                 <div className="max-w-[700px] space-y-8">
                   <div className="border-b border-gray-200 pb-6">
-                    <label className="text-base font-normal block mb-2">Email:</label>
+                    <label className="text-lg font-light block mb-2">Email:</label>
                     <div className="flex items-center gap-2">
-                      <div className="flex-1 border border-[#d1d7dc] px-4 py-2.5 text-base text-gray-600 bg-[#f7f9fa]">
-                        Your email address is <span className="font-normal text-[#1c1d1f]">{user?.email}</span>
+                      <div className="flex-1 border border-[#d1d7dc] px-4 py-2.5 text-lg text-gray-600 bg-[#f7f9fa]">
+                        Your email address is <span className="font-light text-[#1c1d1f]">{user?.email}</span>
                       </div>
                       <button
                         type="button"
@@ -581,14 +581,14 @@ const StudentProfileEdit = () => {
 
                   <form onSubmit={handleSavePassword} className="space-y-4">
                     <div>
-                      <label className="text-base font-normal block mb-2">New password</label>
+                      <label className="text-lg font-light block mb-2">New password</label>
                       <div className="relative">
                         <input
                           type={showNew ? "text" : "password"}
                           placeholder="Enter new password"
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
-                          className="w-full border border-[#d1d7dc] px-4 py-2.5 pr-11 text-base focus:outline-none focus:border-[#1c1d1f]"
+                          className="w-full border border-[#d1d7dc] px-4 py-2.5 pr-11 text-lg focus:outline-none focus:border-[#1c1d1f]"
                         />
                         <button
                           type="button"
@@ -601,14 +601,14 @@ const StudentProfileEdit = () => {
                     </div>
 
                     <div>
-                      <label className="text-base font-normal block mb-2">Confirm new password</label>
+                      <label className="text-lg font-light block mb-2">Confirm new password</label>
                       <div className="relative">
                         <input
                           type={showConfirm ? "text" : "password"}
                           placeholder="Re-type new password"
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
-                          className="w-full border border-[#d1d7dc] px-4 py-2.5 pr-11 text-base focus:outline-none focus:border-[#1c1d1f]"
+                          className="w-full border border-[#d1d7dc] px-4 py-2.5 pr-11 text-lg focus:outline-none focus:border-[#1c1d1f]"
                         />
                         <button
                           type="button"
@@ -623,7 +623,7 @@ const StudentProfileEdit = () => {
                     <button
                       type="submit"
                       disabled={isSavingPwd || !newPassword || !confirmPassword}
-                      className="bg-[#a435f0] hover:bg-[#8710d8] disabled:opacity-50 text-white text-base font-normal px-5 py-2.5 flex items-center gap-2 transition-colors"
+                      className="bg-[#a435f0] hover:bg-[#8710d8] disabled:opacity-50 text-white text-lg font-light px-5 py-2.5 flex items-center gap-2 transition-colors"
                     >
                       {isSavingPwd && <Loader2 className="w-4 h-4 animate-spin" />}
                       Change password
@@ -631,8 +631,8 @@ const StudentProfileEdit = () => {
                   </form>
 
                   <div className="border border-[#d1d7dc] p-6">
-                    <h3 className="text-base font-normal mb-2">Multi-factor Authentication</h3>
-                    <p className="text-base text-gray-600 mb-4 leading-relaxed">
+                    <h3 className="text-lg font-light mb-2">Multi-factor Authentication</h3>
+                    <p className="text-lg text-gray-600 mb-4 leading-relaxed">
                       Increase your account security by requiring that a code emailed to you be entered
                       when you log in. For more information on how multi-factor authentication works,
                       refer to our <a href="#" className="text-[#5624d0] hover:underline">Help Center article</a>.
@@ -640,7 +640,7 @@ const StudentProfileEdit = () => {
                     <button
                       type="button"
                       onClick={() => toast.info("MFA is not enabled for your region.")}
-                      className="bg-[#a435f0] hover:bg-[#8710d8] text-white text-base font-normal px-5 py-2.5 transition-colors"
+                      className="bg-[#a435f0] hover:bg-[#8710d8] text-white text-lg font-light px-5 py-2.5 transition-colors"
                     >
                       Enable
                     </button>
@@ -653,39 +653,39 @@ const StudentProfileEdit = () => {
             {activeTab === "subscriptions" && (
               <div>
                 <div className="pb-5 mb-8">
-                  <h1 className="text-4xl font-normal">Subscriptions</h1>
-                  <p className="text-base text-gray-500 mt-1">Manage your Samriddhi Gyan subscriptions</p>
+                  <h1 className="text-5xl font-light">Subscriptions</h1>
+                  <p className="text-lg text-gray-500 mt-1">Manage your Samriddhi Gyan subscriptions</p>
                 </div>
 
                 <div className="mb-10">
-                  <h2 className="text-lg font-normal mb-4">Active plans</h2>
+                  <h2 className="text-xl font-light mb-4">Active plans</h2>
                   <div className="border border-dashed border-[#d1d7dc] p-8">
                     {user?.subscription && user.subscription.status === "active" ? (
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-base font-normal">{user.subscription.planName || "Personal Plan"}</p>
-                          <p className="text-sm text-gray-500 mt-1">
+                          <p className="text-lg font-light">{user.subscription.planName || "Personal Plan"}</p>
+                          <p className="text-base text-gray-500 mt-1">
                             {user.subscription.startsAt && user.subscription.expiresAt
                               ? `${new Date(user.subscription.startsAt).toLocaleDateString()} – ${new Date(user.subscription.expiresAt).toLocaleDateString()}`
                               : "Subscription period active"}
                           </p>
                         </div>
-                        <span className="inline-flex items-center gap-1 text-sm font-normal text-green-700 bg-green-50 border border-green-200 px-2.5 py-1">
+                        <span className="inline-flex items-center gap-1 text-base font-light text-green-700 bg-green-50 border border-green-200 px-2.5 py-1">
                           <Check className="w-3 h-3" /> Active
                         </span>
                       </div>
                     ) : (
-                      <p className="text-base text-gray-500 text-center">You don't have any active subscriptions</p>
+                      <p className="text-lg text-gray-500 text-center">You don't have any active subscriptions</p>
                     )}
                   </div>
                 </div>
 
                 <div>
-                  <h2 className="text-lg font-normal mb-4">Subscription plans available</h2>
+                  <h2 className="text-xl font-light mb-4">Subscription plans available</h2>
                   <div className="flex flex-col lg:flex-row gap-0 border border-[#d1d7dc] overflow-hidden">
                     <div className="flex-1 p-6">
-                      <h3 className="text-lg font-normal mb-3">{plans[0]?.name || "Personal Plan"}</h3>
-                      <p className="text-base text-gray-600 mb-4">
+                      <h3 className="text-xl font-light mb-3">{plans[0]?.name || "Personal Plan"}</h3>
+                      <p className="text-lg text-gray-600 mb-4">
                         New opportunities await. Sign up for Personal Plan to get all this and more:
                       </p>
                       <ul className="space-y-2 mb-6">
@@ -694,7 +694,7 @@ const StudentProfileEdit = () => {
                           "Courses in tech, business, and more",
                           "Practice tests, exercises, and Q&A",
                         ]).map((f, i) => (
-                          <li key={i} className="flex items-start gap-2 text-base text-gray-600">
+                          <li key={i} className="flex items-start gap-2 text-lg text-gray-600">
                             <Check className="w-4 h-4 text-[#5624d0] mt-0.5 shrink-0" />
                             {f}
                           </li>
@@ -703,15 +703,15 @@ const StudentProfileEdit = () => {
                       <div className="flex items-center gap-4">
                         <button
                           onClick={() => navigate("/subscribe")}
-                          className="bg-[#a435f0] hover:bg-[#8710d8] text-white text-base font-normal px-5 py-2.5 transition-colors"
+                          className="bg-[#a435f0] hover:bg-[#8710d8] text-white text-lg font-light px-5 py-2.5 transition-colors"
                         >
                           Subscribe
                         </button>
-                        <Link to="/subscribe" className="text-base font-light text-[#1c1d1f] hover:text-[#5624d0]">
+                        <Link to="/subscribe" className="text-lg font-extralight text-[#1c1d1f] hover:text-[#5624d0]">
                           Learn more
                         </Link>
                       </div>
-                      <p className="text-sm text-gray-400 mt-4">
+                      <p className="text-base text-gray-400 mt-4">
                         Starting at Rs {plans[0]?.price || "999"} per month. Cancel anytime.
                       </p>
                     </div>
@@ -727,7 +727,7 @@ const StudentProfileEdit = () => {
             {activeTab === "payment" && (
               <div>
                 <div className="pb-5 mb-8 border-b border-gray-200">
-                  <h1 className="text-4xl font-normal">Payment methods</h1>
+                  <h1 className="text-5xl font-light">Payment methods</h1>
                 </div>
 
                 <div className="max-w-[700px] space-y-6">
@@ -739,14 +739,14 @@ const StudentProfileEdit = () => {
                       onChange={(e) => setShowSavedPaymentMethods(e.target.checked)}
                       className="mt-1 accent-[#a435f0]"
                     />
-                    <label htmlFor="showSavedPaymentMethods" className="text-base font-normal text-gray-700">
+                    <label htmlFor="showSavedPaymentMethods" className="text-lg font-light text-gray-700">
                       Show my saved payment methods on the checkout step.
                     </label>
                   </div>
 
                   <div>
-                    <h2 className="text-lg font-normal mb-4">Your saved payment methods</h2>
-                    <div className="border border-dashed border-[#d1d7dc] p-12 text-center text-gray-500 text-base">
+                    <h2 className="text-xl font-light mb-4">Your saved payment methods</h2>
+                    <div className="border border-dashed border-[#d1d7dc] p-12 text-center text-gray-500 text-lg">
                       You don't have any saved payment method
                     </div>
                   </div>
@@ -758,13 +758,13 @@ const StudentProfileEdit = () => {
             {activeTab === "privacy" && (
               <div>
                 <div className="border-b border-gray-200 pb-5 mb-8 text-center">
-                  <h1 className="text-3xl font-normal">Privacy</h1>
-                  <p className="text-base text-gray-500 mt-1">Modify your privacy settings here.</p>
+                  <h1 className="text-4xl font-light">Privacy</h1>
+                  <p className="text-lg text-gray-500 mt-1">Modify your privacy settings here.</p>
                 </div>
 
                 <form onSubmit={handleSavePrivacy} className="max-w-[700px] space-y-6">
                   <div>
-                    <p className="text-base font-normal mb-4">Profile page settings</p>
+                    <p className="text-lg font-light mb-4">Profile page settings</p>
                     <div className="space-y-4">
                       <div className="flex items-center gap-3">
                         <input
@@ -774,7 +774,7 @@ const StudentProfileEdit = () => {
                           onChange={(e) => setShowProfileToLoggedIn(e.target.checked)}
                           className="accent-[#a435f0] w-4.5 h-4.5"
                         />
-                        <label htmlFor="showProfileToLoggedIn" className="text-base font-normal text-gray-700">
+                        <label htmlFor="showProfileToLoggedIn" className="text-lg font-light text-gray-700">
                           Show your profile to logged-in users
                         </label>
                       </div>
@@ -787,7 +787,7 @@ const StudentProfileEdit = () => {
                           onChange={(e) => setShowCoursesTaking(e.target.checked)}
                           className="accent-[#a435f0] w-4.5 h-4.5"
                         />
-                        <label htmlFor="showCoursesTaking" className="text-base font-normal text-gray-700">
+                        <label htmlFor="showCoursesTaking" className="text-lg font-light text-gray-700">
                           Show courses you're taking on your profile page
                         </label>
                       </div>
@@ -797,7 +797,7 @@ const StudentProfileEdit = () => {
                   <button
                     type="submit"
                     disabled={isSavingInfo}
-                    className="bg-[#a435f0] hover:bg-[#8710d8] disabled:opacity-50 text-white text-base font-normal px-5 py-2.5 flex items-center gap-2 transition-colors"
+                    className="bg-[#a435f0] hover:bg-[#8710d8] disabled:opacity-50 text-white text-lg font-light px-5 py-2.5 flex items-center gap-2 transition-colors"
                   >
                     {isSavingInfo && <Loader2 className="w-4 h-4 animate-spin" />}
                     Save
@@ -810,15 +810,15 @@ const StudentProfileEdit = () => {
             {activeTab === "notifications" && (
               <div>
                 <div className="border-b border-gray-200 pb-5 mb-8 text-center">
-                  <h1 className="text-3xl font-normal">Notification preferences</h1>
-                  <p className="text-base text-gray-500 mt-1">Manage the types of communications you receive.</p>
+                  <h1 className="text-4xl font-light">Notification preferences</h1>
+                  <p className="text-lg text-gray-500 mt-1">Manage the types of communications you receive.</p>
                 </div>
 
                 <form onSubmit={handleSaveNotifications} className="max-w-[700px] space-y-6">
                   {/* Updates and Offerings */}
                   <div className="border border-[#d1d7dc] p-5 bg-white space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-lg font-normal">Updates and offerings</span>
+                      <span className="text-xl font-light">Updates and offerings</span>
                       <button
                         type="button"
                         onClick={() => setUpdatesOfferingsEnabled(!updatesOfferingsEnabled)}
@@ -843,7 +843,7 @@ const StudentProfileEdit = () => {
                             onChange={(e) => setProductLaunches(e.target.checked)}
                             className="accent-[#a435f0] w-4 h-4"
                           />
-                          <label htmlFor="prodLaunches" className="text-base font-normal text-gray-600">
+                          <label htmlFor="prodLaunches" className="text-lg font-light text-gray-600">
                             Product launches and announcements
                           </label>
                         </div>
@@ -855,7 +855,7 @@ const StudentProfileEdit = () => {
                             onChange={(e) => setOffersPromotions(e.target.checked)}
                             className="accent-[#a435f0] w-4 h-4"
                           />
-                          <label htmlFor="offersPromos" className="text-base font-normal text-gray-600">
+                          <label htmlFor="offersPromos" className="text-lg font-light text-gray-600">
                             Offers and promotions
                           </label>
                         </div>
@@ -866,7 +866,7 @@ const StudentProfileEdit = () => {
                   {/* Your Learning */}
                   <div className="border border-[#d1d7dc] p-5 bg-white space-y-4">
                     <div className="flex items-center justify-between">
-                      <span className="text-lg font-normal">Your learning</span>
+                      <span className="text-xl font-light">Your learning</span>
                       <button
                         type="button"
                         onClick={() => setLearningNotificationsEnabled(!learningNotificationsEnabled)}
@@ -897,7 +897,7 @@ const StudentProfileEdit = () => {
                               onChange={(e) => setter(e.target.checked)}
                               className="accent-[#a435f0] w-4 h-4"
                             />
-                            <label htmlFor={id} className="text-base font-normal text-gray-600">
+                            <label htmlFor={id} className="text-lg font-light text-gray-600">
                               {label}
                             </label>
                           </div>
@@ -906,13 +906,13 @@ const StudentProfileEdit = () => {
                     )}
                   </div>
 
-                  <p className="text-sm text-gray-500 leading-relaxed">
+                  <p className="text-base text-gray-500 leading-relaxed">
                     Note: It may take a few hours for changes to be reflected in your preferences. You'll still receive transactional emails related to your account and purchases if you unsubscribe.
                   </p>
 
                   <button
                     type="submit"
-                    className="bg-[#a435f0] hover:bg-[#8710d8] text-white text-base font-normal px-5 py-2.5 transition-colors"
+                    className="bg-[#a435f0] hover:bg-[#8710d8] text-white text-lg font-light px-5 py-2.5 transition-colors"
                   >
                     Save
                   </button>
@@ -924,24 +924,24 @@ const StudentProfileEdit = () => {
             {activeTab === "api" && (
               <div>
                 <div className="border-b border-gray-200 pb-5 mb-8 text-center">
-                  <h1 className="text-3xl font-normal">API Clients</h1>
-                  <p className="text-base text-gray-500 mt-1">Create and list your API clients.</p>
+                  <h1 className="text-4xl font-light">API Clients</h1>
+                  <p className="text-lg text-gray-500 mt-1">Create and list your API clients.</p>
                 </div>
 
                 <div className="max-w-[700px] space-y-6">
                   <div>
-                    <h2 className="text-2xl font-normal mb-3">Affiliate API</h2>
-                    <p className="text-base text-gray-600 leading-relaxed mb-4">
+                    <h2 className="text-3xl font-light mb-3">Affiliate API</h2>
+                    <p className="text-lg text-gray-600 leading-relaxed mb-4">
                       The Samriddhi Gyan Affiliate API exposes functionalities of Samriddhi Gyan to help developers build
                       client applications and integrations with Samriddhi Gyan. To see more details, please visit{" "}
-                      <a href="#" className="text-[#5624d0] underline font-light">
+                      <a href="#" className="text-[#5624d0] underline font-extralight">
                         Samriddhi Gyan Affiliate API
                       </a>
                     </p>
 
                     <button
                       type="button"
-                      className="border border-[#a435f0] text-[#a435f0] hover:bg-purple-50 px-5 py-2.5 text-base font-normal transition-colors"
+                      className="border border-[#a435f0] text-[#a435f0] hover:bg-purple-50 px-5 py-2.5 text-lg font-light transition-colors"
                     >
                       Request Affiliate API Client
                     </button>
@@ -950,7 +950,7 @@ const StudentProfileEdit = () => {
                   {/* Alert box with info icon */}
                   <div className="flex items-center gap-4 border border-[#d1d7dc] p-5 rounded-md bg-white">
                     <Info className="w-6 h-6 text-[#1c1d1f] shrink-0" />
-                    <span className="text-base font-normal">You don't have any API clients yet.</span>
+                    <span className="text-lg font-light">You don't have any API clients yet.</span>
                   </div>
                 </div>
               </div>
@@ -960,15 +960,15 @@ const StudentProfileEdit = () => {
             {activeTab === "close" && (
               <div>
                 <div className="border-b border-gray-200 pb-5 mb-8 text-center">
-                  <h1 className="text-3xl font-normal">Close Account</h1>
-                  <p className="text-base text-gray-500 mt-1">Close your account permanently.</p>
+                  <h1 className="text-4xl font-light">Close Account</h1>
+                  <p className="text-lg text-gray-500 mt-1">Close your account permanently.</p>
                 </div>
 
                 <div className="max-w-[700px] space-y-5">
-                  <p className="text-base leading-relaxed">
-                    <span className="text-[#b32d0f] font-normal">Warning:</span> If you close your account, you will be unsubscribed from all <span className="font-normal">0</span> of your courses and will lose access to your account and data associated with your account forever, even if you choose to create a new account using the same email address in the future.
+                  <p className="text-lg leading-relaxed">
+                    <span className="text-[#b32d0f] font-light">Warning:</span> If you close your account, you will be unsubscribed from all <span className="font-light">0</span> of your courses and will lose access to your account and data associated with your account forever, even if you choose to create a new account using the same email address in the future.
                   </p>
-                  <p className="text-base text-gray-650 leading-relaxed">
+                  <p className="text-lg text-gray-650 leading-relaxed">
                     Please note, if you want to reinstate your account after submitting a deletion request, you will have 14 days after the initial submission date to reach out to <a href="mailto:privacy@Samriddhi Gyan.com" className="text-[#5624d0] hover:underline">privacy@Samriddhi Gyan.com</a> to cancel this request.
                   </p>
 
@@ -990,7 +990,7 @@ const StudentProfileEdit = () => {
                         toast.error(err?.data?.message || "Failed to delete account. Please try again.");
                       }
                     }}
-                    className="bg-[#b32d0f] hover:bg-[#8f240c] text-white text-base font-normal px-5 py-2.5 transition-colors disabled:opacity-50"
+                    className="bg-[#b32d0f] hover:bg-[#8f240c] text-white text-lg font-light px-5 py-2.5 transition-colors disabled:opacity-50"
                   >
                     {isDeletingAccount ? "Deleting account..." : "Close account permanently"}
                   </button>

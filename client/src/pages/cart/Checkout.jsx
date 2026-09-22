@@ -147,7 +147,7 @@ const Checkout = () => {
 
   if (isError || (isSubscription && !selectedPlan) || (!isSubscription && !cartData)) {
     return (
-      <div className="text-center py-10 text-red-500 font-bold">
+      <div className="text-center py-10 text-red-500 font-semibold">
         Couldn&apos;t load checkout details. Please try again later.
       </div>
     );
@@ -179,7 +179,7 @@ const Checkout = () => {
           <Link to="/" className="focus:outline-none">
             <img src="/samriddhi_logo1.png" alt="Samriddhi Logo" width="82" height="34" />
           </Link>
-          <Link to="/cart" className="text-sm font-bold text-[#5624d0] hover:text-[#3b189f]">
+          <Link to="/cart" className="text-base font-semibold text-[#5624d0] hover:text-[#3b189f]">
             Cancel
           </Link>
         </div>
@@ -190,13 +190,13 @@ const Checkout = () => {
           
           {/* Left Column: Details */}
           <div className="space-y-10">
-            <h1 className="text-4xl font-extrabold tracking-tight">Checkout</h1>
+            <h1 className="text-5xl font-bold tracking-tight">Checkout</h1>
 
             {/* Billing Address Section */}
             <div className="space-y-4">
-              <h2 className="text-2xl font-extrabold">Billing address</h2>
+              <h2 className="text-3xl font-bold">Billing address</h2>
               <div className="space-y-2">
-                <label className="text-xs font-bold text-[#2d2f31] uppercase">Country</label>
+                <label className="text-sm font-semibold text-[#2d2f31] uppercase">Country</label>
                 <div className="relative max-w-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <Globe className="h-5 w-5 text-gray-400" />
@@ -204,7 +204,7 @@ const Checkout = () => {
                   <select
                     value={country}
                     onChange={(e) => setCountry(e.target.value)}
-                    className="block w-full pl-10 pr-10 py-3 text-base border border-[#2d2f31] bg-white text-[#2d2f31] focus:outline-none rounded-none appearance-none font-bold"
+                    className="block w-full pl-10 pr-10 py-3 text-lg border border-[#2d2f31] bg-white text-[#2d2f31] focus:outline-none rounded-none appearance-none font-semibold"
                   >
                     <option value="Nepal">Nepal</option>
                     <option value="India">India</option>
@@ -213,11 +213,11 @@ const Checkout = () => {
                     <option value="Australia">Australia</option>
                   </select>
                   <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                    <span className="text-xs text-gray-500 font-bold">▼</span>
+                    <span className="text-sm text-gray-500 font-semibold">▼</span>
                   </div>
                 </div>
               </div>
-              <p className="text-xs text-[#6a6f73] leading-relaxed">
+              <p className="text-sm text-[#6a6f73] leading-relaxed">
                 Samriddhi Gyan is required by law to collect applicable transaction taxes for purchases made in certain tax jurisdictions.
               </p>
             </div>
@@ -225,8 +225,8 @@ const Checkout = () => {
             {/* Payment Method Section */}
             <div className="space-y-6">
               <div className="flex justify-between items-center border-b border-[#d1d7dc] pb-3">
-                <h2 className="text-2xl font-extrabold">Payment method</h2>
-                <span className="text-xs text-[#6a6f73] flex items-center gap-1 font-bold">
+                <h2 className="text-3xl font-bold">Payment method</h2>
+                <span className="text-sm text-[#6a6f73] flex items-center gap-1 font-semibold">
                   <span className="text-[#38755b]">🔒</span> Secure and encrypted
                 </span>
               </div>
@@ -246,17 +246,17 @@ const Checkout = () => {
                           onChange={() => setPaymentMethod("Stripe")}
                           className="h-5 w-5 text-[#5624d0] border-[#2d2f31] focus:ring-[#5624d0]"
                         />
-                        <span className="font-extrabold text-[#2d2f31] text-base">Stripe (Card Payment)</span>
+                        <span className="font-bold text-[#2d2f31] text-lg">Stripe (Card Payment)</span>
                       </div>
                       {/* Card Logos */}
                       <div className="flex gap-1.5 flex-wrap">
-                        <span className="bg-[#f7f9fa] border border-[#d1d7dc] px-1.5 py-0.5 rounded text-[10px] font-extrabold text-[#6a6f73] tracking-wider">VISA</span>
-                        <span className="bg-[#f7f9fa] border border-[#d1d7dc] px-1.5 py-0.5 rounded text-[10px] font-extrabold text-[#6a6f73] tracking-wider">MC</span>
-                        <span className="bg-[#f7f9fa] border border-[#d1d7dc] px-1.5 py-0.5 rounded text-[10px] font-extrabold text-[#6a6f73] tracking-wider">AMEX</span>
-                        <span className="bg-[#f7f9fa] border border-[#d1d7dc] px-1.5 py-0.5 rounded text-[10px] font-extrabold text-[#6a6f73] tracking-wider">JCB</span>
+                        <span className="bg-[#f7f9fa] border border-[#d1d7dc] px-1.5 py-0.5 rounded text-[10px] font-bold text-[#6a6f73] tracking-wider">VISA</span>
+                        <span className="bg-[#f7f9fa] border border-[#d1d7dc] px-1.5 py-0.5 rounded text-[10px] font-bold text-[#6a6f73] tracking-wider">MC</span>
+                        <span className="bg-[#f7f9fa] border border-[#d1d7dc] px-1.5 py-0.5 rounded text-[10px] font-bold text-[#6a6f73] tracking-wider">AMEX</span>
+                        <span className="bg-[#f7f9fa] border border-[#d1d7dc] px-1.5 py-0.5 rounded text-[10px] font-bold text-[#6a6f73] tracking-wider">JCB</span>
                       </div>
                     </div>
-                    <div className="pl-8 pt-3 text-sm text-[#6a6f73]">
+                    <div className="pl-8 pt-3 text-base text-[#6a6f73]">
                       You will be redirected securely to Stripe payment gateway to input your card credentials.
                     </div>
                   </label>
@@ -274,12 +274,12 @@ const Checkout = () => {
                         onChange={() => setPaymentMethod("eSewa")}
                         className="h-5 w-5 text-[#5624d0] border-[#2d2f31] focus:ring-[#5624d0]"
                       />
-                      <span className="font-extrabold text-[#2d2f31] text-base">eSewa Pay</span>
+                      <span className="font-bold text-[#2d2f31] text-lg">eSewa Pay</span>
                     </div>
                     {/* eSewa Logo Text */}
-                    <span className="bg-[#60bb46] text-white px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-wider">eSewa</span>
+                    <span className="bg-[#60bb46] text-white px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-wider">eSewa</span>
                   </div>
-                  <div className="pl-8 pt-3 text-sm text-[#6a6f73]">
+                  <div className="pl-8 pt-3 text-base text-[#6a6f73]">
                     {isSubscription 
                       ? "Pay instantly for your subscription using your eSewa account credentials."
                       : "Pay instantly using your eSewa account credentials or eSewa mobile app."}
@@ -290,7 +290,7 @@ const Checkout = () => {
 
             {/* Order Details list */}
             <div className="space-y-4">
-              <h2 className="text-2xl font-extrabold">
+              <h2 className="text-3xl font-bold">
                 {isSubscription 
                   ? "Subscription detail" 
                   : `Order details (${cart.length + cartCertifications.length} item${cart.length + cartCertifications.length !== 1 ? "s" : ""})`}
@@ -299,19 +299,19 @@ const Checkout = () => {
                 {isSubscription ? (
                   <div className="flex justify-between items-start gap-4 py-4">
                     <div className="flex items-center gap-3 min-w-0">
-                      <div className="p-3 bg-purple-50 border border-slate-200 rounded-none shrink-0 flex items-center justify-center h-10 w-16 text-[#a435f0] font-extrabold text-[10px] uppercase">
+                      <div className="p-3 bg-purple-50 border border-slate-200 rounded-none shrink-0 flex items-center justify-center h-10 w-16 text-[#a435f0] font-bold text-[10px] uppercase">
                         Plan
                       </div>
                       <div>
-                        <span className="font-bold text-[#2d2f31] text-sm block">
+                        <span className="font-semibold text-[#2d2f31] text-base block">
                           {selectedPlan.planName}
                         </span>
-                        <span className="text-xs text-slate-500 font-semibold mt-0.5 block">
+                        <span className="text-sm text-slate-500 font-medium mt-0.5 block">
                           Duration: {selectedPlan.durationMonths} Month{selectedPlan.durationMonths > 1 ? "s" : ""}
                         </span>
                       </div>
                     </div>
-                    <span className="font-extrabold text-sm text-[#2d2f31] flex-shrink-0">
+                    <span className="font-bold text-base text-[#2d2f31] flex-shrink-0">
                       Rs {selectedPlan.priceNpr.toLocaleString()}
                     </span>
                   </div>
@@ -321,11 +321,11 @@ const Checkout = () => {
                       <div key={item._id} className="flex justify-between items-start gap-4 py-4">
                         <div className="flex items-center gap-3 min-w-0">
                           <img src={item.thumbnail} alt={item.title} className="w-16 h-10 object-cover border border-[#d1d7dc] flex-shrink-0" />
-                          <span className="font-bold text-[#2d2f31] text-sm hover:text-[#5624d0] truncate block">
+                          <span className="font-semibold text-[#2d2f31] text-base hover:text-[#5624d0] truncate block">
                             {item.title}
                           </span>
                         </div>
-                        <span className="font-extrabold text-sm text-[#2d2f31] flex-shrink-0">
+                        <span className="font-bold text-base text-[#2d2f31] flex-shrink-0">
                           Rs {(item.price?.current ?? 0).toLocaleString()}
                         </span>
                       </div>
@@ -334,11 +334,11 @@ const Checkout = () => {
                       <div key={item._id} className="flex justify-between items-start gap-4 py-4">
                         <div className="flex items-center gap-3 min-w-0">
                           <img src={item.badgeUrl || "/placeholder.jpg"} alt={item.name} className="w-10 h-10 object-contain border border-[#d1d7dc] flex-shrink-0 p-1 bg-white rounded-lg" />
-                          <span className="font-bold text-[#2d2f31] text-sm hover:text-[#5624d0] truncate block">
+                          <span className="font-semibold text-[#2d2f31] text-base hover:text-[#5624d0] truncate block">
                             {item.name} Exam Voucher
                           </span>
                         </div>
-                        <span className="font-extrabold text-sm text-[#2d2f31] flex-shrink-0">
+                        <span className="font-bold text-base text-[#2d2f31] flex-shrink-0">
                           Rs {(item.examPrice ?? 0).toLocaleString()}
                         </span>
                       </div>
@@ -351,9 +351,9 @@ const Checkout = () => {
 
           {/* Right Column: Order Summary */}
           <div className="border border-[#d1d7dc] bg-[#f7f9fa] p-7">
-            <h2 className="text-2xl font-extrabold mb-6">Order summary</h2>
+            <h2 className="text-3xl font-bold mb-6">Order summary</h2>
             
-            <div className="space-y-4 text-sm font-medium text-[#2d2f31]">
+            <div className="space-y-4 text-base font-normal text-[#2d2f31]">
               <div className="flex justify-between">
                 <span className="text-[#6a6f73]">Original Price:</span>
                 <span>Rs {originalTotal.toLocaleString()}</span>
@@ -368,7 +368,7 @@ const Checkout = () => {
                     </div>
                   )}
                   {activeCreditDeduction > 0 && (
-                    <div className="flex justify-between text-emerald-600 font-bold">
+                    <div className="flex justify-between text-emerald-600 font-semibold">
                       <span>Upgrade Credit:</span>
                       <span>-Rs {activeCreditDeduction.toLocaleString()}</span>
                     </div>
@@ -385,20 +385,20 @@ const Checkout = () => {
 
               <hr className="border-[#d1d7dc]" />
               <div className="flex justify-between items-baseline pt-2">
-                <span className="text-lg font-extrabold">Total:</span>
-                <span className="text-3xl font-extrabold">Rs {subtotal.toLocaleString()}</span>
+                <span className="text-xl font-bold">Total:</span>
+                <span className="text-4xl font-bold">Rs {subtotal.toLocaleString()}</span>
               </div>
             </div>
 
             <div className="mt-8 space-y-4">
-              <p className="text-xs text-[#6a6f73]">
-                By completing your purchase, you agree to these <Link to="/terms" className="text-[#5624d0] underline font-bold">Terms of Service</Link>.
+              <p className="text-sm text-[#6a6f73]">
+                By completing your purchase, you agree to these <Link to="/terms" className="text-[#5624d0] underline font-semibold">Terms of Service</Link>.
               </p>
               
               <Button
                 disabled={isProcessing}
                 onClick={handlePay}
-                className="w-full h-14 bg-[#a435f0] text-white hover:bg-[#8710d8] font-bold text-lg rounded-none transition-colors shadow-none"
+                className="w-full h-14 bg-[#a435f0] text-white hover:bg-[#8710d8] font-semibold text-xl rounded-none transition-colors shadow-none"
               >
                 {isProcessing ? (
                   <Loader2 className="animate-spin h-5 w-5" />
@@ -410,11 +410,11 @@ const Checkout = () => {
 
             {/* Guarantee badge box */}
             <div className="mt-8 pt-6 border-t border-[#d1d7dc] text-center space-y-2">
-              <div className="flex items-center justify-center gap-1.5 font-extrabold text-[#2d2f31] text-sm">
+              <div className="flex items-center justify-center gap-1.5 font-bold text-[#2d2f31] text-base">
                 <ShieldCheck className="h-5 w-5 text-[#5624d0]" />
                 30-Day Money-Back Guarantee
               </div>
-              <p className="text-xs text-[#6a6f73] leading-relaxed px-4">
+              <p className="text-sm text-[#6a6f73] leading-relaxed px-4">
                 Not satisfied? Get a full refund within 30 days. Simple and straightforward!
               </p>
             </div>

@@ -6,11 +6,8 @@
 //
 // Example output: "LMS-ORD-A1B2C3D4"
 
-import { v4 as uuidv4 } from "uuid";
+import crypto from "crypto";
 
 export const generateOrderId = () => {
-  // Takes the first segment of a UUID (8 hex chars) and uppercases it.
-  // e.g. uuid "f47ac10b-58cc-..." → "LMS-ORD-F47AC10B"
-  // This matches the pattern already used in your Stripe and eSewa controllers.
-  return `LMS-ORD-${uuidv4().split("-")[0].toUpperCase()}`;
+  return `LMS-ORD-${crypto.randomUUID().slice(0, 8).toUpperCase()}`;
 };

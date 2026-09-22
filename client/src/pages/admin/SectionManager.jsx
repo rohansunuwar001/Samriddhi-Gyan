@@ -126,14 +126,14 @@ const SectionManager = ({ section, courseId, index = 1 }) => {
         {isEditingTitle ? (
           <div className="flex-1 space-y-3 bg-white p-4 border border-[#1c1d1f]">
             <div className="flex items-center gap-3">
-              <span className="font-normal text-base text-[#1c1d1f] w-24 shrink-0">Section Title:</span>
+              <span className="font-light text-lg text-[#1c1d1f] w-24 shrink-0">Section Title:</span>
               <div className="flex-1 relative">
                 <input
                   type="text"
                   maxLength={80}
                   value={editedTitle}
                   onChange={(e) => setEditedTitle(e.target.value)}
-                  className="w-full border border-[#6a6f73] px-3 py-1.5 pr-10 text-base text-[#1c1d1f] outline-none focus:border-[#1c1d1f]"
+                  className="w-full border border-[#6a6f73] px-3 py-1.5 pr-10 text-lg text-[#1c1d1f] outline-none focus:border-[#1c1d1f]"
                 />
                 <span className="absolute right-3 top-2 text-[10px] text-[#6a6f73]">
                   {80 - editedTitle.length}
@@ -142,14 +142,14 @@ const SectionManager = ({ section, courseId, index = 1 }) => {
             </div>
             
             <div className="flex items-center gap-3">
-              <span className="font-normal text-base text-[#1c1d1f] w-24 shrink-0">Objective:</span>
+              <span className="font-light text-lg text-[#1c1d1f] w-24 shrink-0">Objective:</span>
               <div className="flex-1 relative">
                 <input
                   type="text"
                   maxLength={200}
                   value={editedObjective}
                   onChange={(e) => setEditedObjective(e.target.value)}
-                  className="w-full border border-[#6a6f73] px-3 py-1.5 pr-10 text-base text-[#1c1d1f] outline-none focus:border-[#1c1d1f]"
+                  className="w-full border border-[#6a6f73] px-3 py-1.5 pr-10 text-lg text-[#1c1d1f] outline-none focus:border-[#1c1d1f]"
                 />
                 <span className="absolute right-3 top-2 text-[10px] text-[#6a6f73]">
                   {200 - editedObjective.length}
@@ -165,7 +165,7 @@ const SectionManager = ({ section, courseId, index = 1 }) => {
                   setEditedTitle(section.title);
                   setEditedObjective(section.learningObjective || "");
                 }}
-                className="text-base font-normal text-[#1c1d1f] hover:text-black px-3 py-1.5"
+                className="text-lg font-light text-[#1c1d1f] hover:text-black px-3 py-1.5"
               >
                 Cancel
               </button>
@@ -173,7 +173,7 @@ const SectionManager = ({ section, courseId, index = 1 }) => {
                 type="button"
                 disabled={isUpdatingSection}
                 onClick={handleUpdateSection}
-                className="bg-[#a435f0] hover:bg-[#8710d8] text-white font-normal text-base px-4 py-1.5 transition-colors"
+                className="bg-[#a435f0] hover:bg-[#8710d8] text-white font-light text-lg px-4 py-1.5 transition-colors"
               >
                 Save
               </button>
@@ -183,8 +183,8 @@ const SectionManager = ({ section, courseId, index = 1 }) => {
           <div className="flex items-center gap-2 flex-grow min-w-0">
             <FileText className="w-4.5 h-4.5 text-[#6a6f73] shrink-0" />
             <div className="flex items-center gap-2 min-w-0">
-              <span className="font-normal text-lg text-[#1c1d1f] shrink-0">Section {index}:</span>
-              <span className="text-lg text-[#1c1d1f] truncate font-light">{section.title}</span>
+              <span className="font-light text-xl text-[#1c1d1f] shrink-0">Section {index}:</span>
+              <span className="text-xl text-[#1c1d1f] truncate font-extralight">{section.title}</span>
               
               <button
                 onClick={() => setIsEditingTitle(true)}
@@ -229,7 +229,7 @@ const SectionManager = ({ section, courseId, index = 1 }) => {
               </div>
             ))
           ) : (
-            <p className="text-base text-[#6a6f73] italic py-2">No curriculum items yet in this section.</p>
+            <p className="text-lg text-[#6a6f73] italic py-2">No curriculum items yet in this section.</p>
           )}
         </div>
 
@@ -237,7 +237,7 @@ const SectionManager = ({ section, courseId, index = 1 }) => {
         {activeFormType && (
           <div className="border border-[#1c1d1f] p-4 bg-white space-y-3 mt-4">
             <div className="flex items-center gap-2">
-              <span className="font-normal text-base text-[#1c1d1f] capitalize">New {activeFormType}:</span>
+              <span className="font-light text-lg text-[#1c1d1f] capitalize">New {activeFormType}:</span>
               <div className="flex-grow relative">
                 <input
                   type="text"
@@ -245,7 +245,7 @@ const SectionManager = ({ section, courseId, index = 1 }) => {
                   placeholder={`Enter a ${activeFormType} title`}
                   value={newItemTitle}
                   onChange={(e) => setNewItemTitle(e.target.value)}
-                  className="w-full border border-[#6a6f73] px-3 py-2 pr-10 text-base text-[#1c1d1f] outline-none focus:border-[#1c1d1f]"
+                  className="w-full border border-[#6a6f73] px-3 py-2 pr-10 text-lg text-[#1c1d1f] outline-none focus:border-[#1c1d1f]"
                 />
                 <span className="absolute right-3 top-2 text-[10px] text-[#6a6f73]">
                   {80 - newItemTitle.length}
@@ -259,7 +259,7 @@ const SectionManager = ({ section, courseId, index = 1 }) => {
                   setActiveFormType(null);
                   setNewItemTitle("");
                 }}
-                className="text-base font-normal text-[#1c1d1f] hover:text-black px-3 py-1.5"
+                className="text-lg font-light text-[#1c1d1f] hover:text-black px-3 py-1.5"
               >
                 Cancel
               </button>
@@ -273,7 +273,7 @@ const SectionManager = ({ section, courseId, index = 1 }) => {
                     handleAddMockItem(activeFormType);
                   }
                 }}
-                className="bg-[#a435f0] hover:bg-[#8710d8] text-white font-normal text-base px-4 py-1.5 transition-colors disabled:opacity-50"
+                className="bg-[#a435f0] hover:bg-[#8710d8] text-white font-light text-lg px-4 py-1.5 transition-colors disabled:opacity-50"
               >
                 Add {activeFormType}
               </button>
@@ -285,7 +285,7 @@ const SectionManager = ({ section, courseId, index = 1 }) => {
         <div className="relative mt-4">
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-normal text-base px-3 py-2 transition-colors flex items-center gap-1.5"
+            className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-light text-lg px-3 py-2 transition-colors flex items-center gap-1.5"
           >
             <Plus className="w-3.5 h-3.5" /> Curriculum item
           </button>
@@ -300,7 +300,7 @@ const SectionManager = ({ section, courseId, index = 1 }) => {
                 
                 {/* Watch or read */}
                 <div className="px-4 py-2 bg-slate-50 border-b border-[#d1d7dc]">
-                  <span className="text-[10px] font-normal text-[#6a6f73] uppercase tracking-wider">Watch or read</span>
+                  <span className="text-[10px] font-light text-[#6a6f73] uppercase tracking-wider">Watch or read</span>
                 </div>
                 <div
                   onClick={() => {
@@ -312,8 +312,8 @@ const SectionManager = ({ section, courseId, index = 1 }) => {
                   <PlayCircle className="w-4.5 h-4.5 text-[#5624d0] mt-0.5 shrink-0" />
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-base font-normal text-[#1c1d1f]">Lecture</span>
-                      <span className="bg-emerald-100 text-emerald-800 text-[9px] font-normal px-1 py-0.2 rounded">With lab</span>
+                      <span className="text-lg font-light text-[#1c1d1f]">Lecture</span>
+                      <span className="bg-emerald-100 text-emerald-800 text-[9px] font-light px-1 py-0.2 rounded">With lab</span>
                     </div>
                     <p className="text-[10px] text-[#6a6f73]">Video or text lesson</p>
                   </div>
@@ -321,7 +321,7 @@ const SectionManager = ({ section, courseId, index = 1 }) => {
 
                 {/* Role play */}
                 <div className="px-4 py-2 bg-slate-50 border-b border-[#d1d7dc]">
-                  <span className="text-[10px] font-normal text-[#6a6f73] uppercase tracking-wider">Role play</span>
+                  <span className="text-[10px] font-light text-[#6a6f73] uppercase tracking-wider">Role play</span>
                 </div>
                 <div
                   onClick={() => {
@@ -333,8 +333,8 @@ const SectionManager = ({ section, courseId, index = 1 }) => {
                   <Users className="w-4.5 h-4.5 text-[#5624d0] mt-0.5 shrink-0" />
                   <div>
                     <div className="flex items-center gap-1.5">
-                      <span className="text-base font-normal text-[#1c1d1f]">Practice role play</span>
-                      <span className="bg-purple-100 text-purple-800 text-[9px] font-normal px-1 py-0.2 rounded">AI</span>
+                      <span className="text-lg font-light text-[#1c1d1f]">Practice role play</span>
+                      <span className="bg-purple-100 text-purple-800 text-[9px] font-light px-1 py-0.2 rounded">AI</span>
                     </div>
                     <p className="text-[10px] text-[#6a6f73]">Unscored conversation for free-form skill rehearsal</p>
                   </div>
@@ -342,7 +342,7 @@ const SectionManager = ({ section, courseId, index = 1 }) => {
 
                 {/* Coding & labs */}
                 <div className="px-4 py-2 bg-slate-50 border-b border-[#d1d7dc]">
-                  <span className="text-[10px] font-normal text-[#6a6f73] uppercase tracking-wider">Coding & labs</span>
+                  <span className="text-[10px] font-light text-[#6a6f73] uppercase tracking-wider">Coding & labs</span>
                 </div>
                 <div
                   onClick={() => {
@@ -353,14 +353,14 @@ const SectionManager = ({ section, courseId, index = 1 }) => {
                 >
                   <Code2 className="w-4.5 h-4.5 text-[#5624d0] mt-0.5 shrink-0" />
                   <div>
-                    <span className="text-base font-normal text-[#1c1d1f]">Coding exercise</span>
+                    <span className="text-lg font-light text-[#1c1d1f]">Coding exercise</span>
                     <p className="text-[10px] text-[#6a6f73]">Code challenges with instant feedback</p>
                   </div>
                 </div>
 
                 {/* Knowledge checks */}
                 <div className="px-4 py-2 bg-slate-50 border-b border-[#d1d7dc]">
-                  <span className="text-[10px] font-normal text-[#6a6f73] uppercase tracking-wider">Knowledge checks</span>
+                  <span className="text-[10px] font-light text-[#6a6f73] uppercase tracking-wider">Knowledge checks</span>
                 </div>
                 <div
                   onClick={() => {
@@ -371,7 +371,7 @@ const SectionManager = ({ section, courseId, index = 1 }) => {
                 >
                   <FileQuestion className="w-4.5 h-4.5 text-[#5624d0] mt-0.5 shrink-0" />
                   <div>
-                    <span className="text-base font-normal text-[#1c1d1f]">Quiz</span>
+                    <span className="text-lg font-light text-[#1c1d1f]">Quiz</span>
                     <p className="text-[10px] text-[#6a6f73]">Quick comprehension check after a lesson</p>
                   </div>
                 </div>
@@ -384,7 +384,7 @@ const SectionManager = ({ section, courseId, index = 1 }) => {
                 >
                   <FileQuestion className="w-4.5 h-4.5 text-[#5624d0] mt-0.5 shrink-0" />
                   <div>
-                    <span className="text-base font-normal text-[#1c1d1f]">Practice test</span>
+                    <span className="text-lg font-light text-[#1c1d1f]">Practice test</span>
                     <p className="text-[10px] text-[#6a6f73]">Timed exam to prep for certification</p>
                   </div>
                 </div>
@@ -397,7 +397,7 @@ const SectionManager = ({ section, courseId, index = 1 }) => {
                 >
                   <FileQuestion className="w-4.5 h-4.5 text-[#5624d0] mt-0.5 shrink-0" />
                   <div>
-                    <span className="text-base font-normal text-[#1c1d1f]">Assignment</span>
+                    <span className="text-lg font-light text-[#1c1d1f]">Assignment</span>
                     <p className="text-[10px] text-[#6a6f73]">Task for learners to complete and submit</p>
                   </div>
                 </div>

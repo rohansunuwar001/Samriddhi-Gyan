@@ -13,16 +13,16 @@ const ArticleCard = ({ article, size = 'small' }) => (
         className="bg-white dark:bg-gray-800 rounded-lg h-full flex flex-col border border-gray-200 dark:border-gray-700"
     >
         <Link to={`/blog/${article.slug}`} className="flex flex-col flex-grow p-6">
-            <p className="text-base font-normal text-gray-500 dark:text-gray-400 mb-2">
+            <p className="text-lg font-light text-gray-500 dark:text-gray-400 mb-2">
                 {article.category?.name}
             </p>
 
             <h3
                 className={`${
                     size === 'large'
-                        ? 'text-2xl md:text-3xl'
-                        : 'text-xl'
-                } font-normal text-gray-900 dark:text-white leading-tight flex-grow`}
+                        ? 'text-3xl md:text-4xl'
+                        : 'text-2xl'
+                } font-light text-gray-900 dark:text-white leading-tight flex-grow`}
             >
                 {article.title}
             </h3>
@@ -34,7 +34,7 @@ const ArticleCard = ({ article, size = 'small' }) => (
                         alt={article.author?.name}
                         className="w-8 h-8 rounded-full"
                     />
-                    <span className="text-base text-gray-700 dark:text-gray-300">
+                    <span className="text-lg text-gray-700 dark:text-gray-300">
                         {article.author?.name}
                     </span>
                 </div>

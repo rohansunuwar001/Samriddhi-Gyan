@@ -8,13 +8,13 @@ const ExploreRelatedTopics = ({ topics }) => {
 
     return (
         <div>
-            <h2 className="text-2xl font-bold mb-4">Explore related topics</h2>
+            <h2 className="text-3xl font-semibold mb-4">Explore related topics</h2>
             <div className="flex flex-wrap gap-3">
                 {topics.map((topic) => (
                     <Link
                         key={topic}
                         to={`/topics/${encodeURIComponent(topic)}`}
-                        className="px-4 py-2 rounded-full border border-gray-800 text-sm font-bold text-gray-900 hover:bg-gray-100 transition-colors"
+                        className="px-4 py-2 rounded-full border border-gray-800 text-base font-semibold text-gray-900 hover:bg-gray-100 transition-colors"
                     >
                         {topic}
                     </Link>

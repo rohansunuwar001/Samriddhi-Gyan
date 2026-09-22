@@ -460,10 +460,10 @@ const HomeCms = () => {
       {/* Header */}
       <header className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/40 dark:border-slate-800/20 pb-4">
         <div>
-          <h2 className="text-3xl font-light tracking-tight text-slate-900 dark:text-white">
+          <h2 className="text-4xl font-extralight tracking-tight text-slate-900 dark:text-white">
             Landing Page Hero & Client Logos CMS Management
           </h2>
-          <p className="text-sm text-slate-500 font-light mt-1">
+          <p className="text-base text-slate-500 font-extralight mt-1">
             Dynamic landing page content manager. Customize your landing page hero carousel slides, client trust logos, and career promo sections.
           </p>
         </div>
@@ -473,7 +473,7 @@ const HomeCms = () => {
       <div className="flex flex-wrap border-b border-slate-200 dark:border-slate-800">
         <button
           onClick={() => setActiveTab("carousel")}
-          className={`py-2.5 px-6 font-medium text-sm border-b-2 transition-all ${
+          className={`py-2.5 px-6 font-normal text-base border-b-2 transition-all ${
             activeTab === "carousel"
               ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
               : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
@@ -483,7 +483,7 @@ const HomeCms = () => {
         </button>
         <button
           onClick={() => setActiveTab("logos")}
-          className={`py-2.5 px-6 font-medium text-sm border-b-2 transition-all ${
+          className={`py-2.5 px-6 font-normal text-base border-b-2 transition-all ${
             activeTab === "logos"
               ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
               : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
@@ -493,7 +493,7 @@ const HomeCms = () => {
         </button>
         <button
           onClick={() => setActiveTab("promo")}
-          className={`py-2.5 px-6 font-medium text-sm border-b-2 transition-all ${
+          className={`py-2.5 px-6 font-normal text-base border-b-2 transition-all ${
             activeTab === "promo"
               ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
               : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
@@ -512,10 +512,10 @@ const HomeCms = () => {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-lg font-medium text-slate-900 dark:text-white">
+                <h3 className="text-xl font-normal text-slate-900 dark:text-white">
                   Home Page - Hero Carousel Section
                 </h3>
-                <p className="text-xs text-slate-400 font-light mt-0.5">
+                <p className="text-sm text-slate-400 font-extralight mt-0.5">
                   Location: Landing Homepage (Top Area)
                 </p>
               </div>
@@ -543,7 +543,7 @@ const HomeCms = () => {
                   <form onSubmit={handleSaveSlide} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4">
                       <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-500">Slide Title</label>
+                        <label className="text-sm font-medium text-slate-500">Slide Title</label>
                         <Input
                           placeholder="e.g. Get AI-ready from Rs 999"
                           value={slideTitle}
@@ -551,7 +551,7 @@ const HomeCms = () => {
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-500">Description</label>
+                        <label className="text-sm font-medium text-slate-500">Description</label>
                         <Textarea
                           placeholder="Slide subtitle / summary detail text..."
                           rows={3}
@@ -561,7 +561,7 @@ const HomeCms = () => {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
-                          <label className="text-xs font-semibold text-slate-500">Redirect Link</label>
+                          <label className="text-sm font-medium text-slate-500">Redirect Link</label>
                           <Input
                             placeholder="e.g. /course/search"
                             value={slideLink}
@@ -569,7 +569,7 @@ const HomeCms = () => {
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-xs font-semibold text-slate-500">Order</label>
+                          <label className="text-sm font-medium text-slate-500">Order</label>
                           <Input
                             type="number"
                             placeholder="e.g. 0"
@@ -580,7 +580,7 @@ const HomeCms = () => {
                       </div>
 
                       <div className="space-y-2 pt-2">
-                        <label className="text-xs font-semibold text-slate-500 block">Style Preset</label>
+                        <label className="text-sm font-medium text-slate-500 block">Style Preset</label>
                         <div className="grid grid-cols-2 gap-2">
                           {BG_PRESETS.map((preset, idx) => (
                             <button
@@ -590,13 +590,13 @@ const HomeCms = () => {
                                 setSlideBgColor(preset.bgColor);
                                 setSlideTextColor(preset.textColor);
                               }}
-                              className={`p-2.5 rounded-lg border text-left text-xs transition-all ${
+                              className={`p-2.5 rounded-lg border text-left text-sm transition-all ${
                                 slideBgColor === preset.bgColor
                                   ? "border-indigo-500 bg-indigo-500/5 ring-1 ring-indigo-500"
                                   : "border-slate-200 dark:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900"
                               }`}
                             >
-                              <div className="font-semibold text-[10px] text-slate-500 mb-1">{preset.name}</div>
+                              <div className="font-medium text-[10px] text-slate-500 mb-1">{preset.name}</div>
                               <div className={`h-4 rounded ${preset.bgColor} border border-slate-200/20`} />
                             </button>
                           ))}
@@ -606,7 +606,7 @@ const HomeCms = () => {
 
                     <div className="space-y-4 flex flex-col justify-between">
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-500">Slide Image (Cloudinary)</label>
+                        <label className="text-sm font-medium text-slate-500">Slide Image (Cloudinary)</label>
                         <div className="border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-6 text-center cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors relative">
                           <input
                             type="file"
@@ -617,7 +617,7 @@ const HomeCms = () => {
                           {isUploadingSlideImage ? (
                             <div className="flex flex-col items-center py-6 space-y-2">
                               <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
-                              <span className="text-xs text-slate-500">Uploading to Cloudinary...</span>
+                              <span className="text-sm text-slate-500">Uploading to Cloudinary...</span>
                             </div>
                           ) : slideImagePreview ? (
                             <div className="relative group max-h-48 overflow-hidden rounded-xl mx-auto">
@@ -630,7 +630,7 @@ const HomeCms = () => {
                           ) : (
                             <div className="py-6 flex flex-col items-center justify-center text-slate-400">
                               <ImageIcon className="w-10 h-10 mb-2 text-slate-300" />
-                              <p className="text-xs">Upload image</p>
+                              <p className="text-sm">Upload image</p>
                             </div>
                           )}
                         </div>
@@ -670,8 +670,8 @@ const HomeCms = () => {
                     <CardHeader className={`p-6 border-b border-slate-100 dark:border-slate-800/40 ${slide.bgColor}`}>
                       <div className="flex items-start justify-between">
                         <div className="max-w-[70%] text-left">
-                          <h4 className="font-extrabold text-lg leading-tight text-[#1c1d1f]">{slide.title}</h4>
-                          <p className="text-xs text-gray-700 font-light mt-2">{slide.description}</p>
+                          <h4 className="font-bold text-xl leading-tight text-[#1c1d1f]">{slide.title}</h4>
+                          <p className="text-sm text-gray-700 font-extralight mt-2">{slide.description}</p>
                         </div>
                         <img
                           src={slide.image}
@@ -680,7 +680,7 @@ const HomeCms = () => {
                         />
                       </div>
                     </CardHeader>
-                    <CardContent className="p-4 flex items-center justify-between text-xs text-slate-500">
+                    <CardContent className="p-4 flex items-center justify-between text-sm text-slate-500">
                       <div className="flex flex-wrap gap-2">
                         <span className="font-mono bg-slate-100 dark:bg-slate-800/60 px-2 py-0.5 rounded">
                           Order: {slide.order}
@@ -715,10 +715,10 @@ const HomeCms = () => {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-lg font-medium text-slate-900 dark:text-white">
+                <h3 className="text-xl font-normal text-slate-900 dark:text-white">
                   Home Page - Trusted Companies Banner Section
                 </h3>
-                <p className="text-xs text-slate-400 font-light mt-0.5">
+                <p className="text-sm text-slate-400 font-extralight mt-0.5">
                   Location: Landing Homepage (Middle Banner Area)
                 </p>
               </div>
@@ -746,7 +746,7 @@ const HomeCms = () => {
                   <form onSubmit={handleSaveLogo} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4">
                       <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-500">Company Name</label>
+                        <label className="text-sm font-medium text-slate-500">Company Name</label>
                         <Input
                           placeholder="e.g. Volkswagen, Samsung, Vimeo"
                           value={logoName}
@@ -754,7 +754,7 @@ const HomeCms = () => {
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-500">Sorting Order</label>
+                        <label className="text-sm font-medium text-slate-500">Sorting Order</label>
                         <Input
                           type="number"
                           placeholder="e.g. 0"
@@ -766,7 +766,7 @@ const HomeCms = () => {
 
                     <div className="space-y-4 flex flex-col justify-between">
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-500">Logo Image File</label>
+                        <label className="text-sm font-medium text-slate-500">Logo Image File</label>
                         <div className="border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-6 text-center cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors relative">
                           <input
                             type="file"
@@ -777,7 +777,7 @@ const HomeCms = () => {
                           {isUploadingLogoImage ? (
                             <div className="flex flex-col items-center py-4 space-y-2">
                               <Loader2 className="w-6 h-6 animate-spin text-indigo-600" />
-                              <span className="text-xs text-slate-500">Uploading to Cloudinary...</span>
+                              <span className="text-sm text-slate-500">Uploading to Cloudinary...</span>
                             </div>
                           ) : logoImagePreview ? (
                             <div className="relative max-w-[200px] mx-auto p-4 bg-white border rounded-xl flex items-center justify-center">
@@ -790,7 +790,7 @@ const HomeCms = () => {
                           ) : (
                             <div className="py-4 flex flex-col items-center justify-center text-slate-400">
                               <Upload className="w-8 h-8 mb-1 text-slate-300" />
-                              <p className="text-xs">Upload logo file</p>
+                              <p className="text-sm">Upload logo file</p>
                             </div>
                           )}
                         </div>
@@ -836,10 +836,10 @@ const HomeCms = () => {
                         />
                       </div>
                       <div className="w-full text-center space-y-1">
-                        <div className="font-semibold text-xs text-slate-800 truncate">{logo.name}</div>
+                        <div className="font-medium text-sm text-slate-800 truncate">{logo.name}</div>
                         <div className="text-[10px] text-slate-400">Order: {logo.order}</div>
                       </div>
-                      <div className="flex items-center gap-1 pt-1 justify-center w-full border-t border-slate-100/60 dark:border-slate-800/60 text-xs">
+                      <div className="flex items-center gap-1 pt-1 justify-center w-full border-t border-slate-100/60 dark:border-slate-800/60 text-sm">
                         <Button
                           variant="ghost"
                           size="icon"
@@ -868,10 +868,10 @@ const HomeCms = () => {
           <div className="space-y-6">
             <div className="flex justify-between items-center">
               <div>
-                <h3 className="text-lg font-medium text-slate-900 dark:text-white">
+                <h3 className="text-xl font-normal text-slate-900 dark:text-white">
                   Home Page - Career Promo Banner Section
                 </h3>
-                <p className="text-xs text-slate-400 font-light mt-0.5">
+                <p className="text-sm text-slate-400 font-extralight mt-0.5">
                   Location: Landing Homepage (Bottom Accent Banner)
                 </p>
               </div>
@@ -899,7 +899,7 @@ const HomeCms = () => {
                   <form onSubmit={handleSavePromo} className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-4">
                       <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-500">Banner Title</label>
+                        <label className="text-sm font-medium text-slate-500">Banner Title</label>
                         <Input
                           placeholder="e.g. Reimagine your career in the AI era"
                           value={promoTitle}
@@ -907,7 +907,7 @@ const HomeCms = () => {
                         />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-500">Description</label>
+                        <label className="text-sm font-medium text-slate-500">Description</label>
                         <Textarea
                           placeholder="e.g. Future-proof your skills with Personal Plan..."
                           rows={3}
@@ -917,7 +917,7 @@ const HomeCms = () => {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
-                          <label className="text-xs font-semibold text-slate-500">Primary Button Text</label>
+                          <label className="text-sm font-medium text-slate-500">Primary Button Text</label>
                           <Input
                             placeholder="e.g. Learn AI and more"
                             value={promoPrimaryBtnText}
@@ -925,7 +925,7 @@ const HomeCms = () => {
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-xs font-semibold text-slate-500">Primary Button Link</label>
+                          <label className="text-sm font-medium text-slate-500">Primary Button Link</label>
                           <Input
                             placeholder="e.g. /course/search"
                             value={promoPrimaryBtnLink}
@@ -935,7 +935,7 @@ const HomeCms = () => {
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
-                          <label className="text-xs font-semibold text-slate-500">Secondary Button Text</label>
+                          <label className="text-sm font-medium text-slate-500">Secondary Button Text</label>
                           <Input
                             placeholder="e.g. Prep for a certification"
                             value={promoSecondaryBtnText}
@@ -943,7 +943,7 @@ const HomeCms = () => {
                           />
                         </div>
                         <div className="space-y-1">
-                          <label className="text-xs font-semibold text-slate-500">Secondary Button Link</label>
+                          <label className="text-sm font-medium text-slate-500">Secondary Button Link</label>
                           <Input
                             placeholder="e.g. /course/search"
                             value={promoSecondaryBtnLink}
@@ -952,11 +952,11 @@ const HomeCms = () => {
                         </div>
                       </div>
                       <div className="space-y-1">
-                        <label className="text-xs font-semibold text-slate-500">Personalized Category/Topic Trigger (Optional)</label>
+                        <label className="text-sm font-medium text-slate-500">Personalized Category/Topic Trigger (Optional)</label>
                         <select
                           value={promoCategoryName}
                           onChange={(e) => setPromoCategoryName(e.target.value)}
-                          className="flex h-10 w-full rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
+                          className="flex h-10 w-full rounded-md border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-950 px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-indigo-500"
                         >
                           <option value="">-- General Fallback Banner (No personalization) --</option>
                           {subChildCategories.map((c) => (
@@ -965,7 +965,7 @@ const HomeCms = () => {
                             </option>
                           ))}
                         </select>
-                        <p className="text-[10px] text-slate-400 font-light mt-0.5">
+                        <p className="text-[10px] text-slate-400 font-extralight mt-0.5">
                           Choose a sub-child category. If a visitor views courses or searches topics under this category, this banner will automatically display on their homepage.
                         </p>
                       </div>
@@ -973,7 +973,7 @@ const HomeCms = () => {
 
                     <div className="space-y-4 flex flex-col justify-between">
                       <div className="space-y-2">
-                        <label className="text-xs font-semibold text-slate-500">Illustration Image (Cloudinary)</label>
+                        <label className="text-sm font-medium text-slate-500">Illustration Image (Cloudinary)</label>
                         <div className="border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-2xl p-6 text-center cursor-pointer hover:bg-slate-50/50 dark:hover:bg-slate-900/10 transition-colors relative">
                           <input
                             type="file"
@@ -984,7 +984,7 @@ const HomeCms = () => {
                           {isUploadingPromoImage ? (
                             <div className="flex flex-col items-center py-6 space-y-2">
                               <Loader2 className="w-8 h-8 animate-spin text-indigo-600" />
-                              <span className="text-xs text-slate-500">Uploading to Cloudinary...</span>
+                              <span className="text-sm text-slate-500">Uploading to Cloudinary...</span>
                             </div>
                           ) : promoImagePreview ? (
                             <div className="relative group max-h-48 overflow-hidden rounded-xl mx-auto bg-slate-100 p-2">
@@ -997,7 +997,7 @@ const HomeCms = () => {
                           ) : (
                             <div className="py-6 flex flex-col items-center justify-center text-slate-400">
                               <ImageIcon className="w-10 h-10 mb-2 text-slate-300" />
-                              <p className="text-xs">Drag & drop or click to upload</p>
+                              <p className="text-sm">Drag & drop or click to upload</p>
                             </div>
                           )}
                         </div>
@@ -1044,20 +1044,20 @@ const HomeCms = () => {
                           />
                         </div>
                         <div>
-                          <h4 className="font-semibold text-sm text-slate-900 dark:text-white flex items-center gap-1.5">
+                          <h4 className="font-medium text-base text-slate-900 dark:text-white flex items-center gap-1.5">
                             {promoItem.title}
                             {promoItem.isActive && (
-                              <span className="text-[9px] font-bold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">
+                              <span className="text-[9px] font-semibold bg-emerald-100 text-emerald-800 px-1.5 py-0.5 rounded">
                                 ACTIVE
                               </span>
                             )}
                             {promoItem.categoryName && (
-                              <span className="text-[9px] font-bold bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded">
+                              <span className="text-[9px] font-semibold bg-indigo-100 text-indigo-800 px-1.5 py-0.5 rounded">
                                 Personalization Target: {promoItem.categoryName}
                               </span>
                             )}
                           </h4>
-                          <p className="text-xs text-slate-500 font-light mt-1 max-w-xl truncate">
+                          <p className="text-sm text-slate-500 font-extralight mt-1 max-w-xl truncate">
                             {promoItem.description}
                           </p>
                         </div>

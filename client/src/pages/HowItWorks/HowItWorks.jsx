@@ -73,10 +73,10 @@ const HowItWorks = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="text-center mb-20">
-          <h2 className="text-5xl lg:text-6xl font-normal tracking-tight text-gray-900 dark:text-white font-serif">
+          <h2 className="text-6xl lg:text-7xl font-light tracking-tight text-gray-900 dark:text-white font-serif">
             Start Learning in Minutes
           </h2>
-          <p className="mt-4 max-w-2xl text-xl text-gray-600 dark:text-gray-300 mx-auto">
+          <p className="mt-4 max-w-2xl text-2xl text-gray-600 dark:text-gray-300 mx-auto">
             Our simple process gets you from signup to skills in just a few steps.
           </p>
         </div>
@@ -100,7 +100,7 @@ const HowItWorks = () => {
               >
                 {/* Step number icon */}
                 <div className={`flex-shrink-0 relative z-10 flex items-center justify-center h-16 w-16 rounded-full bg-white dark:bg-gray-800 border-4 border-gray-200 dark:border-gray-700 ${step.color}`}>
-                  <span className="text-3xl font-normal">{index + 1}</span>
+                  <span className="text-4xl font-light">{index + 1}</span>
                 </div>
 
                 {/* Step content card */}
@@ -115,7 +115,7 @@ const HowItWorks = () => {
                       <div className={`p-3 rounded-lg ${step.bgColor} bg-opacity-10 dark:bg-opacity-20`}>
                         {React.cloneElement(step.icon, { className: `h-8 w-8 ${step.color}` })}
                       </div>
-                      <CardTitle className="text-2xl text-gray-800 dark:text-white">{step.title}</CardTitle>
+                      <CardTitle className="text-3xl text-gray-800 dark:text-white">{step.title}</CardTitle>
                     </CardHeader>
                     <CardContent>
                       <p className="text-gray-600 dark:text-gray-400">{step.description}</p>
@@ -129,9 +129,9 @@ const HowItWorks = () => {
 
         {/* Call to Action */}
         <div className="mt-24 text-center">
-            <h3 className="text-3xl font-normal text-gray-900 dark:text-white">Ready to begin your journey?</h3>
+            <h3 className="text-4xl font-light text-gray-900 dark:text-white">Ready to begin your journey?</h3>
             <p className="mt-2 text-gray-600 dark:text-gray-400">There`s no better time to start than now.</p>
-            <Link to="/courses" className="mt-6 inline-flex items-center justify-center px-6 py-3 bg-indigo-600 text-white text-xl font-normal rounded-md hover:bg-indigo-700 transition-colors">
+            <Link to="/courses" className="mt-6 inline-flex items-center justify-center px-6 py-3 bg-indigo-600 text-white text-2xl font-light rounded-md hover:bg-indigo-700 transition-colors">
               Browse Available Courses
               </Link>
 {/* 

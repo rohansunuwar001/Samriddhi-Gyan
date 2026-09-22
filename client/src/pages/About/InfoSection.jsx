@@ -58,9 +58,9 @@ const infoData = [
 const InfoCard = ({ title, description, linkText, linkHref, borderColor, textColor }) => (
     <div>
         <hr className={`border-t-4 ${borderColor} w-24 mb-6`} />
-        <h3 className="text-2xl font-bold text-gray-900 mb-3">{title}</h3>
+        <h3 className="text-3xl font-semibold text-gray-900 mb-3">{title}</h3>
         <p className="text-gray-600 leading-relaxed mb-6">{description}</p>
-        <a href={linkHref} className={`inline-flex items-center font-bold ${textColor} group`}>
+        <a href={linkHref} className={`inline-flex items-center font-semibold ${textColor} group`}>
             <span>{linkText}</span>
             <ArrowRightIcon className="w-5 h-5 ml-1 transition-transform duration-200 group-hover:translate-x-1" />
         </a>

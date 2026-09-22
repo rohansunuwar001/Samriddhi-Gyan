@@ -46,7 +46,7 @@ const ErrorState = ({ error }) => (
   <div className="p-8">
     <Alert variant="destructive" className="border-red-500/50 bg-red-500/5">
       <AlertCircle className="h-5 w-5 text-red-500" />
-      <AlertTitle className="text-red-500 font-bold">Error Loading Location Analytics</AlertTitle>
+      <AlertTitle className="text-red-500 font-semibold">Error Loading Location Analytics</AlertTitle>
       <AlertDescription className="text-red-600 dark:text-red-400">
         {error?.data?.message || "An unexpected error occurred while fetching geolocation logs."}
       </AlertDescription>
@@ -65,20 +65,20 @@ const ContinentNode = ({ continentName, continentData }) => {
         className="w-full flex items-center justify-between p-4 bg-slate-50/50 dark:bg-slate-800/10 hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-colors text-left"
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-bold text-sm shadow-sm">
+          <div className="w-10 h-10 rounded-lg bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400 flex items-center justify-center font-semibold text-base shadow-sm">
             <Globe className="w-5 h-5" />
           </div>
           <div>
-            <h3 className="font-semibold text-slate-950 dark:text-slate-100">
+            <h3 className="font-medium text-slate-950 dark:text-slate-100">
               {continentName || "Unknown Continent"}
             </h3>
-            <p className="text-xs text-slate-400 dark:text-slate-500 font-light">
+            <p className="text-sm text-slate-400 dark:text-slate-500 font-extralight">
               Continent level aggregation
             </p>
           </div>
         </div>
         <div className="flex items-center gap-4">
-          <div className="px-3 py-1 rounded-full text-xs font-semibold bg-indigo-100/50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400">
+          <div className="px-3 py-1 rounded-full text-sm font-medium bg-indigo-100/50 dark:bg-indigo-900/20 text-indigo-700 dark:text-indigo-400">
             {continentData.count} Visit{continentData.count > 1 ? "s" : ""}
           </div>
           {isExpanded ? (
@@ -111,20 +111,20 @@ const CountryNode = ({ countryCode, countryData }) => {
         className="w-full flex items-center justify-between p-3.5 hover:bg-slate-50 dark:hover:bg-slate-800/10 transition-colors text-left"
       >
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-md bg-purple-50 dark:bg-purple-950/20 text-purple-600 dark:text-purple-400 flex items-center justify-center font-bold text-xs shadow-xs">
+          <div className="w-8 h-8 rounded-md bg-purple-50 dark:bg-purple-950/20 text-purple-600 dark:text-purple-400 flex items-center justify-center font-semibold text-sm shadow-xs">
             {countryCode === "Unknown" ? "UN" : countryCode}
           </div>
           <div>
-            <h4 className="font-medium text-slate-800 dark:text-slate-200 text-sm">
+            <h4 className="font-normal text-slate-800 dark:text-slate-200 text-base">
               {countryCode === "NP" ? "Nepal" : countryCode === "Unknown" ? "Unknown Country" : countryCode}
             </h4>
-            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-light">
+            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-extralight">
               Country Code: {countryCode}
             </p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <div className="px-2.5 py-0.5 rounded-full text-[10px] font-semibold bg-purple-100/50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400">
+          <div className="px-2.5 py-0.5 rounded-full text-[10px] font-medium bg-purple-100/50 dark:bg-purple-900/20 text-purple-700 dark:text-purple-400">
             {countryData.count} Visit{countryData.count > 1 ? "s" : ""}
           </div>
           {isExpanded ? (
@@ -158,10 +158,10 @@ const RegionNode = ({ regionName, regionData }) => {
       >
         <div className="flex items-center gap-2 text-slate-700 dark:text-slate-300">
           <Globe2 className="w-4 h-4 text-slate-400" />
-          <span className="font-normal text-xs">{regionName || "Unknown Region"}</span>
+          <span className="font-light text-sm">{regionName || "Unknown Region"}</span>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-[10px] text-slate-500 font-medium">
+          <span className="text-[10px] text-slate-500 font-normal">
             {regionData.count} area{regionData.count > 1 ? "s" : ""}
           </span>
           {isExpanded ? (
@@ -195,7 +195,7 @@ const CityNode = ({ cityName, cityData }) => {
       >
         <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
           <MapPin className="w-3.5 h-3.5 text-slate-400" />
-          <span className="font-light text-xs">{cityName || "Unknown City"}</span>
+          <span className="font-extralight text-sm">{cityName || "Unknown City"}</span>
         </div>
         <div className="flex items-center gap-3">
           <span className="text-[10px] text-slate-400">
@@ -216,22 +216,22 @@ const CityNode = ({ cityName, cityData }) => {
               <div className="flex flex-wrap items-start justify-between gap-2">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-semibold text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded flex items-center gap-1 font-mono">
+                    <span className="text-[10px] font-medium text-slate-800 dark:text-slate-200 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded flex items-center gap-1 font-mono">
                       <Fingerprint className="w-3 h-3 text-slate-400" />
                       {visit.ip}
                     </span>
                     {visit.user ? (
-                      <span className="text-[9px] font-bold text-emerald-700 bg-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 px-1.5 py-0.5 rounded flex items-center gap-0.5">
+                      <span className="text-[9px] font-semibold text-emerald-700 bg-emerald-100 dark:bg-emerald-950/20 dark:text-emerald-400 px-1.5 py-0.5 rounded flex items-center gap-0.5">
                         <UserCheck className="w-2.5 h-2.5" />
                         Registered: {visit.user.name} ({visit.user.role})
                       </span>
                     ) : (
-                      <span className="text-[9px] font-normal text-slate-400 bg-slate-100/50 dark:bg-slate-800/40 px-1.5 py-0.5 rounded">
+                      <span className="text-[9px] font-light text-slate-400 bg-slate-100/50 dark:bg-slate-800/40 px-1.5 py-0.5 rounded">
                         Guest Visitor
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-light font-sans">
+                  <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-extralight font-sans">
                     {visit.formattedAddress}
                   </p>
                 </div>
@@ -308,14 +308,14 @@ const LocationAnalytics = () => {
       {/* Header */}
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-light tracking-tight text-slate-900 dark:text-white">
+          <h2 className="text-4xl font-extralight tracking-tight text-slate-900 dark:text-white">
             Geospatial Location Analytics
           </h2>
-          <p className="text-sm text-slate-500 font-light">
+          <p className="text-base text-slate-500 font-extralight">
             Silently resolve, aggregate, and map visitor locations (Continents, Countries, Cities, accurate address) to optimize target demographics.
           </p>
         </div>
-        <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/10 border border-emerald-100 dark:border-emerald-900/30 px-3 py-1.5 rounded-lg text-emerald-800 dark:text-emerald-400 text-xs font-semibold shadow-sm">
+        <div className="flex items-center gap-2 bg-emerald-50 dark:bg-emerald-950/10 border border-emerald-100 dark:border-emerald-900/30 px-3 py-1.5 rounded-lg text-emerald-800 dark:text-emerald-400 text-sm font-medium shadow-sm">
           <TrendingUp className="w-4 h-4" /> Live Tracking Active
         </div>
       </header>
@@ -324,11 +324,11 @@ const LocationAnalytics = () => {
       <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
         <Card className="shadow-sm border-slate-200/60 dark:border-slate-800/40 backdrop-blur-md bg-white/60 dark:bg-slate-900/60">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-light text-slate-500">Total Visits</CardTitle>
+            <CardTitle className="text-base font-extralight text-slate-500">Total Visits</CardTitle>
             <Users className="h-4 w-4 text-purple-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-normal text-slate-800 dark:text-slate-100">
+            <div className="text-4xl font-light text-slate-800 dark:text-slate-100">
               <CountUp start={0} end={rawCount} duration={1.5} />
             </div>
             <p className="text-[10px] text-slate-400 mt-1">Logs recorded platform-wide</p>
@@ -337,11 +337,11 @@ const LocationAnalytics = () => {
 
         <Card className="shadow-sm border-slate-200/60 dark:border-slate-800/40 backdrop-blur-md bg-white/60 dark:bg-slate-900/60">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-light text-slate-500">Unique Continents</CardTitle>
+            <CardTitle className="text-base font-extralight text-slate-500">Unique Continents</CardTitle>
             <Globe className="h-4 w-4 text-sky-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-normal text-slate-800 dark:text-slate-100">
+            <div className="text-4xl font-light text-slate-800 dark:text-slate-100">
               <CountUp start={0} end={totals.continentsCount} duration={1.5} />
             </div>
             <p className="text-[10px] text-slate-400 mt-1">Visiting continents</p>
@@ -350,11 +350,11 @@ const LocationAnalytics = () => {
 
         <Card className="shadow-sm border-slate-200/60 dark:border-slate-800/40 backdrop-blur-md bg-white/60 dark:bg-slate-900/60">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-light text-slate-500">Countries & Regions</CardTitle>
+            <CardTitle className="text-base font-extralight text-slate-500">Countries & Regions</CardTitle>
             <Globe2 className="h-4 w-4 text-indigo-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-normal text-slate-800 dark:text-slate-100">
+            <div className="text-4xl font-light text-slate-800 dark:text-slate-100">
               <CountUp start={0} end={totals.countriesCount} duration={1.5} />
             </div>
             <p className="text-[10px] text-slate-400 mt-1">{totals.regionsCount} Regions, {totals.citiesCount} Cities</p>
@@ -363,11 +363,11 @@ const LocationAnalytics = () => {
 
         <Card className="shadow-sm border-slate-200/60 dark:border-slate-800/40 backdrop-blur-md bg-white/60 dark:bg-slate-900/60">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-light text-slate-500">Registered Users</CardTitle>
+            <CardTitle className="text-base font-extralight text-slate-500">Registered Users</CardTitle>
             <UserCheck className="h-4 w-4 text-emerald-500" />
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-normal text-slate-800 dark:text-slate-100">
+            <div className="text-4xl font-light text-slate-800 dark:text-slate-100">
               <CountUp start={0} end={totals.registeredCount} duration={1.5} />
             </div>
             <p className="text-[10px] text-slate-400 mt-1">Logged-in location sync profiles</p>
@@ -378,16 +378,16 @@ const LocationAnalytics = () => {
       {/* Hierarchical tree drilldown section */}
       <Card className="shadow-sm border-slate-200/60 dark:border-slate-800/40 backdrop-blur-md bg-white/60 dark:bg-slate-900/60">
         <CardHeader className="border-b border-slate-200/40 dark:border-slate-800/20 pb-4">
-          <CardTitle className="text-lg font-medium text-slate-800 dark:text-slate-100">
+          <CardTitle className="text-xl font-normal text-slate-800 dark:text-slate-100">
             Visitor Demographics Tree
           </CardTitle>
-          <CardDescription className="font-light">
+          <CardDescription className="font-extralight">
             Drill down into continents, countries, states, and cities to inspect specific visitor details.
           </CardDescription>
         </CardHeader>
         <CardContent className="pt-6">
           {Object.keys(stats).length === 0 ? (
-            <div className="text-center py-12 text-slate-400 dark:text-slate-600 font-light">
+            <div className="text-center py-12 text-slate-400 dark:text-slate-600 font-extralight">
               No geospatial visitor logs found. Active location tracking will log visitors as they arrive.
             </div>
           ) : (

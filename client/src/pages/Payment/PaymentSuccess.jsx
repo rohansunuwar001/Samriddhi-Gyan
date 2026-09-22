@@ -28,7 +28,7 @@ const PaymentSuccess = () => {
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-50 text-center px-4">
         <div className="bg-white p-8 md:p-12 rounded-2xl shadow-xl max-w-lg">
             <CheckCircle2 className="h-16 w-16 text-green-500 mx-auto mb-6" />
-            <h1 className="text-3xl font-bold text-gray-800 mb-2">Payment Successful!</h1>
+            <h1 className="text-4xl font-semibold text-gray-800 mb-2">Payment Successful!</h1>
             <p className="text-gray-600 mb-8">
                 Thank you for your purchase. Your new courses are now available in your learning dashboard.
             </p>
@@ -45,7 +45,7 @@ const PaymentSuccess = () => {
                 </Link>
             </div>
             {sessionId && (
-                <p className="text-xs text-gray-400 mt-8">
+                <p className="text-sm text-gray-400 mt-8">
                     Ref ID: {sessionId}
                 </p>
             )}

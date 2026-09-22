@@ -78,7 +78,7 @@ const VideoModal = ({ isOpen, onClose, videoUrl }) => {
           >
             <button 
               onClick={onClose}
-              className="absolute -top-3 -right-3 z-[60] w-10 h-10 bg-white rounded-full text-black flex items-center justify-center text-2xl font-bold hover:scale-110 transition-transform"
+              className="absolute -top-3 -right-3 z-[60] w-10 h-10 bg-white rounded-full text-black flex items-center justify-center text-3xl font-semibold hover:scale-110 transition-transform"
               aria-label="Close video player"
             >
               &times;
@@ -92,7 +92,7 @@ const VideoModal = ({ isOpen, onClose, videoUrl }) => {
               >
                 <div className="flex items-center gap-3 py-2 px-4 bg-black/60 rounded-full backdrop-blur-sm">
                   <VolumeX className="h-6 w-6 text-white" />
-                  <span className="text-white font-semibold">Click to unmute</span>
+                  <span className="text-white font-medium">Click to unmute</span>
                 </div>
               </div>
             )}
@@ -178,13 +178,13 @@ const HowWeStartedSection = ({
               viewport={{ once: true, amount: 0.5 }} 
             >
               <motion.h2 
-                className="text-4xl sm:text-5xl font-bold text-gray-900 mb-6"
+                className="text-5xl sm:text-6xl font-semibold text-gray-900 mb-6"
                 variants={textItemVariants}
               >
                 {title}
               </motion.h2>
               <motion.p 
-                className="text-xl text-gray-700 leading-relaxed"
+                className="text-2xl text-gray-700 leading-relaxed"
                 variants={textItemVariants}
               >
                 {description}

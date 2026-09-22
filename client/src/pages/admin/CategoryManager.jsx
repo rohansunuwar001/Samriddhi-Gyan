@@ -48,13 +48,16 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 
-import { AlertCircle, Edit, Loader2, PlusCircle, Trash2 } from "lucide-react";
+import { AlertCircle, Edit, Loader2, PlusCircle, Trash2, Compass, Tag } from "lucide-react";
+import ExploreMenuManager from "./ExploreMenuManager";
 
 const ROOT_PARENT_VALUE = "__root__";
 
 const getParentId = (category) => category.parent?._id || category.parent || null;
 
 const CategoryManager = () => {
+  const [activeTab, setActiveTab] = useState("categories"); // 'categories' or 'explore-menu'
+
   // Create state
   const [newParentName, setNewParentName] = useState("");
   const [newChildName, setNewChildName] = useState("");
@@ -257,18 +260,54 @@ const CategoryManager = () => {
   return (
     <div className="flex-1 space-y-6 p-8 pt-6 bg-slate-50 min-h-screen text-left">
       <header>
-        <h2 className="text-4xl font-normal tracking-tight text-slate-900 font-sans">Categories</h2>
+        <h2 className="text-5xl font-light tracking-tight text-slate-900 font-sans">
+          {activeTab === "categories" ? "Categories" : "Explore Menu Customizer"}
+        </h2>
         <p className="text-muted-foreground font-sans">
-          Create parent categories, child categories, and sub-child categories for course breadcrumbs and topic organization.
+          {activeTab === "categories"
+            ? "Create parent categories, child categories, and sub-child categories for course breadcrumbs and topic organization."
+            : "Customize Section 1 (New & Featured) and Section 2 (Explore by goal) of the user-facing Explore dropdown."}
         </p>
       </header>
 
-      {/* CREATE FORMS ROW */}
+      {/* Tab Switcher */}
+      <div className="flex items-center gap-3 border-b border-slate-200 pb-3">
+        <button
+          type="button"
+          onClick={() => setActiveTab("categories")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            activeTab === "categories"
+              ? "bg-purple-600 text-white shadow-sm"
+              : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+          }`}
+        >
+          <Tag className="w-4 h-4" />
+          Course Categories
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("explore-menu")}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+            activeTab === "explore-menu"
+              ? "bg-purple-600 text-white shadow-sm"
+              : "bg-white text-slate-600 hover:bg-slate-100 border border-slate-200"
+          }`}
+        >
+          <Compass className="w-4 h-4" />
+          Explore Menu (New & Featured / Goals)
+        </button>
+      </div>
+
+      {activeTab === "explore-menu" ? (
+        <ExploreMenuManager />
+      ) : (
+        <>
+          {/* CREATE FORMS ROW */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* CREATE PARENT (LEVEL 0) */}
         <Card className="shadow-sm border border-slate-200">
           <CardHeader>
-            <CardTitle className="text-lg font-normal text-slate-800">Create parent category</CardTitle>
+            <CardTitle className="text-xl font-light text-slate-800">Create parent category</CardTitle>
             <CardDescription>
               Example: Development, Business, Design, Marketing.
             </CardDescription>
@@ -295,7 +334,7 @@ const CategoryManager = () => {
         {/* CREATE CHILD (LEVEL 1) */}
         <Card className="shadow-sm border border-slate-200">
           <CardHeader>
-            <CardTitle className="text-lg font-normal text-slate-800">Create child category</CardTitle>
+            <CardTitle className="text-xl font-light text-slate-800">Create child category</CardTitle>
             <CardDescription>
               Example: Web Development inside Development.
             </CardDescription>
@@ -308,7 +347,7 @@ const CategoryManager = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {parentCategories.length === 0 ? (
-                    <div className="px-2 py-1.5 text-base text-muted-foreground">Create a parent first.</div>
+                    <div className="px-2 py-1.5 text-lg text-muted-foreground">Create a parent first.</div>
                   ) : (
                     parentCategories.map((category) => (
                       <SelectItem key={category._id} value={category._id}>
@@ -338,7 +377,7 @@ const CategoryManager = () => {
         {/* CREATE SUB-CHILD (LEVEL 2) */}
         <Card className="shadow-sm border border-slate-200">
           <CardHeader>
-            <CardTitle className="text-lg font-normal text-slate-800">Create sub-child category</CardTitle>
+            <CardTitle className="text-xl font-light text-slate-800">Create sub-child category</CardTitle>
             <CardDescription>
               Example: Javascript inside Web Development.
             </CardDescription>
@@ -367,7 +406,7 @@ const CategoryManager = () => {
                 </SelectTrigger>
                 <SelectContent>
                   {childrenFilteredByParent.length === 0 ? (
-                    <div className="px-2 py-1.5 text-base text-muted-foreground">No child categories found.</div>
+                    <div className="px-2 py-1.5 text-lg text-muted-foreground">No child categories found.</div>
                   ) : (
                     childrenFilteredByParent.map((category) => (
                       <SelectItem key={category._id} value={category._id}>
@@ -400,7 +439,7 @@ const CategoryManager = () => {
       {/* HIERARCHY TABLE */}
       <Card className="shadow-sm border border-slate-200 bg-white">
         <CardHeader>
-          <CardTitle className="text-xl font-normal text-slate-800">Category hierarchy</CardTitle>
+          <CardTitle className="text-2xl font-light text-slate-800">Category hierarchy</CardTitle>
           <CardDescription>
             Student course pages use this hierarchy for breadcrumbs.
           </CardDescription>
@@ -453,7 +492,7 @@ const CategoryManager = () => {
 
                     return (
                       <TableRow key={category._id}>
-                        <TableCell className="font-light">
+                        <TableCell className="font-extralight">
                           {editingId === category._id ? (
                             <Input
                               value={editingName}
@@ -465,7 +504,7 @@ const CategoryManager = () => {
                             <span 
                               className={`
                                 block
-                                ${level === 0 ? "font-normal text-slate-900" : ""}
+                                ${level === 0 ? "font-light text-slate-900" : ""}
                                 ${level === 1 ? "pl-6 text-slate-800" : ""}
                                 ${level === 2 ? "pl-12 text-slate-500 italic" : ""}
                               `}
@@ -494,12 +533,12 @@ const CategoryManager = () => {
                               </SelectContent>
                             </Select>
                           ) : (
-                            <span className="text-muted-foreground font-light text-sm">
+                            <span className="text-muted-foreground font-extralight text-base">
                               {parentText}
                             </span>
                           )}
                         </TableCell>
-                        <TableCell className="text-muted-foreground text-sm">{category.slug}</TableCell>
+                        <TableCell className="text-muted-foreground text-base">{category.slug}</TableCell>
                         <TableCell className="text-right">
                           {editingId === category._id ? (
                             <div className="flex justify-end gap-2">
@@ -554,6 +593,8 @@ const CategoryManager = () => {
           )}
         </CardContent>
       </Card>
+        </>
+      )}
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>

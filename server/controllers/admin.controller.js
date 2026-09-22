@@ -15,63 +15,181 @@ export class AdminController extends BaseController {
 
   getSuperAdminDashboardAnalytics = async (req, res) => {
     try {
+      const now = new Date();
+
+      // Current week: Sunday 00:00:00 to Saturday 23:59:59
+      const currentWeekStart = new Date(now);
+      currentWeekStart.setDate(now.getDate() - now.getDay());
+      currentWeekStart.setHours(0, 0, 0, 0);
+
+      const currentWeekEnd = new Date(currentWeekStart);
+      currentWeekEnd.setDate(currentWeekStart.getDate() + 6);
+      currentWeekEnd.setHours(23, 59, 59, 999);
+
+      // Previous week: Sunday 00:00:00 to Saturday 23:59:59
+      const previousWeekStart = new Date(currentWeekStart);
+      previousWeekStart.setDate(previousWeekStart.getDate() - 7);
+
+      const previousWeekEnd = new Date(currentWeekStart);
+      previousWeekEnd.setMilliseconds(-1);
+
+      // 7-day revenue comparison (Sun - Sat)
+      const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      const weeklyRevenue = dayNames.map((dayName, idx) => {
+        const d = new Date(currentWeekStart);
+        d.setDate(currentWeekStart.getDate() + idx);
+        return {
+          day: dayName,
+          date: dayName,
+          fullDate: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`,
+          dailyRevenue: 0,
+          previous: 0,
+        };
+      });
+
       const userCountsPromise = User.aggregate([{ $group: { _id: "$role", count: { $sum: 1 } } }]);
+      const totalUsersPromise = User.countDocuments();
+      const newUsersThisWeekPromise = User.countDocuments({
+        createdAt: { $gte: currentWeekStart, $lte: currentWeekEnd }
+      });
       const courseCountPromise = Course.countDocuments();
-      const totalRevenuePromise = CoursePurchase.aggregate([
+
+      const totalCourseRevenuePromise = CoursePurchase.aggregate([
         { $match: { status: 'completed' } },
         { $group: { _id: null, total: { $sum: '$totalAmount' } } }
       ]);
+      const totalSubRevenuePromise = SubscriptionPurchase.aggregate([
+        { $match: { status: 'completed' } },
+        { $group: { _id: null, total: { $sum: '$amount' } } }
+      ]);
 
-      const recentUsersPromise = User.find({}).sort({ createdAt: -1 }).limit(5).select("name email role createdAt photoUrl").lean();
-      const recentTransactionsPromise = CoursePurchase.find({ status: 'completed' }).sort({ createdAt: -1 }).limit(5).populate("userId", "name").select("orderId userId totalAmount paymentMethod createdAt").lean();
+      const recentUsersPromise = User.find({})
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .select("name email role createdAt photoUrl")
+        .lean();
+
+      const recentCourseTransactionsPromise = CoursePurchase.find({ status: 'completed' })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .populate("userId", "name email")
+        .select("orderId userId totalAmount paymentMethod createdAt")
+        .lean();
+
+      const recentSubTransactionsPromise = SubscriptionPurchase.find({ status: 'completed' })
+        .sort({ createdAt: -1 })
+        .limit(5)
+        .populate("userId", "name email")
+        .select("orderId userId amount paymentMethod createdAt")
+        .lean();
 
       const topEnrolledCoursesPromise = Course.aggregate([
         { $match: { isPublished: true } },
-        { $addFields: { enrollmentCount: { $size: '$enrolledStudents' } } },
+        { $addFields: { enrollmentCount: { $size: { $ifNull: ['$enrolledStudents', []] } } } },
         { $sort: { enrollmentCount: -1 } },
         { $limit: 5 },
         { $project: { title: 1, enrollmentCount: 1, ratings: 1 } }
       ]);
-      const topRatedCoursesPromise = Course.find({ isPublished: true, numOfReviews: { $gt: 5 } }).sort({ ratings: -1 }).limit(5).select('title ratings numOfReviews').lean();
 
-      const sevenDaysAgo = new Date();
-      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const weeklyRevenuePromise = CoursePurchase.aggregate([
-        { $match: { status: "completed", createdAt: { $gte: sevenDaysAgo } } },
-        { $group: { _id: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } }, dailyRevenue: { $sum: "$totalAmount" } } },
-        { $sort: { _id: 1 } },
-      ]);
+      const topRatedCoursesPromise = Course.find({ isPublished: true, numOfReviews: { $gt: 5 } })
+        .sort({ ratings: -1 })
+        .limit(5)
+        .select('title ratings numOfReviews')
+        .lean();
+
+      const twoWeeksCoursePurchasesPromise = CoursePurchase.find({
+        status: 'completed',
+        createdAt: { $gte: previousWeekStart, $lte: currentWeekEnd }
+      }).select('totalAmount createdAt').lean();
+
+      const twoWeeksSubPurchasesPromise = SubscriptionPurchase.find({
+        status: 'completed',
+        createdAt: { $gte: previousWeekStart, $lte: currentWeekEnd }
+      }).select('amount createdAt').lean();
 
       const [
         userCounts,
+        totalUsers,
+        newUsersThisWeek,
         totalCourses,
-        revenueResult,
+        totalCourseRevenue,
+        totalSubRevenue,
         recentUsers,
-        recentTransactions,
+        recentCourseTransactions,
+        recentSubTransactions,
         topEnrolledCourses,
         topRatedCourses,
-        weeklyRevenue
+        twoWeeksCoursePurchases,
+        twoWeeksSubPurchases
       ] = await Promise.all([
         userCountsPromise,
+        totalUsersPromise,
+        newUsersThisWeekPromise,
         courseCountPromise,
-        totalRevenuePromise,
+        totalCourseRevenuePromise,
+        totalSubRevenuePromise,
         recentUsersPromise,
-        recentTransactionsPromise,
+        recentCourseTransactionsPromise,
+        recentSubTransactionsPromise,
         topEnrolledCoursesPromise,
         topRatedCoursesPromise,
-        weeklyRevenuePromise
+        twoWeeksCoursePurchasesPromise,
+        twoWeeksSubPurchasesPromise
       ]);
+
+      const processRevenueItem = (createdAt, amount) => {
+        const itemDate = new Date(createdAt);
+        const dayIdx = itemDate.getDay();
+        if (dayIdx >= 0 && dayIdx < 7) {
+          if (itemDate >= currentWeekStart && itemDate <= currentWeekEnd) {
+            weeklyRevenue[dayIdx].dailyRevenue += amount;
+          } else if (itemDate >= previousWeekStart && itemDate <= previousWeekEnd) {
+            weeklyRevenue[dayIdx].previous += amount;
+          }
+        }
+      };
+
+      twoWeeksCoursePurchases.forEach(p => processRevenueItem(p.createdAt, p.totalAmount || 0));
+      twoWeeksSubPurchases.forEach(p => processRevenueItem(p.createdAt, p.amount || 0));
+
+      const currentWeekRevenue = weeklyRevenue.reduce((acc, item) => acc + item.dailyRevenue, 0);
+      const previousWeekRevenue = weeklyRevenue.reduce((acc, item) => acc + item.previous, 0);
 
       const totalStudents = userCounts.find(r => r._id === 'student')?.count || 0;
       const totalInstructors = userCounts.find(r => r._id === 'instructor')?.count || 0;
-      const totalRevenue = revenueResult[0]?.total || 0;
+      const totalRevenue = (totalCourseRevenue[0]?.total || 0) + (totalSubRevenue[0]?.total || 0);
+
+      const newUsersPercentage = totalUsers > 0 ? Math.round((newUsersThisWeek / totalUsers) * 100) : 0;
+      const instructorConversionRate = (totalStudents + totalInstructors) > 0
+        ? Math.round((totalInstructors / (totalStudents + totalInstructors)) * 100)
+        : (totalUsers > 0 ? Math.round((totalInstructors / totalUsers) * 100) : 0);
+
+      const normalizedSubTx = recentSubTransactions.map(sp => ({
+        _id: sp._id,
+        orderId: sp.orderId,
+        userId: sp.userId,
+        totalAmount: sp.amount,
+        paymentMethod: sp.paymentMethod,
+        createdAt: sp.createdAt,
+        type: 'Subscription'
+      }));
+
+      const recentTransactions = [...recentCourseTransactions, ...normalizedSubTx]
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+        .slice(0, 5);
 
       const dashboardData = {
         stats: {
           totalRevenue,
-          totalUsers: totalStudents + totalInstructors,
+          totalUsers,
+          totalStudents,
           totalInstructors,
           totalCourses,
+          currentWeekRevenue,
+          previousWeekRevenue,
+          newUsersThisWeek,
+          newUsersPercentage,
+          instructorConversionRate,
         },
         activity: {
           recentUsers,

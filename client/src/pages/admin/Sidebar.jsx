@@ -30,7 +30,7 @@ const DashboardNavLink = ({ to, icon, label }) => {
             className={({ isActive }) =>
                 `flex items-center gap-3 rounded-lg px-3 py-2 transition-all hover:bg-muted/50 dark:hover:bg-muted/20 ${
                 isActive
-                    ? 'bg-muted dark:bg-muted/30 font-normal text-primary' // Style for active link
+                    ? 'bg-muted dark:bg-muted/30 font-light text-primary' // Style for active link
                     : 'text-muted-foreground' // Style for inactive link
                 }`
             }

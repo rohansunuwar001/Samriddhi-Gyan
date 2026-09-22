@@ -57,50 +57,50 @@ const ProfileCourseCard = ({ course }) => {
             className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-gray-300 text-base font-light">
+          <div className="w-full h-full flex items-center justify-center text-gray-300 text-lg font-extralight">
             No Image
           </div>
         )}
       </div>
       <div className="p-4 flex flex-col flex-1">
         {/* Title */}
-        <h3 className="text-base font-normal text-[#1c1d1f] line-clamp-2 leading-tight min-h-[40px] mb-1">
+        <h3 className="text-lg font-light text-[#1c1d1f] line-clamp-2 leading-tight min-h-[40px] mb-1">
           {course.title}
         </h3>
         
         {/* Subtitle / Achievements */}
         {course.subtitle && (
-          <p className="text-xs text-slate-500 font-light line-clamp-2 mb-2 leading-normal min-h-[32px]">
+          <p className="text-sm text-slate-500 font-extralight line-clamp-2 mb-2 leading-normal min-h-[32px]">
             {course.subtitle}
           </p>
         )}
 
         {/* Instructor name and position */}
-        <p className="text-xs text-slate-400 font-light truncate mb-2">
+        <p className="text-sm text-slate-400 font-extralight truncate mb-2">
           {creatorName}{creatorHeadline ? `, ${creatorHeadline}` : ""}
         </p>
 
         {/* Info Capsules Row */}
         <div className="flex flex-wrap items-center gap-1.5 mt-auto mb-3">
-          <div className="border border-[#d1d7dc] px-1.5 py-0.5 rounded-sm flex items-center gap-1 text-[#b4690e] font-normal text-xs bg-amber-50/10">
+          <div className="border border-[#d1d7dc] px-1.5 py-0.5 rounded-sm flex items-center gap-1 text-[#b4690e] font-light text-sm bg-amber-50/10">
             <Star className="w-3 h-3 fill-current text-[#b4690e]" />
             <span>{(course.ratings || 0).toFixed(1)}</span>
           </div>
-          <div className="border border-[#d1d7dc] px-1.5 py-0.5 rounded-sm text-slate-500 font-light text-xs bg-slate-50/10">
+          <div className="border border-[#d1d7dc] px-1.5 py-0.5 rounded-sm text-slate-500 font-extralight text-sm bg-slate-50/10">
             {course.numOfReviews || 0} ratings
           </div>
-          <div className="border border-[#d1d7dc] px-1.5 py-0.5 rounded-sm text-slate-500 font-light text-xs capitalize bg-slate-50/10">
+          <div className="border border-[#d1d7dc] px-1.5 py-0.5 rounded-sm text-slate-500 font-extralight text-sm capitalize bg-slate-50/10">
             {course.level || "All levels"}
           </div>
         </div>
 
         {/* Price Section */}
         <div className="flex items-baseline gap-2">
-          <span className="text-base font-normal text-[#1c1d1f]">
+          <span className="text-lg font-light text-[#1c1d1f]">
             {currentPrice ? `NPR ${currentPrice}` : "Free"}
           </span>
           {hasDiscount && (
-            <span className="text-sm text-slate-400 line-through font-light">
+            <span className="text-base text-slate-400 line-through font-extralight">
               NPR {originalPrice}
             </span>
           )}
@@ -239,19 +239,19 @@ const Profile = () => {
       <div className={isStudent ? "bg-[#1c1d1f] text-white py-12 px-6 md:px-12" : "bg-[#f8f9fb] text-[#1c1d1f] border-b border-[#d1d7dc] py-16 px-6 md:px-12"}>
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-center">
           <div>
-            <span className={`text-sm font-normal tracking-widest uppercase ${isStudent ? "text-[#d1d7dc]" : "text-[#6a6f73]"}`}>
+            <span className={`text-base font-light tracking-widest uppercase ${isStudent ? "text-[#d1d7dc]" : "text-[#6a6f73]"}`}>
               {profileUser.role === "student" ? "Learner" : profileUser.role === "admin" ? "Admin" : "Instructor"}
             </span>
-            <h1 className={`text-5xl font-normal mt-2 ${isStudent ? "text-white" : "text-[#1c1d1f]"}`}>
+            <h1 className={`text-6xl font-light mt-2 ${isStudent ? "text-white" : "text-[#1c1d1f]"}`}>
               {profileUser.name}
             </h1>
             {profileUser.headline && (
-              <p className={`text-xl mt-2 font-normal ${isStudent ? "text-gray-300" : "text-[#1c1d1f]"}`}>
+              <p className={`text-2xl mt-2 font-light ${isStudent ? "text-gray-300" : "text-[#1c1d1f]"}`}>
                 {profileUser.headline}
               </p>
             )}
             {!isStudent && (
-              <div className="inline-block mt-3 px-3 py-1 bg-[#ecebfa] text-[#5022c3] text-sm font-normal rounded-sm shadow-sm">
+              <div className="inline-block mt-3 px-3 py-1 bg-[#ecebfa] text-[#5022c3] text-base font-light rounded-sm shadow-sm">
                 Instructor Partner
               </div>
             )}
@@ -267,31 +267,31 @@ const Profile = () => {
           {!isStudent && profileUser.role !== "admin" && (
             <div className="flex gap-16 mb-6">
               <div>
-                <div className="text-3xl font-normal text-[#1c1d1f]">
+                <div className="text-4xl font-light text-[#1c1d1f]">
                   {totalLearners.toLocaleString()}
                 </div>
-                <div className="text-sm text-[#6a6f73] font-light mt-1">Total learners</div>
+                <div className="text-base text-[#6a6f73] font-extralight mt-1">Total learners</div>
               </div>
               <div>
-                <div className="text-3xl font-normal text-[#1c1d1f]">
+                <div className="text-4xl font-light text-[#1c1d1f]">
                   {totalReviews.toLocaleString()}
                 </div>
-                <div className="text-sm text-[#6a6f73] font-light mt-1">Reviews</div>
+                <div className="text-base text-[#6a6f73] font-extralight mt-1">Reviews</div>
               </div>
             </div>
           )}
 
           {/* Biography Area with Collapse Toggle */}
           <div>
-            <h2 className="text-2xl font-normal pb-3 mb-3">About me</h2>
+            <h2 className="text-3xl font-light pb-3 mb-3">About me</h2>
             <div 
-              className="text-gray-700 leading-relaxed text-base font-normal"
+              className="text-gray-700 leading-relaxed text-lg font-light"
               dangerouslySetInnerHTML={{ __html: isExpanded || !isLongDescription ? displayDescription : truncatedDescription }}
             />
             {isLongDescription && (
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
-                className="text-[#5022c3] font-normal text-base hover:underline mt-2 flex items-center gap-1"
+                className="text-[#5022c3] font-light text-lg hover:underline mt-2 flex items-center gap-1"
               >
                 {isExpanded ? "Show less" : "Show more"}
                 <span>{isExpanded ? "▲" : "▼"}</span>
@@ -307,9 +307,9 @@ const Profile = () => {
                 <div className="flex border-b border-[#d1d7dc] mb-6 overflow-x-auto gap-6">
                   <button
                     onClick={() => setActiveTab("learning")}
-                    className={`pb-3 text-lg font-normal transition-all border-b-2 whitespace-nowrap ${
+                    className={`pb-3 text-xl font-light transition-all border-b-2 whitespace-nowrap ${
                       activeTab === "learning"
-                        ? "border-[#1c1d1f] text-[#1c1d1f] font-normal"
+                        ? "border-[#1c1d1f] text-[#1c1d1f] font-light"
                         : "border-transparent text-gray-500 hover:text-[#1c1d1f]"
                     }`}
                   >
@@ -317,9 +317,9 @@ const Profile = () => {
                   </button>
                   <button
                     onClick={() => setActiveTab("wishlist")}
-                    className={`pb-3 text-lg font-normal transition-all border-b-2 whitespace-nowrap ${
+                    className={`pb-3 text-xl font-light transition-all border-b-2 whitespace-nowrap ${
                       activeTab === "wishlist"
-                        ? "border-[#1c1d1f] text-[#1c1d1f] font-normal"
+                        ? "border-[#1c1d1f] text-[#1c1d1f] font-light"
                         : "border-transparent text-gray-500 hover:text-[#1c1d1f]"
                     }`}
                   >
@@ -337,7 +337,7 @@ const Profile = () => {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-base text-gray-500">Not enrolled in any courses yet.</p>
+                      <p className="text-lg text-gray-500">Not enrolled in any courses yet.</p>
                     )}
                   </div>
                 )}
@@ -351,7 +351,7 @@ const Profile = () => {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-base text-gray-500">Wishlist is empty.</p>
+                      <p className="text-lg text-gray-500">Wishlist is empty.</p>
                     )}
                   </div>
                 )}
@@ -359,7 +359,7 @@ const Profile = () => {
             ) : (
               // Directly render courses grid for Instructors
               <div className="pt-6 border-t border-gray-200">
-                <h2 className="text-2xl font-normal mb-6">
+                <h2 className="text-3xl font-light mb-6">
                   My courses ({createdCourses.length})
                 </h2>
                 {createdCourses && createdCourses.length > 0 ? (
@@ -369,7 +369,7 @@ const Profile = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-base text-gray-500">No courses created yet.</p>
+                  <p className="text-lg text-gray-500">No courses created yet.</p>
                 )}
               </div>
             )
@@ -381,7 +381,7 @@ const Profile = () => {
           <div className="border border-[#d1d7dc] p-6 text-center space-y-6 bg-white shadow-md rounded-sm">
             <Avatar className="w-36 h-36 mx-auto border border-gray-200">
               <AvatarImage src={profileUser.photoUrl} alt={profileUser.name} className="object-cover" />
-              <AvatarFallback className="text-5xl font-normal text-white bg-[#1c1d1f]">{initials}</AvatarFallback>
+              <AvatarFallback className="text-6xl font-light text-white bg-[#1c1d1f]">{initials}</AvatarFallback>
             </Avatar>
 
             {/* Social media links outlined in purple */}
@@ -418,7 +418,7 @@ const Profile = () => {
             {isOwnProfile && (
               <button
                 onClick={handleNavigateToEdit}
-                className="w-full border border-[#1c1d1f] hover:bg-gray-50 text-[#1c1d1f] font-normal py-3 text-base transition-colors mt-4"
+                className="w-full border border-[#1c1d1f] hover:bg-gray-50 text-[#1c1d1f] font-light py-3 text-lg transition-colors mt-4"
               >
                 Edit profile
               </button>
@@ -454,7 +454,7 @@ const ProfilePageSkeleton = () => (
 const ProfilePageError = ({ error }) => (
   <div className="min-h-screen flex items-center justify-center bg-gray-50">
     <div className="bg-red-50 border border-red-200 rounded-xl p-8 text-center">
-      <h2 className="text-xl font-bold text-red-700 mb-2">Failed to Load Profile</h2>
+      <h2 className="text-2xl font-semibold text-red-700 mb-2">Failed to Load Profile</h2>
       <p className="text-red-650 mb-6">{error?.data?.message || "An error occurred."}</p>
       <Button variant="destructive" onClick={() => window.location.reload()}>Try Again</Button>
     </div>

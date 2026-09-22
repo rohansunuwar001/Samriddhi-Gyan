@@ -125,14 +125,13 @@ const certificateSchema = new mongoose.Schema(
 );
 
 // ── Pre-save: generate certificateId when being issued ───────────────────────
-certificateSchema.pre("save", function (next) {
+certificateSchema.pre("save", function () {
   if (!this.isTemplate && !this.certificateId) {
     const year = new Date().getFullYear();
     const rand = nanoid(6).toUpperCase();
     this.certificateId = `SG-${year}-${rand}`;
     this.verificationUrl = `/verify/${this.certificateId}`;
   }
-  next();
 });
 
 export const Certificate = mongoose.model("Certificate", certificateSchema);

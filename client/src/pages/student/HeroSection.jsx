@@ -61,10 +61,10 @@ const HeroSection = () => {
               >
                 {/* Text box on left for each slide */}
                 <div className="bg-white border border-gray-200 rounded-lg p-6 max-w-sm shadow-lg text-left ml-12">
-                  <h2 className="text-5xl font-normal text-gray-900 mb-4 leading-tight">
+                  <h2 className="text-6xl font-light text-gray-900 mb-4 leading-tight">
                     {slide.title}
                   </h2>
-                  <p className="text-xl text-gray-700">{slide.description}</p>
+                  <p className="text-2xl text-gray-700">{slide.description}</p>
                 </div>
               </div>
             ))}

@@ -194,7 +194,7 @@ const CourseProgress = () => {
 
   if (error || !courseData) {
     return (
-      <div className="text-center py-20 text-red-500 font-normal">
+      <div className="text-center py-20 text-red-500 font-light">
         Failed to load course content. Please try again.
       </div>
     );
@@ -239,17 +239,17 @@ const CourseProgress = () => {
             />
           </Link>
           <div className="h-6 w-px bg-[#3e4143] shrink-0"></div>
-          <span className="font-normal text-lg text-[#f7f9fa] truncate max-w-[180px] sm:max-w-[320px] md:max-w-[450px]">
+          <span className="font-light text-xl text-[#f7f9fa] truncate max-w-[180px] sm:max-w-[320px] md:max-w-[450px]">
             {courseData.course.title}
           </span>
         </div>
 
         {/* Right: Actions */}
-        <div className="flex items-center gap-4 text-lg font-normal text-[#d1d7dc]">
+        <div className="flex items-center gap-4 text-xl font-light text-[#d1d7dc]">
           {/* Assignments/Tasks Link */}
           <Link
             to={`/course-detail/${courseId}/assignments`}
-            className="flex items-center gap-1.5 hover:text-white transition-colors border border-[#8a8d91] hover:border-white px-3 py-1.5 rounded-none shrink-0 font-normal text-xs"
+            className="flex items-center gap-1.5 hover:text-white transition-colors border border-[#8a8d91] hover:border-white px-3 py-1.5 rounded-none shrink-0 font-light text-sm"
           >
             Assignments
           </Link>
@@ -257,17 +257,17 @@ const CourseProgress = () => {
           {/* Leave a Rating */}
           <Dialog open={isRatingOpen} onOpenChange={setIsRatingOpen}>
             <DialogTrigger asChild>
-              <button className="flex items-center gap-1.5 hover:text-white transition-colors shrink-0 font-normal">
+              <button className="flex items-center gap-1.5 hover:text-white transition-colors shrink-0 font-light">
                 <Star className="h-4 w-4 text-gray-400" />
                 <span className="hidden md:inline">Leave a rating</span>
               </button>
             </DialogTrigger>
             <DialogContent className="max-w-md p-8 bg-white text-[#2d2f31] rounded-none border border-[#d1d7dc] shadow-2xl">
               <DialogHeader>
-                <DialogTitle className="text-3xl font-normal text-center mb-1 text-[#2d2f31]">
+                <DialogTitle className="text-4xl font-light text-center mb-1 text-[#2d2f31]">
                   How would you rate this course?
                 </DialogTitle>
-                <p className="text-center text-base font-normal text-[#6a6f73] uppercase mb-4 tracking-wider">
+                <p className="text-center text-lg font-light text-[#6a6f73] uppercase mb-4 tracking-wider">
                   Select Rating
                 </p>
               </DialogHeader>
@@ -300,7 +300,7 @@ const CourseProgress = () => {
           {/* Your Progress Popover */}
           <Popover>
             <PopoverTrigger asChild>
-              <button className="flex items-center gap-1.5 hover:text-white transition-colors shrink-0 font-normal">
+              <button className="flex items-center gap-1.5 hover:text-white transition-colors shrink-0 font-light">
                 <CircularProgressTrophy percent={progressPercent} />
                 <span className="hidden sm:inline">Your progress</span>
                 <span className="text-[15px]">▼</span>
@@ -309,10 +309,10 @@ const CourseProgress = () => {
             <PopoverContent className="w-80 bg-white text-[#2d2f31] p-5 shadow-[0_4px_16px_rgba(0,0,0,0.15)] rounded-none border border-[#d1d7dc] mt-2 mr-2 z-50">
               <div className="space-y-4">
                 <div>
-                  <h4 className="font-normal text-[#2d2f31] text-lg leading-tight">
+                  <h4 className="font-light text-[#2d2f31] text-xl leading-tight">
                     {completedCount} of {totalLectures} complete.
                   </h4>
-                  <p className="text-base text-[#6a6f73] mt-1 font-normal">
+                  <p className="text-lg text-[#6a6f73] mt-1 font-light">
                     Finish course to get your certificate
                   </p>
                 </div>
@@ -324,7 +324,7 @@ const CourseProgress = () => {
                       style={{ width: `${progressPercent}%` }}
                     />
                   </div>
-                  <p className="text-[15px] text-right font-normal text-[#2d2f31]">{progressPercent}% Complete</p>
+                  <p className="text-[15px] text-right font-light text-[#2d2f31]">{progressPercent}% Complete</p>
                 </div>
               </div>
             </PopoverContent>
@@ -333,13 +333,13 @@ const CourseProgress = () => {
           {/* Share Course Dialog */}
           <Dialog open={isShareOpen} onOpenChange={setIsShareOpen}>
             <DialogTrigger asChild>
-              <button className="flex items-center gap-1.5 hover:text-white transition-colors border border-[#8a8d91] hover:border-white px-3 py-1.5 rounded-none shrink-0 font-normal">
+              <button className="flex items-center gap-1.5 hover:text-white transition-colors border border-[#8a8d91] hover:border-white px-3 py-1.5 rounded-none shrink-0 font-light">
                 Share <Share2 className="h-3.5 w-3.5" />
               </button>
             </DialogTrigger>
             <DialogContent className="max-w-md p-6 bg-white text-[#2d2f31] rounded-none border border-[#d1d7dc] shadow-2xl">
               <DialogHeader>
-                <DialogTitle className="text-3xl font-normal mb-4 text-[#2d2f31]">
+                <DialogTitle className="text-4xl font-light mb-4 text-[#2d2f31]">
                   Share this course
                 </DialogTitle>
               </DialogHeader>
@@ -348,23 +348,23 @@ const CourseProgress = () => {
                   type="text"
                   readOnly
                   value={courseUrl}
-                  className="flex-grow border border-[#2d2f31] px-3 py-2 text-base outline-none bg-[#f7f9fa]"
+                  className="flex-grow border border-[#2d2f31] px-3 py-2 text-lg outline-none bg-[#f7f9fa]"
                 />
                 <Button
                   onClick={handleCopyUrl}
-                  className="bg-[#a435f0] text-white hover:bg-[#8710d8] font-normal text-base rounded-none h-auto px-5 shadow-none"
+                  className="bg-[#a435f0] text-white hover:bg-[#8710d8] font-light text-lg rounded-none h-auto px-5 shadow-none"
                 >
                   Copy
                 </Button>
               </div>
               <div className="flex justify-center gap-4 mt-6">
-                <button className="h-10 w-10 border border-[#d1d7dc] rounded-full flex items-center justify-center hover:bg-[#f7f9fa] text-[#5624d0] font-normal text-lg">
+                <button className="h-10 w-10 border border-[#d1d7dc] rounded-full flex items-center justify-center hover:bg-[#f7f9fa] text-[#5624d0] font-light text-xl">
                   f
                 </button>
-                <button className="h-10 w-10 border border-[#d1d7dc] rounded-full flex items-center justify-center hover:bg-[#f7f9fa] text-[#5624d0] font-normal text-lg">
+                <button className="h-10 w-10 border border-[#d1d7dc] rounded-full flex items-center justify-center hover:bg-[#f7f9fa] text-[#5624d0] font-light text-xl">
                   𝕏
                 </button>
-                <button className="h-10 w-10 border border-[#d1d7dc] rounded-full flex items-center justify-center hover:bg-[#f7f9fa] text-[#5624d0] font-normal text-lg">
+                <button className="h-10 w-10 border border-[#d1d7dc] rounded-full flex items-center justify-center hover:bg-[#f7f9fa] text-[#5624d0] font-light text-xl">
                   ✉
                 </button>
               </div>
@@ -374,25 +374,25 @@ const CourseProgress = () => {
           {/* Settings Options (3-Dot Dropdown) */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="hover:text-white transition-colors border border-[#8a8d91] hover:border-white h-8 w-8 flex items-center justify-center rounded-none text-lg shrink-0">
+              <button className="hover:text-white transition-colors border border-[#8a8d91] hover:border-white h-8 w-8 flex items-center justify-center rounded-none text-xl shrink-0">
                 <MoreVertical className="h-4 w-4" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-60 bg-white text-[#2d2f31] rounded-none border border-[#d1d7dc] mt-2 shadow-[0_4px_16px_rgba(0,0,0,0.15)] z-50" align="end">
-              <DropdownMenuItem className="cursor-pointer font-normal text-base py-2.5 flex items-center gap-2 hover:bg-[#f7f9fa] focus:bg-[#f7f9fa] focus:text-[#2d2f31]">
+              <DropdownMenuItem className="cursor-pointer font-light text-lg py-2.5 flex items-center gap-2 hover:bg-[#f7f9fa] focus:bg-[#f7f9fa] focus:text-[#2d2f31]">
                 ★ Favorite this course
               </DropdownMenuItem>
               <DropdownMenuItem 
                 onClick={handleArchiveToggle}
-                className="cursor-pointer font-normal text-base py-2.5 flex items-center gap-2 hover:bg-[#f7f9fa] focus:bg-[#f7f9fa] focus:text-[#2d2f31]"
+                className="cursor-pointer font-light text-lg py-2.5 flex items-center gap-2 hover:bg-[#f7f9fa] focus:bg-[#f7f9fa] focus:text-[#2d2f31]"
               >
                 📁 {isArchived ? "Unarchive this course" : "Archive this course"}
               </DropdownMenuItem>
-              <DropdownMenuItem className="cursor-pointer font-normal text-base py-2.5 flex items-center gap-2 hover:bg-[#f7f9fa] focus:bg-[#f7f9fa] focus:text-[#2d2f31]">
+              <DropdownMenuItem className="cursor-pointer font-light text-lg py-2.5 flex items-center gap-2 hover:bg-[#f7f9fa] focus:bg-[#f7f9fa] focus:text-[#2d2f31]">
                 🎁 Gift this course
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-[#d1d7dc]" />
-              <label className="flex items-center gap-2.5 px-3.5 py-2.5 hover:bg-[#f7f9fa] cursor-pointer text-[11px] font-normal text-[#2d2f31]">
+              <label className="flex items-center gap-2.5 px-3.5 py-2.5 hover:bg-[#f7f9fa] cursor-pointer text-[11px] font-light text-[#2d2f31]">
                 <input
                   type="checkbox"
                   checked={announcementEmails}
@@ -401,7 +401,7 @@ const CourseProgress = () => {
                 />
                 New announcement emails
               </label>
-              <label className="flex items-center gap-2.5 px-3.5 py-2.5 hover:bg-[#f7f9fa] cursor-pointer text-[11px] font-normal text-[#2d2f31]">
+              <label className="flex items-center gap-2.5 px-3.5 py-2.5 hover:bg-[#f7f9fa] cursor-pointer text-[11px] font-light text-[#2d2f31]">
                 <input
                   type="checkbox"
                   checked={promoEmails}

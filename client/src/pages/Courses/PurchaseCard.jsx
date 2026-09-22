@@ -233,11 +233,11 @@ const PurchaseCard = ({ course }) => {
 
   const renderRadio = (checked) => (
     <span
-      className={`mt-1 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-[3px] ${
-        checked ? "border-[#5624d0]" : "border-[#2d2f31]"
+      className={`mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+        checked ? "border-[#5624d0]" : "border-[#6a6f73]"
       }`}
     >
-      {checked && <span className="h-3.5 w-3.5 rounded-full bg-[#5624d0]" />}
+      {checked && <span className="h-2.5 w-2.5 rounded-full bg-[#5624d0]" />}
     </span>
   );
 
@@ -245,21 +245,21 @@ const PurchaseCard = ({ course }) => {
     const price = subscription ? subscriptionPrice : currentPrice;
 
     return (
-      <div className="mt-1 flex flex-wrap items-baseline gap-2 text-[#2d2f31]">
-        {subscription && <span className="text-xl font-extrabold">From</span>}
-        <span className={large ? "text-3xl font-extrabold" : "text-2xl font-extrabold"}>
-          Rs{price.toLocaleString()}
+      <div className="mt-1 flex flex-wrap items-baseline gap-2 text-[#1c1d1f]">
+        {subscription && <span className="text-[15px] font-semibold">From</span>}
+        <span className={large ? "text-[24px] font-semibold" : "text-[20px] font-semibold"}>
+          Rs.{price.toLocaleString()}
         </span>
         {originalPrice > price && (
-          <span className="text-lg text-[#6a6f73] line-through">
-            Rs{originalPrice.toLocaleString()}
+          <span className="text-[14px] text-[#6a6f73] line-through font-light">
+            Rs.{originalPrice.toLocaleString()}
           </span>
         )}
         {subscription ? (
-          <span className="text-lg text-[#6a6f73]">/month</span>
+          <span className="text-[14px] text-[#6a6f73] font-light">/month</span>
         ) : (
           discountPercent > 0 && (
-            <span className="text-lg text-[#6a6f73]">{discountPercent}% off</span>
+            <span className="text-[14px] text-[#6a6f73] font-light">{discountPercent}% off</span>
           )
         )}
       </div>
@@ -268,8 +268,8 @@ const PurchaseCard = ({ course }) => {
 
   const renderTimer = () =>
     discountPercent > 0 && (
-      <p className="mt-2 flex items-center gap-1 text-sm font-bold text-[#b4690e]">
-        <Clock3 className="h-4 w-4" />
+      <p className="mt-2 flex items-center gap-1.5 text-[13px] font-semibold text-[#b4690e]">
+        <Clock3 className="h-4 w-4 shrink-0" />
         2 days left at this price!
       </p>
     );
@@ -291,18 +291,18 @@ const PurchaseCard = ({ course }) => {
             toast.info("No promotional preview video available for this course.");
           }
         }}
-        className="group relative block w-full cursor-pointer text-left"
+        className="group relative block w-full cursor-pointer text-left focus:outline-none"
       >
         <img
           src={course.thumbnail}
           alt={course.title}
           className="aspect-video w-full object-cover"
         />
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/35 transition-colors group-hover:bg-black/45">
-          <span className="flex h-20 w-20 items-center justify-center rounded-full bg-white text-[#2d2f31] shadow-md">
-            <PlayCircle className="h-12 w-12 fill-current" />
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 transition-colors group-hover:bg-black/50">
+          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-[#1c1d1f] shadow-lg transition-transform group-hover:scale-110">
+            <PlayCircle className="h-10 w-10 fill-current text-[#1c1d1f]" />
           </span>
-          <p className="mt-4 text-xl font-extrabold text-white">
+          <p className="mt-3 text-[15px] font-semibold text-white tracking-tight drop-shadow-sm">
             Preview this course
           </p>
         </div>
@@ -314,36 +314,36 @@ const PurchaseCard = ({ course }) => {
     <button
       type="button"
       aria-label={isCourseInWishlist ? "Remove from wishlist" : "Add to wishlist"}
-      className="flex h-14 w-16 shrink-0 items-center justify-center rounded-md border border-[#6d28d9] text-[#6d28d9] hover:bg-[#f5f0ff] disabled:opacity-70"
+      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xs border border-[#1c1d1f] text-[#1c1d1f] hover:bg-gray-50 disabled:opacity-70 transition-colors"
       onClick={handleWishlistClick}
       disabled={
         isWishlistDataLoading || isAddingToWishlist || isRemovingFromWishlist
       }
     >
       {isAddingToWishlist || isRemovingFromWishlist ? (
-        <Loader2 className="h-6 w-6 animate-spin" />
+        <Loader2 className="h-5 w-5 animate-spin" />
       ) : (
-        <Heart className={`h-6 w-6 ${isCourseInWishlist ? "fill-current" : ""}`} />
+        <Heart className={`h-5 w-5 ${isCourseInWishlist ? "fill-[#1c1d1f]" : ""}`} />
       )}
     </button>
   );
 
   const renderSubscriptionDetails = () => (
-    <div className="space-y-3 text-base text-[#6a6f73]">
-      <div className="flex items-center gap-4">
-        <BookOpenCheck className="h-5 w-5 text-[#2d2f31]" />
-        <span>Access to top-rated courses</span>
+    <div className="space-y-2.5 text-[14px] text-[#2d2f31]">
+      <div className="flex items-center gap-3">
+        <BookOpenCheck className="h-4 w-4 text-[#2d2f31] shrink-0" />
+        <span>Access to 28,000+ top-rated courses</span>
       </div>
-      <div className="flex items-center gap-4">
-        <Tag className="h-5 w-5 text-[#2d2f31]" />
+      <div className="flex items-center gap-3">
+        <Tag className="h-4 w-4 text-[#2d2f31] shrink-0" />
         <span>Cancel anytime</span>
       </div>
-      <div className="flex items-center gap-4">
-        <Info className="h-5 w-5 text-[#2d2f31]" />
+      <div className="flex items-center gap-3">
+        <Info className="h-4 w-4 text-[#2d2f31] shrink-0" />
         <button
           type="button"
           onClick={() => navigate("/subscribe")}
-          className="font-extrabold text-[#5624d0] underline"
+          className="font-semibold text-[#5624d0] underline hover:text-[#401b9c]"
         >
           Learn more
         </button>
@@ -352,49 +352,53 @@ const PurchaseCard = ({ course }) => {
   );
 
   const renderCouponBox = () => (
-    <div className="space-y-3 bg-[#f7f9fa] p-7">
+    <div className="space-y-3 bg-[#f7f9fa] p-5 border-t border-[#d1d7dc]">
       <div className="flex items-center justify-between">
-        <span className="text-lg font-extrabold text-[#2d2f31]">
+        <span className="text-[14px] font-semibold text-[#1c1d1f]">
           Apply Coupon
         </span>
-        <div className="flex items-center gap-4 text-[#2d2f31]">
-          <Gift className="h-6 w-6" />
-          <Share2 className="h-6 w-6" />
+        <div className="flex items-center gap-3 text-[#2d2f31]">
+          <button type="button" className="p-1 hover:text-[#5624d0] transition-colors" aria-label="Gift this course">
+            <Gift className="h-5 w-5" />
+          </button>
+          <button type="button" className="p-1 hover:text-[#5624d0] transition-colors" aria-label="Share this course">
+            <Share2 className="h-5 w-5" />
+          </button>
         </div>
       </div>
 
       {appliedCoupon ? (
-        <div className="flex h-12 items-center justify-between rounded border border-[#38755b] bg-[#e6f4ea] px-4 text-base">
+        <div className="flex h-11 items-center justify-between rounded-xs border border-[#38755b] bg-[#e6f4ea] px-3 text-[14px]">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-[#1e4620]">
+            <span className="font-semibold text-[#1e4620]">
               {appliedCoupon.coupon?.code || appliedCoupon.code}
             </span>
-            <span className="font-medium text-[#2e6930]">Applied!</span>
+            <span className="font-normal text-[#2e6930]">Applied!</span>
           </div>
           <button
             type="button"
             onClick={handleRemoveCoupon}
-            className="text-sm font-semibold text-red-600 hover:text-red-800 hover:underline"
+            className="text-[13px] font-medium text-red-600 hover:text-red-800 hover:underline"
           >
             Remove
           </button>
         </div>
       ) : (
-        <form onSubmit={handleApplyCoupon} className="grid grid-cols-[1fr_96px] gap-3">
+        <form onSubmit={handleApplyCoupon} className="grid grid-cols-[1fr_80px] gap-2">
           <input
             type="text"
             value={couponCode}
             onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
             placeholder="Enter Coupon"
-            className="h-12 rounded border border-[#8a8d91] bg-white px-4 text-base uppercase outline-none focus:border-[#5624d0]"
+            className="h-10 rounded-xs border border-[#8a8d91] bg-white px-3 text-[14px] uppercase outline-none focus:border-[#1c1d1f]"
           />
           <Button
             type="submit"
             variant="outline"
             disabled={isValidatingCoupon}
-            className="h-12 rounded-md border-[#6d28d9] text-lg font-extrabold text-[#6d28d9] hover:bg-[#f5f0ff]"
+            className="h-10 rounded-xs border-[#1c1d1f] text-[14px] font-semibold text-[#1c1d1f] hover:bg-gray-100"
           >
-            {isValidatingCoupon ? <Loader2 className="h-5 w-5 animate-spin" /> : "Apply"}
+            {isValidatingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
           </Button>
         </form>
       )}
@@ -405,23 +409,23 @@ const PurchaseCard = ({ course }) => {
     <>
       <button
         type="button"
-        className="block w-full p-7 text-left"
+        className="block w-full p-5 text-left focus:outline-none"
         onClick={() => setSelectedPlan("subscription")}
       >
-        <div className="grid grid-cols-[32px_1fr] gap-4">
+        <div className="flex items-start gap-3">
           {renderRadio(true)}
           <div>
-            <p className="text-lg text-[#6a6f73]">Subscribe and save</p>
+            <p className="text-[15px] font-semibold text-[#1c1d1f]">Subscribe and save</p>
             {renderPriceLine({ subscription: true, large: false })}
           </div>
         </div>
       </button>
 
-      <div className="space-y-5 px-7 pb-7">
+      <div className="space-y-4 px-5 pb-5">
         {renderSubscriptionDetails()}
         <Button
           type="button"
-          className="h-14 w-full rounded-md bg-[#6d28d9] text-lg font-extrabold text-white hover:bg-[#5b21b6]"
+          className="h-12 w-full rounded-xs bg-[#a435f0] text-[16px] font-semibold text-white hover:bg-[#8710d8] shadow-sm transition-colors"
           onClick={() => navigate("/subscribe")}
         >
           Start subscription
@@ -430,13 +434,13 @@ const PurchaseCard = ({ course }) => {
 
       <button
         type="button"
-        className="block w-full border-y border-[#d1d7dc] p-7 text-left hover:bg-[#f7f9fa]"
+        className="block w-full border-y border-[#d1d7dc] p-5 text-left hover:bg-[#f7f9fa] focus:outline-none transition-colors"
         onClick={() => setSelectedPlan("individual")}
       >
-        <div className="grid grid-cols-[32px_1fr] gap-4">
+        <div className="flex items-start gap-3">
           {renderRadio(false)}
           <div>
-            <p className="text-lg text-[#6a6f73]">Buy individual course</p>
+            <p className="text-[15px] font-semibold text-[#1c1d1f]">Buy individual course</p>
             {renderPriceLine()}
             {renderTimer()}
           </div>
@@ -452,40 +456,40 @@ const PurchaseCard = ({ course }) => {
       {course?.includedInSubscription ? (
         <button
           type="button"
-          className="block w-full p-7 text-left"
+          className="block w-full p-5 text-left focus:outline-none"
           onClick={() => setSelectedPlan("individual")}
         >
-          <div className="grid grid-cols-[32px_1fr] gap-4">
+          <div className="flex items-start gap-3">
             {renderRadio(true)}
             <div>
-              <p className="text-lg text-[#6a6f73]">Buy individual course</p>
+              <p className="text-[15px] font-semibold text-[#1c1d1f]">Buy individual course</p>
               {renderPriceLine()}
               {renderTimer()}
             </div>
           </div>
         </button>
       ) : (
-        <div className="p-7 text-left border-b border-[#d1d7dc]">
-          <p className="text-lg font-extrabold text-[#2d2f31]">Buy individual course</p>
+        <div className="p-5 text-left border-b border-[#d1d7dc]">
+          <p className="text-[15px] font-semibold text-[#1c1d1f]">Buy individual course</p>
           {renderPriceLine()}
           {renderTimer()}
         </div>
       )}
 
-      <div className="space-y-4 px-7 pb-7 text-base text-[#6a6f73] pt-4">
-        <div className="flex items-center gap-4">
-          <BadgeCheck className="h-5 w-5 text-[#2d2f31]" />
-          <span>30-day money-back guarantee</span>
+      <div className="space-y-3.5 px-5 pb-5 text-[14px] text-[#2d2f31] pt-3">
+        <div className="flex items-center gap-3">
+          <BadgeCheck className="h-4 w-4 text-[#2d2f31] shrink-0" />
+          <span>30-Day Money-Back Guarantee</span>
         </div>
-        <div className="flex items-center gap-4">
-          <InfinityIcon className="h-5 w-5 text-[#2d2f31]" />
-          <span>Full lifetime access</span>
+        <div className="flex items-center gap-3">
+          <InfinityIcon className="h-4 w-4 text-[#2d2f31] shrink-0" />
+          <span>Full Lifetime Access</span>
         </div>
 
-        <div className="flex gap-3 pt-4">
+        <div className="flex gap-2 pt-2">
           <Button
             type="button"
-            className="h-14 flex-1 rounded-md bg-[#6d28d9] text-lg font-extrabold text-white hover:bg-[#5b21b6]"
+            className="h-12 flex-1 rounded-xs bg-[#a435f0] text-[16px] font-semibold text-white hover:bg-[#8710d8] shadow-sm transition-colors"
             onClick={handleCartClick}
             disabled={isCartDataLoading || isAddingToCart}
           >
@@ -503,7 +507,7 @@ const PurchaseCard = ({ course }) => {
         <Button
           type="button"
           variant="outline"
-          className="h-14 w-full rounded-md border-[#6d28d9] text-lg font-extrabold text-[#6d28d9] hover:bg-[#f5f0ff]"
+          className="h-12 w-full rounded-xs border-[#1c1d1f] text-[16px] font-semibold text-[#1c1d1f] hover:bg-gray-50 transition-colors"
           onClick={handleBuyNow}
           disabled={isCartDataLoading || isAddingToCart}
         >
@@ -514,13 +518,13 @@ const PurchaseCard = ({ course }) => {
       {course?.includedInSubscription && (
         <button
           type="button"
-          className="block w-full border-y border-[#d1d7dc] p-7 text-left hover:bg-[#f7f9fa]"
+          className="block w-full border-y border-[#d1d7dc] p-5 text-left hover:bg-[#f7f9fa] focus:outline-none transition-colors"
           onClick={() => setSelectedPlan("subscription")}
         >
-          <div className="grid grid-cols-[32px_1fr] gap-4">
+          <div className="flex items-start gap-3">
             {renderRadio(false)}
             <div>
-              <p className="text-lg text-[#6a6f73]">Subscribe and save</p>
+              <p className="text-[15px] font-semibold text-[#1c1d1f]">Subscribe and save</p>
               {renderPriceLine({ subscription: true, large: false })}
             </div>
           </div>
@@ -540,10 +544,10 @@ const PurchaseCard = ({ course }) => {
           <div className="space-y-4 p-7 text-center">
             <div className="flex flex-col items-center justify-center gap-2 border border-violet-200 bg-violet-50/20 p-4 rounded text-violet-800">
               <Info className="h-6 w-6 text-[#5624d0]" />
-              <p className="font-semibold text-sm">
+              <p className="font-medium text-base">
                 Administrator Mode
               </p>
-              <p className="text-xs text-slate-500 font-light leading-relaxed">
+              <p className="text-sm text-slate-500 font-extralight leading-relaxed">
                 As an administrator, you cannot enroll, purchase, or subscribe to courses.
               </p>
             </div>
@@ -552,13 +556,13 @@ const PurchaseCard = ({ course }) => {
           <div className="space-y-5 p-7 text-center">
             <div className="flex items-center justify-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-green-600" />
-              <p className="font-bold text-gray-800">
+              <p className="font-semibold text-gray-800">
                 You have access to this course
               </p>
             </div>
             <Button
               type="button"
-              className="h-12 w-full rounded-md bg-purple-700 text-base font-semibold hover:bg-purple-800"
+              className="h-12 w-full rounded-md bg-purple-700 text-lg font-medium hover:bg-purple-800"
               onClick={(e) => {
                 e.stopPropagation();
                 navigate(`/course-detail/${course._id}/content`);
@@ -587,7 +591,7 @@ const PurchaseCard = ({ course }) => {
           >
             <button
               onClick={() => setIsPreviewOpen(false)}
-              className="absolute -top-9 right-0 text-white hover:text-gray-300 text-base font-light flex items-center gap-1"
+              className="absolute -top-9 right-0 text-white hover:text-gray-300 text-lg font-extralight flex items-center gap-1"
             >
               Close ×
             </button>

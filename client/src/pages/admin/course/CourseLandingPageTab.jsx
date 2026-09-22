@@ -25,7 +25,7 @@ function LimitedTextInput({ label, name, value, onChange, maxLen, placeholder, h
   const len = value?.length || 0;
   return (
     <div className={`space-y-1.5 ${className}`}>
-      <label className="block text-xl font-normal text-[#1c1d1f]">{label}</label>
+      <label className="block text-2xl font-light text-[#1c1d1f]">{label}</label>
       <div className="relative flex items-center border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus-within:border-[#1c1d1f] transition-colors w-full">
         <input
           type="text"
@@ -34,11 +34,11 @@ function LimitedTextInput({ label, name, value, onChange, maxLen, placeholder, h
           onChange={onChange}
           maxLength={maxLen}
           placeholder={placeholder}
-          className="flex-1 px-4 py-3 text-lg font-normal bg-transparent outline-none text-[#1c1d1f] placeholder-[#9a9fa5]"
+          className="flex-1 px-4 py-3 text-xl font-light bg-transparent outline-none text-[#1c1d1f] placeholder-[#9a9fa5]"
         />
-        <span className="pr-4 text-base font-light text-[#6a6f73] shrink-0">{len}</span>
+        <span className="pr-4 text-lg font-extralight text-[#6a6f73] shrink-0">{len}</span>
       </div>
-      {hint && <p className="text-base font-light text-[#6a6f73]">{hint}</p>}
+      {hint && <p className="text-lg font-extralight text-[#6a6f73]">{hint}</p>}
     </div>
   );
 }
@@ -210,7 +210,7 @@ const CourseLandingPageTab = () => {
         promoVideoProgress: course.promoVideoProgress || 0,
         promoVideoThumbnail: course.promoVideoThumbnail || "",
         relatedCertificates: course.relatedCertificates?.length > 0
-          ? course.relatedCertificates.map((c) => c._id || c)
+          ? course.relatedCertificates.map((c) => String(c?._id || c))
           : [],
       });
       setPreviewThumbnail(course.thumbnail || "");
@@ -435,7 +435,10 @@ const CourseLandingPageTab = () => {
     formData.append("courseIncludes[hasCertificate]", details.courseIncludes.hasCertificate);
     if (details.thumbnailFile) formData.append("courseThumbnail", details.thumbnailFile);
     if (details.promoVideoFile) formData.append("coursePromoVideo", details.promoVideoFile);
-    formData.append("relatedCertificates", JSON.stringify(details.relatedCertificates || []));
+    const certIds = (details.relatedCertificates || [])
+      .map((c) => String(typeof c === "object" && c?._id ? c._id : c))
+      .filter(Boolean);
+    formData.append("relatedCertificates", JSON.stringify(certIds));
     try {
       await editCourse({ courseId, formData }).unwrap();
       toast.success("Course details saved!");
@@ -464,13 +467,13 @@ const CourseLandingPageTab = () => {
 
       {/* ── HEADER ── */}
       <div className="px-10 pt-10 pb-6 border-b border-[#d1d7dc]">
-        <h2 className="text-3xl font-normal text-[#1c1d1f]">Course landing page</h2>
+        <h2 className="text-4xl font-light text-[#1c1d1f]">Course landing page</h2>
       </div>
 
       <div className="px-10 py-8 space-y-10">
 
         {/* Intro description */}
-        <p className="text-lg font-light text-[#6a6f73] leading-relaxed max-w-3xl">
+        <p className="text-xl font-extralight text-[#6a6f73] leading-relaxed max-w-3xl">
           Your course landing page is crucial to your success on our platform. If it&apos;s done right, it can also help you gain
           visibility in search engines like Google. As you complete this section, think about creating a compelling Course
           Landing Page that demonstrates why someone would want to enroll in your course. Learn more about{" "}
@@ -502,25 +505,25 @@ const CourseLandingPageTab = () => {
 
         {/* ── COURSE DESCRIPTION ── */}
         <div className="space-y-1.5">
-          <label className="block text-xl font-normal text-[#1c1d1f]">Course description</label>
+          <label className="block text-2xl font-light text-[#1c1d1f]">Course description</label>
           <div className="border border-[#6a6f73] focus-within:border-[#1c1d1f] transition-colors">
             <RichTextEditor
               value={details.description}
               onChange={(val) => setDetails((prev) => ({ ...prev, description: val }))}
             />
           </div>
-          <p className="text-base font-light text-[#6a6f73]">Description should have minimum 200 words.</p>
+          <p className="text-lg font-extralight text-[#6a6f73]">Description should have minimum 200 words.</p>
         </div>
 
         {/* ── BASIC INFO ── */}
         <div className="space-y-3">
-          <label className="block text-xl font-normal text-[#1c1d1f]">Basic info</label>
+          <label className="block text-2xl font-light text-[#1c1d1f]">Basic info</label>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {/* Language */}
             <select
               value={details.language}
               onChange={(e) => setDetails((prev) => ({ ...prev, language: e.target.value }))}
-              className="border border-[#6a6f73] px-4 py-3 text-lg font-normal bg-white outline-none focus:border-[#1c1d1f] transition-colors"
+              className="border border-[#6a6f73] px-4 py-3 text-xl font-light bg-white outline-none focus:border-[#1c1d1f] transition-colors"
             >
               {LANGUAGES.map((l) => <option key={l} value={l}>{l}</option>)}
             </select>
@@ -528,7 +531,7 @@ const CourseLandingPageTab = () => {
             <select
               value={details.level}
               onChange={(e) => setDetails((prev) => ({ ...prev, level: e.target.value }))}
-              className="border border-[#6a6f73] px-4 py-3 text-lg font-normal bg-white outline-none focus:border-[#1c1d1f] transition-colors"
+              className="border border-[#6a6f73] px-4 py-3 text-xl font-light bg-white outline-none focus:border-[#1c1d1f] transition-colors"
             >
               <option value="">-- Select Level --</option>
               {levels.map((l) => <option key={l} value={l}>{l}</option>)}
@@ -540,7 +543,7 @@ const CourseLandingPageTab = () => {
                 const cat = availableCategories.find((c) => c._id === e.target.value);
                 setDetails((prev) => ({ ...prev, category: cat ? cat.name : "" }));
               }}
-              className="border border-[#6a6f73] px-4 py-3 text-lg font-normal bg-white outline-none focus:border-[#1c1d1f] transition-colors"
+              className="border border-[#6a6f73] px-4 py-3 text-xl font-light bg-white outline-none focus:border-[#1c1d1f] transition-colors"
             >
               <option value="">-- Select Category --</option>
               {parents.map((c) => <option key={c._id} value={c._id}>{c.name}</option>)}
@@ -555,7 +558,7 @@ const CourseLandingPageTab = () => {
                   const cat = availableCategories.find((c) => c._id === e.target.value);
                   setDetails((prev) => ({ ...prev, category: cat ? cat.name : "" }));
                 }}
-                className="border border-[#6a6f73] px-4 py-3 text-lg font-normal bg-white outline-none focus:border-[#1c1d1f] transition-colors"
+                className="border border-[#6a6f73] px-4 py-3 text-xl font-light bg-white outline-none focus:border-[#1c1d1f] transition-colors"
               >
                 <option value="">-- Select Subcategory --</option>
                 {availableCategories
@@ -576,7 +579,7 @@ const CourseLandingPageTab = () => {
                   const cat = availableCategories.find((c) => c._id === e.target.value);
                   setDetails((prev) => ({ ...prev, category: cat ? cat.name : "" }));
                 }}
-                className="border border-[#6a6f73] px-4 py-3 text-lg font-normal bg-white outline-none focus:border-[#1c1d1f] transition-colors"
+                className="border border-[#6a6f73] px-4 py-3 text-xl font-light bg-white outline-none focus:border-[#1c1d1f] transition-colors"
               >
                 <option value="">-- Select Sub-category (optional) --</option>
                 {availableCategories
@@ -594,7 +597,7 @@ const CourseLandingPageTab = () => {
         <div className="space-y-4">
           <div className="flex flex-col space-y-1.5">
             <div className="flex items-center gap-2 relative">
-              <label className="text-xl font-light text-[#1c1d1f]">
+              <label className="text-2xl font-extralight text-[#1c1d1f]">
                 What is primarily taught in your course?
               </label>
               <div 
@@ -604,8 +607,8 @@ const CourseLandingPageTab = () => {
               >
                 <Info className="w-5 h-5 text-[#6a6f73] cursor-pointer shrink-0" />
                 {showTopicTooltip && (
-                  <div className="absolute left-6 top-1/2 -translate-y-1/2 w-80 bg-white border border-[#d1d7dc] shadow-xl rounded-sm p-5 z-50 text-sm font-light text-[#1c1d1f] leading-relaxed">
-                    Each individual topic chosen should comprehensively describe your course's content without being too broad. E.g. "The Complete Tennis Course" should have "Tennis" – not "Tennis Serve" (specific, but not comprehensive) and not "Sports" (comprehensive, but not specific). <span className="text-[#5624d0] underline cursor-pointer font-light">Learn more.</span>
+                  <div className="absolute left-6 top-1/2 -translate-y-1/2 w-80 bg-white border border-[#d1d7dc] shadow-xl rounded-sm p-5 z-50 text-base font-extralight text-[#1c1d1f] leading-relaxed">
+                    Each individual topic chosen should comprehensively describe your course's content without being too broad. E.g. "The Complete Tennis Course" should have "Tennis" – not "Tennis Serve" (specific, but not comprehensive) and not "Sports" (comprehensive, but not specific). <span className="text-[#5624d0] underline cursor-pointer font-extralight">Learn more.</span>
                   </div>
                 )}
               </div>
@@ -617,7 +620,7 @@ const CourseLandingPageTab = () => {
                 {details.topics.map((topic) => (
                   <div 
                     key={topic} 
-                    className="bg-[#5624d0] text-white text-sm font-light rounded-full px-4 py-2 flex items-center gap-2 shrink-0 transition-all"
+                    className="bg-[#5624d0] text-white text-base font-extralight rounded-full px-4 py-2 flex items-center gap-2 shrink-0 transition-all"
                   >
                     <span>{topic}</span>
                     <button
@@ -640,7 +643,7 @@ const CourseLandingPageTab = () => {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="e.g. Landscape Photography"
-                  className="w-full border border-[#6a6f73] px-4 py-3 text-lg font-light bg-white outline-none focus:border-[#1c1d1f] transition-colors"
+                  className="w-full border border-[#6a6f73] px-4 py-3 text-xl font-extralight bg-white outline-none focus:border-[#1c1d1f] transition-colors"
                 />
 
                 {/* Suggestions Dropdown */}
@@ -651,7 +654,7 @@ const CourseLandingPageTab = () => {
                         key={suggestion.slug}
                         type="button"
                         onClick={() => handleAddTopic(suggestion.name)}
-                        className="w-full border border-[#d1d7dc] hover:border-[#5624d0] rounded-full px-5 py-2 text-left hover:bg-slate-50 cursor-pointer text-sm font-light text-[#1c1d1f] transition-all focus:outline-none"
+                        className="w-full border border-[#d1d7dc] hover:border-[#5624d0] rounded-full px-5 py-2 text-left hover:bg-slate-50 cursor-pointer text-base font-extralight text-[#1c1d1f] transition-all focus:outline-none"
                       >
                         {suggestion.name}
                       </button>
@@ -659,7 +662,7 @@ const CourseLandingPageTab = () => {
                   </div>
                 )}
                 {searchQuery.trim() && suggestions.length === 0 && (
-                  <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-[#d1d7dc] shadow-xl rounded-sm p-4 z-50 text-sm font-light text-[#6a6f73] text-center">
+                  <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-[#d1d7dc] shadow-xl rounded-sm p-4 z-50 text-base font-extralight text-[#6a6f73] text-center">
                     No matching topics found. Please type another topic.
                   </div>
                 )}
@@ -671,7 +674,7 @@ const CourseLandingPageTab = () => {
               <button
                 type="button"
                 onClick={() => setShowSearchInput(true)}
-                className="text-[#5624d0] hover:text-[#3b1a91] text-sm font-light underline transition-colors block w-max self-start pt-1 focus:outline-none"
+                className="text-[#5624d0] hover:text-[#3b1a91] text-base font-extralight underline transition-colors block w-max self-start pt-1 focus:outline-none"
               >
                 Propose another topic...
               </button>
@@ -682,7 +685,7 @@ const CourseLandingPageTab = () => {
           {details.topics && details.topics.length >= 2 && (
             <div className="flex flex-col space-y-2 mt-4">
               <div className="flex items-center gap-2 relative">
-                <label className="text-xl font-light text-[#1c1d1f]">
+                <label className="text-2xl font-extralight text-[#1c1d1f]">
                   From the topics you have selected, which is the most representative topic?
                 </label>
                 <div 
@@ -692,8 +695,8 @@ const CourseLandingPageTab = () => {
                 >
                   <Info className="w-5 h-5 text-[#6a6f73] cursor-pointer shrink-0" />
                   {showRepTooltip && (
-                    <div className="absolute left-6 top-1/2 -translate-y-1/2 w-80 bg-white border border-[#d1d7dc] shadow-xl rounded-sm p-5 z-50 text-sm font-light text-[#1c1d1f] leading-relaxed">
-                      Which topic do you spend the most time covering in your course? If you believe two topics are equally representative of your entire course, select either one. All of the topics listed will still count as being taught in your course. <span className="text-[#5624d0] underline cursor-pointer font-light">Learn more.</span>
+                    <div className="absolute left-6 top-1/2 -translate-y-1/2 w-80 bg-white border border-[#d1d7dc] shadow-xl rounded-sm p-5 z-50 text-base font-extralight text-[#1c1d1f] leading-relaxed">
+                      Which topic do you spend the most time covering in your course? If you believe two topics are equally representative of your entire course, select either one. All of the topics listed will still count as being taught in your course. <span className="text-[#5624d0] underline cursor-pointer font-extralight">Learn more.</span>
                     </div>
                   )}
                 </div>
@@ -703,7 +706,7 @@ const CourseLandingPageTab = () => {
                 <select
                   value={details.primaryTopic}
                   onChange={(e) => setDetails(prev => ({ ...prev, primaryTopic: e.target.value }))}
-                  className="w-full border border-[#6a6f73] px-4 py-3 text-lg font-light bg-white outline-none focus:border-[#1c1d1f] transition-colors appearance-none cursor-pointer"
+                  className="w-full border border-[#6a6f73] px-4 py-3 text-xl font-extralight bg-white outline-none focus:border-[#1c1d1f] transition-colors appearance-none cursor-pointer"
                   style={{
                     backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236a6f73' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
                     backgroundRepeat: "no-repeat",
@@ -722,18 +725,18 @@ const CourseLandingPageTab = () => {
           )}
           {/* Related Certifications (Udemy-Style linkage) */}
           <div className="flex flex-col space-y-3 mt-6 pt-6 border-t border-slate-100">
-            <label className="text-xl font-normal text-[#1c1d1f]">
+            <label className="text-2xl font-light text-[#1c1d1f]">
               Prepares students for Certifications
             </label>
-            <p className="text-sm text-slate-500 font-light">
+            <p className="text-base text-slate-500 font-extralight">
               Select one or more certifications this course prepares learners for. These courses will be suggested to students on the respective certification details pages.
             </p>
             {loadingCertifications ? (
-              <div className="flex items-center gap-2 text-sm text-slate-400">
+              <div className="flex items-center gap-2 text-base text-slate-400">
                 <Loader2 className="animate-spin" size={16} /> Loading certifications...
               </div>
             ) : certificationsList.length === 0 ? (
-              <p className="text-sm text-slate-400">No certifications categories found in Admin panel.</p>
+              <p className="text-base text-slate-400">No certifications categories found in Admin panel.</p>
             ) : (
               <div className="space-y-4">
                 <div className="max-w-md">
@@ -742,16 +745,16 @@ const CourseLandingPageTab = () => {
                       const val = e.target.value;
                       if (!val) return;
                       setDetails((prev) => {
-                        const exists = prev.relatedCertificates?.includes(val);
-                        if (exists) return prev;
+                        const current = (prev.relatedCertificates || []).map((c) => String(c?._id || c));
+                        if (current.includes(String(val))) return prev;
                         return {
                           ...prev,
-                          relatedCertificates: [...(prev.relatedCertificates || []), val]
+                          relatedCertificates: [...current, String(val)]
                         };
                       });
                       e.target.value = ""; // Reset dropdown selection
                     }}
-                    className="w-full border border-[#6a6f73] px-4 py-3 text-lg font-normal bg-white outline-none focus:border-[#1c1d1f] transition-colors"
+                    className="w-full border border-[#6a6f73] px-4 py-3 text-xl font-light bg-white outline-none focus:border-[#1c1d1f] transition-colors cursor-pointer"
                   >
                     <option value="">-- Select Certification --</option>
                     {certificationsList.map((cert) => (
@@ -764,25 +767,30 @@ const CourseLandingPageTab = () => {
 
                 {/* Selected Certifications Tags */}
                 <div className="flex flex-wrap gap-2">
-                  {(details.relatedCertificates || []).map((certId) => {
-                    const cert = certificationsList.find(c => c._id === certId);
+                  {(details.relatedCertificates || []).map((item) => {
+                    const certId = String(typeof item === "object" && item?._id ? item._id : item);
+                    const cert =
+                      certificationsList.find((c) => String(c._id) === certId) ||
+                      (typeof item === "object" ? item : null);
                     if (!cert) return null;
                     return (
                       <div
                         key={certId}
-                        className="flex items-center gap-2 bg-purple-50 border border-purple-300 text-purple-950 text-sm font-medium px-3 py-1.5 rounded-full shadow-sm"
+                        className="flex items-center gap-2 bg-purple-50 border border-purple-300 text-purple-950 text-base font-normal px-3 py-1.5 rounded-full shadow-sm"
                       >
                         <span>{cert.name}</span>
-                        <span className="text-xs text-slate-400">({cert.issuer?.name})</span>
+                        <span className="text-sm text-slate-400">({cert.issuer?.name || "Certificate"})</span>
                         <button
                           type="button"
                           onClick={() => {
                             setDetails((prev) => ({
                               ...prev,
-                              relatedCertificates: prev.relatedCertificates.filter(id => id !== certId)
+                              relatedCertificates: (prev.relatedCertificates || []).filter(
+                                (id) => String(id?._id || id) !== certId
+                              )
                             }));
                           }}
-                          className="flex h-4 w-4 items-center justify-center rounded-full hover:bg-purple-200 text-purple-700 hover:text-purple-950 font-bold text-xs"
+                          className="flex h-4 w-4 items-center justify-center rounded-full hover:bg-purple-200 text-purple-700 hover:text-purple-950 font-semibold text-sm"
                         >
                           &times;
                         </button>
@@ -797,7 +805,7 @@ const CourseLandingPageTab = () => {
 
         {/* ── COURSE IMAGE ── */}
         <div className="space-y-3">
-          <label className="block text-xl font-normal text-[#1c1d1f]">Course image</label>
+          <label className="block text-2xl font-light text-[#1c1d1f]">Course image</label>
           <div className="flex gap-6 items-start">
             <div className="w-64 shrink-0 border border-[#d1d7dc] overflow-hidden">
               {previewThumbnail ? (
@@ -807,19 +815,19 @@ const CourseLandingPageTab = () => {
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-lg font-light text-[#6a6f73] leading-relaxed mb-4">
+              <p className="text-xl font-extralight text-[#6a6f73] leading-relaxed mb-4">
                 Upload your course image here. It must meet our{" "}
                 <span className="text-[#5624d0] underline cursor-pointer">course image quality standards</span> to be accepted.
                 Important guidelines: 750x422 pixels; .jpg, .jpeg, .gif, or .png, no text on the image.
               </p>
               <div className="flex items-center gap-2">
-                <div className="border border-[#6a6f73] px-4 py-2.5 flex-1 text-lg font-light text-[#6a6f73] truncate">
+                <div className="border border-[#6a6f73] px-4 py-2.5 flex-1 text-xl font-extralight text-[#6a6f73] truncate">
                   {details.thumbnailFile ? details.thumbnailFile.name : "No file selected"}
                 </div>
                 <button
                   type="button"
                   onClick={() => thumbnailInputRef.current?.click()}
-                  className="border border-[#5624d0] text-[#5624d0] hover:bg-purple-50 font-normal text-lg px-5 py-2.5 transition-colors shrink-0"
+                  className="border border-[#5624d0] text-[#5624d0] hover:bg-purple-50 font-light text-xl px-5 py-2.5 transition-colors shrink-0"
                 >
                   Upload File
                 </button>
@@ -837,14 +845,14 @@ const CourseLandingPageTab = () => {
 
         {/* ── PROMOTIONAL VIDEO ── */}
         <div className="space-y-3">
-          <label className="block text-xl font-normal text-[#1c1d1f]">Promotional video</label>
+          <label className="block text-2xl font-light text-[#1c1d1f]">Promotional video</label>
           <div className="flex gap-6 items-start">
             <div className="w-64 shrink-0 border border-[#d1d7dc] aspect-video bg-[#f7f9fa] flex items-center justify-center relative overflow-hidden">
               {isProgressActive ? (
                 <div className="flex flex-col items-center justify-center gap-2 p-4 text-center h-full w-full bg-white z-20">
                   <Loader2 className="w-8 h-8 animate-spin text-[#5624d0]" />
-                  <span className="text-base font-light text-[#1c1d1f]">Uploading & processing...</span>
-                  <span className="text-lg font-light text-[#a435f0]">{activeProgress}%</span>
+                  <span className="text-lg font-extralight text-[#1c1d1f]">Uploading & processing...</span>
+                  <span className="text-xl font-extralight text-[#a435f0]">{activeProgress}%</span>
                 </div>
               ) : details.promoVideoStatus === "ready" && details.promoVideoUrl ? (
                 <div className="relative group w-full h-full cursor-pointer" onClick={() => setIsPreviewOpen(true)}>
@@ -856,19 +864,19 @@ const CourseLandingPageTab = () => {
                   ) : previewThumbnail ? (
                     <img src={previewThumbnail} alt="Promo preview" className="w-full h-full object-cover" />
                   ) : (
-                    <div className="w-full h-full bg-[#e3e7ea] flex items-center justify-center text-sm font-normal text-[#1c1d1f]">
+                    <div className="w-full h-full bg-[#e3e7ea] flex items-center justify-center text-base font-light text-[#1c1d1f]">
                       Play Promo Video
                     </div>
                   )}
                 </div>
               ) : (
-                <div className="p-4 text-center text-sm font-light text-[#6a6f73] leading-relaxed bg-white h-full w-full flex items-center justify-center">
+                <div className="p-4 text-center text-base font-extralight text-[#6a6f73] leading-relaxed bg-white h-full w-full flex items-center justify-center">
                   Save the changes in order to complete the upload of your file. Once you save it, we will process it to ensure it works smoothly on Samriddhi Gyan.
                 </div>
               )}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-lg font-light text-[#6a6f73] leading-relaxed mb-4">
+              <p className="text-xl font-extralight text-[#6a6f73] leading-relaxed mb-4">
                 Your promo video is a quick and compelling way for students to preview what they'll learn in your course.
                 Students considering your course are more likely to enroll if your promo video is well-made.{" "}
                 <span className="text-[#5624d0] underline cursor-pointer">Learn how to make your promo video awesome!</span>
@@ -881,7 +889,7 @@ const CourseLandingPageTab = () => {
                       className="bg-[#a435f0] h-full transition-all duration-300 flex items-center justify-center"
                       style={{ width: `${activeProgress}%` }}
                     />
-                    <span className="absolute inset-0 flex items-center justify-center text-base font-light text-white mix-blend-difference">
+                    <span className="absolute inset-0 flex items-center justify-center text-lg font-extralight text-white mix-blend-difference">
                       {activeProgress}%
                     </span>
                   </div>
@@ -889,7 +897,7 @@ const CourseLandingPageTab = () => {
                     <button
                       type="button"
                       onClick={handleCancelUpload}
-                      className="border border-[#5624d0] text-[#5624d0] hover:bg-purple-50 font-normal text-lg px-6 py-2 transition-colors shrink-0 h-11"
+                      className="border border-[#5624d0] text-[#5624d0] hover:bg-purple-50 font-light text-xl px-6 py-2 transition-colors shrink-0 h-11"
                     >
                       Cancel
                     </button>
@@ -897,7 +905,7 @@ const CourseLandingPageTab = () => {
                     <button
                       type="button"
                       onClick={handleDeletePromoVideo}
-                      className="border border-[#5624d0] text-[#5624d0] hover:bg-purple-50 font-normal text-lg px-6 py-2 transition-colors shrink-0 h-11"
+                      className="border border-[#5624d0] text-[#5624d0] hover:bg-purple-50 font-light text-xl px-6 py-2 transition-colors shrink-0 h-11"
                     >
                       Change
                     </button>
@@ -907,14 +915,14 @@ const CourseLandingPageTab = () => {
                 <div className="flex items-center gap-2 max-w-xl w-full">
                   <div 
                     onClick={() => promoInputRef.current?.click()}
-                    className="border border-[#6a6f73] px-4 py-2.5 flex-1 text-lg font-light text-[#6a6f73] truncate cursor-pointer hover:border-[#1c1d1f] transition-colors h-11"
+                    className="border border-[#6a6f73] px-4 py-2.5 flex-1 text-xl font-extralight text-[#6a6f73] truncate cursor-pointer hover:border-[#1c1d1f] transition-colors h-11"
                   >
                     {details.promoVideoUrl ? "Uploaded master playlist (master.m3u8)" : "Promo Video (Ready)"}
                   </div>
                   <button
                     type="button"
                     onClick={handleDeletePromoVideo}
-                    className="border border-[#5624d0] text-[#5624d0] hover:bg-purple-50 font-normal text-lg px-6 py-2.5 transition-colors shrink-0 h-11 flex items-center justify-center"
+                    className="border border-[#5624d0] text-[#5624d0] hover:bg-purple-50 font-light text-xl px-6 py-2.5 transition-colors shrink-0 h-11 flex items-center justify-center"
                   >
                     Change
                   </button>
@@ -923,14 +931,14 @@ const CourseLandingPageTab = () => {
                 <div className="flex items-center gap-2 max-w-xl w-full">
                   <div 
                     onClick={() => promoInputRef.current?.click()}
-                    className="border border-[#6a6f73] px-4 py-2.5 flex-1 text-lg font-light text-[#6a6f73] truncate cursor-pointer hover:border-[#1c1d1f] transition-colors h-11"
+                    className="border border-[#6a6f73] px-4 py-2.5 flex-1 text-xl font-extralight text-[#6a6f73] truncate cursor-pointer hover:border-[#1c1d1f] transition-colors h-11"
                   >
                     No file selected
                   </div>
                   <button
                     type="button"
                     onClick={() => promoInputRef.current?.click()}
-                    className="border border-[#5624d0] text-[#5624d0] hover:bg-purple-50 font-normal text-lg px-5 py-2 transition-colors shrink-0 h-11"
+                    className="border border-[#5624d0] text-[#5624d0] hover:bg-purple-50 font-light text-xl px-5 py-2 transition-colors shrink-0 h-11"
                   >
                     Upload File
                   </button>
@@ -950,13 +958,13 @@ const CourseLandingPageTab = () => {
 
         {/* ── INSTRUCTOR PROFILE(S) ── */}
         <div className="space-y-4">
-          <label className="block text-xl font-light text-[#1c1d1f]">Instructor profile(s)</label>
+          <label className="block text-2xl font-extralight text-[#1c1d1f]">Instructor profile(s)</label>
 
           {profileIncomplete && (
             <div className="bg-red-50/50 border border-red-300 p-5 flex gap-3 items-start rounded-sm">
               <AlertTriangle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-              <p className="text-base font-light text-[#1c1d1f]">
-                <span className="font-normal">All visible instructors of this course must complete their profile before the course can be published.</span>{" "}
+              <p className="text-lg font-extralight text-[#1c1d1f]">
+                <span className="font-light">All visible instructors of this course must complete their profile before the course can be published.</span>{" "}
                 This includes name, image, and a short summary of your background 50 words minimum.
               </p>
             </div>
@@ -971,21 +979,21 @@ const CourseLandingPageTab = () => {
                 <User className="w-5 h-5 text-white" />
               )}
             </div>
-            <span className="text-lg text-[#5624d0] hover:underline cursor-pointer font-light">
+            <span className="text-xl text-[#5624d0] hover:underline cursor-pointer font-extralight">
               {user?.name || "Instructor"}
             </span>
           </div>
 
           {profileIncomplete && (
             <div className="border border-red-300 bg-red-50/40 rounded-sm p-5 space-y-1">
-              <p className="text-lg font-light text-[#1c1d1f]">Incomplete</p>
+              <p className="text-xl font-extralight text-[#1c1d1f]">Incomplete</p>
               {instructorBioWords < 50 && (
-                <p className="text-base font-light text-[#6a6f73]">Your instructor biography must have at least 50 words.</p>
+                <p className="text-lg font-extralight text-[#6a6f73]">Your instructor biography must have at least 50 words.</p>
               )}
               {!hasPhoto && (
-                <p className="text-base font-light text-[#6a6f73]">Your instructor image is required.</p>
+                <p className="text-lg font-extralight text-[#6a6f73]">Your instructor image is required.</p>
               )}
-              <a href="/instructor/profile" className="text-[#5624d0] underline text-sm font-light block mt-1">
+              <a href="/instructor/profile" className="text-[#5624d0] underline text-base font-extralight block mt-1">
                 Update your profile.
               </a>
             </div>
@@ -997,7 +1005,7 @@ const CourseLandingPageTab = () => {
           <button
             onClick={handleSubmit}
             disabled={isUpdating}
-            className="bg-[#a435f0] hover:bg-[#8710d8] disabled:bg-slate-300 text-white font-normal text-lg px-7 py-3 transition-colors"
+            className="bg-[#a435f0] hover:bg-[#8710d8] disabled:bg-slate-300 text-white font-light text-xl px-7 py-3 transition-colors"
           >
             {isUpdating ? (
               <span className="flex items-center gap-2"><Loader2 className="w-4 h-4 animate-spin" /> Saving...</span>
@@ -1020,7 +1028,7 @@ const CourseLandingPageTab = () => {
         >
           <button
             onClick={() => setIsPreviewOpen(false)}
-            className="absolute -top-9 right-0 text-white hover:text-gray-300 text-base font-light flex items-center gap-1"
+            className="absolute -top-9 right-0 text-white hover:text-gray-300 text-lg font-extralight flex items-center gap-1"
           >
             Close ×
           </button>

@@ -6,6 +6,7 @@ import path from "path";
 import fs from "fs";
 import mongoose from "mongoose";
 import { Course } from "../models/course.model.js";
+import { Certification } from "../models/certification.model.js";
 import { Review } from "../models/review.model.js";
 import { CoursePurchase } from "../models/coursePurchase.model.js";
 import { CourseProgress } from "../models/courseProgress.model.js";
@@ -45,19 +46,34 @@ const removeDuplicateCategoryTopics = (topics, category) => {
 const getCategoryDisplayInfo = async (categoryName) => {
   if (!categoryName) return { categoryDetails: null, categoryHierarchy: [] };
 
-  const category = await Category.findOne({ name: categoryName })
-    .populate('parent', 'name slug')
+  let current = await Category.findOne({ name: categoryName })
+    .populate('parent', 'name slug parent')
     .lean();
 
-  if (!category) {
+  if (!current) {
     return { categoryDetails: null, categoryHierarchy: [categoryName] };
   }
 
-  const categoryHierarchy = category.parent
-    ? [category.parent.name, category.name]
-    : [category.name];
+  const categoryDetails = current;
+  const hierarchy = [current.name];
 
-  return { categoryDetails: category, categoryHierarchy };
+  while (current.parent) {
+    const parentName = typeof current.parent === 'object' ? current.parent.name : null;
+    const parentId = typeof current.parent === 'object' ? current.parent._id : current.parent;
+
+    if (parentName) {
+      hierarchy.unshift(parentName);
+    }
+    
+    if (parentId) {
+      current = await Category.findById(parentId).populate('parent', 'name slug parent').lean();
+      if (!current) break;
+    } else {
+      break;
+    }
+  }
+
+  return { categoryDetails, categoryHierarchy: hierarchy };
 };
 
 const attachCategoryDisplayInfo = async (course) => {
@@ -258,6 +274,22 @@ export class CourseService extends BaseService {
       course.includedInSubscription = fields.includedInSubscription === true || fields.includedInSubscription === "true";
     }
 
+    if (fields.relatedCertificates !== undefined) {
+      let parsed = fields.relatedCertificates;
+      if (typeof parsed === "string") {
+        try {
+          parsed = JSON.parse(parsed);
+        } catch (err) {
+          parsed = [];
+        }
+      }
+      if (Array.isArray(parsed)) {
+        course.relatedCertificates = parsed
+          .map((id) => (typeof id === "object" && id?._id ? id._id : id))
+          .filter((id) => mongoose.Types.ObjectId.isValid(id));
+      }
+    }
+
     if (fields.topics !== undefined) {
       course.topics = await validateTopics(fields.topics, fields.category ?? course.category);
     } else if (fields.category !== undefined) {
@@ -382,6 +414,7 @@ export class CourseService extends BaseService {
     const course = await Course.findById(courseId)
       .populate({ path: "creator", select: "name photoUrl headline description" })
       .populate({ path: "sections", populate: { path: "lectures" } })
+      .populate({ path: "relatedCertificates", populate: { path: "issuer", select: "name type" } })
       .lean();
 
     if (!course) {

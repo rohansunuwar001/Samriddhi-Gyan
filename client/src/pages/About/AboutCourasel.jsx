@@ -74,7 +74,7 @@ const VideoModal = ({ isOpen, onClose, videoUrl }) => {
       >
         <button
           onClick={onClose}
-          className="absolute -top-3 -right-3 z-[60] w-10 h-10 bg-white rounded-full text-black flex items-center justify-center text-2xl font-bold hover:scale-110 transition-transform"
+          className="absolute -top-3 -right-3 z-[60] w-10 h-10 bg-white rounded-full text-black flex items-center justify-center text-3xl font-semibold hover:scale-110 transition-transform"
           aria-label="Close video player"
         >
           &times;
@@ -87,7 +87,7 @@ const VideoModal = ({ isOpen, onClose, videoUrl }) => {
           >
             <div className="flex items-center gap-3 py-2 px-4 bg-black/60 rounded-full backdrop-blur-sm">
               <VolumeX className="h-6 w-6 text-white" />
-              <span className="text-white font-semibold">Click to unmute</span>
+              <span className="text-white font-medium">Click to unmute</span>
             </div>
           </div>
         )}
@@ -181,7 +181,7 @@ const AboutCarousel = () => {
 
           <button
             onClick={goToPrevious}
-            className="absolute top-1/2 left-0 md:-left-4 transform -translate-y-1/2 text-4xl text-gray-400 hover:text-gray-800 transition-colors duration-300 z-10 p-2 bg-white/50 rounded-full"
+            className="absolute top-1/2 left-0 md:-left-4 transform -translate-y-1/2 text-5xl text-gray-400 hover:text-gray-800 transition-colors duration-300 z-10 p-2 bg-white/50 rounded-full"
             aria-label="Previous Slide"
           >
             <FiChevronLeft />
@@ -195,13 +195,13 @@ const AboutCarousel = () => {
           </div>
 
           <div className="w-full md:w-1/2 text-center md:text-left">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-4">{title}</h2>
-            <p className="text-base md:text-lg text-gray-600 leading-relaxed">{description}</p>
+            <h2 className="text-4xl md:text-5xl font-semibold text-gray-800 mb-4">{title}</h2>
+            <p className="text-lg md:text-xl text-gray-600 leading-relaxed">{description}</p>
           </div>
 
           <button
             onClick={goToNext}
-            className="absolute top-1/2 right-0 md:-right-4 transform -translate-y-1/2 text-4xl text-gray-400 hover:text-gray-800 transition-colors duration-300 z-10 p-2 bg-white/50 rounded-full"
+            className="absolute top-1/2 right-0 md:-right-4 transform -translate-y-1/2 text-5xl text-gray-400 hover:text-gray-800 transition-colors duration-300 z-10 p-2 bg-white/50 rounded-full"
             aria-label="Next Slide"
           >
             <FiChevronRight />

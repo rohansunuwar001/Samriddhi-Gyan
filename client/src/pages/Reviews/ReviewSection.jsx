@@ -22,12 +22,12 @@ const ReviewsSection = ({ course, percentCompleted }) => {
     ratings = 0,
   } = course;
 
-  // Calculate rating breakdown
+  // Calculate rating breakdown strictly from real server review data
   const breakdown = useMemo(() => {
-    if (reviews.length > 0) {
+    if (Array.isArray(reviews) && reviews.length > 0) {
       const counts = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
       reviews.forEach((r) => {
-        const val = Math.round(r.rating || 5);
+        const val = Math.max(1, Math.min(5, Math.round(r.rating || 0)));
         if (counts[val] !== undefined) {
           counts[val]++;
         }
@@ -41,7 +41,7 @@ const ReviewsSection = ({ course, percentCompleted }) => {
         1: Math.round((counts[1] / total) * 100),
       };
     }
-    return { 5: 68, 4: 19, 3: 7, 2: 2, 1: 4 };
+    return { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
   }, [reviews]);
 
   const handleHelpfulClick = (reviewId, type) => {
@@ -99,19 +99,19 @@ const ReviewsSection = ({ course, percentCompleted }) => {
   return (
     <section className="space-y-8 select-none bg-white py-2 text-[#2d2f31]">
       <div>
-        <h2 className="text-2xl font-normal tracking-tight mb-5">Student feedback</h2>
+        <h2 className="text-3xl font-light tracking-tight mb-5">Student feedback</h2>
 
         {/* Rating Grid Breakdown */}
         <div className="flex flex-col md:flex-row items-start md:items-center gap-8 bg-white pb-6">
           {/* Large Average Score */}
           <div className="text-center md:text-left shrink-0">
-            <div className="text-[72px] font-normal text-[#b4690e] leading-none mb-1">
+            <div className="text-[72px] font-light text-[#b4690e] leading-none mb-1">
               {ratings ? ratings.toFixed(1) : "0.0"}
             </div>
             <div className="flex justify-center md:justify-start mb-2">
               {renderStars(ratings)}
             </div>
-            <div className="text-sm font-normal text-[#b4690e] uppercase tracking-wider">
+            <div className="text-base font-light text-[#b4690e] uppercase tracking-wider">
               Course Rating
             </div>
           </div>
@@ -121,7 +121,7 @@ const ReviewsSection = ({ course, percentCompleted }) => {
             {[5, 4, 3, 2, 1].map((rating) => {
               const pct = breakdown[rating] || 0;
               return (
-                <div key={rating} className="flex items-center gap-3 text-sm">
+                <div key={rating} className="flex items-center gap-3 text-base">
                   {/* Progress Bar Line */}
                   <div className="flex-1 bg-gray-200 h-2 rounded-none overflow-hidden relative">
                     <div
@@ -136,7 +136,7 @@ const ReviewsSection = ({ course, percentCompleted }) => {
                   {/* Percentage label link */}
                   <button
                     onClick={() => setRatingFilter(rating.toString())}
-                    className="w-10 text-left text-[#5624d0] hover:text-[#3b1990] hover:underline font-normal shrink-0"
+                    className="w-10 text-left text-[#5624d0] hover:text-[#3b1990] hover:underline font-light shrink-0"
                   >
                     {pct}%
                   </button>
@@ -152,11 +152,11 @@ const ReviewsSection = ({ course, percentCompleted }) => {
         {allowReview ? (
           <AddReviewForm courseId={courseId} />
         ) : isEnrolled ? (
-          <p className="text-center text-sm text-[#6a6f73] font-normal leading-relaxed">
+          <p className="text-center text-base text-[#6a6f73] font-light leading-relaxed">
             Please complete at least 80% of the course to leave a review. (Currently at {(percentCompleted || 0).toFixed(0)}%)
           </p>
         ) : (
-          <p className="text-center text-sm text-[#6a6f73] font-normal leading-relaxed">
+          <p className="text-center text-base text-[#6a6f73] font-light leading-relaxed">
             You must be enrolled in this course to leave a review.
           </p>
         )}
@@ -164,7 +164,7 @@ const ReviewsSection = ({ course, percentCompleted }) => {
 
       {/* Reviews Search & Filtration controls */}
       <div className="space-y-4">
-        <h3 className="text-xl font-normal">Reviews</h3>
+        <h3 className="text-2xl font-light">Reviews</h3>
 
         <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center justify-between">
           {/* Search Reviews Input bar */}
@@ -174,7 +174,7 @@ const ReviewsSection = ({ course, percentCompleted }) => {
               placeholder="Search reviews"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="flex-grow border border-[#d1d7dc] px-3.5 py-2.5 text-sm outline-none focus:border-[#2d2f31] bg-white text-[#2d2f31] placeholder-gray-400 rounded-none h-10 min-w-0"
+              className="flex-grow border border-[#d1d7dc] px-3.5 py-2.5 text-base outline-none focus:border-[#2d2f31] bg-white text-[#2d2f31] placeholder-gray-400 rounded-none h-10 min-w-0"
             />
             <button className="h-10 w-10 shrink-0 bg-[#2d2f31] hover:bg-black text-white flex items-center justify-center transition-colors">
               <Search className="h-4 w-4" />
@@ -183,11 +183,11 @@ const ReviewsSection = ({ course, percentCompleted }) => {
 
           {/* Filter ratings dropdown selection */}
           <div className="flex items-center gap-3">
-            <span className="text-sm font-normal text-[#2d2f31] whitespace-nowrap">Filter ratings</span>
+            <span className="text-base font-light text-[#2d2f31] whitespace-nowrap">Filter ratings</span>
             <select
               value={ratingFilter}
               onChange={(e) => setRatingFilter(e.target.value)}
-              className="border border-[#d1d7dc] px-3.5 py-2 text-sm outline-none focus:border-[#2d2f31] bg-white text-[#2d2f31] rounded-none h-10 min-w-[120px] font-normal cursor-pointer"
+              className="border border-[#d1d7dc] px-3.5 py-2 text-base outline-none focus:border-[#2d2f31] bg-white text-[#2d2f31] rounded-none h-10 min-w-[120px] font-light cursor-pointer"
             >
               <option value="all">All ratings</option>
               <option value="5">5 stars</option>
@@ -203,7 +203,7 @@ const ReviewsSection = ({ course, percentCompleted }) => {
       {/* Reviews feed list */}
       <div className="divide-y divide-[#d1d7dc] border-t border-[#d1d7dc]">
         {filteredReviews.length === 0 ? (
-          <p className="py-8 text-center text-sm text-gray-500 font-normal">
+          <p className="py-8 text-center text-base text-gray-500 font-light">
             No reviews match your filter parameters.
           </p>
         ) : (
@@ -216,7 +216,7 @@ const ReviewsSection = ({ course, percentCompleted }) => {
                 {/* Avatar with Initials bubble */}
                 <Avatar className="h-10 w-10 rounded-full border border-gray-100 shrink-0">
                   <AvatarImage src={review.user?.photoUrl} />
-                  <AvatarFallback className="bg-[#2d2f31] text-white text-sm font-normal rounded-full">
+                  <AvatarFallback className="bg-[#2d2f31] text-white text-base font-light rounded-full">
                     {initial}
                   </AvatarFallback>
                 </Avatar>
@@ -224,7 +224,7 @@ const ReviewsSection = ({ course, percentCompleted }) => {
                 {/* Content body */}
                 <div className="flex-1 min-w-0 space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <h4 className="text-sm font-normal text-[#2d2f31] truncate">
+                    <h4 className="text-base font-light text-[#2d2f31] truncate">
                       {review.user?.name || "Student"}
                     </h4>
                   </div>
@@ -232,18 +232,20 @@ const ReviewsSection = ({ course, percentCompleted }) => {
                   {/* Rating Stars and Date relative info */}
                   <div className="flex items-center gap-2">
                     {renderStars(review.rating)}
-                    <span className="text-xs text-[#6a6f73] font-normal">
-                      {review.createdAt ? new Date(review.createdAt).toLocaleDateString() : "4 months ago"}
-                    </span>
+                    {review.createdAt && (
+                      <span className="text-sm text-[#6a6f73] font-light">
+                        {new Date(review.createdAt).toLocaleDateString()}
+                      </span>
+                    )}
                   </div>
 
                   {/* Text Comment body */}
-                  <p className="text-sm leading-relaxed text-[#2d2f31] font-normal pt-1 break-words">
+                  <p className="text-base leading-relaxed text-[#2d2f31] font-light pt-1 break-words">
                     {review.comment || "Good"}
                   </p>
 
                   {/* Helpful question line */}
-                  <div className="flex items-center gap-3 text-xs text-[#6a6f73] font-normal pt-2">
+                  <div className="flex items-center gap-3 text-sm text-[#6a6f73] font-light pt-2">
                     <span>Was this review helpful?</span>
                     
                     <button

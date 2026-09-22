@@ -135,7 +135,7 @@ const CourseSidebar = ({
         <div className="flex space-x-4 h-full">
           <button
             onClick={() => setActiveTab("content")}
-            className={`h-full px-2 text-lg font-normal transition-all relative border-b-2 ${
+            className={`h-full px-2 text-xl font-light transition-all relative border-b-2 ${
               activeTab === "content"
                 ? "border-[#2d2f31] text-[#2d2f31]"
                 : "border-transparent text-[#6a6f73] hover:text-[#2d2f31]"
@@ -145,7 +145,7 @@ const CourseSidebar = ({
           </button>
           <button
             onClick={() => setActiveTab("ai")}
-            className={`h-full px-2 text-lg font-normal transition-all relative border-b-2 flex items-center gap-1 ${
+            className={`h-full px-2 text-xl font-light transition-all relative border-b-2 flex items-center gap-1 ${
               activeTab === "ai"
                 ? "border-[#2d2f31] text-[#2d2f31]"
                 : "border-transparent text-[#6a6f73] hover:text-[#2d2f31]"
@@ -190,10 +190,10 @@ const CourseSidebar = ({
                     className="w-full flex justify-between items-start p-4 bg-[#f7f9fa] hover:bg-[#ecebfa]/50 transition-colors text-left border-b border-[#d1d7dc]"
                   >
                     <div className="space-y-1 pr-4">
-                      <h3 className="font-normal text-[#2d2f31] text-base sm:text-lg leading-snug capitalize">
+                      <h3 className="font-light text-[#2d2f31] text-lg sm:text-xl leading-snug capitalize">
                         {section.title}
                       </h3>
-                      <p className="text-base text-[#6a6f73] font-normal">
+                      <p className="text-lg text-[#6a6f73] font-light">
                         {viewedLecturesCount} / {totalLecturesCount} |{" "}
                         {formatSectionDuration(sectionDuration)}
                       </p>
@@ -249,13 +249,13 @@ const CourseSidebar = ({
                             {/* Lecture Details */}
                             <div className="space-y-1 min-w-0 flex-1">
                               <h4
-                                className={`text-lg leading-relaxed text-[#2d2f31] ${
-                                  isSelected ? "font-light" : "font-normal"
+                                className={`text-xl leading-relaxed text-[#2d2f31] ${
+                                  isSelected ? "font-extralight" : "font-light"
                                 }`}
                               >
                                 {lIdx + 1}. {lecture.title}
                               </h4>
-                              <div className="flex items-center gap-1.5 text-base text-[#6a6f73]">
+                              <div className="flex items-center gap-1.5 text-lg text-[#6a6f73]">
                                 <Video className="h-3.5 w-3.5 text-gray-400" />
                                 <span>{formatDuration(lecture.durationInSeconds)}</span>
                               </div>
@@ -278,10 +278,10 @@ const CourseSidebar = ({
                 /* Suggestion Presets Overlay (Samriddhi Gyan style) */
                 <div className="space-y-5">
                   <div className="space-y-1">
-                    <h3 className="text-xl font-normal text-[#2d2f31]">
+                    <h3 className="text-2xl font-light text-[#2d2f31]">
                       Do you have any questions about this course?
                     </h3>
-                    <p className="text-sm text-[#6a6f73] leading-relaxed font-normal">
+                    <p className="text-base text-[#6a6f73] leading-relaxed font-light">
                       Our AI assistant may make mistakes. Verify for accuracy.{" "}
                       <Link to="/terms" className="text-[#a435f0] hover:underline cursor-pointer">
                         Terms Apply.
@@ -295,7 +295,7 @@ const CourseSidebar = ({
                       <button
                         key={index}
                         onClick={() => askAI(preset)}
-                        className="w-full text-left p-3.5 border border-[#d1d7dc] hover:bg-[#f7f9fa] transition-colors rounded-none outline-none block text-base text-[#2d2f31] leading-relaxed font-normal shadow-none"
+                        className="w-full text-left p-3.5 border border-[#d1d7dc] hover:bg-[#f7f9fa] transition-colors rounded-none outline-none block text-lg text-[#2d2f31] leading-relaxed font-light shadow-none"
                       >
                         {preset}
                       </button>
@@ -311,14 +311,14 @@ const CourseSidebar = ({
                       className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                     >
                       <div
-                        className={`max-w-[85%] px-3.5 py-2.5 text-base leading-relaxed ${
+                        className={`max-w-[85%] px-3.5 py-2.5 text-lg leading-relaxed ${
                           msg.role === "user"
                             ? "bg-[#a435f0] text-white rounded-none"
                             : "bg-[#f7f9fa] border border-[#d1d7dc] text-[#2d2f31] rounded-none"
                         }`}
                       >
                         {msg.role === "assistant" && (
-                          <div className="flex items-center gap-1.5 mb-1.5 text-sm font-normal text-[#a435f0]">
+                          <div className="flex items-center gap-1.5 mb-1.5 text-base font-light text-[#a435f0]">
                             <Bot className="h-3.5 w-3.5" /> Course Assistant
                           </div>
                         )}
@@ -331,7 +331,7 @@ const CourseSidebar = ({
                             </p>
                             <button
                               onClick={() => toggleMessageExpand(index)}
-                              className="mt-2 text-sm font-normal text-[#a435f0] hover:text-[#8710d8] flex items-center gap-1 focus:outline-none uppercase tracking-wider transition-colors"
+                              className="mt-2 text-base font-light text-[#a435f0] hover:text-[#8710d8] flex items-center gap-1 focus:outline-none uppercase tracking-wider transition-colors"
                             >
                               {expandedMessages[index] !== false ? "Minimize ▴" : "Read Full Response ▾"}
                             </button>
@@ -345,7 +345,7 @@ const CourseSidebar = ({
 
                   {loading && (
                     <div className="flex justify-start">
-                      <div className="bg-[#f7f9fa] border border-[#d1d7dc] text-[#2d2f31] max-w-[85%] px-3.5 py-2.5 rounded-none text-base flex items-center gap-2">
+                      <div className="bg-[#f7f9fa] border border-[#d1d7dc] text-[#2d2f31] max-w-[85%] px-3.5 py-2.5 rounded-none text-lg flex items-center gap-2">
                         <Loader2 className="h-3.5 w-3.5 animate-spin text-[#a435f0]" />
                         <span>Thinking...</span>
                       </div>
@@ -371,7 +371,7 @@ const CourseSidebar = ({
                   onChange={(e) => setPrompt(e.target.value)}
                   onKeyDown={handleKeyDown}
                   disabled={loading}
-                  className="flex-grow border border-[#d1d7dc] px-3.5 py-2.5 text-base outline-none focus:border-[#2d2f31] bg-white text-[#2d2f31] placeholder-gray-400 rounded-none h-10 min-w-0"
+                  className="flex-grow border border-[#d1d7dc] px-3.5 py-2.5 text-lg outline-none focus:border-[#2d2f31] bg-white text-[#2d2f31] placeholder-gray-400 rounded-none h-10 min-w-0"
                 />
                 {/* Submit Circle Button */}
                 <button
@@ -384,7 +384,7 @@ const CourseSidebar = ({
               </div>
 
               {/* Feedback Links */}
-              <span className="text-sm text-[#a435f0] hover:underline cursor-pointer block text-center font-normal">
+              <span className="text-base text-[#a435f0] hover:underline cursor-pointer block text-center font-light">
                 Share feedback
               </span>
             </div>

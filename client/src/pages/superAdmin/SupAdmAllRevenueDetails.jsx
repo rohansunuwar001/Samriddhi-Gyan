@@ -120,7 +120,7 @@ const FilterControls = ({ params, onParamsChange }) => {
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="w-full sm:w-auto justify-start text-left font-normal"
+              className="w-full sm:w-auto justify-start text-left font-light"
             >
               <CalendarIcon className="mr-2 h-4 w-4 text-slate-500" />
               {date?.from ? (
@@ -428,7 +428,7 @@ const SupAdmAllRevenueDetails = () => {
       {/* HEADER SECTION */}
       <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-extrabold tracking-tight text-slate-900">
+          <h2 className="text-4xl font-bold tracking-tight text-slate-900">
             Revenue & Fund Analysis
           </h2>
           <p className="text-muted-foreground mt-1">
@@ -438,7 +438,7 @@ const SupAdmAllRevenueDetails = () => {
         <Button
           onClick={handleExportCSV}
           disabled={purchases.length === 0}
-          className="bg-purple-600 hover:bg-purple-700 text-white font-medium flex items-center gap-2 shadow-sm"
+          className="bg-purple-600 hover:bg-purple-700 text-white font-normal flex items-center gap-2 shadow-sm"
         >
           <Download className="h-4 w-4" />
           Export CSV Report
@@ -450,13 +450,13 @@ const SupAdmAllRevenueDetails = () => {
         <Card className="shadow-sm border border-slate-100 relative overflow-hidden bg-white">
           <div className="absolute top-0 left-0 right-0 h-1 bg-slate-400" />
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <CardTitle className="text-sm font-medium text-slate-500 uppercase tracking-wider">
               Total Course Sales
             </CardTitle>
             <BookOpen className="h-4 w-4 text-slate-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-slate-900">
+            <div className="text-3xl font-semibold text-slate-900">
               Rs {(summary.totalCourseSales || 0).toLocaleString()}
             </div>
             <p className="text-[11px] text-slate-500 mt-1">
@@ -468,13 +468,13 @@ const SupAdmAllRevenueDetails = () => {
         <Card className="shadow-sm border border-slate-100 relative overflow-hidden bg-white">
           <div className="absolute top-0 left-0 right-0 h-1 bg-emerald-500" />
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">
+            <CardTitle className="text-sm font-medium text-emerald-600 uppercase tracking-wider">
               Instructor Course Share (37%)
             </CardTitle>
             <Percent className="h-4 w-4 text-emerald-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-emerald-700">
+            <div className="text-3xl font-semibold text-emerald-700">
               Rs {(summary.totalInstructorShare || 0).toLocaleString()}
             </div>
             <p className="text-[11px] text-slate-500 mt-1">
@@ -486,13 +486,13 @@ const SupAdmAllRevenueDetails = () => {
         <Card className="shadow-sm border border-slate-100 relative overflow-hidden bg-white">
           <div className="absolute top-0 left-0 right-0 h-1 bg-blue-500" />
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-xs font-semibold text-blue-600 uppercase tracking-wider">
+            <CardTitle className="text-sm font-medium text-blue-600 uppercase tracking-wider">
               Admin Course Share (63%)
             </CardTitle>
             <DollarSign className="h-4 w-4 text-blue-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-blue-700">
+            <div className="text-3xl font-semibold text-blue-700">
               Rs {(summary.totalAdminShare || 0).toLocaleString()}
             </div>
             <p className="text-[11px] text-slate-500 mt-1">
@@ -504,13 +504,13 @@ const SupAdmAllRevenueDetails = () => {
         <Card className="shadow-sm border border-slate-100 relative overflow-hidden bg-white">
           <div className="absolute top-0 left-0 right-0 h-1 bg-amber-500" />
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-xs font-semibold text-amber-600 uppercase tracking-wider">
+            <CardTitle className="text-sm font-medium text-amber-600 uppercase tracking-wider">
               Subscription Sales
             </CardTitle>
             <Activity className="h-4 w-4 text-amber-400" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-amber-700">
+            <div className="text-3xl font-semibold text-amber-700">
               Rs {(summary.totalSubSales || 0).toLocaleString()}
             </div>
             <p className="text-[11px] text-slate-500 mt-1">
@@ -522,13 +522,13 @@ const SupAdmAllRevenueDetails = () => {
         <Card className="shadow-sm border border-purple-200 relative overflow-hidden bg-purple-50/15">
           <div className="absolute top-0 left-0 right-0 h-1 bg-purple-600" />
           <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
-            <CardTitle className="text-xs font-bold text-purple-700 uppercase tracking-wider">
+            <CardTitle className="text-sm font-semibold text-purple-700 uppercase tracking-wider">
               Net Admin Revenue
             </CardTitle>
             <TrendingUp className="h-4 w-4 text-purple-600" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-extrabold text-purple-900">
+            <div className="text-3xl font-bold text-purple-900">
               Rs {(summary.netAdminRevenue || 0).toLocaleString()}
             </div>
             <p className="text-[11px] text-purple-600 mt-1">
@@ -541,16 +541,16 @@ const SupAdmAllRevenueDetails = () => {
       {/* DETAILED TABS INTERFACE */}
       <Tabs defaultValue="transactions" className="space-y-6">
         <TabsList className="bg-slate-200/60 p-1 rounded-lg border border-slate-200">
-          <TabsTrigger value="transactions" className="px-4 py-2 font-medium">
+          <TabsTrigger value="transactions" className="px-4 py-2 font-normal">
             Transactions Log
           </TabsTrigger>
-          <TabsTrigger value="instructor-payouts" className="px-4 py-2 font-medium">
+          <TabsTrigger value="instructor-payouts" className="px-4 py-2 font-normal">
             Instructor Payout Manager
           </TabsTrigger>
-          <TabsTrigger value="subscription-pool" className="px-4 py-2 font-medium">
+          <TabsTrigger value="subscription-pool" className="px-4 py-2 font-normal">
             Subscription Payout Pool
           </TabsTrigger>
-          <TabsTrigger value="financial-charts" className="px-4 py-2 font-medium">
+          <TabsTrigger value="financial-charts" className="px-4 py-2 font-normal">
             Revenue Analytics Charts
           </TabsTrigger>
         </TabsList>
@@ -559,7 +559,7 @@ const SupAdmAllRevenueDetails = () => {
         <TabsContent value="transactions" className="space-y-4">
           <Card className="shadow-sm border border-slate-200 bg-white">
             <CardHeader className="border-b border-slate-100">
-              <CardTitle className="text-lg font-bold text-slate-800">Transaction History</CardTitle>
+              <CardTitle className="text-xl font-semibold text-slate-800">Transaction History</CardTitle>
               <CardDescription>
                 Search, filter, and inspect splits for all student orders on the platform.
               </CardDescription>
@@ -580,12 +580,12 @@ const SupAdmAllRevenueDetails = () => {
               <Table>
                 <TableHeader>
                   <TableRow className="bg-slate-50">
-                    <TableHead className="font-semibold text-slate-700">Order ID</TableHead>
-                    <TableHead className="font-semibold text-slate-700">Customer</TableHead>
-                    <TableHead className="font-semibold text-slate-700">Courses Purchased & Payout Splits</TableHead>
-                    <TableHead className="font-semibold text-slate-700">Status</TableHead>
-                    <TableHead className="font-semibold text-slate-700">Gateway</TableHead>
-                    <TableHead className="text-right font-semibold text-slate-700">Total Amount</TableHead>
+                    <TableHead className="font-medium text-slate-700">Order ID</TableHead>
+                    <TableHead className="font-medium text-slate-700">Customer</TableHead>
+                    <TableHead className="font-medium text-slate-700">Courses Purchased & Payout Splits</TableHead>
+                    <TableHead className="font-medium text-slate-700">Status</TableHead>
+                    <TableHead className="font-medium text-slate-700">Gateway</TableHead>
+                    <TableHead className="text-right font-medium text-slate-700">Total Amount</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -594,12 +594,12 @@ const SupAdmAllRevenueDetails = () => {
                   ) : purchases.length > 0 ? (
                     purchases.map((purchase) => (
                       <TableRow key={purchase._id} className="hover:bg-slate-50/50">
-                        <TableCell className="font-mono text-xs font-semibold text-slate-600">
+                        <TableCell className="font-mono text-sm font-medium text-slate-600">
                           {purchase.orderId}
                         </TableCell>
                         <TableCell>
-                          <div className="font-semibold text-slate-800">{purchase.userId?.name || "Guest"}</div>
-                          <div className="text-xs text-slate-500">
+                          <div className="font-medium text-slate-800">{purchase.userId?.name || "Guest"}</div>
+                          <div className="text-sm text-slate-500">
                             {purchase.userId?.email || "N/A"}
                           </div>
                         </TableCell>
@@ -608,32 +608,32 @@ const SupAdmAllRevenueDetails = () => {
                             <table className="w-full text-left border-collapse text-[11px]">
                               <thead>
                                 <tr className="bg-slate-100 border-b border-slate-200">
-                                  <th className="p-2 font-semibold text-slate-700">Course & Creator</th>
-                                  <th className="p-2 font-semibold text-slate-700 text-right">Price</th>
-                                  <th className="p-2 font-semibold text-emerald-800 text-right">Instructor (37%)</th>
-                                  <th className="p-2 font-semibold text-blue-800 text-right">Admin (63%)</th>
+                                  <th className="p-2 font-medium text-slate-700">Course & Creator</th>
+                                  <th className="p-2 font-medium text-slate-700 text-right">Price</th>
+                                  <th className="p-2 font-medium text-emerald-800 text-right">Instructor (37%)</th>
+                                  <th className="p-2 font-medium text-blue-800 text-right">Admin (63%)</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 {purchase.courses.map((item) => (
                                   <tr key={item._id} className="border-b border-slate-150 last:border-0 hover:bg-slate-100/30">
                                     <td className="p-2">
-                                      <span className="font-semibold text-slate-900 block text-xs">
+                                      <span className="font-medium text-slate-900 block text-sm">
                                         {item.courseId?.title || "Deleted Course"}
                                       </span>
                                       {item.courseId?.creator && (
-                                        <span className="text-[10px] text-purple-600 font-medium block">
+                                        <span className="text-[10px] text-purple-600 font-normal block">
                                           {item.courseId.creator.name} ({item.courseId.creator.email})
                                         </span>
                                       )}
                                     </td>
-                                    <td className="p-2 text-right font-medium text-slate-700">
+                                    <td className="p-2 text-right font-normal text-slate-700">
                                       Rs {item.priceAtPurchase.toLocaleString()}
                                     </td>
-                                    <td className="p-2 text-right font-semibold text-emerald-600">
+                                    <td className="p-2 text-right font-medium text-emerald-600">
                                       Rs {(item.instructorShare || 0).toLocaleString()}
                                     </td>
-                                    <td className="p-2 text-right font-semibold text-blue-600">
+                                    <td className="p-2 text-right font-medium text-blue-600">
                                       Rs {(item.adminShare || 0).toLocaleString()}
                                     </td>
                                   </tr>
@@ -644,7 +644,7 @@ const SupAdmAllRevenueDetails = () => {
                         </TableCell>
                         <TableCell>
                           <Badge
-                            className="capitalize font-semibold text-xs py-1"
+                            className="capitalize font-medium text-sm py-1"
                             variant={
                               purchase.status === "completed"
                                 ? "default"
@@ -656,8 +656,8 @@ const SupAdmAllRevenueDetails = () => {
                             {purchase.status}
                           </Badge>
                         </TableCell>
-                        <TableCell className="font-medium text-slate-700">{purchase.paymentMethod}</TableCell>
-                        <TableCell className="text-right font-bold text-slate-900">
+                        <TableCell className="font-normal text-slate-700">{purchase.paymentMethod}</TableCell>
+                        <TableCell className="text-right font-semibold text-slate-900">
                           Rs {purchase.totalAmount.toLocaleString()}
                         </TableCell>
                       </TableRow>
@@ -675,7 +675,7 @@ const SupAdmAllRevenueDetails = () => {
               {/* --- Pagination Controls --- */}
               {pagination.totalPages > 1 && (
                 <div className="flex items-center justify-between p-4 border-t border-slate-100 bg-slate-50/50">
-                  <span className="text-xs text-slate-500">
+                  <span className="text-sm text-slate-500">
                     Showing page <strong>{pagination.currentPage}</strong> of <strong>{pagination.totalPages}</strong>
                   </span>
                   <div className="flex items-center gap-2">
@@ -709,14 +709,14 @@ const SupAdmAllRevenueDetails = () => {
             <Card className="shadow-sm border border-slate-200 bg-white">
               <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between flex-wrap gap-4">
                 <div>
-                  <CardTitle className="text-lg font-bold text-slate-800">
+                  <CardTitle className="text-xl font-semibold text-slate-800">
                     Instructor Payout balances
                   </CardTitle>
                   <CardDescription>
                     Calculate total earnings, subtract disbursements, and pay pending amounts with a single click.
                   </CardDescription>
                 </div>
-                <Badge className="bg-purple-100 text-purple-800 border-purple-200 flex items-center gap-1 font-semibold">
+                <Badge className="bg-purple-100 text-purple-800 border-purple-200 flex items-center gap-1 font-medium">
                   <Wallet className="h-3 w-3" />
                   Payout Control
                 </Badge>
@@ -725,13 +725,13 @@ const SupAdmAllRevenueDetails = () => {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-slate-50">
-                      <TableHead className="font-semibold text-slate-700">Instructor</TableHead>
-                      <TableHead className="font-semibold text-slate-700">Course Sales Share (37%)</TableHead>
-                      <TableHead className="font-semibold text-slate-700">Subscription Share (15%)</TableHead>
-                      <TableHead className="font-semibold text-slate-700">Total Accumulated</TableHead>
-                      <TableHead className="font-semibold text-slate-700">Total Paid Out</TableHead>
-                      <TableHead className="font-semibold text-slate-700">Unpaid Balance</TableHead>
-                      <TableHead className="text-right font-semibold text-slate-700">Actions</TableHead>
+                      <TableHead className="font-medium text-slate-700">Instructor</TableHead>
+                      <TableHead className="font-medium text-slate-700">Course Sales Share (37%)</TableHead>
+                      <TableHead className="font-medium text-slate-700">Subscription Share (15%)</TableHead>
+                      <TableHead className="font-medium text-slate-700">Total Accumulated</TableHead>
+                      <TableHead className="font-medium text-slate-700">Total Paid Out</TableHead>
+                      <TableHead className="font-medium text-slate-700">Unpaid Balance</TableHead>
+                      <TableHead className="text-right font-medium text-slate-700">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -739,7 +739,7 @@ const SupAdmAllRevenueDetails = () => {
                       <TableRow>
                         <TableCell colSpan={7} className="h-32 text-center">
                           <Loader2 className="h-8 w-8 animate-spin text-purple-600 mx-auto" />
-                          <span className="text-xs text-slate-500 mt-2 block">Loading instructor accounts...</span>
+                          <span className="text-sm text-slate-500 mt-2 block">Loading instructor accounts...</span>
                         </TableCell>
                       </TableRow>
                     ) : payoutData?.summary && payoutData.summary.length > 0 ? (
@@ -752,31 +752,31 @@ const SupAdmAllRevenueDetails = () => {
                                 <AvatarFallback>{inst.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                               </Avatar>
                               <div>
-                                <div className="font-semibold text-slate-800">{inst.name}</div>
-                                <div className="text-xs text-slate-500">{inst.email}</div>
+                                <div className="font-medium text-slate-800">{inst.name}</div>
+                                <div className="text-sm text-slate-500">{inst.email}</div>
                               </div>
                             </div>
                           </TableCell>
-                          <TableCell className="font-medium text-slate-700">
+                          <TableCell className="font-normal text-slate-700">
                             Rs {inst.courseEarnings.toLocaleString()}
                           </TableCell>
-                          <TableCell className="font-medium text-slate-700">
+                          <TableCell className="font-normal text-slate-700">
                             Rs {inst.subscriptionEarnings.toLocaleString()}
                           </TableCell>
-                          <TableCell className="font-bold text-slate-900">
+                          <TableCell className="font-semibold text-slate-900">
                             Rs {inst.totalEarnings.toLocaleString()}
                           </TableCell>
-                          <TableCell className="font-medium text-emerald-700">
+                          <TableCell className="font-normal text-emerald-700">
                             Rs {inst.totalPaid.toLocaleString()}
                           </TableCell>
-                          <TableCell className="font-extrabold text-amber-700 bg-amber-50/40">
+                          <TableCell className="font-bold text-amber-700 bg-amber-50/40">
                             Rs {inst.pendingBalance.toLocaleString()}
                           </TableCell>
                           <TableCell className="text-right">
                             {inst.pendingBalance > 0 ? (
                               <Button
                                 size="sm"
-                                className="bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs px-3 shadow-sm"
+                                className="bg-amber-600 hover:bg-amber-700 text-white font-medium text-sm px-3 shadow-sm"
                                 onClick={() => handleOpenPayoutDialog(inst)}
                               >
                                 Pay Instructor
@@ -792,7 +792,7 @@ const SupAdmAllRevenueDetails = () => {
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={7} className="h-32 text-center text-slate-400 text-xs">
+                        <TableCell colSpan={7} className="h-32 text-center text-slate-400 text-sm">
                           No instructors found in the database.
                         </TableCell>
                       </TableRow>
@@ -805,7 +805,7 @@ const SupAdmAllRevenueDetails = () => {
             {/* Payout History Logs */}
             <Card className="shadow-sm border border-slate-200 bg-white">
               <CardHeader className="border-b border-slate-100">
-                <CardTitle className="text-lg font-bold text-slate-800 flex items-center gap-2">
+                <CardTitle className="text-xl font-semibold text-slate-800 flex items-center gap-2">
                   <History className="h-5 w-5 text-slate-500" />
                   Disbursement Logs & History
                 </CardTitle>
@@ -817,12 +817,12 @@ const SupAdmAllRevenueDetails = () => {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-slate-50">
-                      <TableHead className="font-semibold text-slate-700">Disbursement Date</TableHead>
-                      <TableHead className="font-semibold text-slate-700">Recipient</TableHead>
-                      <TableHead className="font-semibold text-slate-700">Paid Amount</TableHead>
-                      <TableHead className="font-semibold text-slate-700">Method</TableHead>
-                      <TableHead className="font-semibold text-slate-700">Reference ID</TableHead>
-                      <TableHead className="font-semibold text-slate-700">Remarks</TableHead>
+                      <TableHead className="font-medium text-slate-700">Disbursement Date</TableHead>
+                      <TableHead className="font-medium text-slate-700">Recipient</TableHead>
+                      <TableHead className="font-medium text-slate-700">Paid Amount</TableHead>
+                      <TableHead className="font-medium text-slate-700">Method</TableHead>
+                      <TableHead className="font-medium text-slate-700">Reference ID</TableHead>
+                      <TableHead className="font-medium text-slate-700">Remarks</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -835,36 +835,36 @@ const SupAdmAllRevenueDetails = () => {
                     ) : payoutData?.payoutHistory && payoutData.payoutHistory.length > 0 ? (
                       payoutData.payoutHistory.map((payout) => (
                         <TableRow key={payout._id} className="hover:bg-slate-50/50">
-                          <TableCell className="font-medium text-slate-600">
+                          <TableCell className="font-normal text-slate-600">
                             {format(new Date(payout.paidAt || payout.createdAt), "PPP p")}
                           </TableCell>
                           <TableCell>
-                            <div className="font-semibold text-slate-800">
+                            <div className="font-medium text-slate-800">
                               {payout.instructorId?.name || "Deleted Instructor"}
                             </div>
-                            <div className="text-xs text-slate-500">
+                            <div className="text-sm text-slate-500">
                               {payout.instructorId?.email || "N/A"}
                             </div>
                           </TableCell>
-                          <TableCell className="font-bold text-emerald-700">
+                          <TableCell className="font-semibold text-emerald-700">
                             Rs {payout.amount.toLocaleString()}
                           </TableCell>
                           <TableCell>
-                            <Badge variant="outline" className="font-semibold text-xs">
+                            <Badge variant="outline" className="font-medium text-sm">
                               {payout.paymentMethod}
                             </Badge>
                           </TableCell>
-                          <TableCell className="font-mono text-xs text-slate-600">
+                          <TableCell className="font-mono text-sm text-slate-600">
                             {payout.transactionId || "—"}
                           </TableCell>
-                          <TableCell className="text-xs text-slate-600 max-w-[200px] truncate">
+                          <TableCell className="text-sm text-slate-600 max-w-[200px] truncate">
                             {payout.remarks || "—"}
                           </TableCell>
                         </TableRow>
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={6} className="h-32 text-center text-slate-400 text-xs">
+                        <TableCell colSpan={6} className="h-32 text-center text-slate-400 text-sm">
                           No payout transactions have been recorded.
                         </TableCell>
                       </TableRow>
@@ -881,31 +881,31 @@ const SupAdmAllRevenueDetails = () => {
           <div className="grid gap-6 md:grid-cols-3">
             <Card className="md:col-span-1 shadow-sm border border-slate-200 bg-white">
               <CardHeader className="bg-purple-50/40 border-b border-purple-100">
-                <CardTitle className="text-base font-bold text-purple-950 flex items-center gap-2">
+                <CardTitle className="text-lg font-semibold text-purple-950 flex items-center gap-2">
                   <Award className="h-5 w-5 text-purple-600" />
                   Samriddhi Gyan Model Split logic
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-4 space-y-4 text-xs text-slate-600">
+              <CardContent className="pt-4 space-y-4 text-sm text-slate-600">
                 <p>
                   Samriddhi Gyan watch-time payouts are distributed using engagement metrics:
                 </p>
                 <div className="space-y-2.5 border-t border-slate-100 pt-3">
-                  <div className="flex justify-between font-semibold">
+                  <div className="flex justify-between font-medium">
                     <span>Total Sub Revenue:</span>
                     <span className="text-slate-900">Rs {(summary.totalSubSales || 0).toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between text-amber-700 font-semibold">
+                  <div className="flex justify-between text-amber-700 font-medium">
                     <span>Instructor Pool (15%):</span>
                     <span>Rs {(summary.subInstructorPool || 0).toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between text-purple-700 font-semibold">
+                  <div className="flex justify-between text-purple-700 font-medium">
                     <span>Platform Admin Share (85%):</span>
                     <span>Rs {(summary.subAdminShare || 0).toLocaleString()}</span>
                   </div>
                 </div>
                 <div className="border-t border-slate-100 pt-3 text-[11px] space-y-1">
-                  <span className="font-semibold block text-slate-800">Engagement-based Pool:</span>
+                  <span className="font-medium block text-slate-800">Engagement-based Pool:</span>
                   <p>
                     Instructors receive payouts from the 15% revenue pool proportionally based on their courses' total watched minutes by subscribers relative to total watch-time across the whole catalog.
                   </p>
@@ -916,12 +916,12 @@ const SupAdmAllRevenueDetails = () => {
             <Card className="md:col-span-2 shadow-sm border border-slate-200 bg-white">
               <CardHeader className="border-b border-slate-100 flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-lg font-bold text-slate-800">Instructor Engagement & Share</CardTitle>
+                  <CardTitle className="text-xl font-semibold text-slate-800">Instructor Engagement & Share</CardTitle>
                   <CardDescription>
                     Track subscriber lecture consumption and corresponding payouts.
                   </CardDescription>
                 </div>
-                <Badge className="bg-amber-100 text-amber-800 border-amber-200 flex items-center gap-1 font-semibold">
+                <Badge className="bg-amber-100 text-amber-800 border-amber-200 flex items-center gap-1 font-medium">
                   <Clock className="h-3 w-3" />
                   Watch-time model
                 </Badge>
@@ -930,10 +930,10 @@ const SupAdmAllRevenueDetails = () => {
                 <Table>
                   <TableHeader>
                     <TableRow className="bg-slate-50">
-                      <TableHead className="font-semibold text-slate-700">Instructor</TableHead>
-                      <TableHead className="font-semibold text-slate-700">Total Watch-time</TableHead>
-                      <TableHead className="font-semibold text-slate-700">Catalog Share %</TableHead>
-                      <TableHead className="text-right font-semibold text-slate-700">Pool Payout</TableHead>
+                      <TableHead className="font-medium text-slate-700">Instructor</TableHead>
+                      <TableHead className="font-medium text-slate-700">Total Watch-time</TableHead>
+                      <TableHead className="font-medium text-slate-700">Catalog Share %</TableHead>
+                      <TableHead className="text-right font-medium text-slate-700">Pool Payout</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -941,23 +941,23 @@ const SupAdmAllRevenueDetails = () => {
                       summary.instructorShares.map((inst) => (
                         <TableRow key={inst.instructorId} className="hover:bg-slate-50/50">
                           <TableCell>
-                            <div className="font-semibold text-slate-800">{inst.name}</div>
-                            <div className="text-xs text-slate-500">{inst.email}</div>
+                            <div className="font-medium text-slate-800">{inst.name}</div>
+                            <div className="text-sm text-slate-500">{inst.email}</div>
                           </TableCell>
-                          <TableCell className="font-medium text-slate-700">
+                          <TableCell className="font-normal text-slate-700">
                             {formatDuration(inst.secondsWatched)}
                           </TableCell>
-                          <TableCell className="font-semibold text-slate-800">
+                          <TableCell className="font-medium text-slate-800">
                             {(inst.shareRatio * 100).toFixed(2)}%
                           </TableCell>
-                          <TableCell className="text-right font-bold text-amber-700">
+                          <TableCell className="text-right font-semibold text-amber-700">
                             Rs {inst.amount.toLocaleString()}
                           </TableCell>
                         </TableRow>
                       ))
                     ) : (
                       <TableRow>
-                        <TableCell colSpan={4} className="h-32 text-center text-slate-400 text-xs">
+                        <TableCell colSpan={4} className="h-32 text-center text-slate-400 text-sm">
                           No subscriber watch-time data recorded yet.
                         </TableCell>
                       </TableRow>
@@ -974,7 +974,7 @@ const SupAdmAllRevenueDetails = () => {
           <div className="grid gap-6 md:grid-cols-2">
             <Card className="shadow-sm border border-slate-200 bg-white">
               <CardHeader className="border-b border-slate-100">
-                <CardTitle className="text-base font-bold text-slate-800 flex items-center gap-2">
+                <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
                   <PieIcon className="h-5 w-5 text-emerald-500" />
                   Course Revenue Distribution
                 </CardTitle>
@@ -1006,14 +1006,14 @@ const SupAdmAllRevenueDetails = () => {
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="text-sm text-slate-400">No course revenue data to plot.</div>
+                  <div className="text-base text-slate-400">No course revenue data to plot.</div>
                 )}
               </CardContent>
             </Card>
 
             <Card className="shadow-sm border border-slate-200 bg-white">
               <CardHeader className="border-b border-slate-100">
-                <CardTitle className="text-base font-bold text-slate-800 flex items-center gap-2">
+                <CardTitle className="text-lg font-semibold text-slate-800 flex items-center gap-2">
                   <PieIcon className="h-5 w-5 text-purple-500" />
                   Subscription Revenue Distribution
                 </CardTitle>
@@ -1045,7 +1045,7 @@ const SupAdmAllRevenueDetails = () => {
                     </PieChart>
                   </ResponsiveContainer>
                 ) : (
-                  <div className="text-sm text-slate-400">No subscription revenue data to plot.</div>
+                  <div className="text-base text-slate-400">No subscription revenue data to plot.</div>
                 )}
               </CardContent>
             </Card>
@@ -1053,7 +1053,7 @@ const SupAdmAllRevenueDetails = () => {
 
           <Card className="shadow-sm border border-slate-200 bg-white">
             <CardHeader className="border-b border-slate-100">
-              <CardTitle className="text-base font-bold text-slate-800">
+              <CardTitle className="text-lg font-semibold text-slate-800">
                 Platform Earnings Stream Comparison
               </CardTitle>
               <CardDescription>
@@ -1091,7 +1091,7 @@ const SupAdmAllRevenueDetails = () => {
                   </RechartsBarChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-full flex items-center justify-center text-sm text-slate-400">
+                <div className="h-full flex items-center justify-center text-base text-slate-400">
                   No chart data available yet.
                 </div>
               )}
@@ -1104,7 +1104,7 @@ const SupAdmAllRevenueDetails = () => {
       <Dialog open={isPayoutDialogOpen} onOpenChange={setIsPayoutDialogOpen}>
         <DialogContent className="max-w-md bg-white border border-slate-200">
           <DialogHeader>
-            <DialogTitle className="text-xl font-bold text-slate-900 flex items-center gap-2">
+            <DialogTitle className="text-2xl font-semibold text-slate-900 flex items-center gap-2">
               <CreditCard className="h-5 w-5 text-purple-600" />
               Instructor Payout Checkout
             </DialogTitle>
@@ -1123,29 +1123,29 @@ const SupAdmAllRevenueDetails = () => {
                     <AvatarFallback>{selectedInstructor.name.slice(0, 2).toUpperCase()}</AvatarFallback>
                   </Avatar>
                   <div>
-                    <div className="font-bold text-slate-800">{selectedInstructor.name}</div>
-                    <div className="text-xs text-slate-500">{selectedInstructor.email}</div>
+                    <div className="font-semibold text-slate-800">{selectedInstructor.name}</div>
+                    <div className="text-sm text-slate-500">{selectedInstructor.email}</div>
                   </div>
                 </div>
 
-                <div className="space-y-1.5 text-xs text-slate-600">
+                <div className="space-y-1.5 text-sm text-slate-600">
                   <div className="flex justify-between">
                     <span>Course Earnings:</span>
-                    <span className="font-medium text-slate-800">Rs {selectedInstructor.courseEarnings.toLocaleString()}</span>
+                    <span className="font-normal text-slate-800">Rs {selectedInstructor.courseEarnings.toLocaleString()}</span>
                   </div>
                   <div className="flex justify-between">
                     <span>Watch-time Pool Share:</span>
-                    <span className="font-medium text-slate-800">Rs {selectedInstructor.subscriptionEarnings.toLocaleString()}</span>
+                    <span className="font-normal text-slate-800">Rs {selectedInstructor.subscriptionEarnings.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between border-t border-slate-200/60 pt-2 font-medium">
+                  <div className="flex justify-between border-t border-slate-200/60 pt-2 font-normal">
                     <span>Total Accumulated:</span>
                     <span className="text-slate-800">Rs {selectedInstructor.totalEarnings.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between text-emerald-600 font-semibold">
+                  <div className="flex justify-between text-emerald-600 font-medium">
                     <span>Already Disbursed:</span>
                     <span>- Rs {selectedInstructor.totalPaid.toLocaleString()}</span>
                   </div>
-                  <div className="flex justify-between border-t border-slate-200 pt-2 font-bold text-sm text-slate-900 bg-amber-50/50 p-1.5 rounded">
+                  <div className="flex justify-between border-t border-slate-200 pt-2 font-semibold text-base text-slate-900 bg-amber-50/50 p-1.5 rounded">
                     <span className="text-amber-800">Remaining Balance:</span>
                     <span className="text-amber-900">Rs {selectedInstructor.pendingBalance.toLocaleString()}</span>
                   </div>
@@ -1155,7 +1155,7 @@ const SupAdmAllRevenueDetails = () => {
               {/* Form Input fields */}
               <div className="space-y-3">
                 <div className="space-y-1">
-                  <Label htmlFor="amount" className="text-xs font-bold text-slate-700">
+                  <Label htmlFor="amount" className="text-sm font-semibold text-slate-700">
                     Disbursement Amount (Rs)
                   </Label>
                   <Input
@@ -1175,7 +1175,7 @@ const SupAdmAllRevenueDetails = () => {
 
                 <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <Label htmlFor="paymentMethod" className="text-xs font-bold text-slate-700">
+                    <Label htmlFor="paymentMethod" className="text-sm font-semibold text-slate-700">
                       Payment Method
                     </Label>
                     <Select
@@ -1198,7 +1198,7 @@ const SupAdmAllRevenueDetails = () => {
                   </div>
 
                   <div className="space-y-1">
-                    <Label htmlFor="transactionId" className="text-xs font-bold text-slate-700">
+                    <Label htmlFor="transactionId" className="text-sm font-semibold text-slate-700">
                       Reference / Trans ID
                     </Label>
                     <Input
@@ -1214,7 +1214,7 @@ const SupAdmAllRevenueDetails = () => {
                 </div>
 
                 <div className="space-y-1">
-                  <Label htmlFor="remarks" className="text-xs font-bold text-slate-700">
+                  <Label htmlFor="remarks" className="text-sm font-semibold text-slate-700">
                     Remarks / Notes
                   </Label>
                   <Input
@@ -1240,7 +1240,7 @@ const SupAdmAllRevenueDetails = () => {
                   type="submit"
                   size="sm"
                   disabled={isPaying}
-                  className="bg-purple-600 hover:bg-purple-700 text-white font-semibold flex items-center gap-1.5"
+                  className="bg-purple-600 hover:bg-purple-700 text-white font-medium flex items-center gap-1.5"
                 >
                   {isPaying && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                   Confirm & Disburse Funds

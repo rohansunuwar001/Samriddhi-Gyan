@@ -5,10 +5,10 @@ const DynamicContentHeader = ({ title, description }) => {
   return (
     <div className="bg-white flex items-center justify-center py-20">
       <div className="text-center max-w-4xl px-5">
-        <h1 className="font-serif text-6xl md:text-6xl font-normal text-gray-800 mb-6">
+        <h1 className="font-serif text-7xl md:text-7xl font-light text-gray-800 mb-6">
           {title}
         </h1>
-        <p className="text-2xl leading-relaxed text-gray-600 max-w-2xl mx-auto">
+        <p className="text-3xl leading-relaxed text-gray-600 max-w-2xl mx-auto">
           {description}
         </p>
       </div>

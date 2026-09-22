@@ -35,12 +35,12 @@ const ChatMessage = ({ chat }) => {
           <a
             href={chat.fileData}
             download={chat.text}
-            className="bg-white text-gray-700 text-sm px-3 py-2 rounded-md shadow-sm inline-block break-words max-w-full"
+            className="bg-white text-gray-700 text-base px-3 py-2 rounded-md shadow-sm inline-block break-words max-w-full"
           >
             📎 {chat.text}
           </a>
         ) : (
-          <p className="message-text break-words whitespace-pre-line text-xs px-3 py-2 bg-[#e1e5e8] rounded-bl-sm rounded-br-xl rounded-tl-xl rounded-tr-xl">
+          <p className="message-text break-words whitespace-pre-line text-sm px-3 py-2 bg-[#e1e5e8] rounded-bl-sm rounded-br-xl rounded-tl-xl rounded-tr-xl">
             {typeof chat.text === "string" ? chat.text : chat.text}
           </p>
         )}

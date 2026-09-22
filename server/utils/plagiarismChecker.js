@@ -29,57 +29,36 @@ function simpleHash(str, seed) {
   return Math.abs(hash);
 }
 
+function computeSignature(shingles, numHashes = 20) {
+  const sig = Array(numHashes).fill(Infinity);
+  shingles.forEach((shingle) => {
+    for (let h = 0; h < numHashes; h++) {
+      sig[h] = Math.min(sig[h], simpleHash(shingle, h));
+    }
+  });
+  return sig;
+}
+
 /**
  * Compares document signatures to identify candidate duplicates.
- * @param {string} docText - The student's text submission.
- * @param {Array<{id: string, text: string}>} refDocs - Library of prior submissions to compare against.
- * @param {number} threshold - Jaccard similarity threshold above which we flag plagiarism (0.0 to 1.0).
- * @returns {Array<{id: string, similarity: number}>} List of flagged matches.
  */
 export function checkPlagiarism(docText, refDocs, threshold = 0.5) {
-  const kShingles = 5;
-  const numHashes = 20;
-
-  const targetShingles = getShingles(docText, kShingles);
+  const targetShingles = getShingles(docText);
   if (targetShingles.size === 0) return [];
 
-  // Generate signature for target document
-  const targetSig = Array(numHashes).fill(Infinity);
-  for (let h = 0; h < numHashes; h++) {
-    targetShingles.forEach((shingle) => {
-      targetSig[h] = Math.min(targetSig[h], simpleHash(shingle, h));
-    });
-  }
-
+  const targetSig = computeSignature(targetShingles);
   const results = [];
 
   refDocs.forEach((ref) => {
-    const refShingles = getShingles(ref.text, kShingles);
+    const refShingles = getShingles(ref.text);
     if (refShingles.size === 0) return;
 
-    // Generate signature for reference document
-    const refSig = Array(numHashes).fill(Infinity);
-    for (let h = 0; h < numHashes; h++) {
-      refShingles.forEach((shingle) => {
-        refSig[h] = Math.min(refSig[h], simpleHash(shingle, h));
-      });
-    }
-
-    // Compute estimated Jaccard Similarity using MinHash signature overlaps
-    let matches = 0;
-    for (let h = 0; h < numHashes; h++) {
-      if (targetSig[h] === refSig[h]) {
-        matches++;
-      }
-    }
-
-    const similarity = matches / numHashes;
+    const refSig = computeSignature(refShingles);
+    const matches = targetSig.filter((val, h) => val === refSig[h]).length;
+    const similarity = matches / 20;
 
     if (similarity >= threshold) {
-      results.push({
-        id: ref.id,
-        similarity: Number(similarity.toFixed(2))
-      });
+      results.push({ id: ref.id, similarity: Number(similarity.toFixed(2)) });
     }
   });
 

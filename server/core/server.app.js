@@ -7,6 +7,7 @@ import { initSocket } from "../utils/socket.js";
 import { scheduleOrderCleanup } from "../scripts/cleanupPendingOrders.script.js";
 import { cleanupOrphanedUploads } from "../utils/cleanupOrphanedUploads.js";
 import { cleanupStaleHLS } from "../utils/cleanupStaleHLS.js";
+import { syncSubChildTopics } from "../controllers/category.controller.js";
 
 export class ServerApp {
   constructor(appInstance, port = process.env.PORT || 10000) {
@@ -23,6 +24,7 @@ export class ServerApp {
     cleanupOrphanedUploads();
     cleanupStaleHLS();
     scheduleOrderCleanup();
+    syncSubChildTopics();
   }
 
   async start() {

@@ -96,7 +96,7 @@ const ChatbotForm = ({ chatHistory, setChatHistory, generateBotResponse }) => {
       <form method="post" onSubmit={handleFormSubmit}>
         <div className="flex gap-4">
           <div className="input-emoji-section relative flex max-h-[80px] w-[17rem] flex-[1_1] overflow-hidden rounded-sm border-[1px] border-[black] border-[solid] px-4 pb-1 pt-2 md:w-[16rem]">
-            <div className="input-section text-sm">
+            <div className="input-section text-base">
               <input
                 type="text"
                 name="text"

@@ -66,9 +66,9 @@ function LimitedInput({ value, onChange, placeholder, maxLen = 160 }) {
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="flex-1 px-4 py-3 text-lg text-[#1c1d1f] outline-none bg-transparent pr-16"
+        className="flex-1 px-4 py-3 text-xl text-[#1c1d1f] outline-none bg-transparent pr-16"
       />
-      <span className="absolute right-4 text-base text-[#6a6f73] pointer-events-none">
+      <span className="absolute right-4 text-lg text-[#6a6f73] pointer-events-none">
         {maxLen - (value?.length || 0)}
       </span>
     </div>
@@ -149,7 +149,7 @@ function SimpleInput({ value, onChange, placeholder, onRemove, canRemove }) {
         value={value}
         onChange={onChange}
         placeholder={placeholder}
-        className="flex-1 px-4 py-3 text-lg text-[#1c1d1f] outline-none bg-transparent pr-10"
+        className="flex-1 px-4 py-3 text-xl text-[#1c1d1f] outline-none bg-transparent pr-10"
       />
       {canRemove && (
         <button
@@ -253,8 +253,8 @@ function IntendedLearnersPanel({ courseId, courseData, onSaveStart, onSaveEnd, o
     <div className="bg-white border border-[#d1d7dc] p-10 shadow-sm">
       {/* Header */}
       <div className="border-b border-[#d1d7dc] pb-5 mb-8">
-        <h2 className="text-4xl font-normal text-[#1c1d1f] mb-4">Intended learners</h2>
-        <p className="text-lg text-[#1c1d1f] leading-relaxed">
+        <h2 className="text-5xl font-light text-[#1c1d1f] mb-4">Intended learners</h2>
+        <p className="text-xl text-[#1c1d1f] leading-relaxed">
           The following descriptions will be publicly visible on your{" "}
           <span className="text-[#5624d0] underline cursor-pointer">Course Landing Page</span>{" "}
           and will have a direct impact on your course performance. These descriptions will help
@@ -264,8 +264,8 @@ function IntendedLearnersPanel({ courseId, courseData, onSaveStart, onSaveEnd, o
 
       {/* What will students learn */}
       <div className="mb-10">
-        <h3 className="font-normal text-[#1c1d1f] mb-2">What will students learn in your course?</h3>
-        <p className="text-lg text-[#1c1d1f] mb-4">
+        <h3 className="font-light text-[#1c1d1f] mb-2">What will students learn in your course?</h3>
+        <p className="text-xl text-[#1c1d1f] mb-4">
           You must enter at least 4{" "}
           <span className="text-[#5624d0] underline cursor-pointer">learning objectives or outcomes</span>{" "}
           that learners can expect to achieve after completing your course.
@@ -294,7 +294,7 @@ function IntendedLearnersPanel({ courseId, courseData, onSaveStart, onSaveEnd, o
         </div>
         <button
           onClick={() => addItem(setLearnings, learnings)}
-          className="flex items-center gap-1.5 text-lg font-normal text-[#5624d0] hover:text-[#4019a4] transition-colors mt-4"
+          className="flex items-center gap-1.5 text-xl font-light text-[#5624d0] hover:text-[#4019a4] transition-colors mt-4"
         >
           <PlusCircle className="w-4.5 h-4.5" /> Add more to your response
         </button>
@@ -302,10 +302,10 @@ function IntendedLearnersPanel({ courseId, courseData, onSaveStart, onSaveEnd, o
 
       {/* Requirements */}
       <div className="mb-10">
-        <h3 className="font-normal text-[#1c1d1f] mb-2">
+        <h3 className="font-light text-[#1c1d1f] mb-2">
           What are the requirements or prerequisites for taking your course?
         </h3>
-        <p className="text-lg text-[#1c1d1f] mb-4">
+        <p className="text-xl text-[#1c1d1f] mb-4">
           List the required skills, experience, tools or equipment learners should have prior to taking
           your course. If there are no requirements, use this space as an opportunity to lower the barrier
           for beginners.
@@ -324,7 +324,7 @@ function IntendedLearnersPanel({ courseId, courseData, onSaveStart, onSaveEnd, o
         </div>
         <button
           onClick={() => addItem(setRequirements, requirements)}
-          className="flex items-center gap-1.5 text-lg font-normal text-[#5624d0] hover:text-[#4019a4] transition-colors mt-4"
+          className="flex items-center gap-1.5 text-xl font-light text-[#5624d0] hover:text-[#4019a4] transition-colors mt-4"
         >
           <PlusCircle className="w-4.5 h-4.5" /> Add more to your response
         </button>
@@ -332,8 +332,8 @@ function IntendedLearnersPanel({ courseId, courseData, onSaveStart, onSaveEnd, o
 
       {/* Who is this course for */}
       <div className="mb-10">
-        <h3 className="font-normal text-[#1c1d1f] mb-2">Who is this course for?</h3>
-        <p className="text-lg text-[#1c1d1f] mb-4">
+        <h3 className="font-light text-[#1c1d1f] mb-2">Who is this course for?</h3>
+        <p className="text-xl text-[#1c1d1f] mb-4">
           Write a clear description of the{" "}
           <span className="text-[#5624d0] underline cursor-pointer">intended learners</span>{" "}
           for your course who will find your course content valuable. This will help you attract the right
@@ -353,7 +353,7 @@ function IntendedLearnersPanel({ courseId, courseData, onSaveStart, onSaveEnd, o
         </div>
         <button
           onClick={() => addItem(setWhoIsThisFor, whoIsThisFor)}
-          className="flex items-center gap-1.5 text-lg font-normal text-[#5624d0] hover:text-[#4019a4] transition-colors mt-4"
+          className="flex items-center gap-1.5 text-xl font-light text-[#5624d0] hover:text-[#4019a4] transition-colors mt-4"
         >
           <PlusCircle className="w-4.5 h-4.5" /> Add more to your response
         </button>
@@ -369,13 +369,13 @@ function CourseStructurePanel() {
   return (
     <div className="bg-white border border-[#d1d7dc] p-10 shadow-sm">
       <div className="border-b border-[#d1d7dc] pb-5 mb-8">
-        <h2 className="text-4xl font-normal text-[#1c1d1f]">Course structure</h2>
+        <h2 className="text-5xl font-light text-[#1c1d1f]">Course structure</h2>
       </div>
 
       <div className="flex gap-8 items-start mb-10">
         <div className="flex-1">
-          <h3 className="text-3xl font-normal text-[#1c1d1f] mb-4">There's a course in you. Plan it out.</h3>
-          <p className="text-lg text-[#1c1d1f] leading-relaxed">
+          <h3 className="text-4xl font-light text-[#1c1d1f] mb-4">There's a course in you. Plan it out.</h3>
+          <p className="text-xl text-[#1c1d1f] leading-relaxed">
             Planning your course carefully will create a clear learning path for students and help you once you film. Think down to the details of each lecture including the skill you'll teach, estimated video length, practical activities to include, and how you'll create introductions and summaries.
           </p>
         </div>
@@ -387,11 +387,11 @@ function CourseStructurePanel() {
               <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
             </svg>
           </div>
-          <h4 className="font-normal text-[#1c1d1f] text-lg mb-2">Our library of resources</h4>
-          <p className="text-base text-[#6a6f73] mb-4">
+          <h4 className="font-light text-[#1c1d1f] text-xl mb-2">Our library of resources</h4>
+          <p className="text-lg text-[#6a6f73] mb-4">
             Tips and guides to structuring a course students love.
           </p>
-          <button className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-normal text-base py-2.5 px-4 transition-colors">
+          <button className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-light text-lg py-2.5 px-4 transition-colors">
             Teaching Center
           </button>
         </div>
@@ -399,53 +399,53 @@ function CourseStructurePanel() {
 
       {/* Tips */}
       <div className="mb-10">
-        <h3 className="text-2xl font-normal text-[#1c1d1f] mb-5">Tips</h3>
+        <h3 className="text-3xl font-light text-[#1c1d1f] mb-5">Tips</h3>
         <div className="space-y-6">
           <div>
-            <h4 className="font-normal text-[#1c1d1f] text-lg mb-1.5">Start with your goals.</h4>
-            <p className="text-lg text-[#1c1d1f] leading-relaxed">
+            <h4 className="font-light text-[#1c1d1f] text-xl mb-1.5">Start with your goals.</h4>
+            <p className="text-xl text-[#1c1d1f] leading-relaxed">
               Setting goals for what learners will accomplish in your course (also known as <span className="text-[#5624d0] underline cursor-pointer">learning objectives</span>) at the beginning will help you determine what content to include and how you will teach the content to help your learners achieve the goals.
             </p>
           </div>
 
           <div>
-            <h4 className="font-normal text-[#1c1d1f] text-lg mb-1.5">Create an outline.</h4>
-            <p className="text-lg text-[#1c1d1f] leading-relaxed">
+            <h4 className="font-light text-[#1c1d1f] text-xl mb-1.5">Create an outline.</h4>
+            <p className="text-xl text-[#1c1d1f] leading-relaxed">
               Decide what skills you'll teach and how you'll teach them. Group related lectures into sections. Each section should have at least 3 lectures, and include at least one assignment or practical activity. <span className="text-[#5624d0] underline cursor-pointer">Learn more.</span>
             </p>
           </div>
 
           <div>
-            <h4 className="font-normal text-[#1c1d1f] text-lg mb-1.5">Introduce yourself and create momentum.</h4>
-            <p className="text-lg text-[#1c1d1f] leading-relaxed">
+            <h4 className="font-light text-[#1c1d1f] text-xl mb-1.5">Introduce yourself and create momentum.</h4>
+            <p className="text-xl text-[#1c1d1f] leading-relaxed">
               People online want to start learning quickly. Make an introduction section that gives learners something to be excited about in the first 10 minutes.
             </p>
           </div>
 
           <div>
-            <h4 className="font-normal text-[#1c1d1f] text-lg mb-1.5">Sections have a clear learning objective.</h4>
-            <p className="text-lg text-[#1c1d1f] leading-relaxed">
+            <h4 className="font-light text-[#1c1d1f] text-xl mb-1.5">Sections have a clear learning objective.</h4>
+            <p className="text-xl text-[#1c1d1f] leading-relaxed">
               Introduce each section by describing the section's <span className="text-[#5624d0] underline cursor-pointer">goal and why it's important</span>. Give lectures and sections titles that reflect their content and have a logical flow.
             </p>
           </div>
 
           <div>
-            <h4 className="font-normal text-[#1c1d1f] text-lg mb-1.5">Lectures cover one concept.</h4>
-            <p className="text-lg text-[#1c1d1f] leading-relaxed">
+            <h4 className="font-light text-[#1c1d1f] text-xl mb-1.5">Lectures cover one concept.</h4>
+            <p className="text-xl text-[#1c1d1f] leading-relaxed">
               A good lecture length is 2-7 minutes to keep students interested and help them study in short bursts. Cover a single topic in each lecture so learners can easily find and re-watch them later.
             </p>
           </div>
 
           <div>
-            <h4 className="font-normal text-[#1c1d1f] text-lg mb-1.5">Mix and match your lecture types.</h4>
-            <p className="text-lg text-[#1c1d1f] leading-relaxed">
+            <h4 className="font-light text-[#1c1d1f] text-xl mb-1.5">Mix and match your lecture types.</h4>
+            <p className="text-xl text-[#1c1d1f] leading-relaxed">
               Alternate between filming yourself, your screen, and slides or other visuals. Showing yourself can help learners feel connected.
             </p>
           </div>
 
           <div>
-            <h4 className="font-normal text-[#1c1d1f] text-lg mb-1.5">Practice activities create hands-on learning.</h4>
-            <p className="text-lg text-[#1c1d1f] leading-relaxed">
+            <h4 className="font-light text-[#1c1d1f] text-xl mb-1.5">Practice activities create hands-on learning.</h4>
+            <p className="text-xl text-[#1c1d1f] leading-relaxed">
               Help learners <span className="text-[#5624d0] underline cursor-pointer">apply your lessons</span> to their real world with projects, assignments, coding exercises, or worksheets.
             </p>
           </div>
@@ -454,8 +454,8 @@ function CourseStructurePanel() {
 
       {/* Requirements */}
       <div className="mb-10">
-        <h3 className="text-2xl font-normal text-[#1c1d1f] mb-4">Requirements</h3>
-        <ul className="list-disc pl-5 space-y-2 text-lg text-[#1c1d1f]">
+        <h3 className="text-3xl font-light text-[#1c1d1f] mb-4">Requirements</h3>
+        <ul className="list-disc pl-5 space-y-2 text-xl text-[#1c1d1f]">
           <li>See the <span className="text-[#5624d0] underline cursor-pointer">complete list</span> of course quality requirements</li>
           <li>Your course must have at least five lectures</li>
           <li>All lectures must add up to at least 30+ minutes of total video</li>
@@ -465,19 +465,19 @@ function CourseStructurePanel() {
 
       {/* Resources */}
       <div>
-        <h3 className="text-2xl font-normal text-[#1c1d1f] mb-4">Resources</h3>
+        <h3 className="text-3xl font-light text-[#1c1d1f] mb-4">Resources</h3>
         <div className="space-y-4">
           <div>
-            <span className="font-normal text-lg text-[#5624d0] hover:underline cursor-pointer block">Samriddhi Gyan Trust & Safety</span>
-            <span className="text-base text-[#6a6f73]">Our policies for instructors and students</span>
+            <span className="font-light text-xl text-[#5624d0] hover:underline cursor-pointer block">Samriddhi Gyan Trust & Safety</span>
+            <span className="text-lg text-[#6a6f73]">Our policies for instructors and students</span>
           </div>
           <div>
-            <span className="font-normal text-lg text-[#5624d0] hover:underline cursor-pointer block">Join the instructor community</span>
-            <span className="text-base text-[#6a6f73]">A place to connect with other instructors</span>
+            <span className="font-light text-xl text-[#5624d0] hover:underline cursor-pointer block">Join the instructor community</span>
+            <span className="text-lg text-[#6a6f73]">A place to connect with other instructors</span>
           </div>
           <div>
-            <span className="font-normal text-lg text-[#5624d0] hover:underline cursor-pointer block">Official Samriddhi Gyan Course: How to Create an Online Course</span>
-            <span className="text-base text-[#6a6f73]">Learn about course creation from the Samriddhi Gyan Instructor Team and experienced instructors</span>
+            <span className="font-light text-xl text-[#5624d0] hover:underline cursor-pointer block">Official Samriddhi Gyan Course: How to Create an Online Course</span>
+            <span className="text-lg text-[#6a6f73]">Learn about course creation from the Samriddhi Gyan Instructor Team and experienced instructors</span>
           </div>
         </div>
       </div>
@@ -492,13 +492,13 @@ function SetupTestVideoPanel() {
   return (
     <div className="bg-white border border-[#d1d7dc] p-10 shadow-sm">
       <div className="border-b border-[#d1d7dc] pb-5 mb-8">
-        <h2 className="text-4xl font-normal text-[#1c1d1f]">Setup & test video</h2>
+        <h2 className="text-5xl font-light text-[#1c1d1f]">Setup & test video</h2>
       </div>
 
       <div className="flex gap-8 items-start mb-10">
         <div className="flex-1">
-          <h3 className="text-3xl font-normal text-[#1c1d1f] mb-4">Arrange your ideal studio and get early feedback</h3>
-          <p className="text-lg text-[#1c1d1f] leading-relaxed">
+          <h3 className="text-4xl font-light text-[#1c1d1f] mb-4">Arrange your ideal studio and get early feedback</h3>
+          <p className="text-xl text-[#1c1d1f] leading-relaxed">
             It's important to get your audio and video set up correctly now, because it's much more difficult to fix your videos after you've recorded. There are many creative ways to use what you have to create professional looking video.
           </p>
         </div>
@@ -516,11 +516,11 @@ function SetupTestVideoPanel() {
               <line x1="17" y1="7" x2="22" y2="7" />
             </svg>
           </div>
-          <h4 className="font-normal text-[#1c1d1f] text-lg mb-2">Free expert video help</h4>
-          <p className="text-base text-[#6a6f73] mb-4">
+          <h4 className="font-light text-[#1c1d1f] text-xl mb-2">Free expert video help</h4>
+          <p className="text-lg text-[#6a6f73] mb-4">
             Get personalized advice on your audio and video.
           </p>
-          <button className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-normal text-base py-2.5 px-4 transition-colors">
+          <button className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-light text-lg py-2.5 px-4 transition-colors">
             Create a test video
           </button>
         </div>
@@ -528,46 +528,46 @@ function SetupTestVideoPanel() {
 
       {/* Tips */}
       <div className="mb-10">
-        <h3 className="text-2xl font-normal text-[#1c1d1f] mb-5">Tips</h3>
+        <h3 className="text-3xl font-light text-[#1c1d1f] mb-5">Tips</h3>
         <div className="space-y-6">
           <div>
-            <h4 className="font-normal text-[#1c1d1f] text-lg mb-1.5">Equipment can be easy.</h4>
-            <p className="text-lg text-[#1c1d1f] leading-relaxed">
+            <h4 className="font-light text-[#1c1d1f] text-xl mb-1.5">Equipment can be easy.</h4>
+            <p className="text-xl text-[#1c1d1f] leading-relaxed">
               You don't need to buy fancy equipment. Most smartphone cameras can capture video in HD, and you can record audio on another phone or external microphone.
             </p>
           </div>
 
           <div>
-            <h4 className="font-normal text-[#1c1d1f] text-lg mb-1.5">Students need to hear you.</h4>
-            <p className="text-lg text-[#1c1d1f] leading-relaxed">
+            <h4 className="font-light text-[#1c1d1f] text-xl mb-1.5">Students need to hear you.</h4>
+            <p className="text-xl text-[#1c1d1f] leading-relaxed">
               A good microphone is the most important piece of equipment you will choose. There are lot of affordable options. Make sure it's correctly plugged in and 6-12 inches (15-30 cm) from you.
             </p>
           </div>
 
           <div>
-            <h4 className="font-normal text-[#1c1d1f] text-lg mb-1.5">Make a studio.</h4>
-            <p className="text-lg text-[#1c1d1f] leading-relaxed">
+            <h4 className="font-light text-[#1c1d1f] text-xl mb-1.5">Make a studio.</h4>
+            <p className="text-xl text-[#1c1d1f] leading-relaxed">
               Clean up your background and arrange props. Almost any small space can be transformed with a backdrop made of colored paper or an ironed bed sheet.
             </p>
           </div>
 
           <div>
-            <h4 className="font-normal text-[#1c1d1f] text-lg mb-1.5">Light the scene and your face.</h4>
-            <p className="text-lg text-[#1c1d1f] leading-relaxed">
+            <h4 className="font-light text-[#1c1d1f] text-xl mb-1.5">Light the scene and your face.</h4>
+            <p className="text-xl text-[#1c1d1f] leading-relaxed">
               Turn off overhead lights. Experiment with three-point lighting by placing two lamps in front of you and one behind aimed on the background.
             </p>
           </div>
 
           <div>
-            <h4 className="font-normal text-[#1c1d1f] text-lg mb-1.5">Reduce noise and echo.</h4>
-            <p className="text-lg text-[#1c1d1f] leading-relaxed">
+            <h4 className="font-light text-[#1c1d1f] text-xl mb-1.5">Reduce noise and echo.</h4>
+            <p className="text-xl text-[#1c1d1f] leading-relaxed">
               Turn off fans or air vents, and record at a time when it's quiet. Place acoustic foam or blankets on the walls, and bring in rugs or furniture to dampen echo.
             </p>
           </div>
 
           <div>
-            <h4 className="font-normal text-[#1c1d1f] text-lg mb-1.5">Be creative.</h4>
-            <p className="text-lg text-[#1c1d1f] leading-relaxed">
+            <h4 className="font-light text-[#1c1d1f] text-xl mb-1.5">Be creative.</h4>
+            <p className="text-xl text-[#1c1d1f] leading-relaxed">
               Students won't see behind the scenes. No one will know if you're surrounded by pillows for soundproofing... unless you tell other instructors in the community!
             </p>
           </div>
@@ -576,8 +576,8 @@ function SetupTestVideoPanel() {
 
       {/* Requirements */}
       <div className="mb-10">
-        <h3 className="text-2xl font-normal text-[#1c1d1f] mb-4">Requirements</h3>
-        <ul className="list-disc pl-5 space-y-2 text-lg text-[#1c1d1f]">
+        <h3 className="text-3xl font-light text-[#1c1d1f] mb-4">Requirements</h3>
+        <ul className="list-disc pl-5 space-y-2 text-xl text-[#1c1d1f]">
           <li>Film and export in HD to create videos of at least 720p, or 1080p if possible</li>
           <li>Audio should come out of both the left and right channels and be synced to your video</li>
           <li>Audio should be free of echo and background noise so as not to be distracting to students</li>
@@ -586,19 +586,19 @@ function SetupTestVideoPanel() {
 
       {/* Resources */}
       <div>
-        <h3 className="text-2xl font-normal text-[#1c1d1f] mb-4">Resources</h3>
+        <h3 className="text-3xl font-light text-[#1c1d1f] mb-4">Resources</h3>
         <div className="space-y-4">
           <div>
-            <span className="font-normal text-lg text-[#5624d0] hover:underline cursor-pointer block">Teaching Center: Guide to equipment</span>
-            <span className="text-base text-[#6a6f73]">Make a home studio on a budget</span>
+            <span className="font-light text-xl text-[#5624d0] hover:underline cursor-pointer block">Teaching Center: Guide to equipment</span>
+            <span className="text-lg text-[#6a6f73]">Make a home studio on a budget</span>
           </div>
           <div>
-            <span className="font-normal text-lg text-[#5624d0] hover:underline cursor-pointer block">Samriddhi Gyan Trust & Safety</span>
-            <span className="text-base text-[#6a6f73]">Our policies for instructors and students</span>
+            <span className="font-light text-xl text-[#5624d0] hover:underline cursor-pointer block">Samriddhi Gyan Trust & Safety</span>
+            <span className="text-lg text-[#6a6f73]">Our policies for instructors and students</span>
           </div>
           <div>
-            <span className="font-normal text-lg text-[#5624d0] hover:underline cursor-pointer block">Join the community</span>
-            <span className="text-base text-[#6a6f73]">A place to talk with other instructors</span>
+            <span className="font-light text-xl text-[#5624d0] hover:underline cursor-pointer block">Join the community</span>
+            <span className="text-lg text-[#6a6f73]">A place to talk with other instructors</span>
           </div>
         </div>
       </div>
@@ -613,13 +613,13 @@ function FilmEditPanel() {
   return (
     <div className="bg-white border border-[#d1d7dc] p-10 shadow-sm">
       <div className="border-b border-[#d1d7dc] pb-5 mb-8">
-        <h2 className="text-4xl font-normal text-[#1c1d1f]">Film & edit</h2>
+        <h2 className="text-5xl font-light text-[#1c1d1f]">Film & edit</h2>
       </div>
 
       <div className="flex gap-8 items-start mb-10">
         <div className="flex-1">
-          <h3 className="text-3xl font-normal text-[#1c1d1f] mb-4">You're ready to share your knowledge.</h3>
-          <p className="text-lg text-[#1c1d1f] leading-relaxed">
+          <h3 className="text-4xl font-light text-[#1c1d1f] mb-4">You're ready to share your knowledge.</h3>
+          <p className="text-xl text-[#1c1d1f] leading-relaxed">
             This is your moment! If you've structured your course and used our guides, you're well prepared for the actual shoot. Pace yourself, take time to make it just right, and fine-tune when you edit.
           </p>
         </div>
@@ -633,11 +633,11 @@ function FilmEditPanel() {
               <path d="M16 3.13a4 4 0 0 1 0 7.75" />
             </svg>
           </div>
-          <h4 className="font-normal text-[#1c1d1f] text-lg mb-2">You're in good company</h4>
-          <p className="text-base text-[#6a6f73] mb-4">
+          <h4 className="font-light text-[#1c1d1f] text-xl mb-2">You're in good company</h4>
+          <p className="text-lg text-[#6a6f73] mb-4">
             Chat and get production help with other Samriddhi Gyan instructors.
           </p>
-          <button className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-normal text-base py-2.5 px-4 transition-colors">
+          <button className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-light text-lg py-2.5 px-4 transition-colors">
             Join the community
           </button>
         </div>
@@ -645,46 +645,46 @@ function FilmEditPanel() {
 
       {/* Tips */}
       <div className="mb-10">
-        <h3 className="text-2xl font-normal text-[#1c1d1f] mb-5">Tips</h3>
+        <h3 className="text-3xl font-light text-[#1c1d1f] mb-5">Tips</h3>
         <div className="space-y-6">
           <div>
-            <h4 className="font-normal text-[#1c1d1f] text-lg mb-1.5">Take breaks and review frequently.</h4>
-            <p className="text-lg text-[#1c1d1f] leading-relaxed">
+            <h4 className="font-light text-[#1c1d1f] text-xl mb-1.5">Take breaks and review frequently.</h4>
+            <p className="text-xl text-[#1c1d1f] leading-relaxed">
               Check often for any changes such as new noises. Be aware of your own energy levels--filming can tire you out and that translates to the screen.
             </p>
           </div>
 
           <div>
-            <h4 className="font-normal text-[#1c1d1f] text-lg mb-1.5">Build rapport.</h4>
-            <p className="text-lg text-[#1c1d1f] leading-relaxed">
+            <h4 className="font-light text-[#1c1d1f] text-xl mb-1.5">Build rapport.</h4>
+            <p className="text-xl text-[#1c1d1f] leading-relaxed">
               Students want to know who's teaching them. Even for a course that is mostly screencasts, film yourself for your introduction. Or go the extra mile and film yourself introducing each section!
             </p>
           </div>
 
           <div>
-            <h4 className="font-normal text-[#1c1d1f] text-lg mb-1.5">Being on camera takes practice.</h4>
-            <p className="text-lg text-[#1c1d1f] leading-relaxed">
+            <h4 className="font-light text-[#1c1d1f] text-xl mb-1.5">Being on camera takes practice.</h4>
+            <p className="text-xl text-[#1c1d1f] leading-relaxed">
               Make eye contact with the camera and speak clearly. Do as many retakes as you need to get it right.
             </p>
           </div>
 
           <div>
-            <h4 className="font-normal text-[#1c1d1f] text-lg mb-1.5">Set yourself up for editing success.</h4>
-            <p className="text-lg text-[#1c1d1f] leading-relaxed">
+            <h4 className="font-light text-[#1c1d1f] text-xl mb-1.5">Set yourself up for editing success.</h4>
+            <p className="text-xl text-[#1c1d1f] leading-relaxed">
               You can edit out long pauses, mistakes, and ums or ahs. Film a few extra activities or images that you can add in later to cover those cuts.
             </p>
           </div>
 
           <div>
-            <h4 className="font-normal text-[#1c1d1f] text-lg mb-1.5">Create audio marks.</h4>
-            <p className="text-lg text-[#1c1d1f] leading-relaxed">
+            <h4 className="font-light text-[#1c1d1f] text-xl mb-1.5">Create audio marks.</h4>
+            <p className="text-xl text-[#1c1d1f] leading-relaxed">
               Clap when you start each take to easily locate the audio spike during editing. Use our guides to manage your recording day efficiently.
             </p>
           </div>
 
           <div>
-            <h4 className="font-normal text-[#1c1d1f] text-lg mb-1.5">For screencasts, clean up.</h4>
-            <p className="text-lg text-[#1c1d1f] leading-relaxed">
+            <h4 className="font-light text-[#1c1d1f] text-xl mb-1.5">For screencasts, clean up.</h4>
+            <p className="text-xl text-[#1c1d1f] leading-relaxed">
               Move unrelated files and folders off your desktop and open any tabs in advance. Make on-screen text at least 24pt and use zooming to highlight.
             </p>
           </div>
@@ -693,8 +693,8 @@ function FilmEditPanel() {
 
       {/* Requirements */}
       <div className="mb-10">
-        <h3 className="text-2xl font-normal text-[#1c1d1f] mb-4">Requirements</h3>
-        <ul className="list-disc pl-5 space-y-2 text-lg text-[#1c1d1f]">
+        <h3 className="text-3xl font-light text-[#1c1d1f] mb-4">Requirements</h3>
+        <ul className="list-disc pl-5 space-y-2 text-xl text-[#1c1d1f]">
           <li>Film and export in HD to create videos of at least 720p, or 1080p if possible</li>
           <li>Audio should come out of both the left and right channels and be synced to your video</li>
           <li>Audio should be free of echo and background noise so as not to be distracting to students</li>
@@ -703,11 +703,11 @@ function FilmEditPanel() {
 
       {/* Resources */}
       <div>
-        <h3 className="text-2xl font-normal text-[#1c1d1f] mb-4">Resources</h3>
+        <h3 className="text-3xl font-light text-[#1c1d1f] mb-4">Resources</h3>
         <div className="space-y-4">
           <div>
-            <span className="font-normal text-lg text-[#5624d0] hover:underline cursor-pointer block">Create a test video</span>
-            <span className="text-base text-[#6a6f73]">Get feedback before filming your whole course</span>
+            <span className="font-light text-xl text-[#5624d0] hover:underline cursor-pointer block">Create a test video</span>
+            <span className="text-lg text-[#6a6f73]">Get feedback before filming your whole course</span>
           </div>
         </div>
       </div>
@@ -770,16 +770,16 @@ function SettingsPanel({ courseId, courseData, onDelete }) {
   return (
     <div className="bg-white border border-[#d1d7dc] p-10 shadow-sm">
       <div className="flex items-center justify-between mb-8">
-        <h2 className="text-4xl font-normal text-[#1c1d1f]">Settings</h2>
-        <button className="border border-[#6a6f73] hover:bg-[#f7f9fa] text-[#1c1d1f] text-lg font-normal px-4 py-2 flex items-center gap-1 transition-colors">
+        <h2 className="text-5xl font-light text-[#1c1d1f]">Settings</h2>
+        <button className="border border-[#6a6f73] hover:bg-[#f7f9fa] text-[#1c1d1f] text-xl font-light px-4 py-2 flex items-center gap-1 transition-colors">
           Manage Email Notifications ▾
         </button>
       </div>
 
       {/* Course Status */}
       <div className="border border-[#d1d7dc] p-6 mb-6">
-        <h3 className="font-normal text-[#1c1d1f] text-xl mb-1">Course Status</h3>
-        <p className="text-lg text-[#1c1d1f] mb-5">
+        <h3 className="font-light text-[#1c1d1f] text-2xl mb-1">Course Status</h3>
+        <p className="text-xl text-[#1c1d1f] mb-5">
           {isPublished
             ? "This course is published on the marketplace."
             : "This course is not published on the marketplace."}
@@ -789,11 +789,11 @@ function SettingsPanel({ courseId, courseData, onDelete }) {
             <button
               onClick={handlePublishToggle}
               disabled={isPublishing}
-              className="min-w-[120px] border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-normal text-lg py-2 px-4 transition-colors disabled:opacity-50"
+              className="min-w-[120px] border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-light text-xl py-2 px-4 transition-colors disabled:opacity-50"
             >
               {isPublished ? "Unpublish" : "Publish"}
             </button>
-            <p className="text-lg text-[#6a6f73] mt-1">
+            <p className="text-xl text-[#6a6f73] mt-1">
               {isPublished
                 ? "New students can find your course via search."
                 : "New students cannot find your course via search, but existing students can still access content."}
@@ -802,11 +802,11 @@ function SettingsPanel({ courseId, courseData, onDelete }) {
           <div className="flex items-start gap-4">
             <button
               onClick={onDelete}
-              className="min-w-[120px] border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-normal text-lg py-2 px-4 transition-colors"
+              className="min-w-[120px] border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-light text-xl py-2 px-4 transition-colors"
             >
               Delete
             </button>
-            <p className="text-lg text-[#6a6f73] mt-1">
+            <p className="text-xl text-[#6a6f73] mt-1">
               We promise students lifetime access, so courses cannot be deleted after students have enrolled.
             </p>
           </div>
@@ -815,12 +815,12 @@ function SettingsPanel({ courseId, courseData, onDelete }) {
 
       {/* Enrollment Privacy */}
       <div className="border border-[#d1d7dc] p-6 mb-6">
-        <h3 className="font-normal text-[#1c1d1f] text-xl mb-4">Enrollment (Privacy)</h3>
+        <h3 className="font-light text-[#1c1d1f] text-2xl mb-4">Enrollment (Privacy)</h3>
         <div className="relative mb-3">
           <select
             value={enrollment}
             onChange={(e) => setEnrollment(e.target.value)}
-            className="w-full border border-[#6a6f73] px-4 py-3 text-lg text-[#1c1d1f] outline-none focus:border-[#a435f0] bg-white appearance-none cursor-pointer"
+            className="w-full border border-[#6a6f73] px-4 py-3 text-xl text-[#1c1d1f] outline-none focus:border-[#a435f0] bg-white appearance-none cursor-pointer"
             style={{
               backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236a6f73' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")",
               backgroundRepeat: "no-repeat",
@@ -832,7 +832,7 @@ function SettingsPanel({ courseId, courseData, onDelete }) {
             ))}
           </select>
         </div>
-        <p className="text-lg text-[#6a6f73] mb-5">
+        <p className="text-xl text-[#6a6f73] mb-5">
           {enrollment === "public"
             ? "Public courses show up in search results and are available for anyone to take on Samriddhi Gyan."
             : enrollment === "private-invite"
@@ -842,7 +842,7 @@ function SettingsPanel({ courseId, courseData, onDelete }) {
         <button
           onClick={handleSaveEnrollment}
           disabled={isSavingEnrollment}
-          className="bg-[#1c1d1f] hover:bg-[#2d2f31] text-white font-normal text-lg px-5 py-2.5 transition-colors disabled:opacity-50"
+          className="bg-[#1c1d1f] hover:bg-[#2d2f31] text-white font-light text-xl px-5 py-2.5 transition-colors disabled:opacity-50"
         >
           {isSavingEnrollment ? "Saving..." : "Save"}
         </button>
@@ -852,30 +852,30 @@ function SettingsPanel({ courseId, courseData, onDelete }) {
       <div className="border border-[#d1d7dc] p-6">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2">
-            <h3 className="font-normal text-[#1c1d1f] text-xl">Manage instructor permissions</h3>
+            <h3 className="font-light text-[#1c1d1f] text-2xl">Manage instructor permissions</h3>
             <Info className="w-4 h-4 text-[#6a6f73]" />
           </div>
-          <button className="text-lg font-normal text-[#5624d0] hover:underline flex items-center gap-1">
+          <button className="text-xl font-light text-[#5624d0] hover:underline flex items-center gap-1">
             <PlusCircle className="w-4 h-4" /> Add instructor
           </button>
         </div>
 
         {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full text-lg">
+          <table className="w-full text-xl">
             <thead>
               <tr className="border-b border-[#d1d7dc]">
-                <th className="text-left py-2 pr-6 font-normal text-[#1c1d1f] min-w-[180px]">Instructor</th>
+                <th className="text-left py-2 pr-6 font-light text-[#1c1d1f] min-w-[180px]">Instructor</th>
                 {PERMISSION_COLS.map(col => (
-                  <th key={col} className="text-center py-2 px-4 font-normal text-[#1c1d1f] whitespace-nowrap">{col}</th>
+                  <th key={col} className="text-center py-2 px-4 font-light text-[#1c1d1f] whitespace-nowrap">{col}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               <tr className="border-b border-[#d1d7dc]">
                 <td className="py-4 pr-6">
-                  <div className="text-lg font-light text-[#1c1d1f]">{user?.name || "Instructor"}</div>
-                  <span className="inline-block mt-1 bg-[#1c1d1f] text-white text-[10px] font-normal px-2 py-0.5 rounded">
+                  <div className="text-xl font-extralight text-[#1c1d1f]">{user?.name || "Instructor"}</div>
+                  <span className="inline-block mt-1 bg-[#1c1d1f] text-white text-[10px] font-light px-2 py-0.5 rounded">
                     Owner
                   </span>
                 </td>
@@ -894,7 +894,7 @@ function SettingsPanel({ courseId, courseData, onDelete }) {
           </table>
         </div>
 
-        <button className="mt-5 bg-[#1c1d1f] hover:bg-[#2d2f31] text-white font-normal text-lg px-5 py-2.5 transition-colors">
+        <button className="mt-5 bg-[#1c1d1f] hover:bg-[#2d2f31] text-white font-light text-xl px-5 py-2.5 transition-colors">
           Save
         </button>
       </div>
@@ -911,8 +911,8 @@ function PlaceholderPanel({ title }) {
       <div className="w-16 h-16 rounded-full bg-[#f7f9fa] border border-[#d1d7dc] flex items-center justify-center mb-4">
         <Info className="w-7 h-7 text-[#6a6f73]" />
       </div>
-      <h3 className="text-2xl font-normal text-[#1c1d1f] mb-2">{title}</h3>
-      <p className="text-lg text-[#6a6f73] max-w-sm">
+      <h3 className="text-3xl font-light text-[#1c1d1f] mb-2">{title}</h3>
+      <p className="text-xl text-[#6a6f73] max-w-sm">
         This section is coming soon. Please check back later.
       </p>
     </div>
@@ -1010,24 +1010,24 @@ const EditCourse = () => {
         {/* Back to courses */}
         <button
           onClick={() => navigate("/instructor/course")}
-          className="flex items-center gap-1.5 text-lg text-[#cec0fc] hover:text-white transition-colors whitespace-nowrap font-normal"
+          className="flex items-center gap-1.5 text-xl text-[#cec0fc] hover:text-white transition-colors whitespace-nowrap font-light"
         >
           <ArrowLeft className="w-4 h-4" />
           Back to courses
         </button>
 
         {/* Course title */}
-        <span className="font-normal text-white text-lg truncate max-w-[200px]">
+        <span className="font-light text-white text-xl truncate max-w-[200px]">
           {course?.title || "Untitled Course"}
         </span>
 
         {/* Draft badge */}
-        <span className="bg-[#3d3d3d] text-[#cec0fc] text-base font-normal px-2 py-0.5 rounded shrink-0">
+        <span className="bg-[#3d3d3d] text-[#cec0fc] text-lg font-light px-2 py-0.5 rounded shrink-0">
           {isPublished ? "PUBLISHED" : "DRAFT"}
         </span>
 
         {/* Video minutes */}
-        <span className="text-base text-[#9a9fa5] whitespace-nowrap">
+        <span className="text-lg text-[#9a9fa5] whitespace-nowrap">
           {(() => {
             const totalSeconds = course?.totalDurationInSeconds || 0;
             if (!totalSeconds) return "0 min of video content uploaded";
@@ -1049,7 +1049,7 @@ const EditCourse = () => {
           <button
             disabled={!isValid}
             onClick={() => saveFnRef.current?.()}
-            className={`text-lg font-normal px-5 py-2 transition-all border
+            className={`text-xl font-light px-5 py-2 transition-all border
               ${isValid
                 ? "bg-transparent border-white text-white hover:bg-white/10 cursor-pointer"
                 : "bg-[#2d2f31] border-[#4d5154] text-[#868c92] cursor-not-allowed"
@@ -1075,7 +1075,7 @@ const EditCourse = () => {
         <aside className="w-[220px] shrink-0">
           {SIDEBAR_SECTIONS.map((section) => (
             <div key={section.group} className="mb-8">
-              <p className="text-base font-normal text-[#1c1d1f] uppercase tracking-wider mb-4">
+              <p className="text-lg font-light text-[#1c1d1f] uppercase tracking-wider mb-4">
                 {section.group}
               </p>
               <ul className="space-y-1">
@@ -1088,9 +1088,9 @@ const EditCourse = () => {
                           setActiveSection(item.id);
                           setShowSettings(false);
                         }}
-                        className={`w-full flex items-center gap-3 text-lg py-2 px-1 text-left transition-all
+                        className={`w-full flex items-center gap-3 text-xl py-2 px-1 text-left transition-all
                           ${isSelected
-                            ? "text-[#1c1d1f] font-normal border-l-[4px] border-[#1c1d1f] pl-3.5"
+                            ? "text-[#1c1d1f] font-light border-l-[4px] border-[#1c1d1f] pl-3.5"
                             : "text-[#6a6f73] hover:text-[#1c1d1f] pl-4"
                           }`}
                       >
@@ -1110,7 +1110,7 @@ const EditCourse = () => {
 
           {/* Submit for review */}
           <div className="mt-6 pt-4 border-t border-[#d1d7dc]">
-            <button className="w-full bg-[#a435f0] hover:bg-[#8710d8] text-white font-normal text-lg py-3 transition-colors">
+            <button className="w-full bg-[#a435f0] hover:bg-[#8710d8] text-white font-light text-xl py-3 transition-colors">
               Submit for Review
             </button>
           </div>

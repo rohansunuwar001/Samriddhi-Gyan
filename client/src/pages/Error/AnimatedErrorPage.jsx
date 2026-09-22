@@ -54,24 +54,24 @@ export default function AnimatedErrorPage() {
       ref={containerRef}
       className="flex flex-col items-center justify-center min-h-screen p-4 overflow-hidden text-center text-white bg-gray-900 font-sans"
     >
-      <h1 className="status-code text-9xl md:text-[200px] font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-br from-purple-500 to-cyan-400">
+      <h1 className="status-code text-9xl md:text-[200px] font-extrabold tracking-widest text-transparent bg-clip-text bg-gradient-to-br from-purple-500 to-cyan-400">
         0
       </h1>
 
       <div className="mt-4 reveal-text">
-        <h2 className="text-4xl font-bold tracking-tight text-white sm:text-5xl">
+        <h2 className="text-5xl font-semibold tracking-tight text-white sm:text-6xl">
           {error.statusText || 'An Error Occurred'}
         </h2>
       </div>
 
-      <div className="mt-6 text-lg leading-8 text-gray-300 reveal-text">
+      <div className="mt-6 text-xl leading-8 text-gray-300 reveal-text">
         <p>{error.data || "Something went wrong on our end."}</p>
       </div>
 
       <div className="mt-10 home-link-btn">
         <Link
           to="/"
-          className="inline-block px-8 py-4 text-lg font-semibold text-white transition-all duration-300 rounded-lg shadow-lg bg-purple-600/80 hover:bg-purple-700/80 hover:scale-105 backdrop-blur-sm ring-1 ring-white/20"
+          className="inline-block px-8 py-4 text-xl font-medium text-white transition-all duration-300 rounded-lg shadow-lg bg-purple-600/80 hover:bg-purple-700/80 hover:scale-105 backdrop-blur-sm ring-1 ring-white/20"
         >
           Go Back Home
         </Link>

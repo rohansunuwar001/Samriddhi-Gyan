@@ -70,7 +70,7 @@ export const getAllTopics = async (req, res) => {
 
     const topics = await Topic.find({}).sort({ name: 1 }).lean();
     
-    // For each topic, compute stats dynamically from matching courses in database
+    // For each topic, compute stats dynamically from matching courses & reviews in database
     const enrichedTopics = await Promise.all(
       topics.map(async (topic) => {
         const searchRegex = new RegExp(topic.name.trim(), "i");
@@ -79,28 +79,25 @@ export const getAllTopics = async (req, res) => {
           $or: [
             { topics: topic.name },
             { category: topic.name },
+            { categoryHierarchy: topic.name },
             { title: { $regex: searchRegex } },
           ],
-        }).select("enrolledStudents courseIncludes ratings").lean();
+        }).select("_id enrolledStudents courseIncludes").lean();
 
         let numLearners = 0;
         let handsOnPracticeCount = 0;
-        let totalRatingSum = 0;
-        let ratedCoursesCount = 0;
+        const courseIds = courses.map((c) => c._id);
 
         courses.forEach((c) => {
           numLearners += c.enrolledStudents?.length || 0;
           handsOnPracticeCount += c.courseIncludes?.codingExercises || 0;
-          if (c.ratings > 0) {
-            totalRatingSum += c.ratings;
-            ratedCoursesCount++;
-          }
         });
 
-        const avgRating =
-          ratedCoursesCount > 0
-            ? Number((totalRatingSum / ratedCoursesCount).toFixed(1))
-            : topic.rating || 0;
+        const reviews = await Review.find({ course: { $in: courseIds } }).select("rating").lean();
+        const totalRatingSum = reviews.reduce((sum, r) => sum + (r.rating || 0), 0);
+        const avgRating = reviews.length > 0
+          ? Number((totalRatingSum / reviews.length).toFixed(1))
+          : 0;
 
         return {
           ...topic,
@@ -121,156 +118,199 @@ export const getAllTopics = async (req, res) => {
 export const getTopicBySlug = async (req, res) => {
   try {
     const { slug } = req.params;
+
+    // 1. Check if slug matches a Category
+    const categoryDoc = await Category.findOne({ slug }).lean();
+    if (categoryDoc) {
+      // Level 0: Parent Category (e.g. "Development") -> 404
+      if (!categoryDoc.parent) {
+        return res.status(404).json({
+          success: false,
+          message: "Page not found. Parent categories do not have topic pages.",
+          statusCode: 404,
+        });
+      }
+
+      // Level 1: Child Category (e.g. "Backend Development") -> 404
+      const parentDoc = await Category.findById(categoryDoc.parent).lean();
+      if (!parentDoc || !parentDoc.parent) {
+        return res.status(404).json({
+          success: false,
+          message: "Page not found. Child categories do not have topic pages.",
+          statusCode: 404,
+        });
+      }
+
+      // Level 2: Sub-child Category (e.g. "Express Js", "React", "Node Js") -> ALLOWED
+      // Ensure a persistent Topic document exists in the Topic collection
+      const existingTopic = await Topic.findOne({ slug });
+      if (!existingTopic) {
+        await Topic.create({
+          name: categoryDoc.name,
+          slug: categoryDoc.slug,
+          type: "topic",
+          parentCategory: parentDoc.name,
+          bannerTitle: `${categoryDoc.name} Courses`,
+          description: `Explore top-rated online courses in ${categoryDoc.name}. Master new skills with curated paths and hands-on practice.`,
+          relatedTopics: [],
+        });
+      }
+    }
+
+    // 2. Fetch Topic
     let topic = await Topic.findOne({ slug }).lean();
+    if (!topic) {
+      return res.status(404).json({
+        success: false,
+        message: "Topic not found",
+        statusCode: 404,
+      });
+    }
+
+    // Double-check: ensure Topic does not coincide with any Parent or Child category
+    const topicCategory = await Category.findOne({ slug: topic.slug }).lean();
+    if (topicCategory) {
+      if (!topicCategory.parent) {
+        return res.status(404).json({
+          success: false,
+          message: "Page not found. Parent categories do not have topic pages.",
+          statusCode: 404,
+        });
+      }
+      const parentCat = await Category.findById(topicCategory.parent).lean();
+      if (!parentCat || !parentCat.parent) {
+        return res.status(404).json({
+          success: false,
+          message: "Page not found. Child categories do not have topic pages.",
+          statusCode: 404,
+        });
+      }
+    }
+
     let courses = [];
     let cert = null;
 
-    if (topic) {
-      if (topic.type === "certification") {
-        cert = await Certification.findOne({ name: new RegExp(`^${topic.name.trim()}$`, "i") })
-          .populate("issuer", "name type")
-          .populate("categoryFilterParent", "name slug")
-          .populate("categoryFilterChild", "name slug")
-          .populate("categoryFilterSubChild", "name slug")
-          .lean();
-      }
+    if (topic.type === "certification") {
+      cert = await Certification.findOne({ name: new RegExp(`^${topic.name.trim()}$`, "i") })
+        .populate("issuer", "name type")
+        .populate("categoryFilterParent", "name slug")
+        .populate("categoryFilterChild", "name slug")
+        .populate("categoryFilterSubChild", "name slug")
+        .lean();
+    }
 
-      if (cert) {
-        let targetCategoryNames = [];
-        const categoriesToQuery = [];
-        if (cert.categoryFilterParent) categoriesToQuery.push(cert.categoryFilterParent._id || cert.categoryFilterParent);
-        if (cert.categoryFilterChild) categoriesToQuery.push(cert.categoryFilterChild._id || cert.categoryFilterChild);
-        if (cert.categoryFilterSubChild) categoriesToQuery.push(cert.categoryFilterSubChild._id || cert.categoryFilterSubChild);
+    if (cert) {
+      let targetCategoryNames = [];
+      const categoriesToQuery = [];
+      if (cert.categoryFilterParent) categoriesToQuery.push(cert.categoryFilterParent._id || cert.categoryFilterParent);
+      if (cert.categoryFilterChild) categoriesToQuery.push(cert.categoryFilterChild._id || cert.categoryFilterChild);
+      if (cert.categoryFilterSubChild) categoriesToQuery.push(cert.categoryFilterSubChild._id || cert.categoryFilterSubChild);
 
-        const resolvedCategories = await Category.find({ _id: { $in: categoriesToQuery } }).lean();
+      const resolvedCategories = await Category.find({ _id: { $in: categoriesToQuery } }).lean();
 
-        const parentCat = resolvedCategories.find(c => String(c._id) === String(cert.categoryFilterParent?._id || cert.categoryFilterParent));
-        const childCat = resolvedCategories.find(c => String(c._id) === String(cert.categoryFilterChild?._id || cert.categoryFilterChild));
-        const subChildCat = resolvedCategories.find(c => String(c._id) === String(cert.categoryFilterSubChild?._id || cert.categoryFilterSubChild));
+      const parentCat = resolvedCategories.find(c => String(c._id) === String(cert.categoryFilterParent?._id || cert.categoryFilterParent));
+      const childCat = resolvedCategories.find(c => String(c._id) === String(cert.categoryFilterChild?._id || cert.categoryFilterChild));
+      const subChildCat = resolvedCategories.find(c => String(c._id) === String(cert.categoryFilterSubChild?._id || cert.categoryFilterSubChild));
 
-        if (subChildCat) {
-          targetCategoryNames.push(subChildCat.name);
-        } else if (childCat) {
-          targetCategoryNames.push(childCat.name);
-          const subCats = await Category.find({ parent: childCat._id }).select("name").lean();
-          subCats.forEach(sc => targetCategoryNames.push(sc.name));
-        } else if (parentCat) {
-          targetCategoryNames.push(parentCat.name);
-          const children = await Category.find({ parent: parentCat._id }).select("_id name").lean();
-          for (const child of children) {
-            targetCategoryNames.push(child.name);
-            const grandchildren = await Category.find({ parent: child._id }).select("name").lean();
-            grandchildren.forEach(gc => targetCategoryNames.push(gc.name));
-          }
+      if (subChildCat) {
+        targetCategoryNames.push(subChildCat.name);
+      } else if (childCat) {
+        targetCategoryNames.push(childCat.name);
+        const subCats = await Category.find({ parent: childCat._id }).select("name").lean();
+        subCats.forEach(sc => targetCategoryNames.push(sc.name));
+      } else if (parentCat) {
+        targetCategoryNames.push(parentCat.name);
+        const children = await Category.find({ parent: parentCat._id }).select("_id name").lean();
+        for (const child of children) {
+          targetCategoryNames.push(child.name);
+          const grandchildren = await Category.find({ parent: child._id }).select("name").lean();
+          grandchildren.forEach(gc => targetCategoryNames.push(gc.name));
         }
-
-        courses = await Course.find({
-          category: { $in: targetCategoryNames },
-          isPublished: true,
-        })
-          .populate("creator", "name photoUrl headline")
-          .lean();
-      } else {
-        courses = await Course.find({
-          isPublished: true,
-          $or: [
-            { topics: topic.name },
-            { category: topic.name },
-          ],
-        })
-          .populate("creator", "name photoUrl headline")
-          .lean();
       }
 
-      let numLearners = 0;
-      let handsOnPracticeCount = 0;
-      let totalRatingSum = 0;
-      let ratedCoursesCount = 0;
-
-      courses.forEach((c) => {
-        numLearners += c.enrolledStudents?.length || 0;
-        handsOnPracticeCount += c.courseIncludes?.codingExercises || 0;
-        if (c.ratings > 0) {
-          totalRatingSum += c.ratings;
-          ratedCoursesCount++;
-        }
-      });
-
-      topic.numLearners = numLearners;
-      topic.handsOnPracticeCount = handsOnPracticeCount;
-      topic.rating =
-        ratedCoursesCount > 0
-          ? Number((totalRatingSum / ratedCoursesCount).toFixed(1))
-          : topic.rating || 0;
-    } else {
-      // Fallback: search Category by slug
-      const categoryDoc = await Category.findOne({ slug }).lean();
-      if (!categoryDoc) {
-        return res.status(404).json({ success: false, message: "Topic or Category not found" });
-      }
-
-      // If category is found, fetch children AND grandchildren (up to 2 levels deep)
-      const children = await Category.find({ parent: categoryDoc._id }).lean();
-      const grandchildren = children.length
-        ? await Category.find({ parent: { $in: children.map(c => c._id) } }).lean()
-        : [];
-      const categoryNames = [
-        categoryDoc.name,
-        ...children.map(s => s.name),
-        ...grandchildren.map(s => s.name),
-      ];
-
-      // Query published courses
       courses = await Course.find({
+        category: { $in: targetCategoryNames },
         isPublished: true,
-        category: { $in: categoryNames },
       })
         .populate("creator", "name photoUrl headline")
         .lean();
-
-      let numLearners = 0;
-      let handsOnPracticeCount = 0;
-      let totalRatingSum = 0;
-      let ratedCoursesCount = 0;
-
-      courses.forEach((c) => {
-        numLearners += c.enrolledStudents?.length || 0;
-        handsOnPracticeCount += c.courseIncludes?.codingExercises || 0;
-        if (c.ratings > 0) {
-          totalRatingSum += c.ratings;
-          ratedCoursesCount++;
-        }
-      });
-
-      // Create a virtual topic object
-      topic = {
-        name: categoryDoc.name,
-        slug: categoryDoc.slug,
-        type: "topic",
-        description: `Explore top-rated online courses in ${categoryDoc.name}. Master new skills with curated paths and hands-on practice.`,
-        bannerTitle: `${categoryDoc.name} Courses`,
-        logoUrl: "",
-        numLearners,
-        handsOnPracticeCount,
-        rating: ratedCoursesCount > 0 ? Number((totalRatingSum / ratedCoursesCount).toFixed(1)) : 0,
-        relatedTopics: [...children.map(s => s.name), ...grandchildren.map(s => s.name)],
-        parentCategory: "",
-      };
+    } else {
+      courses = await Course.find({
+        isPublished: true,
+        $or: [
+          { topics: topic.name },
+          { category: topic.name },
+          { categoryHierarchy: topic.name },
+          { title: { $regex: new RegExp(topic.name.trim(), "i") } },
+        ],
+      })
+        .populate("creator", "name photoUrl headline")
+        .lean();
     }
 
-    // Fetch top rated reviews (rating >= 4) for courses under this topic/category
-    const courseIds = courses.map(c => c._id);
-    const reviews = await Review.find({
+    const courseIds = courses.map((c) => c._id);
+    const allReviews = await Review.find({
       course: { $in: courseIds },
-      rating: { $gte: 4 }
     })
       .sort({ rating: -1, createdAt: -1 })
-      .limit(6)
       .populate("user", "name photoUrl")
       .populate("course", "title")
       .lean();
 
-    return res.status(200).json({ success: true, topic, courses, reviews, certification: cert });
+    const reviewsByCourse = new Map();
+    allReviews.forEach((r) => {
+      const cId = r.course?._id?.toString() || r.course?.toString();
+      if (cId) {
+        if (!reviewsByCourse.has(cId)) reviewsByCourse.set(cId, []);
+        reviewsByCourse.get(cId).push(r);
+      }
+    });
+
+    let numLearners = 0;
+    let handsOnPracticeCount = 0;
+    let totalRatingSum = 0;
+    let totalRatingsCount = 0;
+
+    const enrichedCourses = courses.map((c) => {
+      const cId = c._id.toString();
+      const courseReviews = reviewsByCourse.get(cId) || [];
+      const courseRatings = courseReviews.map((r) => r.rating);
+      const avg = courseRatings.length
+        ? Number((courseRatings.reduce((s, r) => s + r, 0) / courseRatings.length).toFixed(1))
+        : 0;
+
+      numLearners += c.enrolledStudents?.length || 0;
+      handsOnPracticeCount += c.courseIncludes?.codingExercises || 0;
+
+      if (courseRatings.length > 0) {
+        totalRatingSum += courseRatings.reduce((s, r) => s + r, 0);
+        totalRatingsCount += courseRatings.length;
+      }
+
+      return {
+        ...c,
+        ratings: courseRatings,
+        avgRating: avg,
+        reviewCount: courseRatings.length,
+      };
+    });
+
+    topic.numLearners = numLearners;
+    topic.handsOnPracticeCount = handsOnPracticeCount;
+    topic.rating =
+      totalRatingsCount > 0
+        ? Number((totalRatingSum / totalRatingsCount).toFixed(1))
+        : 0;
+
+    const topReviews = allReviews.filter((r) => r.rating >= 4).slice(0, 6);
+
+    return res.status(200).json({
+      success: true,
+      topic,
+      courses: enrichedCourses,
+      reviews: topReviews.length > 0 ? topReviews : allReviews.slice(0, 6),
+      certification: cert,
+    });
   } catch (error) {
     console.error("getTopicBySlug error:", error);
     return res.status(500).json({ success: false, message: "Server error", error: error.message });

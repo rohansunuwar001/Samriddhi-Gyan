@@ -8,7 +8,7 @@ export default function PaymentFailed() {
       <div className="text-center">
         <XCircle className="mx-auto text-red-500 w-16 h-16" />
 
-        <h1 className="text-3xl font-bold mt-5">Payment Failed</h1>
+        <h1 className="text-4xl font-semibold mt-5">Payment Failed</h1>
 
         <p className="mt-3 text-gray-500">Your payment was not completed.</p>
 

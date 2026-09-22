@@ -66,18 +66,18 @@ const LectureRow = ({ lecture }) => {
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0">
                     {lecture.isPreview && (
-                        <span className="flex items-center gap-1 text-purple-700 text-sm font-medium">
+                        <span className="flex items-center gap-1 text-purple-700 text-base font-normal">
                             <PlayCircle className="h-3.5 w-3.5 fill-current" />
                             Preview
                         </span>
                     )}
-                    <span className="text-gray-500 text-sm tabular-nums">
+                    <span className="text-gray-500 text-base tabular-nums">
                         {formatDurationClock(lecture.durationInSeconds)}
                     </span>
                 </div>
             </div>
             {hasDescription && showDescription && (
-                <p className="mt-2 ml-7 text-sm text-gray-600 leading-relaxed">
+                <p className="mt-2 ml-7 text-base text-gray-600 leading-relaxed">
                     {lecture.description}
                 </p>
             )}
@@ -103,18 +103,18 @@ const CourseContent = ({ sections = [], totalLectures = 0, totalLength = 0 }) =>
     return (
         <div>
             <div className="flex items-center justify-between mb-1">
-                <h2 className="text-2xl font-bold">Course content</h2>
+                <h2 className="text-3xl font-semibold">Course content</h2>
             </div>
-            <div className="text-sm text-gray-600 mb-4">
+            <div className="text-base text-gray-600 mb-4">
                 {totalSections} section{totalSections !== 1 ? "s" : ""} • {totalLectures} lecture{totalLectures !== 1 ? "s" : ""} • {formatDurationShort(totalLength)} total length
             </div>
             <Accordion type="multiple" className="w-full border border-gray-200 rounded-md overflow-hidden divide-y divide-gray-200">
                 {sections.map((section, index) => (
                     <AccordionItem value={`item-${index}`} key={section._id || index} className="border-0">
-                        <AccordionTrigger className="font-bold bg-gray-50 hover:bg-gray-100 px-4 py-3 hover:no-underline">
+                        <AccordionTrigger className="font-semibold bg-gray-50 hover:bg-gray-100 px-4 py-3 hover:no-underline">
                             <div className="flex justify-between w-full pr-4 items-center">
                                 <span className="text-left">{section.title}</span>
-                                <span className="text-gray-600 font-normal text-sm flex-shrink-0 ml-4">
+                                <span className="text-gray-600 font-light text-base flex-shrink-0 ml-4">
                                     {(section.lectures?.length || 0)} lecture{(section.lectures?.length || 0) !== 1 ? "s" : ""} • {formatDurationShort(section.totalDurationInSeconds)}
                                 </span>
                             </div>

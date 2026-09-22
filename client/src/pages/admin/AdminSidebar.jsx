@@ -16,6 +16,7 @@ import {
   Award,
   MapPin,
   Wrench,
+  Compass,
 } from "lucide-react";
 
 const AdminSidebar = () => {
@@ -59,9 +60,10 @@ const AdminSidebar = () => {
       id: "course-setup",
       label: "Course Setup",
       icon: <Tag className="w-5 h-5" />,
-      paths: ["/admin/categories", "/admin/topics", "/admin/certifications"],
+      paths: ["/admin/categories", "/admin/explore-menu", "/admin/topics", "/admin/certifications"],
       subItems: [
         { to: "/admin/categories", label: "Categories", icon: <Tag className="w-4 h-4" /> },
+        { to: "/admin/explore-menu", label: "Explore Menu", icon: <Compass className="w-4 h-4" /> },
         { to: "/admin/topics", label: "Topics", icon: <Tag className="w-4 h-4" /> },
         { to: "/admin/certifications", label: "Certifications", icon: <Award className="w-4 h-4" /> }
       ]
@@ -121,7 +123,7 @@ const AdminSidebar = () => {
               <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-[#a435f0] to-[#8720cf] flex items-center justify-center shadow-md shrink-0">
                 <BookOpen className="w-5 h-5 text-white" />
               </div>
-              <span className="font-normal text-white text-lg tracking-tight whitespace-nowrap">
+              <span className="font-light text-white text-xl tracking-tight whitespace-nowrap">
                 Samriddhi <span className="text-[#a435f0]">Gyan</span>
               </span>
             </div>
@@ -148,7 +150,7 @@ const AdminSidebar = () => {
                     onClick={() => navigate(item.to)}
                     className={`w-full flex items-center gap-4 py-3.5 px-3 transition-colors rounded-lg group ${
                       isMenuBtnActive
-                        ? "bg-white/10 text-white font-normal"
+                        ? "bg-white/10 text-white font-light"
                         : "hover:bg-white/5 hover:text-white"
                     }`}
                     title={!isHovered ? item.label : undefined}
@@ -160,7 +162,7 @@ const AdminSidebar = () => {
                       {item.icon}
                     </div>
                     {isHovered && (
-                      <span className="text-base tracking-wide transition-opacity duration-300 font-light">
+                      <span className="text-lg tracking-wide transition-opacity duration-300 font-extralight">
                         {item.label}
                       </span>
                     )}
@@ -177,7 +179,7 @@ const AdminSidebar = () => {
                   onClick={() => isHovered && toggleSubMenu(item.id)}
                   className={`w-full flex items-center justify-between py-3.5 px-3 transition-colors rounded-lg group ${
                     isMenuBtnActive 
-                      ? "bg-white/10 text-white font-normal" 
+                      ? "bg-white/10 text-white font-light" 
                       : "hover:bg-white/5 hover:text-white"
                   }`}
                   title={!isHovered ? item.label : undefined}
@@ -191,7 +193,7 @@ const AdminSidebar = () => {
                       {item.icon}
                     </div>
                     {isHovered && (
-                      <span className="text-base tracking-wide transition-opacity duration-300 font-light">
+                      <span className="text-lg tracking-wide transition-opacity duration-300 font-extralight">
                         {item.label}
                       </span>
                     )}
@@ -217,9 +219,9 @@ const AdminSidebar = () => {
                           key={sub.to}
                           to={sub.to}
                           end
-                          className={`flex items-center gap-3 py-2 px-3 text-sm rounded transition-colors ${
+                          className={`flex items-center gap-3 py-2 px-3 text-base rounded transition-colors ${
                             isSubActive
-                              ? "text-white font-normal bg-[#a435f0]/20"
+                              ? "text-white font-light bg-[#a435f0]/20"
                               : "text-gray-400 hover:text-white hover:bg-white/5"
                           }`}
                         >
@@ -239,7 +241,7 @@ const AdminSidebar = () => {
 
         {/* Footer Area / Role indicator */}
         {isHovered && (
-          <div className="p-4 border-t border-[#3e4143] bg-black/10 text-[10px] text-gray-400 text-center shrink-0 tracking-wider font-sans font-bold">
+          <div className="p-4 border-t border-[#3e4143] bg-black/10 text-[10px] text-gray-400 text-center shrink-0 tracking-wider font-sans font-semibold">
             ADMIN WORKSPACE
           </div>
         )}

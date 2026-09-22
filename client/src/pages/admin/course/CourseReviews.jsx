@@ -99,9 +99,9 @@ const ReplyToReviewDialog = ({ review, isOpen, onClose, onSave }) => {
         </DialogHeader>
         <div className="mt-4">
           <div className="p-4 border rounded-md bg-secondary">
-            <p className="font-normal">{review.user?.name || "Student"}</p>
+            <p className="font-light">{review.user?.name || "Student"}</p>
             <StarRatingDisplay rating={review.rating} />
-            <p className="text-lg text-muted-foreground mt-2 italic">
+            <p className="text-xl text-muted-foreground mt-2 italic">
               "{review.comment}"
             </p>
           </div>
@@ -205,7 +205,7 @@ const CourseReviews = () => {
   return (
     <div className="flex-1 space-y-6 p-8 pt-6 bg-slate-50 min-h-screen">
       <header>
-        <h2 className="text-5xl font-normal tracking-tight">Course Reviews</h2>
+        <h2 className="text-6xl font-light tracking-tight">Course Reviews</h2>
         <p className="text-muted-foreground">
           Manage and respond to student feedback.
         </p>
@@ -306,21 +306,21 @@ const CourseReviews = () => {
                           </AvatarFallback>
                         </Avatar>
                         <div>
-                          <p className="font-light">{review.user?.name || "Student"}</p>
-                          <p className="text-lg text-muted-foreground">
+                          <p className="font-extralight">{review.user?.name || "Student"}</p>
+                          <p className="text-xl text-muted-foreground">
                             {review.user?.email || "—"}
                           </p>
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="text-lg text-muted-foreground">
+                    <TableCell className="text-xl text-muted-foreground">
                       {review.courseTitle}
                     </TableCell>
                     <TableCell>
                       <StarRatingDisplay rating={review.rating} />
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
-                      <p className="text-lg max-w-xs truncate">
+                      <p className="text-xl max-w-xs truncate">
                         {review.comment}
                       </p>
                     </TableCell>
@@ -365,7 +365,7 @@ const CourseReviews = () => {
           </Table>
           {totalPages > 1 && (
             <div className="flex items-center justify-between pt-4">
-              <span className="text-lg text-muted-foreground">
+              <span className="text-xl text-muted-foreground">
                 Page {currentPage} of {totalPages}
               </span>
               <div className="flex items-center gap-2">

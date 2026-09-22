@@ -55,7 +55,7 @@ function Step1({ value, onChange }) {
 
   return (
     <div className="flex flex-col items-center">
-      <h1 className="text-4xl font-normal text-[#1c1d1f] text-center mb-12">
+      <h1 className="text-5xl font-light text-[#1c1d1f] text-center mb-12">
         First, let's find out what type of course you're making.
       </h1>
       <div className="flex gap-4">
@@ -70,8 +70,8 @@ function Step1({ value, onChange }) {
               }`}
           >
             <div className="mb-4">{opt.icon}</div>
-            <p className="font-normal text-lg text-[#1c1d1f] mb-2">{opt.label}</p>
-            <p className="text-base text-[#6a6f73] leading-relaxed">{opt.desc}</p>
+            <p className="font-light text-xl text-[#1c1d1f] mb-2">{opt.label}</p>
+            <p className="text-lg text-[#6a6f73] leading-relaxed">{opt.desc}</p>
           </button>
         ))}
       </div>
@@ -86,10 +86,10 @@ function Step2({ value, onChange }) {
   const MAX = 60;
   return (
     <div className="flex flex-col items-center w-full max-w-lg">
-      <h1 className="text-4xl font-normal text-[#1c1d1f] text-center mb-3">
+      <h1 className="text-5xl font-light text-[#1c1d1f] text-center mb-3">
         How about a working title?
       </h1>
-      <p className="text-lg text-[#6a6f73] text-center mb-8">
+      <p className="text-xl text-[#6a6f73] text-center mb-8">
         It's ok if you can't think of a good title now. You can change it later.
       </p>
       <div className="relative w-full">
@@ -99,10 +99,10 @@ function Step2({ value, onChange }) {
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="e.g., Learn Photoshop CS6 from Scratch"
-          className="w-full border border-[#6a6f73] focus:border-[#a435f0] outline-none px-4 py-3 text-lg text-[#1c1d1f] pr-12 transition-colors"
+          className="w-full border border-[#6a6f73] focus:border-[#a435f0] outline-none px-4 py-3 text-xl text-[#1c1d1f] pr-12 transition-colors"
           style={{ borderWidth: "1.5px" }}
         />
-        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-base text-[#6a6f73]">
+        <span className="absolute right-3 top-1/2 -translate-y-1/2 text-lg text-[#6a6f73]">
           {MAX - value.length}
         </span>
       </div>
@@ -162,10 +162,10 @@ function Step3({ value, onChange, categories }) {
 
   return (
     <div className="flex flex-col items-center w-full max-w-lg">
-      <h1 className="text-4xl font-normal text-[#1c1d1f] text-center mb-3">
+      <h1 className="text-5xl font-light text-[#1c1d1f] text-center mb-3">
         What category best fits the knowledge you'll share?
       </h1>
-      <p className="text-lg text-[#6a6f73] text-center mb-8">
+      <p className="text-xl text-[#6a6f73] text-center mb-8">
         If you're not sure about the right category, you can change it later.
       </p>
 
@@ -174,7 +174,7 @@ function Step3({ value, onChange, categories }) {
         <select
           value={parentId}
           onChange={(e) => handleParent(e.target.value)}
-          className="w-full border border-[#6a6f73] px-4 py-3 text-lg text-[#1c1d1f] outline-none focus:border-[#a435f0] bg-white appearance-none cursor-pointer"
+          className="w-full border border-[#6a6f73] px-4 py-3 text-xl text-[#1c1d1f] outline-none focus:border-[#a435f0] bg-white appearance-none cursor-pointer"
           style={{ borderWidth: "1.5px", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236a6f73' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
         >
           <option value="">Choose a category</option>
@@ -190,7 +190,7 @@ function Step3({ value, onChange, categories }) {
           <select
             value={childId}
             onChange={(e) => handleChild(e.target.value)}
-            className="w-full border border-[#6a6f73] px-4 py-3 text-lg text-[#1c1d1f] outline-none focus:border-[#a435f0] bg-white appearance-none cursor-pointer"
+            className="w-full border border-[#6a6f73] px-4 py-3 text-xl text-[#1c1d1f] outline-none focus:border-[#a435f0] bg-white appearance-none cursor-pointer"
             style={{ borderWidth: "1.5px", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236a6f73' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
           >
             <option value="">Choose a subcategory</option>
@@ -207,7 +207,7 @@ function Step3({ value, onChange, categories }) {
           <select
             value={selectedLevel === 2 ? selectedId : ""}
             onChange={(e) => handleSubChild(e.target.value)}
-            className="w-full border border-[#6a6f73] px-4 py-3 text-lg text-[#1c1d1f] outline-none focus:border-[#a435f0] bg-white appearance-none cursor-pointer"
+            className="w-full border border-[#6a6f73] px-4 py-3 text-xl text-[#1c1d1f] outline-none focus:border-[#a435f0] bg-white appearance-none cursor-pointer"
             style={{ borderWidth: "1.5px", backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236a6f73' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E\")", backgroundRepeat: "no-repeat", backgroundPosition: "right 12px center" }}
           >
             <option value="">Choose a topic</option>
@@ -227,10 +227,10 @@ function Step3({ value, onChange, categories }) {
 function Step4({ value, onChange }) {
   return (
     <div className="flex flex-col items-center w-full max-w-lg">
-      <h1 className="text-4xl font-normal text-[#1c1d1f] text-center mb-3">
+      <h1 className="text-5xl font-light text-[#1c1d1f] text-center mb-3">
         How much time can you spend creating your course per week?
       </h1>
-      <p className="text-lg text-[#6a6f73] text-center mb-8">
+      <p className="text-xl text-[#6a6f73] text-center mb-8">
         There's no wrong answer. We can help you achieve your goals even if you don't have much time.
       </p>
       <div className="w-full space-y-2">
@@ -238,7 +238,7 @@ function Step4({ value, onChange }) {
           <button
             key={opt}
             onClick={() => onChange(opt)}
-            className={`w-full flex items-center gap-4 border px-5 py-4 text-lg text-left transition-colors rounded-sm
+            className={`w-full flex items-center gap-4 border px-5 py-4 text-xl text-left transition-colors rounded-sm
               ${value === opt
                 ? "border-[#1c1d1f] bg-white"
                 : "border-[#d1d7dc] hover:border-[#8c8c8c] bg-white"
@@ -328,20 +328,20 @@ const AddCourse = () => {
           <div className="w-8 h-8 rounded bg-gradient-to-tr from-[#a435f0] to-[#5624d0] flex items-center justify-center">
             <BookOpen className="w-4 h-4 text-white" />
           </div>
-          <span className="font-normal text-[#1c1d1f] text-xl tracking-tight">
+          <span className="font-light text-[#1c1d1f] text-2xl tracking-tight">
             Samriddhi<span className="text-[#a435f0]">Gyan</span>
           </span>
         </div>
 
         {/* Step indicator */}
-        <span className="text-lg font-light text-[#1c1d1f]">
+        <span className="text-xl font-extralight text-[#1c1d1f]">
           Step {step} of 4
         </span>
 
         {/* Exit */}
         <button
           onClick={() => navigate("/instructor/course")}
-          className="text-lg font-normal text-[#5624d0] hover:underline"
+          className="text-xl font-light text-[#5624d0] hover:underline"
         >
           Exit
         </button>
@@ -369,7 +369,7 @@ const AddCourse = () => {
         <button
           onClick={handleBack}
           disabled={step === 1}
-          className={`px-5 py-2.5 text-lg font-normal border transition-colors
+          className={`px-5 py-2.5 text-xl font-light border transition-colors
             ${step === 1
               ? "border-[#d1d7dc] text-[#d1d7dc] cursor-not-allowed"
               : "border-[#1c1d1f] text-[#1c1d1f] hover:bg-[#f7f9fa]"
@@ -382,7 +382,7 @@ const AddCourse = () => {
         <button
           onClick={handleContinue}
           disabled={!active || isLoading}
-          className={`px-6 py-2.5 text-lg font-normal transition-all
+          className={`px-6 py-2.5 text-xl font-light transition-all
             ${active
               ? "bg-[#a435f0] text-white hover:bg-[#8710d8] cursor-pointer"
               : "bg-[#d1d7dc] text-[#6a6f73] cursor-not-allowed"

@@ -39,14 +39,14 @@ const CtaSection = ({ description, buttonText, buttonHref }) => {
   return (
     <div className="bg-white py-16 sm:py-24">
       <div className="max-w-4xl mx-auto px-6 text-center">
-        <p className="text-lg md:text-xl text-gray-700 leading-relaxed">
+        <p className="text-xl md:text-2xl text-gray-700 leading-relaxed">
           {description}
         </p>
         <div className="mt-10">
           <button
             onClick={handleButtonClick}
             disabled={isLoading}
-            className="inline-flex items-center justify-center px-8 py-3 bg-gray-900 text-white font-bold rounded-md shadow-sm hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 disabled:bg-gray-500 disabled:cursor-not-allowed"
+            className="inline-flex items-center justify-center px-8 py-3 bg-gray-900 text-white font-semibold rounded-md shadow-sm hover:bg-gray-700 transition-colors duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-800 disabled:bg-gray-500 disabled:cursor-not-allowed"
           >
             {isLoading ? <Spinner /> : buttonText}
           </button>
