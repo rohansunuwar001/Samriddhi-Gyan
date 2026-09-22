@@ -70,3 +70,8 @@ server/scratch/
 server2/
 server3/
 client/src/pages/GoogleAuthCallback.jsx
+
+# AI Assistant & IDE config / skills
+.gemini/
+skills/
+*.skill
