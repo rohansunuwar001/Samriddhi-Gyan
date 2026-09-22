@@ -31,7 +31,8 @@ const CourseSlider = ({ courses }) => {
       {/* Left Navigation Arrow */}
       <button
         onClick={() => scroll("left")}
-        className="absolute left-[-22px] top-1/2 -translate-y-1/2 bg-white text-[#2d2f31] border border-gray-200 shadow-md rounded-full w-11 h-11 flex items-center justify-center z-10 opacity-0 group-hover/slider:opacity-100 transition-opacity hover:bg-gray-50 focus:outline-none"
+        aria-label="Previous courses"
+        className="absolute -left-4 top-1/2 -translate-y-1/2 bg-[#1c1d1f] hover:bg-black text-white shadow-xl rounded-full w-11 h-11 flex items-center justify-center z-10 opacity-0 group-hover/slider:opacity-100 transition-opacity focus:opacity-100 focus:outline-none"
       >
         <ChevronLeft className="w-6 h-6" />
       </button>
@@ -40,10 +41,10 @@ const CourseSlider = ({ courses }) => {
       <div
         ref={containerRef}
         className="flex gap-4 overflow-x-auto pb-4 scroll-smooth scrollbar-none"
-        style={{ scrollbarWidth: "none" }}
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
         {courses.map((course) => (
-          <div key={course._id} className="w-[230px] shrink-0">
+          <div key={course._id} className="w-[240px] shrink-0">
             <CourseCard course={course} />
           </div>
         ))}
@@ -52,7 +53,8 @@ const CourseSlider = ({ courses }) => {
       {/* Right Navigation Arrow */}
       <button
         onClick={() => scroll("right")}
-        className="absolute right-[-22px] top-1/2 -translate-y-1/2 bg-white text-[#2d2f31] border border-gray-200 shadow-md rounded-full w-11 h-11 flex items-center justify-center z-10 opacity-0 group-hover/slider:opacity-100 transition-opacity hover:bg-gray-50 focus:outline-none"
+        aria-label="Next courses"
+        className="absolute -right-4 top-1/2 -translate-y-1/2 bg-[#1c1d1f] hover:bg-black text-white shadow-xl rounded-full w-11 h-11 flex items-center justify-center z-10 opacity-0 group-hover/slider:opacity-100 transition-opacity focus:opacity-100 focus:outline-none"
       >
         <ChevronRight className="w-6 h-6" />
       </button>
@@ -212,12 +214,12 @@ const Home = () => {
         {/* Let's start learning Section */}
         <div className="space-y-4">
           <div className="flex items-baseline justify-between">
-            <h2 className="text-3xl font-normal text-[#1c1d1f]">
+            <h2 className="text-3xl sm:text-4xl font-semibold text-[#2d2f31] tracking-tight">
               Let's start learning
             </h2>
             <Link
               to="/home/my-courses/learning"
-              className="text-sm font-normal text-[#5624d0] hover:text-[#3b1990] hover:underline"
+              className="text-[14px] font-semibold text-[#a435f0] hover:text-[#8710d8] hover:underline"
             >
               My learning
             </Link>
@@ -226,21 +228,21 @@ const Home = () => {
           {isLoadingLearning ? (
             <div className="flex gap-4 overflow-x-auto pb-4">
               {Array.from({ length: 3 }).map((_, i) => (
-                <Skeleton key={i} className="h-24 w-[380px] shrink-0 bg-gray-100" />
+                <Skeleton key={i} className="h-28 w-[380px] shrink-0 bg-gray-100 rounded-xl" />
               ))}
             </div>
           ) : isErrorLearning ? (
-            <div className="bg-white border border-[#d1d7dc] p-8 text-center text-sm text-slate-500">
+            <div className="bg-white border border-gray-200 rounded-xl p-8 text-center text-[14px] text-gray-500">
               Failed to load purchased courses. Please refresh.
             </div>
           ) : learningCourses.length === 0 ? (
-            <div className="bg-white border border-[#d1d7dc] p-8 text-center space-y-3">
-              <p className="text-sm text-slate-500 font-medium">
+            <div className="bg-white border border-gray-200 rounded-xl p-8 text-center space-y-3 shadow-sm">
+              <p className="text-[15px] text-gray-600 font-normal">
                 You haven't enrolled in any courses yet.
               </p>
               <button
                 onClick={() => navigate("/course/search")}
-                className="bg-[#2d2f31] hover:bg-black text-white px-5 py-2.5 text-xs font-normal"
+                className="bg-[#2d2f31] hover:bg-black text-white px-5 py-2.5 text-[14px] font-semibold rounded-sm shadow-sm transition-all"
               >
                 Browse Courses
               </button>
@@ -261,45 +263,45 @@ const Home = () => {
                     <div
                       key={course._id}
                       onClick={() => navigate(`/course-detail/${course._id}/content`)}
-                      className="w-[380px] shrink-0 bg-white border border-[#d1d7dc] hover:shadow-md transition-shadow cursor-pointer flex flex-row rounded-none overflow-hidden select-none"
+                      className="w-[380px] shrink-0 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-md transition-all cursor-pointer flex flex-row overflow-hidden select-none"
                     >
                       {/* Left Thumbnail with Play Button */}
-                      <div className="relative w-28 h-full bg-slate-100 shrink-0">
+                      <div className="relative w-32 h-full bg-gray-100 shrink-0">
                         <img
-                          src={course.thumbnail || "/default-course-thumbnail.jpg"}
+                          src={course.thumbnail || "/placeholder_course.png"}
                           alt={course.title}
                           className="w-full h-full object-cover"
                         />
-                        <div className="absolute inset-0 bg-black/30 flex items-center justify-center">
-                          <div className="h-10 w-10 rounded-full bg-white flex items-center justify-center text-slate-800 shadow">
+                        <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
+                          <div className="h-10 w-10 rounded-full bg-white/95 flex items-center justify-center text-[#2d2f31] shadow-lg">
                             <Play className="h-5 w-5 fill-current ml-0.5" />
                           </div>
                         </div>
                       </div>
 
                       {/* Right Info */}
-                      <div className="p-3 flex-1 flex flex-col justify-between min-w-0">
+                      <div className="p-3.5 flex-1 flex flex-col justify-between min-w-0">
                         <div className="space-y-1">
-                          <h4 className="font-normal text-xs text-slate-800 line-clamp-1">
+                          <h4 className="font-semibold text-[14px] text-[#2d2f31] line-clamp-1">
                             {course.title}
                           </h4>
-                          <p className="text-[11px] text-slate-500 font-semibold truncate">
+                          <p className="text-[12px] text-[#6a6f73] font-normal truncate">
                             {resume.sectionTitle} • {resume.lectureTitle}
                           </p>
-                          <p className="text-[10px] text-slate-400 font-normal uppercase">
+                          <p className="text-[11px] text-gray-400 font-light uppercase">
                             Lecture • {durMins}m left
                           </p>
                         </div>
 
                         {/* Progress Bar */}
-                        <div className="space-y-1.5 pt-2">
-                          <div className="w-full bg-gray-100 h-1.5 rounded-none overflow-hidden">
+                        <div className="space-y-1 pt-2">
+                          <div className="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
                             <div
-                              className="bg-[#5624d0] h-full transition-all duration-500"
+                              className="bg-[#a435f0] h-full transition-all duration-500 rounded-full"
                               style={{ width: `${progressPercent}%` }}
                             />
                           </div>
-                          <div className="flex justify-between items-center text-[10px] text-slate-500">
+                          <div className="flex justify-between items-center text-[11px] text-[#6a6f73] font-normal">
                             <span>{progressPercent}% complete</span>
                           </div>
                         </div>
@@ -317,7 +319,7 @@ const Home = () => {
           
           {/* Main Title Header */}
           <div>
-            <h2 className="text-4xl font-normal text-[#1c1d1f] tracking-tight">
+            <h2 className="text-4xl sm:text-5xl font-semibold text-[#2d2f31] tracking-tight">
               What to learn next
             </h2>
           </div>
@@ -325,13 +327,13 @@ const Home = () => {
           {/* Slider 1: Recommended for you */}
           {(isLoadingRecommended || (recommendedCourses && recommendedCourses.length > 0)) && (
             <div className="space-y-3">
-              <h3 className="text-2xl font-normal text-[#1c1d1f]">
+              <h3 className="text-2xl sm:text-3xl font-semibold text-[#2d2f31]">
                 Recommended for you
               </h3>
               {isLoadingRecommended ? (
                 <div className="flex gap-4">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <Skeleton key={i} className="h-44 w-[230px] bg-gray-100" />
+                    <Skeleton key={i} className="h-52 w-[240px] bg-gray-100 rounded-xl" />
                   ))}
                 </div>
               ) : (
@@ -343,7 +345,7 @@ const Home = () => {
           {/* Slider 2: Based on your recent searches */}
           {recentSearchesCourses && recentSearchesCourses.length > 0 && (
             <div className="space-y-3">
-              <h3 className="text-xl font-normal text-[#1c1d1f]">
+              <h3 className="text-2xl sm:text-3xl font-semibold text-[#2d2f31]">
                 Based on your recent searches
               </h3>
               <CourseSlider courses={recentSearchesCourses} />
@@ -353,9 +355,9 @@ const Home = () => {
           {/* Slider 3: Because you viewed "..." */}
           {lastViewedCourse && becauseYouViewedCourses && becauseYouViewedCourses.length > 0 && (
             <div className="space-y-3">
-              <h3 className="text-xl font-normal text-[#1c1d1f]">
+              <h3 className="text-2xl sm:text-3xl font-semibold text-[#2d2f31]">
                 Because you viewed &ldquo;
-                <span className="text-[#5624d0] hover:underline cursor-pointer">
+                <span className="text-[#a435f0] hover:underline cursor-pointer">
                   {lastViewedCourse.title}
                 </span>
                 &rdquo;
@@ -368,18 +370,18 @@ const Home = () => {
           {popularForOccupationCourses && popularForOccupationCourses.length > 0 && (
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <h3 className="text-xl font-normal text-[#1c1d1f]">
+                <h3 className="text-2xl sm:text-3xl font-semibold text-[#2d2f31]">
                   Popular for {occupation}
                 </h3>
                 <button
                   onClick={() => navigate("/personalize")}
-                  className="text-sm font-normal text-[#5624d0] hover:underline"
+                  className="text-[14px] font-semibold text-[#a435f0] hover:underline"
                 >
                   Edit occupation
                 </button>
               </div>
-              <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
-                <span className="bg-[#d5ffd6] text-[#1c6f21] px-1.5 py-0.5 rounded font-normal text-[10px] uppercase">
+              <div className="flex items-center gap-2 text-[12px] text-gray-500 font-normal">
+                <span className="bg-[#d5ffd6] text-[#1c6f21] px-2 py-0.5 rounded-sm font-semibold text-[11px] uppercase">
                   New
                 </span>
                 <span>Inspired by your selections</span>
@@ -391,7 +393,7 @@ const Home = () => {
           {/* Slider 5: Trending courses */}
           {trendingCourses && trendingCourses.length > 0 && (
             <div className="space-y-3">
-              <h3 className="text-xl font-normal text-[#1c1d1f]">
+              <h3 className="text-2xl sm:text-3xl font-semibold text-[#2d2f31]">
                 Trending courses
               </h3>
               <CourseSlider courses={trendingCourses.slice(0, 8)} />
@@ -401,9 +403,9 @@ const Home = () => {
           {/* Slider 6: Because you wishlisted "..." */}
           {lastWishlistedCourse && becauseYouWishlistedCourses && becauseYouWishlistedCourses.length > 0 && (
             <div className="space-y-3">
-              <h3 className="text-xl font-normal text-[#1c1d1f]">
+              <h3 className="text-2xl sm:text-3xl font-semibold text-[#2d2f31]">
                 Because you wishlisted &ldquo;
-                <span className="text-[#5624d0] hover:underline cursor-pointer">
+                <span className="text-[#a435f0] hover:underline cursor-pointer">
                   {lastWishlistedCourse.title}
                 </span>
                 &rdquo;
@@ -415,7 +417,7 @@ const Home = () => {
           {/* Slider 7: Recommended to you based on ratings */}
           {basedOnRatingsCourses && basedOnRatingsCourses.length > 0 && (
             <div className="space-y-3">
-              <h3 className="text-xl font-normal text-[#1c1d1f]">
+              <h3 className="text-2xl sm:text-3xl font-semibold text-[#2d2f31]">
                 Recommended to you based on ratings
               </h3>
               <CourseSlider courses={basedOnRatingsCourses.slice(0, 8)} />
@@ -425,20 +427,20 @@ const Home = () => {
           {/* Section 8: Featured courses Tab Section */}
           {featuredCourses && featuredCourses.length > 0 && (
             <div className="space-y-4 pt-4 border-t border-gray-100">
-              <h3 className="text-2xl font-normal text-[#1c1d1f]">
+              <h3 className="text-2xl sm:text-3xl font-semibold text-[#2d2f31]">
                 Featured courses
               </h3>
               
               {/* Tabs */}
-              <div className="flex border-b border-gray-200 text-sm font-normal gap-6">
+              <div className="flex border-b border-gray-200 text-[15px] font-semibold gap-6">
                 {["Most popular", "New", "Intermediate & advanced"].map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveFeaturedTab(tab)}
                     className={`pb-3 focus:outline-none transition-colors border-b-2 ${
                       activeFeaturedTab === tab
-                        ? "border-[#1c1d1f] text-[#1c1d1f]"
-                        : "border-transparent text-gray-500 hover:text-[#1c1d1f]"
+                        ? "border-[#2d2f31] text-[#2d2f31]"
+                        : "border-transparent text-[#6a6f73] hover:text-[#2d2f31]"
                     }`}
                   >
                     {tab}
@@ -455,7 +457,7 @@ const Home = () => {
           {/* Section 9: Topics recommended for you */}
           {recommendedTopics && recommendedTopics.length > 0 && (
             <div className="space-y-4 pt-4 border-t border-gray-100">
-              <h3 className="text-2xl font-normal text-[#1c1d1f]">
+              <h3 className="text-2xl sm:text-3xl font-semibold text-[#2d2f31]">
                 Topics recommended for you
               </h3>
               <div className="flex flex-wrap gap-3">
@@ -463,7 +465,7 @@ const Home = () => {
                   <button
                     key={i}
                     onClick={() => navigate(`/course/search?query=${encodeURIComponent(topic.query)}`)}
-                    className="border border-gray-300 hover:bg-gray-50 text-[#1c1d1f] font-normal text-sm px-5 py-3.5 transition-all select-none"
+                    className="border border-gray-300 hover:bg-gray-100 hover:border-gray-400 text-[#2d2f31] font-semibold text-[14px] px-5 py-3 rounded-md transition-all select-none"
                   >
                     {topic.label}
                   </button>

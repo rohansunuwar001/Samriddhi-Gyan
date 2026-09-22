@@ -63,7 +63,7 @@ const LanguageModal = ({ isOpen, onClose }) => {
                         exit={{ scale: 0.95, opacity: 0 }}
                     >
                         <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-normal text-gray-800">{t('language_switcher.choose_language')}</h2>
+                            <h2 className="text-3xl font-light text-gray-800">{t('language_switcher.choose_language')}</h2>
                             <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
                                 <X className="h-6 w-6" />
                             </button>
@@ -75,7 +75,7 @@ const LanguageModal = ({ isOpen, onClose }) => {
                                     key={lang.code}
                                     onClick={() => handleLanguageChange(lang.code)}
                                     className={`px-4 py-2 text-left rounded-md transition-colors text-gray-700
-                    ${i18n.language.startsWith(lang.code) ? 'border border-black font-normal' : 'hover:bg-gray-100'}`}
+                    ${i18n.language.startsWith(lang.code) ? 'border border-black font-light' : 'hover:bg-gray-100'}`}
                                 >
                                     {lang.name}
                                 </button>

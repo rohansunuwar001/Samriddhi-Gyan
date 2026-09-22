@@ -175,7 +175,7 @@ const ForumPage = () => {
       <div className="bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <h1 className="text-3xl font-normal text-gray-800 dark:text-white">Community Forum</h1>
+            <h1 className="text-4xl font-light text-gray-800 dark:text-white">Community Forum</h1>
             <Dialog open={newPostOpen} onOpenChange={setNewPostOpen}>
               <DialogTrigger asChild>
                 <Button className="gap-2">
@@ -339,7 +339,7 @@ const ForumPage = () => {
                             )}
                             <Badge variant="outline">{discussion.category}</Badge>
                           </div>
-                          <h3 className="text-xl font-normal text-gray-800 dark:text-white mb-2">
+                          <h3 className="text-2xl font-light text-gray-800 dark:text-white mb-2">
                             {discussion.title}
                           </h3>
                           <div className="flex flex-wrap gap-2 mb-4">
@@ -347,13 +347,13 @@ const ForumPage = () => {
                               <Badge 
                                 key={tag} 
                                 variant="outline"
-                                className="text-sm"
+                                className="text-base"
                               >
                                 {tag}
                               </Badge>
                             ))}
                           </div>
-                          <div className="flex items-center text-base text-gray-500 dark:text-gray-400">
+                          <div className="flex items-center text-lg text-gray-500 dark:text-gray-400">
                             <img 
                               src={discussion.authorAvatar} 
                               alt={discussion.author}
@@ -363,11 +363,11 @@ const ForumPage = () => {
                           </div>
                         </div>
                         <div className="flex flex-col items-end gap-2">
-                          <div className="flex items-center gap-2 text-base text-gray-500 dark:text-gray-400">
+                          <div className="flex items-center gap-2 text-lg text-gray-500 dark:text-gray-400">
                             <MessageSquare className="h-4 w-4" />
                             <span>{discussion.replies} replies</span>
                           </div>
-                          <div className="flex items-center gap-2 text-base text-gray-500 dark:text-gray-400">
+                          <div className="flex items-center gap-2 text-lg text-gray-500 dark:text-gray-400">
                             <Clock className="h-4 w-4" />
                             <span>{formatDate(discussion.lastActivity)}</span>
                           </div>
@@ -384,7 +384,7 @@ const ForumPage = () => {
                 className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 p-8 text-center"
               >
                 <MessageSquare className="h-10 w-10 mx-auto text-gray-400 mb-4" />
-                <h3 className="text-xl font-light text-gray-800 dark:text-white mb-2">
+                <h3 className="text-2xl font-extralight text-gray-800 dark:text-white mb-2">
                   No discussions found
                 </h3>
                 <p className="text-gray-600 dark:text-gray-400 mb-4">

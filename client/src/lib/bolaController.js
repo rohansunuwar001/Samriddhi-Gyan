@@ -77,12 +77,6 @@ export class BolaController {
     // Cache for debug overlay
     this.lastScores = scores;
 
-    // Return index of the highest-scoring rendition
-    let bestIndex = 0;
-    for (let i = 1; i < scores.length; i++) {
-      if (scores[i] > scores[bestIndex]) bestIndex = i;
-    }
-
-    return bestIndex;
+    return scores.indexOf(Math.max(...scores));
   }
 }

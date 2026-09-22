@@ -196,14 +196,14 @@ const CourseCurriculumTab = () => {
     <div className="bg-white border border-[#d1d7dc] p-10 shadow-sm relative">
       <div className="flex items-center justify-between border-b border-[#d1d7dc] pb-5 mb-8">
         <div>
-          <h2 className="text-4xl font-normal text-[#1c1d1f]">Curriculum</h2>
-          <p className="text-lg text-[#6a6f73] mt-1">
+          <h2 className="text-5xl font-light text-[#1c1d1f]">Curriculum</h2>
+          <p className="text-xl text-[#6a6f73] mt-1">
             Create your course in sections, each focused on a single learning objective. Then add content, practice activities, and assessments.
           </p>
         </div>
         <button
           onClick={() => setIsBulkOpen(true)}
-          className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-normal text-lg px-4 py-2.5 transition-colors"
+          className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-light text-xl px-4 py-2.5 transition-colors"
         >
           Bulk Uploader
         </button>
@@ -226,7 +226,7 @@ const CourseCurriculumTab = () => {
           ))
         ) : (
           <div className="text-center text-[#6a6f73] py-20 border-2 border-dashed border-[#d1d7dc] bg-[#f7f9fa]">
-            <p className="text-lg font-light">This course has no sections yet. Add your first one below!</p>
+            <p className="text-xl font-extralight">This course has no sections yet. Add your first one below!</p>
           </div>
         )}
       </div>
@@ -244,7 +244,7 @@ const CourseCurriculumTab = () => {
           
           <div className="pl-8 space-y-5">
             <div className="flex items-center gap-4">
-              <span className="font-normal text-lg text-[#1c1d1f] w-24 shrink-0">New Section:</span>
+              <span className="font-light text-xl text-[#1c1d1f] w-24 shrink-0">New Section:</span>
               <div className="flex-1 relative">
                 <input
                   type="text"
@@ -252,16 +252,16 @@ const CourseCurriculumTab = () => {
                   placeholder="Enter a Title"
                   value={newSectionTitle}
                   onChange={(e) => setNewSectionTitle(e.target.value)}
-                  className="w-full border border-[#6a6f73] px-3 py-2 text-lg text-[#1c1d1f] outline-none focus:border-[#1c1d1f] transition-all"
+                  className="w-full border border-[#6a6f73] px-3 py-2 text-xl text-[#1c1d1f] outline-none focus:border-[#1c1d1f] transition-all"
                 />
-                <span className="absolute right-3 top-2.5 text-base text-[#6a6f73]">
+                <span className="absolute right-3 top-2.5 text-lg text-[#6a6f73]">
                   {80 - newSectionTitle.length}
                 </span>
               </div>
             </div>
 
             <div className="flex flex-col gap-2">
-              <span className="font-normal text-base text-[#1c1d1f]">
+              <span className="font-light text-lg text-[#1c1d1f]">
                 What will students be able to do at the end of this section?
               </span>
               <div className="relative">
@@ -271,9 +271,9 @@ const CourseCurriculumTab = () => {
                   placeholder="Enter a learning objective"
                   value={newSectionObjective}
                   onChange={(e) => setNewSectionObjective(e.target.value)}
-                  className="w-full border border-[#6a6f73] px-3 py-2 text-lg text-[#1c1d1f] outline-none focus:border-[#1c1d1f] transition-all"
+                  className="w-full border border-[#6a6f73] px-3 py-2 text-xl text-[#1c1d1f] outline-none focus:border-[#1c1d1f] transition-all"
                 />
-                <span className="absolute right-3 top-2.5 text-base text-[#6a6f73]">
+                <span className="absolute right-3 top-2.5 text-lg text-[#6a6f73]">
                   {200 - newSectionObjective.length}
                 </span>
               </div>
@@ -287,7 +287,7 @@ const CourseCurriculumTab = () => {
                   setNewSectionTitle("");
                   setNewSectionObjective("");
                 }}
-                className="text-lg font-normal text-[#1c1d1f] hover:text-black px-4 py-2"
+                className="text-xl font-light text-[#1c1d1f] hover:text-black px-4 py-2"
               >
                 Cancel
               </button>
@@ -295,7 +295,7 @@ const CourseCurriculumTab = () => {
                 type="button"
                 disabled={isCreatingSection}
                 onClick={handleAddSection}
-                className="bg-[#a435f0] hover:bg-[#8710d8] text-white font-normal text-lg px-5 py-2.5 transition-colors disabled:opacity-50"
+                className="bg-[#a435f0] hover:bg-[#8710d8] text-white font-light text-xl px-5 py-2.5 transition-colors disabled:opacity-50"
               >
                 Add Section
               </button>
@@ -306,7 +306,7 @@ const CourseCurriculumTab = () => {
         <div className="mt-4">
           <button
             onClick={() => setIsAddingSection(true)}
-            className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-normal text-lg px-4 py-2.5 transition-colors flex items-center gap-1.5"
+            className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-light text-xl px-4 py-2.5 transition-colors flex items-center gap-1.5"
           >
             <PlusCircle className="w-4 h-4" /> Section
           </button>
@@ -320,7 +320,7 @@ const CourseCurriculumTab = () => {
             
             {/* Header */}
             <div className="flex items-center justify-between px-6 py-4 border-b border-[#d1d7dc]">
-              <span className="font-normal text-[#1c1d1f]">Bulk Uploader</span>
+              <span className="font-light text-[#1c1d1f]">Bulk Uploader</span>
               <button
                 onClick={() => {
                   if (bulkStep === "uploading" && !window.confirm("Abort uploads?")) return;
@@ -351,25 +351,25 @@ const CourseCurriculumTab = () => {
                     className="hidden"
                     onChange={handleFileSelect}
                   />
-                  <p className="text-2xl text-[#1c1d1f] mb-4">
-                    Drop files here, <span className="text-[#5624d0] font-normal underline">browse files</span> or import from:
+                  <p className="text-3xl text-[#1c1d1f] mb-4">
+                    Drop files here, <span className="text-[#5624d0] font-light underline">browse files</span> or import from:
                   </p>
                   
                   {/* Import providers */}
                   <div className="flex items-center gap-6 mt-4">
-                    <div className="flex flex-col items-center text-base text-[#6a6f73]">
+                    <div className="flex flex-col items-center text-lg text-[#6a6f73]">
                       <div className="w-10 h-10 border border-[#d1d7dc] rounded flex items-center justify-center mb-1 hover:bg-white transition-colors">
                         <svg className="w-5 h-5 text-[#5624d0]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
                       </div>
                       My Device
                     </div>
-                    <div className="flex flex-col items-center text-base text-[#6a6f73] opacity-50">
+                    <div className="flex flex-col items-center text-lg text-[#6a6f73] opacity-50">
                       <div className="w-10 h-10 border border-[#d1d7dc] rounded flex items-center justify-center mb-1">
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                       </div>
                       Google Drive
                     </div>
-                    <div className="flex flex-col items-center text-base text-[#6a6f73] opacity-50">
+                    <div className="flex flex-col items-center text-lg text-[#6a6f73] opacity-50">
                       <div className="w-10 h-10 border border-[#d1d7dc] rounded flex items-center justify-center mb-1">
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
                       </div>
@@ -383,10 +383,10 @@ const CourseCurriculumTab = () => {
               {bulkStep === "preview" && (
                 <div>
                   <div className="flex items-center justify-between mb-6">
-                    <span className="text-lg font-normal text-[#1c1d1f]">{selectedFiles.length} files selected</span>
+                    <span className="text-xl font-light text-[#1c1d1f]">{selectedFiles.length} files selected</span>
                     <button
                       onClick={() => fileInputRef.current?.click()}
-                      className="text-lg font-normal text-[#5624d0] hover:underline"
+                      className="text-xl font-light text-[#5624d0] hover:underline"
                     >
                       + Add more
                     </button>
@@ -403,7 +403,7 @@ const CourseCurriculumTab = () => {
                           <X className="w-3.5 h-3.5" />
                         </button>
                         <FileVideo className="w-8 h-8 text-[#6a6f73] mb-2" />
-                        <span className="text-[11px] font-light text-[#1c1d1f] text-center line-clamp-2 px-1">
+                        <span className="text-[11px] font-extralight text-[#1c1d1f] text-center line-clamp-2 px-1">
                           {sf.name}
                         </span>
                         <span className="text-[10px] text-[#6a6f73] mt-1">
@@ -419,10 +419,10 @@ const CourseCurriculumTab = () => {
               {bulkStep === "uploading" && (
                 <div>
                   <div className="flex items-center justify-between mb-6">
-                    <span className="text-lg font-normal text-[#1c1d1f]">Uploading {selectedFiles.length} files</span>
+                    <span className="text-xl font-light text-[#1c1d1f]">Uploading {selectedFiles.length} files</span>
                     <button
                       onClick={() => setIsPaused(!isPaused)}
-                      className="text-lg font-normal text-[#5624d0] hover:underline flex items-center gap-1"
+                      className="text-xl font-light text-[#5624d0] hover:underline flex items-center gap-1"
                     >
                       {isPaused ? <Play className="w-3.5 h-3.5" /> : <Pause className="w-3.5 h-3.5" />}
                       {isPaused ? "Resume" : "Pause"}
@@ -447,7 +447,7 @@ const CourseCurriculumTab = () => {
                             </div>
                           )}
                           <FileVideo className="w-8 h-8 text-[#6a6f73] mb-2" />
-                          <span className="text-[11px] font-light text-[#1c1d1f] text-center line-clamp-2 px-1">
+                          <span className="text-[11px] font-extralight text-[#1c1d1f] text-center line-clamp-2 px-1">
                             {sf.name}
                           </span>
                           <span className="text-[10px] text-[#6a6f73] mt-1">
@@ -460,7 +460,7 @@ const CourseCurriculumTab = () => {
 
                   {/* Progress bar info */}
                   <div className="border-t border-[#d1d7dc] pt-5">
-                    <div className="flex justify-between text-base text-[#6a6f73] mb-2">
+                    <div className="flex justify-between text-lg text-[#6a6f73] mb-2">
                       <span>Uploading: {uploadProgress}%</span>
                       <span>ETA: 7m 12s left</span>
                     </div>
@@ -478,7 +478,7 @@ const CourseCurriculumTab = () => {
               {bulkStep === "complete" && (
                 <div>
                   <div className="flex items-center justify-between mb-6">
-                    <span className="text-lg font-normal text-green-600 flex items-center gap-1.5">
+                    <span className="text-xl font-light text-green-600 flex items-center gap-1.5">
                       <CheckCircle className="w-5 h-5" /> Upload complete
                     </span>
                   </div>
@@ -491,7 +491,7 @@ const CourseCurriculumTab = () => {
                           <CheckCircle className="w-5 h-5 fill-white" />
                         </div>
                         <FileVideo className="w-8 h-8 text-[#6a6f73] mb-2" />
-                        <span className="text-[11px] font-light text-[#1c1d1f] text-center line-clamp-2 px-1">
+                        <span className="text-[11px] font-extralight text-[#1c1d1f] text-center line-clamp-2 px-1">
                           {sf.name}
                         </span>
                         <span className="text-[10px] text-[#6a6f73] mt-1">
@@ -513,7 +513,7 @@ const CourseCurriculumTab = () => {
                   setSelectedFiles([]);
                   setBulkStep("select");
                 }}
-                className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-normal text-lg px-5 py-2.5 transition-colors"
+                className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-light text-xl px-5 py-2.5 transition-colors"
               >
                 Cancel
               </button>
@@ -521,7 +521,7 @@ const CourseCurriculumTab = () => {
               {bulkStep === "preview" && (
                 <button
                   onClick={startBulkUpload}
-                  className="bg-[#a435f0] hover:bg-[#8710d8] text-white font-normal text-lg px-6 py-2.5 transition-colors"
+                  className="bg-[#a435f0] hover:bg-[#8710d8] text-white font-light text-xl px-6 py-2.5 transition-colors"
                 >
                   Upload {selectedFiles.length} files
                 </button>
@@ -530,7 +530,7 @@ const CourseCurriculumTab = () => {
               {bulkStep === "complete" && (
                 <button
                   onClick={handleBulkComplete}
-                  className="bg-[#1c1d1f] hover:bg-[#2d2f31] text-white font-normal text-lg px-6 py-2.5 transition-colors"
+                  className="bg-[#1c1d1f] hover:bg-[#2d2f31] text-white font-light text-xl px-6 py-2.5 transition-colors"
                 >
                   Done
                 </button>

@@ -346,7 +346,7 @@ const DiscountManager = () => {
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between pb-6 border-b border-gray-200 dark:border-gray-800 gap-4">
         <div>
-          <h1 className="text-4xl font-normal tracking-tight text-[#1c1d1f] dark:text-white">
+          <h1 className="text-5xl font-light tracking-tight text-[#1c1d1f] dark:text-white">
             Discount & Promos CMS
           </h1>
           <p className="text-gray-500 mt-1">
@@ -356,7 +356,7 @@ const DiscountManager = () => {
         {activeTab !== "plans" && (
           <button
             onClick={handleOpenCreate}
-            className="flex items-center justify-center gap-2 bg-[#a435f0] hover:bg-[#8720cf] text-white px-4 py-2.5 rounded-lg font-normal transition-all shadow-md shrink-0 w-full md:w-auto"
+            className="flex items-center justify-center gap-2 bg-[#a435f0] hover:bg-[#8720cf] text-white px-4 py-2.5 rounded-lg font-light transition-all shadow-md shrink-0 w-full md:w-auto"
           >
             <Plus size={18} /> Add New Configuration
           </button>
@@ -367,7 +367,7 @@ const DiscountManager = () => {
       <div className="flex border-b border-gray-200 dark:border-gray-800">
         <button
           onClick={() => setActiveTab("banner")}
-          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-normal text-base transition-all ${
+          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-light text-lg transition-all ${
             activeTab === "banner"
               ? "border-[#a435f0] text-[#a435f0]"
               : "border-transparent text-gray-500 hover:text-gray-700"
@@ -377,7 +377,7 @@ const DiscountManager = () => {
         </button>
         <button
           onClick={() => setActiveTab("promo")}
-          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-normal text-base transition-all ${
+          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-light text-lg transition-all ${
             activeTab === "promo"
               ? "border-[#a435f0] text-[#a435f0]"
               : "border-transparent text-gray-500 hover:text-gray-700"
@@ -387,7 +387,7 @@ const DiscountManager = () => {
         </button>
         <button
           onClick={() => setActiveTab("navbar")}
-          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-normal text-base transition-all ${
+          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-light text-lg transition-all ${
             activeTab === "navbar"
               ? "border-[#a435f0] text-[#a435f0]"
               : "border-transparent text-gray-500 hover:text-gray-700"
@@ -397,7 +397,7 @@ const DiscountManager = () => {
         </button>
         <button
           onClick={() => setActiveTab("plans")}
-          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-normal text-base transition-all ${
+          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-light text-lg transition-all ${
             activeTab === "plans"
               ? "border-[#a435f0] text-[#a435f0]"
               : "border-transparent text-gray-500 hover:text-gray-700"
@@ -407,7 +407,7 @@ const DiscountManager = () => {
         </button>
         <button
           onClick={() => setActiveTab("coupons")}
-          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-normal text-base transition-all ${
+          className={`flex items-center gap-2 px-5 py-3 border-b-2 font-light text-lg transition-all ${
             activeTab === "coupons"
               ? "border-[#a435f0] text-[#a435f0]"
               : "border-transparent text-gray-500 hover:text-gray-700"
@@ -428,9 +428,9 @@ const DiscountManager = () => {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-base border-collapse">
+                <table className="w-full text-left text-lg border-collapse">
                   <thead>
-                    <tr className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 text-gray-500 uppercase tracking-wider text-sm font-normal">
+                    <tr className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 text-gray-500 uppercase tracking-wider text-base font-light">
                       <th className="px-6 py-4">Coupon Code</th>
                       <th className="px-6 py-4">Discount</th>
                       <th className="px-6 py-4">Min Purchase / Cap</th>
@@ -451,39 +451,39 @@ const DiscountManager = () => {
                         <tr key={item._id} className="hover:bg-gray-50/50 dark:hover:bg-gray-900/20">
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
-                              <span className="font-mono font-semibold text-base bg-purple-50 dark:bg-purple-950/40 text-[#a435f0] px-3 py-1 rounded border border-purple-200 dark:border-purple-800">
+                              <span className="font-mono font-medium text-lg bg-purple-50 dark:bg-purple-950/40 text-[#a435f0] px-3 py-1 rounded border border-purple-200 dark:border-purple-800">
                                 {item.code}
                               </span>
                             </div>
                             {item.description && (
-                              <div className="text-xs text-gray-400 mt-1 max-w-xs truncate">
+                              <div className="text-sm text-gray-400 mt-1 max-w-xs truncate">
                                 {item.description}
                               </div>
                             )}
                           </td>
-                          <td className="px-6 py-4 font-semibold text-gray-900 dark:text-white">
+                          <td className="px-6 py-4 font-medium text-gray-900 dark:text-white">
                             {item.discountType === "percentage"
                               ? `${item.discountValue}% OFF`
                               : `Rs ${item.discountValue?.toLocaleString()} OFF`}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                          <td className="px-6 py-4 text-base text-gray-600 dark:text-gray-300">
                             <div>Min: Rs {item.minPurchaseAmount || 0}</div>
                             {item.maxDiscountAmount && (
-                              <div className="text-xs text-gray-400">Cap: Rs {item.maxDiscountAmount}</div>
+                              <div className="text-sm text-gray-400">Cap: Rs {item.maxDiscountAmount}</div>
                             )}
                           </td>
-                          <td className="px-6 py-4 text-sm text-gray-600 dark:text-gray-300">
+                          <td className="px-6 py-4 text-base text-gray-600 dark:text-gray-300">
                             <div>
                               Expiry: {item.validUntil ? new Date(item.validUntil).toLocaleDateString() : "Never"}
                             </div>
-                            <div className="text-xs text-gray-400">
+                            <div className="text-sm text-gray-400">
                               Used: {item.usedCount || 0} / {item.usageLimit || "Unlimited"}
                             </div>
                           </td>
                           <td className="px-6 py-4">
                             <button
                               onClick={() => handleToggleActive(item)}
-                              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-normal transition-all ${
+                              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-base font-light transition-all ${
                                 item.isActive
                                   ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
                                   : "bg-gray-150 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
@@ -525,9 +525,9 @@ const DiscountManager = () => {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-base border-collapse">
+                <table className="w-full text-left text-lg border-collapse">
                   <thead>
-                    <tr className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 text-gray-500 uppercase tracking-wider text-sm font-normal">
+                    <tr className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 text-gray-500 uppercase tracking-wider text-base font-light">
                       <th className="px-6 py-4">Preview</th>
                       <th className="px-6 py-4">Banner Text / Link</th>
                       <th className="px-6 py-4">Colors</th>
@@ -547,30 +547,30 @@ const DiscountManager = () => {
                         <tr key={item._id} className="hover:bg-gray-50/50 dark:hover:bg-gray-900/20">
                           <td className="px-6 py-4">
                             <div
-                              className="px-4 py-1.5 rounded text-sm font-normal text-center truncate max-w-[200px]"
+                              className="px-4 py-1.5 rounded text-base font-light text-center truncate max-w-[200px]"
                               style={{ backgroundColor: item.bgColor, color: item.textColor }}
                             >
                               {item.text}
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <div className="font-light text-gray-900 dark:text-white max-w-sm truncate">
+                            <div className="font-extralight text-gray-900 dark:text-white max-w-sm truncate">
                               {item.text}
                             </div>
                             {item.linkText && (
-                              <div className="text-sm text-[#a435f0] mt-1 font-normal">
+                              <div className="text-base text-[#a435f0] mt-1 font-light">
                                 Link: "{item.linkText}" → {item.linkUrl}
                               </div>
                             )}
                           </td>
-                          <td className="px-6 py-4 text-sm font-mono space-y-1">
+                          <td className="px-6 py-4 text-base font-mono space-y-1">
                             <div>BG: {item.bgColor}</div>
                             <div>Text: {item.textColor}</div>
                           </td>
                           <td className="px-6 py-4">
                             <button
                               onClick={() => handleToggleActive(item)}
-                              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-normal transition-all ${
+                              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-base font-light transition-all ${
                                 item.isActive
                                   ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
                                   : "bg-gray-150 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
@@ -613,9 +613,9 @@ const DiscountManager = () => {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-base border-collapse">
+                <table className="w-full text-left text-lg border-collapse">
                   <thead>
-                    <tr className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 text-gray-500 uppercase tracking-wider text-sm font-normal">
+                    <tr className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 text-gray-500 uppercase tracking-wider text-base font-light">
                       <th className="px-6 py-4">Title / Description</th>
                       <th className="px-6 py-4">Badge</th>
                       <th className="px-6 py-4">CTA Button</th>
@@ -634,26 +634,26 @@ const DiscountManager = () => {
                       promoData?.promos?.map((item) => (
                         <tr key={item._id} className="hover:bg-gray-50/50 dark:hover:bg-gray-900/20">
                           <td className="px-6 py-4 max-w-sm">
-                            <div className="font-normal text-gray-900 dark:text-white truncate">
+                            <div className="font-light text-gray-900 dark:text-white truncate">
                               {item.title}
                             </div>
-                            <div className="text-gray-500 text-sm mt-1 line-clamp-2">
+                            <div className="text-gray-500 text-base mt-1 line-clamp-2">
                               {item.description}
                             </div>
                           </td>
                           <td className="px-6 py-4">
-                            <span className="bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400 px-2.5 py-0.5 rounded text-sm font-normal">
+                            <span className="bg-purple-100 text-purple-700 dark:bg-purple-950/40 dark:text-purple-400 px-2.5 py-0.5 rounded text-base font-light">
                               {item.badgeText}
                             </span>
                           </td>
-                          <td className="px-6 py-4 text-sm font-mono">
+                          <td className="px-6 py-4 text-base font-mono">
                             <div>Text: "{item.buttonText}"</div>
                             <div className="text-gray-400 mt-0.5">Link: {item.buttonUrl}</div>
                           </td>
                           <td className="px-6 py-4">
                             <button
                               onClick={() => handleToggleActive(item)}
-                              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-normal transition-all ${
+                              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-base font-light transition-all ${
                                 item.isActive
                                   ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
                                   : "bg-gray-150 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
@@ -696,9 +696,9 @@ const DiscountManager = () => {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-base border-collapse">
+                <table className="w-full text-left text-lg border-collapse">
                   <thead>
-                    <tr className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 text-gray-500 uppercase tracking-wider text-sm font-normal">
+                    <tr className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 text-gray-500 uppercase tracking-wider text-base font-light">
                       <th className="px-6 py-4">Plan Name</th>
                       <th className="px-6 py-4">Pricing text</th>
                       <th className="px-6 py-4">CTA Button</th>
@@ -716,20 +716,20 @@ const DiscountManager = () => {
                     ) : (
                       navbarData?.navbars?.map((item) => (
                         <tr key={item._id} className="hover:bg-gray-50/50 dark:hover:bg-gray-900/20">
-                          <td className="px-6 py-4 font-normal text-gray-900 dark:text-white">
+                          <td className="px-6 py-4 font-light text-gray-900 dark:text-white">
                             {item.planName}
                           </td>
                           <td className="px-6 py-4 max-w-sm text-gray-500 truncate">
                             {item.pricingText}
                           </td>
-                          <td className="px-6 py-4 text-sm font-mono">
+                          <td className="px-6 py-4 text-base font-mono">
                             <div>Text: "{item.buttonText}"</div>
                             <div className="text-gray-400 mt-0.5">Link: {item.buttonUrl}</div>
                           </td>
                           <td className="px-6 py-4">
                             <button
                               onClick={() => handleToggleActive(item)}
-                              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-normal transition-all ${
+                              className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-base font-light transition-all ${
                                 item.isActive
                                   ? "bg-green-100 text-green-700 dark:bg-green-950/40 dark:text-green-400"
                                   : "bg-gray-150 text-gray-600 dark:bg-gray-800 dark:text-gray-400"
@@ -781,9 +781,9 @@ const DiscountManager = () => {
                 }
               }} className="p-6 space-y-6">
                 <div className="overflow-x-auto border border-gray-200 dark:border-gray-800 rounded-lg">
-                  <table className="w-full text-left text-base border-collapse">
+                  <table className="w-full text-left text-lg border-collapse">
                     <thead>
-                      <tr className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 text-gray-500 uppercase tracking-wider text-sm font-normal">
+                      <tr className="bg-gray-50 dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 text-gray-500 uppercase tracking-wider text-base font-light">
                         <th className="px-6 py-4">Plan Name</th>
                         <th className="px-6 py-4">Duration (Months)</th>
                         <th className="px-6 py-4">Base Price (NPR)</th>
@@ -794,10 +794,10 @@ const DiscountManager = () => {
                     <tbody className="divide-y divide-gray-200 dark:divide-gray-800">
                       {plansForm.map((plan, index) => (
                         <tr key={plan.key} className="hover:bg-gray-50/50 dark:hover:bg-gray-900/20">
-                          <td className="px-6 py-4 font-normal text-gray-900 dark:text-white">
+                          <td className="px-6 py-4 font-light text-gray-900 dark:text-white">
                             {plan.planName}
                           </td>
-                          <td className="px-6 py-4 font-light text-gray-700 dark:text-gray-300">
+                          <td className="px-6 py-4 font-extralight text-gray-700 dark:text-gray-300">
                             {plan.durationMonths} {plan.durationMonths === 1 ? 'month' : 'months'}
                           </td>
                           <td className="px-6 py-4">
@@ -826,7 +826,7 @@ const DiscountManager = () => {
                               className="w-32 border dark:border-gray-700 bg-transparent rounded px-2.5 py-1 focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
                             />
                           </td>
-                          <td className="px-6 py-4 font-normal text-[#1c1d1f] dark:text-white">
+                          <td className="px-6 py-4 font-light text-[#1c1d1f] dark:text-white">
                             Rs {(plan.priceNpr - plan.discountNpr).toLocaleString()}
                           </td>
                         </tr>
@@ -839,7 +839,7 @@ const DiscountManager = () => {
                   <button
                     type="submit"
                     disabled={isUpdatingPlans}
-                    className="flex items-center justify-center gap-2 bg-[#a435f0] hover:bg-[#8720cf] text-white px-6 py-2.5 rounded-lg font-normal transition-all shadow-md"
+                    className="flex items-center justify-center gap-2 bg-[#a435f0] hover:bg-[#8720cf] text-white px-6 py-2.5 rounded-lg font-light transition-all shadow-md"
                   >
                     {isUpdatingPlans && <Loader2 className="w-4 h-4 animate-spin" />}
                     Save Subscription Prices
@@ -856,7 +856,7 @@ const DiscountManager = () => {
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white dark:bg-[#1c1d1f] w-full max-w-lg rounded-xl shadow-2xl border border-gray-200 dark:border-gray-800 overflow-hidden transform transition-all">
             <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-900">
-              <h3 className="font-normal text-xl text-gray-900 dark:text-white">
+              <h3 className="font-light text-2xl text-gray-900 dark:text-white">
                 {editingItem ? "Edit Configuration" : "Add New Configuration"}
               </h3>
               <button
@@ -872,7 +872,7 @@ const DiscountManager = () => {
               {activeTab === "banner" && (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                    <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                       Banner Text
                     </label>
                     <input
@@ -881,12 +881,12 @@ const DiscountManager = () => {
                       value={bannerForm.text}
                       onChange={(e) => setBannerForm({ ...bannerForm, text: e.target.value })}
                       placeholder="e.g. 1 day left! Transform your wishlist goals into career skills | Get those skills and more with this"
-                      className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                      className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-lg focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                      <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                         Link Text (within Banner)
                       </label>
                       <input
@@ -894,11 +894,11 @@ const DiscountManager = () => {
                         value={bannerForm.linkText}
                         onChange={(e) => setBannerForm({ ...bannerForm, linkText: e.target.value })}
                         placeholder="e.g. special offer."
-                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-lg focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                      <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                         Link Redirect URL
                       </label>
                       <input
@@ -906,13 +906,13 @@ const DiscountManager = () => {
                         value={bannerForm.linkUrl}
                         onChange={(e) => setBannerForm({ ...bannerForm, linkUrl: e.target.value })}
                         placeholder="e.g. /subscribe"
-                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-lg focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
                       />
                     </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                      <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                         Background Color (Hex)
                       </label>
                       <div className="flex gap-2">
@@ -926,12 +926,12 @@ const DiscountManager = () => {
                           type="text"
                           value={bannerForm.bgColor}
                           onChange={(e) => setBannerForm({ ...bannerForm, bgColor: e.target.value })}
-                          className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-1.5 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0] font-mono"
+                          className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-1.5 text-lg focus:outline-none focus:ring-1 focus:ring-[#a435f0] font-mono"
                         />
                       </div>
                     </div>
                     <div>
-                      <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                      <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                         Text Color (Hex)
                       </label>
                       <div className="flex gap-2">
@@ -945,7 +945,7 @@ const DiscountManager = () => {
                           type="text"
                           value={bannerForm.textColor}
                           onChange={(e) => setBannerForm({ ...bannerForm, textColor: e.target.value })}
-                          className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-1.5 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0] font-mono"
+                          className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-1.5 text-lg focus:outline-none focus:ring-1 focus:ring-[#a435f0] font-mono"
                         />
                       </div>
                     </div>
@@ -958,7 +958,7 @@ const DiscountManager = () => {
                       onChange={(e) => setBannerForm({ ...bannerForm, isActive: e.target.checked })}
                       className="w-4 h-4 text-[#a435f0] border-gray-300 rounded focus:ring-[#a435f0] cursor-pointer"
                     />
-                    <label htmlFor="bannerActive" className="text-base font-normal select-none cursor-pointer">
+                    <label htmlFor="bannerActive" className="text-lg font-light select-none cursor-pointer">
                       Activate this announcement bar (others will be deactivated)
                     </label>
                   </div>
@@ -970,7 +970,7 @@ const DiscountManager = () => {
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                      <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                         Badge Text
                       </label>
                       <input
@@ -979,11 +979,11 @@ const DiscountManager = () => {
                         value={promoForm.badgeText}
                         onChange={(e) => setPromoForm({ ...promoForm, badgeText: e.target.value })}
                         placeholder="e.g. 10% off for the first 1 year(s)"
-                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-lg focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                      <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                         Promo Title
                       </label>
                       <input
@@ -992,12 +992,12 @@ const DiscountManager = () => {
                         value={promoForm.title}
                         onChange={(e) => setPromoForm({ ...promoForm, title: e.target.value })}
                         placeholder="e.g. Special offer: 10% off..."
-                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-lg focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                    <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                       Description
                     </label>
                     <textarea
@@ -1006,12 +1006,12 @@ const DiscountManager = () => {
                       value={promoForm.description}
                       onChange={(e) => setPromoForm({ ...promoForm, description: e.target.value })}
                       placeholder="e.g. Unlock AI upskilling, practice tests, certifications, and more to make your wishlist dreams come true."
-                      className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0] resize-none"
+                      className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-lg focus:outline-none focus:ring-1 focus:ring-[#a435f0] resize-none"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                      <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                         CTA Button Text
                       </label>
                       <input
@@ -1019,11 +1019,11 @@ const DiscountManager = () => {
                         value={promoForm.buttonText}
                         onChange={(e) => setPromoForm({ ...promoForm, buttonText: e.target.value })}
                         placeholder="e.g. Get the offer"
-                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-lg focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                      <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                         CTA Button URL
                       </label>
                       <input
@@ -1031,12 +1031,12 @@ const DiscountManager = () => {
                         value={promoForm.buttonUrl}
                         onChange={(e) => setPromoForm({ ...promoForm, buttonUrl: e.target.value })}
                         placeholder="e.g. /subscribe"
-                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-lg focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
                       />
                     </div>
                   </div>
                   <div>
-                    <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                    <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                       Fine Print / Terms (Optional)
                     </label>
                     <textarea
@@ -1044,7 +1044,7 @@ const DiscountManager = () => {
                       value={promoForm.finePrint}
                       onChange={(e) => setPromoForm({ ...promoForm, finePrint: e.target.value })}
                       placeholder="e.g. Country restrictions apply. Auto-renews unless canceled."
-                      className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0] resize-none text-sm"
+                      className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-lg focus:outline-none focus:ring-1 focus:ring-[#a435f0] resize-none text-base"
                     />
                   </div>
                   <div className="flex items-center gap-3 pt-2">
@@ -1055,7 +1055,7 @@ const DiscountManager = () => {
                       onChange={(e) => setPromoForm({ ...promoForm, isActive: e.target.checked })}
                       className="w-4 h-4 text-[#a435f0] border-gray-300 rounded focus:ring-[#a435f0] cursor-pointer"
                     />
-                    <label htmlFor="promoActive" className="text-base font-normal select-none cursor-pointer">
+                    <label htmlFor="promoActive" className="text-lg font-light select-none cursor-pointer">
                       Activate this promo card on subscription page
                     </label>
                   </div>
@@ -1066,7 +1066,7 @@ const DiscountManager = () => {
               {activeTab === "navbar" && (
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                    <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                       Plan Name
                     </label>
                     <input
@@ -1075,11 +1075,11 @@ const DiscountManager = () => {
                       value={navbarForm.planName}
                       onChange={(e) => setNavbarForm({ ...navbarForm, planName: e.target.value })}
                       placeholder="e.g. Personal Plan"
-                      className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                      className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-lg focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                    <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                       Pricing Detail Text
                     </label>
                     <input
@@ -1088,12 +1088,12 @@ const DiscountManager = () => {
                       value={navbarForm.pricingText}
                       onChange={(e) => setNavbarForm({ ...navbarForm, pricingText: e.target.value })}
                       placeholder="e.g. Starting at $10.00 $9.00 per month. Cancel anytime."
-                      className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                      className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-lg focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
                     />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                      <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                         Button CTA Text
                       </label>
                       <input
@@ -1101,11 +1101,11 @@ const DiscountManager = () => {
                         value={navbarForm.buttonText}
                         onChange={(e) => setNavbarForm({ ...navbarForm, buttonText: e.target.value })}
                         placeholder="e.g. Start subscription"
-                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-lg focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                      <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                         Button Redirect URL
                       </label>
                       <input
@@ -1113,7 +1113,7 @@ const DiscountManager = () => {
                         value={navbarForm.buttonUrl}
                         onChange={(e) => setNavbarForm({ ...navbarForm, buttonUrl: e.target.value })}
                         placeholder="e.g. /subscribe"
-                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-lg focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
                       />
                     </div>
                   </div>
@@ -1125,7 +1125,7 @@ const DiscountManager = () => {
                       onChange={(e) => setNavbarForm({ ...navbarForm, isActive: e.target.checked })}
                       className="w-4 h-4 text-[#a435f0] border-gray-300 rounded focus:ring-[#a435f0] cursor-pointer"
                     />
-                    <label htmlFor="navbarActive" className="text-base font-normal select-none cursor-pointer">
+                    <label htmlFor="navbarActive" className="text-lg font-light select-none cursor-pointer">
                       Activate this sticky navbar configuration
                     </label>
                   </div>
@@ -1137,7 +1137,7 @@ const DiscountManager = () => {
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                      <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                         Coupon Code *
                       </label>
                       <input
@@ -1146,17 +1146,17 @@ const DiscountManager = () => {
                         value={couponForm.code}
                         onChange={(e) => setCouponForm({ ...couponForm, code: e.target.value.toUpperCase() })}
                         placeholder="e.g. SAVE20"
-                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base font-mono uppercase focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-lg font-mono uppercase focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                      <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                         Discount Type
                       </label>
                       <select
                         value={couponForm.discountType}
                         onChange={(e) => setCouponForm({ ...couponForm, discountType: e.target.value })}
-                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-lg focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
                       >
                         <option value="percentage">Percentage (%)</option>
                         <option value="fixed">Fixed Amount (Rs)</option>
@@ -1166,7 +1166,7 @@ const DiscountManager = () => {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                      <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                         Discount Value * {couponForm.discountType === "percentage" ? "(%)" : "(Rs)"}
                       </label>
                       <input
@@ -1177,11 +1177,11 @@ const DiscountManager = () => {
                         value={couponForm.discountValue}
                         onChange={(e) => setCouponForm({ ...couponForm, discountValue: e.target.value })}
                         placeholder={couponForm.discountType === "percentage" ? "e.g. 20" : "e.g. 200"}
-                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-lg focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                      <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                         Min. Purchase (Rs)
                       </label>
                       <input
@@ -1190,14 +1190,14 @@ const DiscountManager = () => {
                         value={couponForm.minPurchaseAmount}
                         onChange={(e) => setCouponForm({ ...couponForm, minPurchaseAmount: e.target.value })}
                         placeholder="e.g. 500 (0 for none)"
-                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-lg focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                      <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                         Max Cap (Rs, % only)
                       </label>
                       <input
@@ -1207,11 +1207,11 @@ const DiscountManager = () => {
                         value={couponForm.maxDiscountAmount}
                         onChange={(e) => setCouponForm({ ...couponForm, maxDiscountAmount: e.target.value })}
                         placeholder="Optional cap"
-                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0] disabled:opacity-50"
+                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-lg focus:outline-none focus:ring-1 focus:ring-[#a435f0] disabled:opacity-50"
                       />
                     </div>
                     <div>
-                      <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                      <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                         Usage Limit
                       </label>
                       <input
@@ -1220,25 +1220,25 @@ const DiscountManager = () => {
                         value={couponForm.usageLimit}
                         onChange={(e) => setCouponForm({ ...couponForm, usageLimit: e.target.value })}
                         placeholder="e.g. 100 (blank for unlimited)"
-                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                        className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-lg focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                    <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                       Expiry Date (Optional)
                     </label>
                     <input
                       type="date"
                       value={couponForm.validUntil}
                       onChange={(e) => setCouponForm({ ...couponForm, validUntil: e.target.value })}
-                      className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                      className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-lg focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-normal text-gray-500 uppercase tracking-wider mb-1.5">
+                    <label className="block text-base font-light text-gray-500 uppercase tracking-wider mb-1.5">
                       Description / Notes (Optional)
                     </label>
                     <input
@@ -1246,7 +1246,7 @@ const DiscountManager = () => {
                       value={couponForm.description}
                       onChange={(e) => setCouponForm({ ...couponForm, description: e.target.value })}
                       placeholder="e.g. Special festive promo 20% off"
-                      className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-base focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
+                      className="w-full border dark:border-gray-700 bg-transparent rounded-lg px-3 py-2 text-lg focus:outline-none focus:ring-1 focus:ring-[#a435f0]"
                     />
                   </div>
 
@@ -1258,7 +1258,7 @@ const DiscountManager = () => {
                       onChange={(e) => setCouponForm({ ...couponForm, isActive: e.target.checked })}
                       className="w-4 h-4 text-[#a435f0] border-gray-300 rounded focus:ring-[#a435f0] cursor-pointer"
                     />
-                    <label htmlFor="couponActive" className="text-base font-normal select-none cursor-pointer">
+                    <label htmlFor="couponActive" className="text-lg font-light select-none cursor-pointer">
                       Enable and activate this coupon immediately
                     </label>
                   </div>
@@ -1270,14 +1270,14 @@ const DiscountManager = () => {
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 border dark:border-gray-700 rounded-lg font-normal text-base text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-850 transition-all"
+                  className="px-4 py-2 border dark:border-gray-700 rounded-lg font-light text-lg text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-850 transition-all"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={creatingBanner || updatingBanner || creatingPromo || updatingPromo || creatingNavbar || updatingNavbar || creatingCoupon || updatingCoupon}
-                  className="flex items-center justify-center gap-1.5 bg-[#a435f0] hover:bg-[#8720cf] text-white px-5 py-2 rounded-lg font-normal text-base transition-all shadow-md"
+                  className="flex items-center justify-center gap-1.5 bg-[#a435f0] hover:bg-[#8720cf] text-white px-5 py-2 rounded-lg font-light text-lg transition-all shadow-md"
                 >
                   {(creatingBanner || updatingBanner || creatingPromo || updatingPromo || creatingNavbar || updatingNavbar || creatingCoupon || updatingCoupon) && (
                     <Loader2 className="w-4 h-4 animate-spin" />

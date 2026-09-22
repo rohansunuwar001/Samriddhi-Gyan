@@ -5,8 +5,8 @@ import PropTypes from 'prop-types';
  */
 const StatItem = ({ value, label }) => (
   <div className="text-center">
-    <p className="text-4xl md:text-5xl font-bold text-white">{value}</p>
-    <p className="text-base text-indigo-200 mt-1">{label}</p>
+    <p className="text-5xl md:text-6xl font-semibold text-white">{value}</p>
+    <p className="text-lg text-indigo-200 mt-1">{label}</p>
   </div>
 );
 
@@ -29,10 +29,10 @@ const ImpactSection = ({ title, description, stats }) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 sm:py-24">
         {/* Header Content */}
         <div className="text-center max-w-4xl mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold font-serif text-white">
+          <h2 className="text-5xl md:text-6xl font-semibold font-serif text-white">
             {title}
           </h2>
-          <p className="mt-5 text-lg text-indigo-100 leading-relaxed">
+          <p className="mt-5 text-xl text-indigo-100 leading-relaxed">
             {description}
           </p>
         </div>

@@ -5,9 +5,9 @@ import dotenv from "dotenv";
 dotenv.config({});
 
 cloudinary.config({
-  api_key: process.env.API_KEY,
-  api_secret: process.env.API_SECRET,
-  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY?.trim(),
+  api_secret: process.env.API_SECRET?.trim(),
+  cloud_name: process.env.CLOUD_NAME?.trim(),
   secure: true, // It's good practice to enforce HTTPS
 });
 
@@ -27,12 +27,15 @@ export const uploadMedia = async (localFilePath) => {
         });
         
         // After successful upload, remove the local file
-        fs.unlinkSync(localFilePath);
+        if (fs.existsSync(localFilePath)) {
+            try { fs.unlinkSync(localFilePath); } catch (e) {}
+        }
         return uploadResponse;
 
     } catch (error) {
-       
-        fs.unlinkSync(localFilePath); 
+        if (fs.existsSync(localFilePath)) {
+            try { fs.unlinkSync(localFilePath); } catch (e) {}
+        }
         console.error("Cloudinary media upload failed:", error);
         return null;
     }
@@ -50,11 +53,15 @@ export const uploadVideo = async (localFilePath) => {
         });
 
         // The Cloudinary response for video will include a `duration` field.
-        fs.unlinkSync(localFilePath);
+        if (fs.existsSync(localFilePath)) {
+            try { fs.unlinkSync(localFilePath); } catch (e) {}
+        }
         return uploadResponse;
 
     } catch (error) {
-        fs.unlinkSync(localFilePath);
+        if (fs.existsSync(localFilePath)) {
+            try { fs.unlinkSync(localFilePath); } catch (e) {}
+        }
         console.error("Cloudinary video upload failed:", error);
         return null;
     }

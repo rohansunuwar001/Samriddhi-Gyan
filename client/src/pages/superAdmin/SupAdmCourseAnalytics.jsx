@@ -26,7 +26,7 @@ import CountUp from 'react-countup';
 // ====================================================================
 
 const StatCard = ({ title, value, icon: Icon, prefix = "" }) => (
-    <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-sm font-medium">{title}</CardTitle><Icon className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-2xl font-bold"><CountUp start={0} end={value} duration={2} separator="," prefix={prefix} /></div></CardContent></Card>
+    <Card><CardHeader className="flex flex-row items-center justify-between pb-2"><CardTitle className="text-base font-normal">{title}</CardTitle><Icon className="h-4 w-4 text-muted-foreground" /></CardHeader><CardContent><div className="text-3xl font-semibold"><CountUp start={0} end={value} duration={2} separator="," prefix={prefix} /></div></CardContent></Card>
 );
 
 const TopInstructors = ({ instructors }) => (
@@ -35,8 +35,8 @@ const TopInstructors = ({ instructors }) => (
             {instructors.map((inst, index) => (
                 <div key={inst.instructorId} className="flex items-center space-x-4">
                     <Avatar className="h-10 w-10"><AvatarFallback>{index + 1}</AvatarFallback></Avatar>
-                    <div className="flex-1"><p className="text-sm font-medium truncate">{inst.name}</p><p className="text-sm text-muted-foreground">{inst.coursesSold} sales</p></div>
-                    <div className="font-semibold text-green-500">Rs{inst.totalRevenue.toLocaleString()}</div>
+                    <div className="flex-1"><p className="text-base font-normal truncate">{inst.name}</p><p className="text-base text-muted-foreground">{inst.coursesSold} sales</p></div>
+                    <div className="font-medium text-green-500">Rs{inst.totalRevenue.toLocaleString()}</div>
                 </div>
             ))}
         </CardContent>
@@ -151,7 +151,7 @@ const SupAdmCourseAnalytics = () => {
     return (
         <div className="flex-1 space-y-6 p-8 pt-6 bg-slate-50 min-h-screen">
             <header>
-                <h2 className="text-3xl font-bold tracking-tight">Platform Analytics</h2>
+                <h2 className="text-4xl font-semibold tracking-tight">Platform Analytics</h2>
                 <p className="text-muted-foreground">An overview of all instructors and courses.</p>
             </header>
 
@@ -193,7 +193,7 @@ const CourseTable = ({ courses, onEdit, onDelete }) => (
         <TableBody>
             {courses.map(course => (
                 <TableRow key={course._id}>
-                    <TableCell><span className="font-medium">{course.title}</span></TableCell>
+                    <TableCell><span className="font-normal">{course.title}</span></TableCell>
                     <TableCell className="text-muted-foreground">{course.creator?.name || 'N/A'}</TableCell>
                     <TableCell>{course.enrolledStudents?.length || 0}</TableCell>
                     <TableCell>Rs{course.price?.current?.toFixed(2) || '0.00'}</TableCell>

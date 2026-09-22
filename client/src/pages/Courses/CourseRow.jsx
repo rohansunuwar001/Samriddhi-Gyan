@@ -77,14 +77,14 @@ const CourseRow = ({ heading, subheading, courses, sectionTag, actionLabel, onAc
       <div className="flex items-center justify-between mb-4">
         <div>
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-gray-900 md:text-2xl">{heading}</h2>
+            <h2 className="text-2xl font-semibold text-gray-900 md:text-3xl">{heading}</h2>
             {sectionTag && (
-              <span className="bg-violet-100 text-violet-800 text-xs font-semibold px-2.5 py-0.5 rounded">
+              <span className="bg-violet-100 text-violet-800 text-sm font-medium px-2.5 py-0.5 rounded">
                 {sectionTag}
               </span>
             )}
           </div>
-          {subheading && <p className="text-sm text-gray-500 mt-1">{subheading}</p>}
+          {subheading && <p className="text-base text-gray-500 mt-1">{subheading}</p>}
         </div>
         
         {actionLabel && onActionClick && (
@@ -98,7 +98,7 @@ const CourseRow = ({ heading, subheading, courses, sectionTag, actionLabel, onAc
       <div className="relative mx-[-16px] px-[16px]">
         {/* Left Arrow Button */}
         {showLeftArrow && (
-          <div className="absolute left-2 top-1/2 -translate-y-1/2 z-10 hidden group-hover/row:block transition-all">
+          <div className="absolute -left-14 top-1/2 -translate-y-1/2 z-10 hidden group-hover/row:block transition-all">
             <Button
               variant="secondary"
               size="icon"
@@ -113,7 +113,7 @@ const CourseRow = ({ heading, subheading, courses, sectionTag, actionLabel, onAc
 
         {/* Right Arrow Button */}
         {showRightArrow && (
-          <div className="absolute right-2 top-1/2 -translate-y-1/2 z-10 hidden group-hover/row:block transition-all">
+          <div className="absolute -right-14 top-1/2 -translate-y-1/2 z-10 hidden group-hover/row:block transition-all">
             <Button
               variant="secondary"
               size="icon"

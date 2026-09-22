@@ -67,9 +67,9 @@ const CourseIncludes = ({ course }) => {
   const maxRows = Math.max(left.length, right.length);
 
   return (
-    <section>
-      <h2 className="text-xl font-bold mb-4">This course includes:</h2>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+    <section className="font-sans">
+      <h2 className="text-[20px] font-semibold text-[#1c1d1f] mb-4">This course includes:</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 text-[14px]">
         {Array.from({ length: maxRows }).map((_, i) => (
           <React.Fragment key={`row-${i}`}>
             {left[i] ? (
@@ -91,8 +91,8 @@ const CourseIncludes = ({ course }) => {
 
 const IncludeRow = ({ Icon, label }) => (
   <div className="flex items-center gap-3">
-    <Icon className="h-5 w-5 flex-shrink-0 text-gray-600" />
-    <span className="text-violet-700 font-medium">{label}</span>
+    <Icon className="h-4 w-4 shrink-0 text-[#1c1d1f]" />
+    <span className="text-[#2d2f31] font-light text-[14px]">{label}</span>
   </div>
 );
 

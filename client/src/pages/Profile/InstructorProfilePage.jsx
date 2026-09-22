@@ -60,14 +60,14 @@ const InstructorProfilePage = () => {
                 {/* --- Profile Header Section --- */}
                 <section className="flex flex-col lg:flex-row lg:gap-12 items-start mb-12">
                     <div className="w-full lg:flex-1">
-                        <p className="font-bold text-sm text-gray-500 tracking-wider">
+                        <p className="font-semibold text-base text-gray-500 tracking-wider">
                             INSTRUCTOR
                         </p>
-                        <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 dark:text-white mt-2">
+                        <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white mt-2">
                             {user.name}
                         </h1>
-                        <p className="text-xl text-gray-700 dark:text-gray-300 mt-4">{user.headline || "E-Learning Enthusiast"}</p>
-                        <Badge className="mt-4 bg-purple-200 text-purple-800 text-sm font-semibold">
+                        <p className="text-2xl text-gray-700 dark:text-gray-300 mt-4">{user.headline || "E-Learning Enthusiast"}</p>
+                        <Badge className="mt-4 bg-purple-200 text-purple-800 text-base font-medium">
                             Samriddhi Gyan Instructor
                         </Badge>
                     </div>
@@ -75,12 +75,12 @@ const InstructorProfilePage = () => {
                     {/* --- Right Side: Profile Card (Corrected) --- */}
                    <div className="w-full max-w-sm lg:w-80 mt-12 lg:mt-0 mx-auto lg:mx-0 flex-shrink-0">
                         <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 w-full text-center">
-                            <Avatar className="w-36 h-36 rounded-full mx-auto border-4 border-white dark:border-gray-700 shadow-lg text-4xl">
+                            <Avatar className="w-36 h-36 rounded-full mx-auto border-4 border-white dark:border-gray-700 shadow-lg text-5xl">
                                 <AvatarImage src={user.photoUrl} alt={user.name} />
                                 <AvatarFallback>{user.name?.split(" ").map(n => n[0]).join("")}</AvatarFallback>
                             </Avatar>
 
-                            <h2 className="text-xl font-bold text-gray-800 dark:text-white mt-4">{user.name}</h2>
+                            <h2 className="text-2xl font-semibold text-gray-800 dark:text-white mt-4">{user.name}</h2>
 
                             {/* REMOVED: Email is private and not included in the public API response. */}
                             
@@ -106,7 +106,7 @@ const InstructorProfilePage = () => {
                 {user.description && (
                     <section className="max-w-4xl mb-12">
                         <div className="bg-white dark:bg-gray-800/50 p-6 md:p-8 rounded-lg shadow-sm">
-                            <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">About me</h2>
+                            <h2 className="text-3xl font-semibold text-gray-900 dark:text-white mb-4">About me</h2>
                             <p className="text-gray-700 dark:text-gray-300 leading-relaxed whitespace-pre-line">
                                 {user.description}
                             </p>
@@ -116,7 +116,7 @@ const InstructorProfilePage = () => {
                 
                 {/* --- Instructor's Courses Section --- */}
                 <section>
-                    <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+                    <h2 className="text-3xl font-semibold text-gray-900 dark:text-white mb-6">
                         Courses by {user.name}
                     </h2>
                     {courses && courses.length > 0 ? (
@@ -176,7 +176,7 @@ const ProfilePageSkeleton = () => (
 const ProfilePageError = ({ error }) => (
   <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-black">
     <div className="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 rounded-xl p-8 text-center">
-      <h2 className="text-xl font-bold text-red-700 dark:text-red-300 mb-2">
+      <h2 className="text-2xl font-semibold text-red-700 dark:text-red-300 mb-2">
         Failed to Load Profile
       </h2>
       <p className="text-red-600 dark:text-red-400 mb-6">

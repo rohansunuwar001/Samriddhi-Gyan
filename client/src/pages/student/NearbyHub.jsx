@@ -375,8 +375,8 @@ const LiveTrackingMap = ({ userCoords, tutors = [], peers = [], activeTab, onUse
             <Navigation className="h-5 w-5 transform rotate-45" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="text-[10px] text-indigo-300 font-bold uppercase tracking-wider">Next Step</p>
-            <p className="text-xs font-semibold mt-0.5 leading-snug">{routeInfo.instruction}</p>
+            <p className="text-[10px] text-indigo-300 font-semibold uppercase tracking-wider">Next Step</p>
+            <p className="text-sm font-medium mt-0.5 leading-snug">{routeInfo.instruction}</p>
           </div>
         </div>
       )}
@@ -390,18 +390,18 @@ const LiveTrackingMap = ({ userCoords, tutors = [], peers = [], activeTab, onUse
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-1.5 flex-wrap">
-                <span className="text-base font-extrabold text-slate-800">{routeInfo.duration}</span>
-                <span className="text-xs text-slate-300">•</span>
-                <span className="text-xs font-semibold text-slate-500">{routeInfo.distance}</span>
+                <span className="text-lg font-bold text-slate-800">{routeInfo.duration}</span>
+                <span className="text-sm text-slate-300">•</span>
+                <span className="text-sm font-medium text-slate-500">{routeInfo.distance}</span>
               </div>
-              <p className="text-[11px] text-slate-400 font-medium truncate mt-0.5">Navigating to {activeRouteTarget.name}</p>
+              <p className="text-[11px] text-slate-400 font-normal truncate mt-0.5">Navigating to {activeRouteTarget.name}</p>
             </div>
           </div>
           <Button 
             variant="destructive" 
             size="sm" 
             onClick={handleCancelTrip}
-            className="text-xs font-semibold h-8 shrink-0 bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 border-none shadow-none"
+            className="text-sm font-medium h-8 shrink-0 bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 border-none shadow-none"
           >
             Cancel Route
           </Button>
@@ -545,17 +545,17 @@ const NearbyHub = () => {
       <div className="relative overflow-hidden bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white rounded-2xl p-8 mb-8 shadow-md border border-indigo-950/40">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(99,102,241,0.15),transparent_50%)]" />
         <div className="relative z-10 max-w-2xl space-y-3">
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
             <Compass className="h-3.5 w-3.5" />
             Geospatial Proximity Hub
           </span>
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">Nearby Learning Hub</h1>
-          <p className="text-indigo-200 text-sm sm:text-base leading-relaxed">
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">Nearby Learning Hub</h1>
+          <p className="text-indigo-200 text-base sm:text-lg leading-relaxed">
             Discover local educational opportunities. Find nearby instructors for offline tutoring sessions, or connect with regional study circles while protecting your personal privacy.
           </p>
           
           {coords && (
-            <div className="pt-2 flex items-center gap-2 text-xs text-indigo-300">
+            <div className="pt-2 flex items-center gap-2 text-sm text-indigo-300">
               <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
               <span>Location active: {coords.lat.toFixed(4)}, {coords.lon.toFixed(4)}</span>
             </div>
@@ -567,7 +567,7 @@ const NearbyHub = () => {
       <div className="mb-8">
         <Card className="shadow-sm border-slate-200 overflow-hidden bg-white text-slate-800 h-[550px] relative flex flex-col justify-between">
           <CardHeader className="relative z-10 pb-0 flex flex-row items-center justify-between space-y-0 bg-white/90 backdrop-blur-md border-b border-slate-100 py-3 shadow-sm">
-            <CardTitle className="text-sm text-slate-600 font-semibold tracking-wider uppercase flex items-center gap-1.5">
+            <CardTitle className="text-base text-slate-600 font-medium tracking-wider uppercase flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-indigo-600 animate-pulse" />
               {visualMode === "map" ? "Live Location Map" : visualMode === "globe" ? "3D Proximity Earth" : "2D Proximity Radar"}
             </CardTitle>
@@ -575,7 +575,7 @@ const NearbyHub = () => {
             <div className="flex bg-slate-100 rounded-lg p-0.5 border border-slate-200">
               <button
                 onClick={() => setVisualMode("map")}
-                className={`px-2.5 py-1 text-[10px] font-bold rounded-md transition-all ${
+                className={`px-2.5 py-1 text-[10px] font-semibold rounded-md transition-all ${
                   visualMode === "map" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-500 hover:text-slate-800"
                 }`}
               >
@@ -583,7 +583,7 @@ const NearbyHub = () => {
               </button>
               <button
                 onClick={() => setVisualMode("globe")}
-                className={`px-2.5 py-1 text-[10px] font-bold rounded-md transition-all ${
+                className={`px-2.5 py-1 text-[10px] font-semibold rounded-md transition-all ${
                   visualMode === "globe" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-500 hover:text-slate-800"
                 }`}
               >
@@ -591,7 +591,7 @@ const NearbyHub = () => {
               </button>
               <button
                 onClick={() => setVisualMode("radar")}
-                className={`px-2.5 py-1 text-[10px] font-bold rounded-md transition-all ${
+                className={`px-2.5 py-1 text-[10px] font-semibold rounded-md transition-all ${
                   visualMode === "radar" ? "bg-indigo-600 text-white shadow-sm" : "text-slate-500 hover:text-slate-800"
                 }`}
               >
@@ -616,14 +616,14 @@ const NearbyHub = () => {
               ) : scriptError ? (
                 <div className="flex flex-col items-center justify-center p-8 text-center text-rose-500 font-sans">
                   <ShieldAlert className="h-10 w-10 mb-2" />
-                  <p className="font-semibold text-sm">Failed to load Google Maps SDK</p>
-                  <p className="text-xs text-muted-foreground mt-1">Please check your network connection and reload.</p>
+                  <p className="font-medium text-base">Failed to load Google Maps SDK</p>
+                  <p className="text-sm text-muted-foreground mt-1">Please check your network connection and reload.</p>
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center p-8 text-center text-slate-500 font-sans">
                   <RefreshCw className="h-8 w-8 mb-2 animate-spin text-indigo-600" />
-                  <p className="font-semibold text-sm">Loading Map Engine...</p>
-                  <p className="text-xs text-muted-foreground mt-1">Fetching secure spatial API client...</p>
+                  <p className="font-medium text-base">Loading Map Engine...</p>
+                  <p className="text-sm text-muted-foreground mt-1">Fetching secure spatial API client...</p>
                 </div>
               )}
             </div>
@@ -638,7 +638,7 @@ const NearbyHub = () => {
         <div className="space-y-6 lg:col-span-1">
           <Card className="shadow-sm border-slate-200">
             <CardHeader>
-              <CardTitle className="text-lg">My Location Status</CardTitle>
+              <CardTitle className="text-xl">My Location Status</CardTitle>
               <CardDescription>Update your coordinates to query nearby members.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -648,8 +648,8 @@ const NearbyHub = () => {
                     <MapPin className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-slate-800">Coordinates Loaded</p>
-                    <p className="text-xs text-muted-foreground">Stored safely in browser storage</p>
+                    <p className="text-base font-medium text-slate-800">Coordinates Loaded</p>
+                    <p className="text-sm text-muted-foreground">Stored safely in browser storage</p>
                   </div>
                 </div>
               ) : (
@@ -658,14 +658,14 @@ const NearbyHub = () => {
                     <Compass className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="text-sm font-semibold text-slate-700">No Location Stored</p>
-                    <p className="text-xs text-muted-foreground">Please click detect to search nearby</p>
+                    <p className="text-base font-medium text-slate-700">No Location Stored</p>
+                    <p className="text-sm text-muted-foreground">Please click detect to search nearby</p>
                   </div>
                 </div>
               )}
 
               {locError && (
-                <div className="p-3 bg-rose-50 border border-rose-100 text-rose-700 rounded-lg flex items-start gap-2 text-xs">
+                <div className="p-3 bg-rose-50 border border-rose-100 text-rose-700 rounded-lg flex items-start gap-2 text-sm">
                   <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
                   <span>{locError}</span>
                 </div>
@@ -674,7 +674,7 @@ const NearbyHub = () => {
               <Button
                 onClick={detectLocation}
                 disabled={locLoading}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-normal"
               >
                 {locLoading ? (
                   <>
@@ -699,7 +699,7 @@ const NearbyHub = () => {
             <div className="flex gap-1.5 p-1 bg-slate-100 rounded-lg">
               <button
                 onClick={() => setActiveTab("tutors")}
-                className={`flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-md transition-all ${
+                className={`flex items-center gap-1.5 px-4 py-2 text-base font-medium rounded-md transition-all ${
                   activeTab === "tutors"
                     ? "bg-white text-indigo-950 shadow-sm"
                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
@@ -710,7 +710,7 @@ const NearbyHub = () => {
               </button>
               <button
                 onClick={() => setActiveTab("peers")}
-                className={`flex items-center gap-1.5 px-4 py-2 text-sm font-semibold rounded-md transition-all ${
+                className={`flex items-center gap-1.5 px-4 py-2 text-base font-medium rounded-md transition-all ${
                   activeTab === "peers"
                     ? "bg-white text-indigo-950 shadow-sm"
                     : "text-slate-600 hover:text-slate-900 hover:bg-slate-50"
@@ -737,10 +737,10 @@ const NearbyHub = () => {
 
           {/* Privacy Notice Banner for Peers */}
           {activeTab === "peers" && coords && (
-            <div className="p-4 bg-amber-50/70 border border-amber-100 rounded-xl flex gap-3 text-amber-900 text-xs sm:text-sm">
+            <div className="p-4 bg-amber-50/70 border border-amber-100 rounded-xl flex gap-3 text-amber-900 text-sm sm:text-base">
               <ShieldAlert className="h-5 w-5 text-amber-600 shrink-0 mt-0.5" />
               <div>
-                <strong className="font-semibold block mb-0.5">Student Privacy Shield Active</strong>
+                <strong className="font-medium block mb-0.5">Student Privacy Shield Active</strong>
                 To protect student coordinates, exact latitude/longitude coordinates and formatted street addresses are hidden. Peers are fuzzed into distance ranges and cities to keep your physical address completely private.
               </div>
             </div>
@@ -753,8 +753,8 @@ const NearbyHub = () => {
                 <div className="p-4 bg-indigo-50 text-indigo-600 rounded-full w-fit mx-auto">
                   <Compass className="h-8 w-8 animate-bounce" />
                 </div>
-                <h3 className="text-xl font-bold text-slate-800">Proximity Finder Locked</h3>
-                <p className="text-muted-foreground text-sm max-w-md mx-auto">
+                <h3 className="text-2xl font-semibold text-slate-800">Proximity Finder Locked</h3>
+                <p className="text-muted-foreground text-base max-w-md mx-auto">
                   To discover instructors or study circles near you, please grant location access by clicking the button on the left panel.
                 </p>
                 <Button onClick={detectLocation} className="bg-indigo-600 hover:bg-indigo-700 text-white">
@@ -791,7 +791,7 @@ const NearbyHub = () => {
                       <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                         <Avatar className="w-12 h-12 ring-2 ring-indigo-500/20 shrink-0">
                           <AvatarImage src={tutor.photoUrl} alt={tutor.name} />
-                          <AvatarFallback className="bg-indigo-50 font-bold text-indigo-700">
+                          <AvatarFallback className="bg-indigo-50 font-semibold text-indigo-700">
                             {tutor.name.slice(0, 2).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
@@ -799,18 +799,18 @@ const NearbyHub = () => {
                         <div className="flex-grow space-y-2">
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <div>
-                              <h3 className="font-bold text-lg text-slate-900 leading-tight">{tutor.name}</h3>
-                              <p className="text-xs text-indigo-600 font-medium">{tutor.headline || "Instructor"}</p>
+                              <h3 className="font-semibold text-xl text-slate-900 leading-tight">{tutor.name}</h3>
+                              <p className="text-sm text-indigo-600 font-normal">{tutor.headline || "Instructor"}</p>
                             </div>
-                            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-100">
+                            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-indigo-50 text-indigo-700 border border-indigo-100">
                               <MapPin className="h-3 w-3 shrink-0" />
                               {tutor.distance} km away
                             </span>
                           </div>
 
-                          <p className="text-sm text-slate-600 line-clamp-2">{tutor.description}</p>
+                          <p className="text-base text-slate-600 line-clamp-2">{tutor.description}</p>
                           
-                          <div className="flex items-center gap-1.5 text-xs text-muted-foreground pt-1.5">
+                          <div className="flex items-center gap-1.5 text-sm text-muted-foreground pt-1.5">
                             <MapPin className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                             <span>{tutor.locationDetails?.formattedAddress || tutor.locationDetails?.city}</span>
                           </div>
@@ -858,7 +858,7 @@ const NearbyHub = () => {
                       <div className="flex flex-col sm:flex-row sm:items-start gap-4">
                         <Avatar className="w-12 h-12 ring-2 ring-emerald-500/20 shrink-0">
                           <AvatarImage src={peer.photoUrl} alt={peer.name} />
-                          <AvatarFallback className="bg-emerald-50 font-bold text-emerald-700">
+                          <AvatarFallback className="bg-emerald-50 font-semibold text-emerald-700">
                             {peer.name.slice(0, 2).toUpperCase()}
                           </AvatarFallback>
                         </Avatar>
@@ -866,16 +866,16 @@ const NearbyHub = () => {
                         <div className="flex-grow space-y-2">
                           <div className="flex flex-wrap items-center justify-between gap-2">
                             <div>
-                              <h3 className="font-bold text-lg text-slate-900 leading-tight">{peer.name}</h3>
-                              <p className="text-xs text-emerald-600 font-medium">{peer.headline || "E-Learning Student"}</p>
+                              <h3 className="font-semibold text-xl text-slate-900 leading-tight">{peer.name}</h3>
+                              <p className="text-sm text-emerald-600 font-normal">{peer.headline || "E-Learning Student"}</p>
                             </div>
-                            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100">
+                            <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium bg-emerald-50 text-emerald-700 border border-emerald-100">
                               <Users className="h-3 w-3 shrink-0" />
                               {peer.range}
                             </span>
                           </div>
 
-                          <div className="flex items-center gap-1.5 text-xs text-slate-600">
+                          <div className="flex items-center gap-1.5 text-sm text-slate-600">
                             <MapPin className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
                             <span>City: {peer.city || "Not Shared"}</span>
                           </div>

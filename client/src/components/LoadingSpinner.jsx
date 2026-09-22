@@ -33,10 +33,10 @@ const LoadingSpinner = () => {
         </motion.div>
 
         {/* Text Presentation */}
-        <h3 className="mt-6 text-2xl font-normal text-slate-800 tracking-tight">
+        <h3 className="mt-6 text-3xl font-light text-slate-800 tracking-tight">
           Preparing your classroom
         </h3>
-        <p className="mt-1.5 text-base font-light text-slate-500">
+        <p className="mt-1.5 text-lg font-extralight text-slate-500">
           Gathering lessons and materials...
         </p>
 

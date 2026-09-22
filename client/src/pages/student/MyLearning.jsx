@@ -85,14 +85,14 @@ const MyLearningCourseCard = ({ course }) => {
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-white border border-[#d1d7dc] rounded-none p-1 shadow-lg text-[#2d2f31] z-30">
-              <DropdownMenuItem className="text-sm py-2 px-3 focus:bg-[#f7f9fa] cursor-pointer font-normal rounded-none">
+              <DropdownMenuItem className="text-base py-2 px-3 focus:bg-[#f7f9fa] cursor-pointer font-light rounded-none">
                 <Share2 className="h-3.5 w-3.5 mr-2" /> Share course
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-sm py-2 px-3 focus:bg-[#f7f9fa] cursor-pointer font-normal rounded-none">
+              <DropdownMenuItem className="text-base py-2 px-3 focus:bg-[#f7f9fa] cursor-pointer font-light rounded-none">
                 <ListPlus className="h-3.5 w-3.5 mr-2" /> Add to lists
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-[#d1d7dc]" />
-              <DropdownMenuItem className="text-sm py-2 px-3 text-red-600 focus:bg-[#f7f9fa] cursor-pointer font-normal rounded-none">
+              <DropdownMenuItem className="text-base py-2 px-3 text-red-600 focus:bg-[#f7f9fa] cursor-pointer font-light rounded-none">
                 <Archive className="h-3.5 w-3.5 mr-2" /> Archive course
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -102,10 +102,10 @@ const MyLearningCourseCard = ({ course }) => {
 
       <div className="p-4 flex-1 flex flex-col justify-between space-y-3">
         <div className="space-y-1">
-          <h3 className="text-sm sm:text-[13px] font-normal text-[#2d2f31] leading-snug line-clamp-2 hover:text-[#6d28d2] transition-colors">
+          <h3 className="text-base sm:text-[13px] font-light text-[#2d2f31] leading-snug line-clamp-2 hover:text-[#6d28d2] transition-colors">
             {title}
           </h3>
-          <p className="text-[10px] text-[#6a6f73] font-normal truncate">
+          <p className="text-[10px] text-[#6a6f73] font-light truncate">
             {instructorName}
           </p>
         </div>
@@ -119,12 +119,12 @@ const MyLearningCourseCard = ({ course }) => {
           </div>
 
           {progress === 0 ? (
-            <div className="flex justify-between items-center text-[11px] font-normal text-[#6d28d2] hover:text-[#892de1] pt-1">
+            <div className="flex justify-between items-center text-[11px] font-light text-[#6d28d2] hover:text-[#892de1] pt-1">
               <span>START COURSE</span>
             </div>
           ) : (
             <div className="flex items-center justify-between gap-2 text-[10px] text-[#6a6f73]">
-              <span className="font-normal text-gray-500">{progress}% complete</span>
+              <span className="font-light text-gray-500">{progress}% complete</span>
               
               <div className="flex items-center gap-0.5" onClick={(e) => e.stopPropagation()}>
                 {[1, 2, 3, 4, 5].map((star) => (
@@ -145,7 +145,7 @@ const MyLearningCourseCard = ({ course }) => {
                     />
                   </button>
                 ))}
-                <span className="text-[9px] font-normal text-[#6d28d2] ml-1 hover:underline cursor-pointer">
+                <span className="text-[9px] font-light text-[#6d28d2] ml-1 hover:underline cursor-pointer">
                   Leave a rating
                 </span>
               </div>
@@ -335,7 +335,7 @@ const MyLearning = () => {
       {/* ── Header tab navigation block ── */}
       <header className="bg-[#1c1d1f] text-white shrink-0">
         <div className="max-w-7xl mx-auto px-6 md:px-12 pt-8 pb-0">
-          <h1 className="text-4xl font-normal leading-tight mb-6">
+          <h1 className="text-5xl font-light leading-tight mb-6">
             My learning
           </h1>
 
@@ -344,7 +344,7 @@ const MyLearning = () => {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`py-3 px-1 border-b-4 text-sm sm:text-base font-normal transition-all whitespace-nowrap ${
+                className={`py-3 px-1 border-b-4 text-base sm:text-lg font-light transition-all whitespace-nowrap ${
                   activeTab === tab.id
                     ? "border-white text-white"
                     : "border-transparent text-white/60 hover:text-white"
@@ -364,10 +364,10 @@ const MyLearning = () => {
             {/* Start a weekly streak widget card */}
             <div className="border border-[#d1d7dc] bg-white p-6 rounded-none flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 shadow-sm">
               <div className="space-y-1">
-                <h3 className="text-lg font-normal text-[#2d2f31]">
+                <h3 className="text-xl font-light text-[#2d2f31]">
                   Start a weekly streak
                 </h3>
-                <p className="text-sm text-[#6a6f73] font-normal leading-relaxed">
+                <p className="text-base text-[#6a6f73] font-light leading-relaxed">
                   Let's chip away at your learning goals.
                 </p>
               </div>
@@ -378,8 +378,8 @@ const MyLearning = () => {
                     <Flame className="h-5 w-5 fill-current" />
                   </div>
                   <div>
-                    <p className="text-base font-normal leading-none">0 weeks</p>
-                    <p className="text-[10px] text-[#6a6f73] font-normal mt-0.5">Current streak</p>
+                    <p className="text-lg font-light leading-none">0 weeks</p>
+                    <p className="text-[10px] text-[#6a6f73] font-light mt-0.5">Current streak</p>
                   </div>
                 </div>
 
@@ -409,7 +409,7 @@ const MyLearning = () => {
                     <div className="absolute h-2.5 w-2.5 rounded-full bg-[#1f7a54]" />
                   </div>
                   
-                  <div className="text-[10px] leading-relaxed text-[#2d2f31] font-normal">
+                  <div className="text-[10px] leading-relaxed text-[#2d2f31] font-light">
                     <div className="flex items-center gap-1.5">
                       <span className="h-2 w-2 rounded-full bg-amber-500" />
                       <span><strong>0/30</strong> course min</span>
@@ -418,7 +418,7 @@ const MyLearning = () => {
                       <span className="h-2 w-2 rounded-full bg-[#1f7a54]" />
                       <span><strong>3/1</strong> visit</span>
                     </div>
-                    <div className="flex items-center gap-1 text-[#6a6f73] pt-0.5 font-normal">
+                    <div className="flex items-center gap-1 text-[#6a6f73] pt-0.5 font-light">
                       <span>Jun 28 - Jul 4</span>
                       <Info className="h-3 w-3 cursor-pointer" />
                     </div>
@@ -435,23 +435,23 @@ const MyLearning = () => {
                 </div>
                 <div className="space-y-3.5 pr-6">
                   <div className="space-y-1">
-                    <h3 className="text-base font-normal text-[#2d2f31]">
+                    <h3 className="text-lg font-light text-[#2d2f31]">
                       Schedule learning time
                     </h3>
-                    <p className="text-sm text-[#6a6f73] leading-relaxed font-normal">
+                    <p className="text-base text-[#6a6f73] leading-relaxed font-light">
                       Learning a little each day adds up. Research shows that students who make learning a habit are more likely to reach their goals. Set time aside to learn and get reminders using your learning scheduler.
                     </p>
                   </div>
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => handleOpenWizard()}
-                      className="border border-[#6d28d2] text-[#6d28d2] hover:bg-[#f5eeff] hover:border-[#892de1] hover:text-[#892de1] px-5 py-2.5 text-sm font-normal transition-colors"
+                      className="border border-[#6d28d2] text-[#6d28d2] hover:bg-[#f5eeff] hover:border-[#892de1] hover:text-[#892de1] px-5 py-2.5 text-base font-light transition-colors"
                     >
                       Get started
                     </button>
                     <button
                       onClick={() => setShowScheduler(false)}
-                      className="text-[#2d2f31] hover:text-black font-normal text-sm px-2 py-2"
+                      className="text-[#2d2f31] hover:text-black font-light text-base px-2 py-2"
                     >
                       Dismiss
                     </button>
@@ -477,8 +477,8 @@ const MyLearning = () => {
           /* Learning tools dashboard view matching Picture 4 */
           <div className="space-y-6 max-w-4xl animate-in fade-in">
             <div className="space-y-1">
-              <h2 className="text-[22px] font-normal text-[#1c1d1f]">Learning reminders</h2>
-              <p className="text-base text-[#6a6f73] font-normal leading-relaxed">
+              <h2 className="text-[22px] font-light text-[#1c1d1f]">Learning reminders</h2>
+              <p className="text-lg text-[#6a6f73] font-light leading-relaxed">
                 Learning a little each day adds up. Research shows that students who make learning a habit are more likely to reach their goals. Set time aside to learn and get reminders using your learning scheduler.
               </p>
             </div>
@@ -492,15 +492,15 @@ const MyLearning = () => {
             ) : reminders.length === 0 ? (
               <div className="border border-[#d1d7dc] bg-white p-12 text-center rounded-none shadow-sm space-y-4">
                 <Clock className="h-10 w-10 text-gray-300 mx-auto" />
-                <h4 className="font-normal text-base text-[#2d2f31]">
+                <h4 className="font-light text-lg text-[#2d2f31]">
                   No reminders scheduled yet
                 </h4>
-                <p className="text-sm text-[#6a6f73] max-w-sm mx-auto leading-relaxed">
+                <p className="text-base text-[#6a6f73] max-w-sm mx-auto leading-relaxed">
                   Stay committed to your personal learning track by setting up calendar events or browser reminders.
                 </p>
                 <button
                   onClick={() => handleOpenWizard()}
-                  className="bg-[#6d28d2] hover:bg-[#892de1] text-white px-5 py-2.5 text-sm font-normal transition-colors"
+                  className="bg-[#6d28d2] hover:bg-[#892de1] text-white px-5 py-2.5 text-base font-light transition-colors"
                 >
                   Create a reminder
                 </button>
@@ -519,22 +519,22 @@ const MyLearning = () => {
                           <Clock className="h-5 w-5" />
                         </div>
                         <div className="space-y-1.5">
-                          <h4 className="text-lg font-normal text-[#1c1d1f]">{rem.name}</h4>
-                          <div className="flex items-center gap-2 text-sm text-[#2d2f31] font-normal">
-                            <span className="flex items-center gap-1 font-normal text-slate-700">
+                          <h4 className="text-xl font-light text-[#1c1d1f]">{rem.name}</h4>
+                          <div className="flex items-center gap-2 text-base text-[#2d2f31] font-light">
+                            <span className="flex items-center gap-1 font-light text-slate-700">
                               {rem.time}
                             </span>
                             <span className="text-slate-300">•</span>
                             <span className="capitalize">{rem.frequency}</span>
                           </div>
                           {rem.calendarSynced && rem.calendarSynced !== "None" && (
-                            <p className="text-[11px] font-normal text-green-700 flex items-center gap-1">
+                            <p className="text-[11px] font-light text-green-700 flex items-center gap-1">
                               <Check className="h-3.5 w-3.5 stroke-[3px]" />
                               Added to {rem.calendarSynced} Calendar
                             </p>
                           )}
                           {courseTitle && (
-                            <p className="text-[12.5px] text-gray-500 font-light">
+                            <p className="text-[12.5px] text-gray-500 font-extralight">
                               Course: {courseTitle}
                             </p>
                           )}
@@ -552,14 +552,14 @@ const MyLearning = () => {
                           <DropdownMenuContent align="end" className="w-36 bg-white border border-[#d1d7dc] rounded-none p-1 shadow-lg text-[#2d2f31]">
                             <DropdownMenuItem 
                               onClick={() => handleOpenWizard(rem)}
-                              className="text-sm py-2 px-3 focus:bg-[#f7f9fa] cursor-pointer font-normal rounded-none"
+                              className="text-base py-2 px-3 focus:bg-[#f7f9fa] cursor-pointer font-light rounded-none"
                             >
                               <Edit2 className="h-3.5 w-3.5 mr-2" /> Edit reminder
                             </DropdownMenuItem>
                             <DropdownMenuSeparator className="bg-[#d1d7dc]" />
                             <DropdownMenuItem 
                               onClick={() => handleDeleteReminder(rem._id)}
-                              className="text-sm py-2 px-3 text-red-600 focus:bg-[#f7f9fa] cursor-pointer font-normal rounded-none"
+                              className="text-base py-2 px-3 text-red-600 focus:bg-[#f7f9fa] cursor-pointer font-light rounded-none"
                             >
                               <Trash2 className="h-3.5 w-3.5 mr-2" /> Delete reminder
                             </DropdownMenuItem>
@@ -572,7 +572,7 @@ const MyLearning = () => {
 
                 <button
                   onClick={() => handleOpenWizard()}
-                  className="flex items-center gap-2 border border-[#6d28d2] text-[#6d28d2] hover:bg-[#f5eeff] hover:border-[#892de1] hover:text-[#892de1] px-5 py-2.5 text-sm font-normal transition-colors"
+                  className="flex items-center gap-2 border border-[#6d28d2] text-[#6d28d2] hover:bg-[#f5eeff] hover:border-[#892de1] hover:text-[#892de1] px-5 py-2.5 text-base font-light transition-colors"
                 >
                   <Plus className="h-4 w-4" /> Add another
                 </button>
@@ -583,10 +583,10 @@ const MyLearning = () => {
           /* Sub-tab placeholder containers */
           <div className="bg-white border border-[#d1d7dc] p-10 text-center rounded-none shadow-sm space-y-3">
             <BookOpen className="h-8 w-8 text-gray-300 mx-auto" />
-            <h4 className="font-normal text-base text-[#2d2f31] capitalize">
+            <h4 className="font-light text-lg text-[#2d2f31] capitalize">
               No {activeTab} lists defined
             </h4>
-            <p className="text-sm text-[#6a6f73] max-w-sm mx-auto leading-relaxed">
+            <p className="text-base text-[#6a6f73] max-w-sm mx-auto leading-relaxed">
               Organize, share, and track your LMS certification programs and external developer resources in specialized custom channels.
             </p>
           </div>
@@ -600,7 +600,7 @@ const MyLearning = () => {
             
             {/* Header */}
             <div className="flex items-center justify-between p-5 border-b border-gray-100 shrink-0">
-              <h2 className="text-xl font-normal text-[#1c1d1f]">Learning reminders</h2>
+              <h2 className="text-2xl font-light text-[#1c1d1f]">Learning reminders</h2>
               <button 
                 onClick={handleCloseWizard}
                 className="text-gray-400 hover:text-black p-1 transition-colors"
@@ -611,34 +611,34 @@ const MyLearning = () => {
 
             {/* Content Area */}
             <div className="p-6 overflow-y-auto max-h-[70vh] space-y-5 flex-1">
-              <p className="text-sm text-[#6a6f73] font-normal">Step {wizardStep} of 3</p>
+              <p className="text-base text-[#6a6f73] font-light">Step {wizardStep} of 3</p>
 
               {wizardStep === 1 && (
                 <div className="space-y-4 animate-in slide-in-from-right-3 duration-200">
                   <div className="space-y-1.5">
                     <div className="flex justify-between items-baseline">
-                      <label className="text-base font-normal text-[#1c1d1f]">Name</label>
-                      <span className="text-[10px] text-gray-400 font-normal">optional</span>
+                      <label className="text-lg font-light text-[#1c1d1f]">Name</label>
+                      <span className="text-[10px] text-gray-400 font-light">optional</span>
                     </div>
                     <input 
                       type="text" 
                       value={reminderName}
                       onChange={(e) => setReminderName(e.target.value)}
                       placeholder="Learning reminder"
-                      className="w-full border border-gray-300 px-3 py-2 text-base focus:border-black outline-none transition-colors"
+                      className="w-full border border-gray-300 px-3 py-2 text-lg focus:border-black outline-none transition-colors"
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="text-base font-normal text-[#1c1d1f] block">Attach content (optional)</label>
-                    <p className="text-sm text-[#6a6f73] font-normal">Most recent courses or labs:</p>
+                    <label className="text-lg font-light text-[#1c1d1f] block">Attach content (optional)</label>
+                    <p className="text-base text-[#6a6f73] font-light">Most recent courses or labs:</p>
                     
                     {/* Courses Radio Options */}
                     <div className="space-y-2.5 max-h-48 overflow-y-auto pr-1">
                       {filteredCoursesForWizard.map((course) => (
                         <label 
                           key={course._id} 
-                          className="flex items-start gap-2.5 text-sm text-[#2d2f31] font-normal cursor-pointer hover:bg-slate-50 p-1.5"
+                          className="flex items-start gap-2.5 text-base text-[#2d2f31] font-light cursor-pointer hover:bg-slate-50 p-1.5"
                         >
                           <input 
                             type="radio" 
@@ -651,7 +651,7 @@ const MyLearning = () => {
                         </label>
                       ))}
 
-                      <label className="flex items-center gap-2.5 text-sm text-[#2d2f31] font-normal cursor-pointer hover:bg-slate-50 p-1.5">
+                      <label className="flex items-center gap-2.5 text-base text-[#2d2f31] font-light cursor-pointer hover:bg-slate-50 p-1.5">
                         <input 
                           type="radio" 
                           name="attached_content"
@@ -671,7 +671,7 @@ const MyLearning = () => {
                         value={searchCourseQuery}
                         onChange={(e) => setSearchCourseQuery(e.target.value)}
                         placeholder="Search"
-                        className="w-full border border-gray-300 pl-9 pr-3 py-2 text-base focus:border-black outline-none transition-colors"
+                        className="w-full border border-gray-300 pl-9 pr-3 py-2 text-lg focus:border-black outline-none transition-colors"
                       />
                     </div>
                   </div>
@@ -682,14 +682,14 @@ const MyLearning = () => {
                 <div className="space-y-4 animate-in slide-in-from-right-3 duration-200">
                   {/* Frequency toggle select */}
                   <div className="space-y-2">
-                    <label className="text-base font-normal text-[#1c1d1f] block">Frequency</label>
+                    <label className="text-lg font-light text-[#1c1d1f] block">Frequency</label>
                     <div className="flex gap-2">
                       {["Daily", "Weekly", "Once"].map((freq) => (
                         <button
                           key={freq}
                           type="button"
                           onClick={() => setReminderFrequency(freq)}
-                          className={`px-4 py-2 text-sm font-normal border transition-colors ${
+                          className={`px-4 py-2 text-base font-light border transition-colors ${
                             reminderFrequency === freq
                               ? "bg-slate-900 border-slate-900 text-white"
                               : "border-gray-300 text-[#2d2f31] hover:bg-slate-50"
@@ -704,13 +704,13 @@ const MyLearning = () => {
 
                   {/* Time picker */}
                   <div className="space-y-2">
-                    <label className="text-base font-normal text-[#1c1d1f] block">Time</label>
+                    <label className="text-lg font-light text-[#1c1d1f] block">Time</label>
                     <div className="relative max-w-[200px]">
                       <input 
                         type="text" 
                         value={reminderTime}
                         onChange={(e) => setReminderTime(e.target.value)}
-                        className="w-full border border-gray-300 pl-3 pr-9 py-2 text-base focus:border-black outline-none transition-colors"
+                        className="w-full border border-gray-300 pl-3 pr-9 py-2 text-lg focus:border-black outline-none transition-colors"
                         placeholder="12:00 PM"
                       />
                       <Clock className="absolute right-3 top-2.5 h-4 w-4 text-gray-400" />
@@ -722,21 +722,21 @@ const MyLearning = () => {
               {wizardStep === 3 && (
                 <div className="space-y-4 animate-in slide-in-from-right-3 duration-200">
                   <div className="space-y-1.5">
-                    <label className="text-base font-normal text-[#1c1d1f] block">Add to calendar (optional)</label>
+                    <label className="text-lg font-light text-[#1c1d1f] block">Add to calendar (optional)</label>
                     <div className="flex flex-wrap gap-2.5 pt-1.5">
                       <button
                         type="button"
                         onClick={() => handleSyncCalendar("Google")}
-                        className={`flex items-center gap-1.5 px-4 py-2 border text-sm font-normal transition-all ${
+                        className={`flex items-center gap-1.5 px-4 py-2 border text-base font-light transition-all ${
                           calendarType === "Google" ? "border-black bg-slate-50" : "border-gray-300 hover:bg-slate-50"
                         }`}
                       >
-                        <span className="text-red-500 font-normal">G</span> Sign in with Google
+                        <span className="text-red-500 font-light">G</span> Sign in with Google
                       </button>
                       <button
                         type="button"
                         onClick={() => handleSyncCalendar("Apple")}
-                        className={`flex items-center gap-1.5 px-4 py-2 border text-sm font-normal transition-all ${
+                        className={`flex items-center gap-1.5 px-4 py-2 border text-base font-light transition-all ${
                           calendarType === "Apple" ? "border-black bg-slate-50" : "border-gray-300 hover:bg-slate-50"
                         }`}
                       >
@@ -745,7 +745,7 @@ const MyLearning = () => {
                       <button
                         type="button"
                         onClick={() => handleSyncCalendar("Outlook")}
-                        className={`flex items-center gap-1.5 px-4 py-2 border text-sm font-normal transition-all ${
+                        className={`flex items-center gap-1.5 px-4 py-2 border text-base font-light transition-all ${
                           calendarType === "Outlook" ? "border-black bg-slate-50" : "border-gray-300 hover:bg-slate-50"
                         }`}
                       >
@@ -767,7 +767,7 @@ const MyLearning = () => {
                   <button
                     type="button"
                     onClick={() => setWizardStep(prev => prev - 1)}
-                    className="text-[#6d28d2] hover:text-[#892de1] text-sm font-normal transition-colors"
+                    className="text-[#6d28d2] hover:text-[#892de1] text-base font-light transition-colors"
                   >
                     Previous
                   </button>
@@ -778,7 +778,7 @@ const MyLearning = () => {
                   <button
                     type="button"
                     onClick={() => setWizardStep(prev => prev + 1)}
-                    className="bg-[#6d28d2] hover:bg-[#892de1] text-white text-sm font-normal py-2.5 px-5 transition-colors shrink-0"
+                    className="bg-[#6d28d2] hover:bg-[#892de1] text-white text-base font-light py-2.5 px-5 transition-colors shrink-0"
                   >
                     Next
                   </button>
@@ -787,7 +787,7 @@ const MyLearning = () => {
                     type="button"
                     onClick={handleDone}
                     disabled={isCreating || isUpdating}
-                    className="bg-[#6d28d2] hover:bg-[#892de1] text-white text-sm font-normal py-2.5 px-5 transition-colors flex items-center gap-1 shrink-0"
+                    className="bg-[#6d28d2] hover:bg-[#892de1] text-white text-base font-light py-2.5 px-5 transition-colors flex items-center gap-1 shrink-0"
                   >
                     {(isCreating || isUpdating) && <Loader2 className="h-3 w-3 animate-spin" />}
                     Done
@@ -807,16 +807,16 @@ const MyLearning = () => {
 const ErrorState = () => (
   <div className="max-w-4xl mx-auto my-16 px-6 text-center select-none">
     <div className="bg-white border border-[#d1d7dc] rounded-none p-8 shadow-sm">
-      <h2 className="text-lg font-normal text-red-600 mb-2">
+      <h2 className="text-xl font-light text-red-600 mb-2">
         Failed to load your courses
       </h2>
-      <p className="text-sm text-[#6a6f73] mb-5">
+      <p className="text-base text-[#6a6f73] mb-5">
         Please try refreshing the page or check your internet network settings.
       </p>
       <Button
         variant="outline"
         onClick={() => window.location.reload()}
-        className="rounded-none border-[#2d2f31] text-[#2d2f31] hover:bg-gray-50 text-sm font-normal"
+        className="rounded-none border-[#2d2f31] text-[#2d2f31] hover:bg-gray-50 text-base font-light"
       >
         Refresh Page
       </Button>
@@ -839,22 +839,22 @@ const MyLearningSkeleton = () => (
 
 const EmptyLearningState = ({ navigate }) => (
   <div className="bg-white rounded-none border border-[#d1d7dc] p-10 text-center max-w-lg mx-auto shadow-sm space-y-4">
-    <h3 className="text-base font-normal text-[#2d2f31]">
+    <h3 className="text-lg font-light text-[#2d2f31]">
       Your learning journey starts here
     </h3>
-    <p className="text-sm text-[#6a6f73] leading-relaxed">
+    <p className="text-base text-[#6a6f73] leading-relaxed">
       You haven't enrolled in any courses yet. Explore our course registry to discover and enroll in full stack learning tracks.
     </p>
     <div className="flex justify-center gap-3 pt-2">
       <button
         onClick={() => navigate("/courses")}
-        className="bg-[#2d2f31] hover:bg-black text-white px-5 py-2.5 text-sm font-normal transition-all"
+        className="bg-[#2d2f31] hover:bg-black text-white px-5 py-2.5 text-base font-light transition-all"
       >
         Browse Courses
       </button>
       <button
         onClick={() => navigate("/")}
-        className="border border-[#d1d7dc] text-gray-700 hover:bg-gray-50 px-5 py-2.5 text-sm font-normal transition-all"
+        className="border border-[#d1d7dc] text-gray-700 hover:bg-gray-50 px-5 py-2.5 text-base font-light transition-all"
       >
         Go to Home
       </button>

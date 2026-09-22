@@ -27,13 +27,13 @@ const Terms = () => {
       {/* Page Hero Header */}
       <div className="bg-[#1c1d1f] text-white py-16 px-6 sm:px-12 border-b border-gray-800">
         <div className="max-w-6xl mx-auto space-y-4">
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
+          <h1 className="text-4xl sm:text-5xl font-bold tracking-tight">
             Terms of Service
           </h1>
-          <p className="text-sm sm:text-base text-gray-300 max-w-xl font-normal leading-relaxed">
+          <p className="text-base sm:text-lg text-gray-300 max-w-xl font-light leading-relaxed">
             Welcome to Samriddhi Gyan. These Terms of Service govern your use of our LMS platform, websites, and online courses.
           </p>
-          <p className="text-xs text-gray-400 font-semibold">
+          <p className="text-sm text-gray-400 font-medium">
             Last Updated: July 1, 2026
           </p>
         </div>
@@ -46,7 +46,7 @@ const Terms = () => {
           {/* Left Column: Sticky Side Navigation (Desktop only) */}
           <div className="hidden lg:block lg:col-span-1">
             <div className="sticky top-20 bg-white border border-[#d1d7dc] p-4 space-y-1">
-              <h3 className="text-xs font-bold text-[#6a6f73] uppercase tracking-wider mb-3 px-2">
+              <h3 className="text-sm font-semibold text-[#6a6f73] uppercase tracking-wider mb-3 px-2">
                 Table of Contents
               </h3>
               {sections.map((sec) => {
@@ -56,7 +56,7 @@ const Terms = () => {
                   <button
                     key={sec.id}
                     onClick={() => scrollToSection(sec.id)}
-                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-xs font-bold transition-all text-left ${
+                    className={`w-full flex items-center gap-2.5 px-3 py-2 text-sm font-semibold transition-all text-left ${
                       isActive
                         ? "bg-[#ecebfa] text-[#5624d0]"
                         : "text-[#2d2f31] hover:bg-gray-50 hover:text-[#5624d0]"
@@ -78,11 +78,11 @@ const Terms = () => {
               <section id="intro" className="space-y-4 scroll-mt-24">
                 <div className="flex items-center gap-2 border-b border-gray-150 pb-3">
                   <Globe className="w-5 h-5 text-[#a435f0]" />
-                  <h2 className="text-xl font-bold text-[#2d2f31]">
+                  <h2 className="text-2xl font-semibold text-[#2d2f31]">
                     1. Acceptance of Terms
                   </h2>
                 </div>
-                <div className="text-xs sm:text-sm text-[#2d2f31] font-normal leading-relaxed space-y-3">
+                <div className="text-sm sm:text-base text-[#2d2f31] font-light leading-relaxed space-y-3">
                   <p>
                     By registering for, accessing, or using the Samriddhi Gyan LMS platform, you agree to comply with and be bound by these Terms of Service. If you do not agree to these terms, you are prohibited from utilizing our website, platform, and online services.
                   </p>
@@ -96,11 +96,11 @@ const Terms = () => {
               <section id="accounts" className="space-y-4 scroll-mt-24">
                 <div className="flex items-center gap-2 border-b border-gray-150 pb-3">
                   <Lock className="w-5 h-5 text-[#a435f0]" />
-                  <h2 className="text-xl font-bold text-[#2d2f31]">
+                  <h2 className="text-2xl font-semibold text-[#2d2f31]">
                     2. User Accounts & Security
                   </h2>
                 </div>
-                <div className="text-xs sm:text-sm text-[#2d2f31] font-normal leading-relaxed space-y-3">
+                <div className="text-sm sm:text-base text-[#2d2f31] font-light leading-relaxed space-y-3">
                   <p>
                     When creating an account on Samriddhi Gyan, you must provide accurate, complete, and current information. Failure to do so constitutes a breach of the Terms, which may result in immediate suspension or termination of your account.
                   </p>
@@ -114,11 +114,11 @@ const Terms = () => {
               <section id="courses" className="space-y-4 scroll-mt-24">
                 <div className="flex items-center gap-2 border-b border-gray-150 pb-3">
                   <FileText className="w-5 h-5 text-[#a435f0]" />
-                  <h2 className="text-xl font-bold text-[#2d2f31]">
+                  <h2 className="text-2xl font-semibold text-[#2d2f31]">
                     3. Course Access & Content
                   </h2>
                 </div>
-                <div className="text-xs sm:text-sm text-[#2d2f31] font-normal leading-relaxed space-y-3">
+                <div className="text-sm sm:text-base text-[#2d2f31] font-light leading-relaxed space-y-3">
                   <p>
                     Upon purchasing a course, Samriddhi Gyan grants you a limited, non-exclusive, non-transferable license to access the lecture videos, transcripts, assignments, and reading materials solely for your personal, non-commercial education.
                   </p>
@@ -132,11 +132,11 @@ const Terms = () => {
               <section id="payments" className="space-y-4 scroll-mt-24">
                 <div className="flex items-center gap-2 border-b border-gray-150 pb-3">
                   <DollarSign className="w-5 h-5 text-[#a435f0]" />
-                  <h2 className="text-xl font-bold text-[#2d2f31]">
+                  <h2 className="text-2xl font-semibold text-[#2d2f31]">
                     4. Payments, Refunds & Billing
                   </h2>
                 </div>
-                <div className="text-xs sm:text-sm text-[#2d2f31] font-normal leading-relaxed space-y-3">
+                <div className="text-sm sm:text-base text-[#2d2f31] font-light leading-relaxed space-y-3">
                   <p>
                     All pricing is listed in USD (or regional equivalent currencies). Students agree to provide accurate payment info (Credit/Debit Card or Google Pay) at checkout. Transactions are processed securely by our global payment gateways.
                   </p>
@@ -150,15 +150,15 @@ const Terms = () => {
               <section id="conduct" className="space-y-4 scroll-mt-24">
                 <div className="flex items-center gap-2 border-b border-gray-150 pb-3">
                   <ShieldCheck className="w-5 h-5 text-[#a435f0]" />
-                  <h2 className="text-xl font-bold text-[#2d2f31]">
+                  <h2 className="text-2xl font-semibold text-[#2d2f31]">
                     5. Code of Conduct
                   </h2>
                 </div>
-                <div className="text-xs sm:text-sm text-[#2d2f31] font-normal leading-relaxed space-y-3">
+                <div className="text-sm sm:text-base text-[#2d2f31] font-light leading-relaxed space-y-3">
                   <p>
                     As a user of Samriddhi Gyan, you agree to maintain academic honesty, integrity, and mutual respect. You are strictly prohibited from:
                   </p>
-                  <ul className="list-disc pl-5 space-y-1.5 font-normal">
+                  <ul className="list-disc pl-5 space-y-1.5 font-light">
                     <li>Posting offensive, discriminatory, abusive, or harassing content inside the discussion forums or course reviews.</li>
                     <li>Utilizing our AI Learning Assistant to generate spam, malicious script code, or attempt security exploits on the LMS servers.</li>
                     <li>Attempting to bypass authentication or restrict other users' access to the course lecture players.</li>
@@ -170,11 +170,11 @@ const Terms = () => {
               <section id="liability" className="space-y-4 scroll-mt-24">
                 <div className="flex items-center gap-2 border-b border-gray-150 pb-3">
                   <AlertCircle className="w-5 h-5 text-[#a435f0]" />
-                  <h2 className="text-xl font-bold text-[#2d2f31]">
+                  <h2 className="text-2xl font-semibold text-[#2d2f31]">
                     6. Limitation of Liability
                   </h2>
                 </div>
-                <div className="text-xs sm:text-sm text-[#2d2f31] font-normal leading-relaxed space-y-3">
+                <div className="text-sm sm:text-base text-[#2d2f31] font-light leading-relaxed space-y-3">
                   <p>
                     To the maximum extent permitted by law, Samriddhi Gyan LMS and its affiliates, directors, officers, employees, or content contributors shall not be liable for any direct, indirect, incidental, special, or consequential damages resulting from your use of or inability to access our online services.
                   </p>
@@ -188,15 +188,15 @@ const Terms = () => {
               <section id="contact" className="space-y-4 scroll-mt-24">
                 <div className="flex items-center gap-2 border-b border-gray-150 pb-3">
                   <HelpCircle className="w-5 h-5 text-[#a435f0]" />
-                  <h2 className="text-xl font-bold text-[#2d2f31]">
+                  <h2 className="text-2xl font-semibold text-[#2d2f31]">
                     7. Contact Information
                   </h2>
                 </div>
-                <div className="text-xs sm:text-sm text-[#2d2f31] font-normal leading-relaxed space-y-3">
+                <div className="text-sm sm:text-base text-[#2d2f31] font-light leading-relaxed space-y-3">
                   <p>
                     If you have any questions, disputes, or feedback regarding these Terms of Service, please reach out to our legal compliance and student support teams:
                   </p>
-                  <div className="bg-slate-50 border border-gray-200 p-4 space-y-1 font-semibold text-[#2d2f31]">
+                  <div className="bg-slate-50 border border-gray-200 p-4 space-y-1 font-medium text-[#2d2f31]">
                     <p>Samriddhi Gyan LMS Inc.</p>
                     <p>Support Email: legal@samriddhigyan.com</p>
                     <p>Address: Kathmandu, Nepal</p>

@@ -72,7 +72,7 @@ const CertificatePreview = forwardRef(({ data = {} }, ref) => {
               <Award className="text-amber-600" size={36} />
             </div>
           )}
-          <p className="text-sm tracking-[0.25em] uppercase text-amber-700 font-sans font-semibold">
+          <p className="text-base tracking-[0.25em] uppercase text-amber-700 font-sans font-medium">
             {organizationName}
           </p>
         </div>
@@ -80,7 +80,7 @@ const CertificatePreview = forwardRef(({ data = {} }, ref) => {
         {/* Certificate title */}
         <div className="text-center">
           <h1
-            className="text-4xl font-bold text-gray-800 leading-tight"
+            className="text-5xl font-semibold text-gray-800 leading-tight"
             style={{ fontFamily: "'Playfair Display', serif", letterSpacing: "0.02em" }}
           >
             {certificateTitle}
@@ -94,11 +94,11 @@ const CertificatePreview = forwardRef(({ data = {} }, ref) => {
 
         {/* Presented to */}
         <div className="text-center">
-          <p className="text-sm tracking-widest uppercase font-sans text-gray-500 mb-1">
+          <p className="text-base tracking-widest uppercase font-sans text-gray-500 mb-1">
             Presented to
           </p>
           <h2
-            className="text-3xl text-amber-800 font-bold"
+            className="text-4xl text-amber-800 font-semibold"
             style={{ fontFamily: "'Playfair Display', serif" }}
           >
             {recipientName}
@@ -106,16 +106,16 @@ const CertificatePreview = forwardRef(({ data = {} }, ref) => {
         </div>
 
         {/* Statement */}
-        <p className="text-center text-gray-600 text-sm leading-relaxed max-w-xl font-sans italic px-4">
+        <p className="text-center text-gray-600 text-base leading-relaxed max-w-xl font-sans italic px-4">
           {certificateStatement}
         </p>
 
         {/* Course name */}
         <div className="bg-amber-50 border border-amber-200 rounded px-8 py-2 text-center">
-          <p className="text-xs uppercase tracking-widest text-amber-700 font-sans font-semibold mb-0.5">
+          <p className="text-sm uppercase tracking-widest text-amber-700 font-sans font-medium mb-0.5">
             Course / Program
           </p>
-          <p className="text-lg text-gray-800 font-semibold" style={{ fontFamily: "'Playfair Display', serif" }}>
+          <p className="text-xl text-gray-800 font-medium" style={{ fontFamily: "'Playfair Display', serif" }}>
             {courseName}
           </p>
         </div>
@@ -124,26 +124,26 @@ const CertificatePreview = forwardRef(({ data = {} }, ref) => {
         <div className="flex items-start justify-center gap-8 w-full">
           {completionDate && (
             <div className="text-center">
-              <p className="text-xs uppercase tracking-widest text-gray-400 font-sans">Completed</p>
-              <p className="text-sm font-semibold text-gray-700 font-sans">{fmtDate(completionDate)}</p>
+              <p className="text-sm uppercase tracking-widest text-gray-400 font-sans">Completed</p>
+              <p className="text-base font-medium text-gray-700 font-sans">{fmtDate(completionDate)}</p>
             </div>
           )}
           {duration && (
             <div className="text-center">
-              <p className="text-xs uppercase tracking-widest text-gray-400 font-sans">Duration</p>
-              <p className="text-sm font-semibold text-gray-700 font-sans">{duration}</p>
+              <p className="text-sm uppercase tracking-widest text-gray-400 font-sans">Duration</p>
+              <p className="text-base font-medium text-gray-700 font-sans">{duration}</p>
             </div>
           )}
           {grade && (
             <div className="text-center">
-              <p className="text-xs uppercase tracking-widest text-gray-400 font-sans">Grade</p>
-              <p className="text-sm font-semibold text-gray-700 font-sans">{grade}</p>
+              <p className="text-sm uppercase tracking-widest text-gray-400 font-sans">Grade</p>
+              <p className="text-base font-medium text-gray-700 font-sans">{grade}</p>
             </div>
           )}
           {issueDate && (
             <div className="text-center">
-              <p className="text-xs uppercase tracking-widest text-gray-400 font-sans">Issued</p>
-              <p className="text-sm font-semibold text-gray-700 font-sans">{fmtDate(issueDate)}</p>
+              <p className="text-sm uppercase tracking-widest text-gray-400 font-sans">Issued</p>
+              <p className="text-base font-medium text-gray-700 font-sans">{fmtDate(issueDate)}</p>
             </div>
           )}
         </div>
@@ -157,7 +157,7 @@ const CertificatePreview = forwardRef(({ data = {} }, ref) => {
             ) : (
               <div className="h-12 w-32 border-b border-gray-400" />
             )}
-            <p className="text-xs text-gray-500 font-sans text-center">
+            <p className="text-sm text-gray-500 font-sans text-center">
               {instructorName || "Authorized Signatory"}
             </p>
             <p className="text-[10px] text-gray-400 font-sans">Instructor / Director</p>
@@ -173,7 +173,7 @@ const CertificatePreview = forwardRef(({ data = {} }, ref) => {
             {verifyLink ? (
               <QRCodeSVG value={verifyLink} size={52} level="M" />
             ) : (
-              <div className="h-[52px] w-[52px] bg-gray-100 border rounded flex items-center justify-center text-gray-300 text-xs">
+              <div className="h-[52px] w-[52px] bg-gray-100 border rounded flex items-center justify-center text-gray-300 text-sm">
                 QR
               </div>
             )}

@@ -23,10 +23,10 @@ const Certifications = () => {
     return (
       <div className="bg-white border border-[#d1d7dc] p-10 text-center rounded-none shadow-sm space-y-3">
         <BookOpen className="h-8 w-8 text-gray-300 mx-auto" />
-        <h4 className="font-normal text-lg text-[#2d2f31]">
+        <h4 className="font-light text-xl text-[#2d2f31]">
           Earn certifications
         </h4>
-        <p className="text-base text-[#6a6f73] max-w-sm mx-auto leading-relaxed">
+        <p className="text-lg text-[#6a6f73] max-w-sm mx-auto leading-relaxed">
           Complete your enrolled courses fully to unlock certificates and prove your skills to employers.
         </p>
       </div>
@@ -57,11 +57,11 @@ const Certifications = () => {
               {/* Details */}
               <div className="flex-1 min-w-0 text-left space-y-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h3 className="text-xl font-bold text-slate-800 tracking-tight">
+                  <h3 className="text-2xl font-semibold text-slate-800 tracking-tight">
                     {cert.name}
                   </h3>
                   <Badge
-                    className={`text-xs font-bold px-2.5 py-0.5 rounded-none uppercase ${
+                    className={`text-sm font-semibold px-2.5 py-0.5 rounded-none uppercase ${
                       reg.examStatus === "completed"
                         ? reg.passed
                           ? "bg-green-100 text-green-800 border-green-200"
@@ -78,17 +78,17 @@ const Certifications = () => {
                       : "Registered"}
                   </Badge>
                 </div>
-                <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed">
+                <p className="text-base text-slate-500 line-clamp-2 leading-relaxed">
                   {cert.description}
                 </p>
-                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400 font-semibold">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-400 font-medium">
                   <span>Duration: {cert.examDuration || 60} mins</span>
                   <span>•</span>
                   <span>Questions: {cert.questionsCount || 40}</span>
                   {reg.examStatus === "completed" && (
                     <>
                       <span>•</span>
-                      <span className="text-slate-600 font-bold">Score: {reg.score}%</span>
+                      <span className="text-slate-600 font-semibold">Score: {reg.score}%</span>
                     </>
                   )}
                 </div>
@@ -101,7 +101,7 @@ const Certifications = () => {
                     <Button
                       variant="outline"
                       onClick={() => window.open(`http://localhost:10000/api/v1/certificate/verify/${reg.certificateId}`, "_blank")}
-                      className="text-sm font-bold border-[#1c1d1f] hover:bg-slate-50 text-slate-700 h-10 px-4 rounded-none transition-colors w-full md:w-44 flex items-center justify-center gap-1.5"
+                      className="text-base font-semibold border-[#1c1d1f] hover:bg-slate-50 text-slate-700 h-10 px-4 rounded-none transition-colors w-full md:w-44 flex items-center justify-center gap-1.5"
                     >
                       <Award className="w-4 h-4 text-purple-600" />
                       View Certificate
@@ -110,7 +110,7 @@ const Certifications = () => {
                   ) : (
                     <Button
                       onClick={() => navigate(`/certification/${cert.slug}`)}
-                      className="text-sm font-bold bg-[#1c1d1f] hover:bg-[#2d2f31] text-white h-10 px-4 rounded-none transition-colors w-full md:w-44"
+                      className="text-base font-semibold bg-[#1c1d1f] hover:bg-[#2d2f31] text-white h-10 px-4 rounded-none transition-colors w-full md:w-44"
                     >
                       Reapply
                     </Button>
@@ -118,7 +118,7 @@ const Certifications = () => {
                 ) : (
                   <Button
                     onClick={() => navigate(`/certification/${cert.slug}`)}
-                    className="text-sm font-bold bg-purple-600 hover:bg-purple-700 text-white h-10 px-4 rounded-none transition-colors w-full md:w-44 flex items-center justify-center gap-1.5"
+                    className="text-base font-semibold bg-purple-600 hover:bg-purple-700 text-white h-10 px-4 rounded-none transition-colors w-full md:w-44 flex items-center justify-center gap-1.5"
                   >
                     <Play className="w-4 h-4 fill-white" />
                     {reg.examStatus === "started" ? "Resume Exam" : "Take Exam"}
@@ -127,7 +127,7 @@ const Certifications = () => {
                 <Button
                   variant="ghost"
                   onClick={() => navigate(`/certification/${cert.slug}`)}
-                  className="text-sm font-bold text-slate-600 hover:text-purple-600 w-full md:w-44 h-10 px-4 rounded-none"
+                  className="text-base font-semibold text-slate-600 hover:text-purple-600 w-full md:w-44 h-10 px-4 rounded-none"
                 >
                   View Details
                   <ExternalLink className="w-3.5 h-3.5 ml-1" />

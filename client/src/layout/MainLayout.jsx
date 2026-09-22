@@ -1,5 +1,5 @@
 import { Suspense } from 'react';
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 // --- Your Original Imports ---
@@ -13,13 +13,11 @@ import { useLoadUserQuery } from '@/features/api/authApi'; // Adjust path if nee
 import LoadingSpinner from '@/components/LoadingSpinner'; // Adjust path if needed
 
 const MainLayout = () => {
+  const location = useLocation();
   const { user, token } = useSelector((store) => store.auth);
-  // Only call loadUser when a token exists — calling without a token hits a protected
-  // endpoint and produces a 401 for every unauthenticated visitor.
   const hasToken = !!token || !!localStorage.getItem('authToken');
   const { isLoading } = useLoadUserQuery(undefined, { skip: !hasToken });
-  const isInstructor = user?.role === 'instructor';
-  const showBanner = !user || user.role === 'student';
+  const showBanner = (!user || user.role === 'student');
 
   return (
     <div className='flex flex-col min-h-screen'>
@@ -27,7 +25,6 @@ const MainLayout = () => {
       <Navbar />
       
       <main className='flex-grow'>
-       
         {isLoading ? (
           <LoadingSpinner />
         ) : (

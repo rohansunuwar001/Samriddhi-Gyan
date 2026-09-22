@@ -48,10 +48,10 @@ const CourseDetailPage = () => {
     }
 
     return (
-        <div className="bg-white text-[#2d2f31]">
+        <div className="bg-white text-[#2d2f31] font-sans">
             <CourseHeader course={course} purchasePanel={<PurchaseCard course={course} />} />
 
-            <div className="mx-auto grid max-w-[1500px] gap-12 px-6 pb-16 pt-16 sm:px-8 lg:grid-cols-[minmax(0,1fr)_440px] lg:px-10 lg:pt-20 xl:px-16">
+            <div className="mx-auto grid max-w-[1340px] gap-8 px-4 sm:px-6 md:px-8 pb-16 pt-8 lg:grid-cols-[minmax(0,1fr)_380px] xl:grid-cols-[minmax(0,1fr)_400px]">
                 <main className="min-w-0 space-y-8">
                     <WhatYouWillLearn learnings={course.learnings} />
                     <CourseIncludes course={course} />
@@ -69,7 +69,7 @@ const CourseDetailPage = () => {
                     <MoreCoursesFromInstructor instructor={course.creator} currentCourseId={course._id} />
                 </main>
                 <div className="hidden lg:block relative">
-                    <div className="sticky top-[90px] -mt-[370px] z-30">
+                    <div className="sticky top-[80px] -mt-[310px] z-30">
                         <PurchaseCard course={course} />
                     </div>
                 </div>

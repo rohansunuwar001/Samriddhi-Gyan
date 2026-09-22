@@ -46,6 +46,7 @@ import assignmentRouter from "./routes/assignment.route.js";
 import analyticsRouter from "./routes/analytics.route.js";
 import healthRouter from "./routes/health.route.js";
 import couponRouter from "./routes/coupon.route.js";
+import exploreSectionRouter from "./routes/exploreSection.route.js";
 import path from 'path';
 import { fileURLToPath } from 'url';
 dotenv.config({});
@@ -141,9 +142,10 @@ app.use("/api/v1/recommendations", recommendedRoutes);
 app.use("/api/v1/flashcard", flashcardRouter);
 app.use("/api/v1/question", questionRoute);
 app.use("/api/v1/reminder", reminderRoute);
-app.use("/api/v1/admin", adminRouter)
+app.use("/api/v1/admin", adminRouter);
 app.use("/api/v1/admin", blogImportRouter); // POST /api/v1/admin/blog-import
 app.use("/api/v1/cms", cmsRouter);
+app.use("/api/v1/explore-sections", exploreSectionRouter);
 app.use("/api/v1/subscription", subscriptionRouter);
 app.use("/api/v1/payment-methods", paymentMethodRouter);
 app.use("/api/v1/certificate", certificateRouter);

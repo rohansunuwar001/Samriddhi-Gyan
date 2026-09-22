@@ -26,14 +26,14 @@ const EmptyState = ({ onNew }) => (
       <Award size={40} className="text-amber-400" />
     </div>
     <div className="text-center">
-      <h3 className="text-2xl font-light text-gray-700">No certificate templates yet</h3>
-      <p className="text-gray-400 text-sm font-light mt-1 max-w-xs">
+      <h3 className="text-3xl font-extralight text-gray-700">No certificate templates yet</h3>
+      <p className="text-gray-400 text-base font-extralight mt-1 max-w-xs">
         Create a reusable template and issue certificates to your enrolled students.
       </p>
     </div>
     <button
       onClick={onNew}
-      className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-light text-sm transition-colors"
+      className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-extralight text-base transition-colors"
     >
       <Plus size={16} /> Create First Certificate
     </button>
@@ -134,15 +134,15 @@ const CertificateManager = () => {
             <Award className="text-amber-600 shrink-0" size={24} />
           </div>
           <div>
-            <h1 className="text-4xl font-light text-gray-800">Certificate Manager</h1>
-            <p className="text-base font-light text-gray-500 mt-1">
+            <h1 className="text-5xl font-extralight text-gray-800">Certificate Manager</h1>
+            <p className="text-lg font-extralight text-gray-500 mt-1">
               Create templates and issue certificates to your students
             </p>
           </div>
         </div>
         <button
           onClick={() => navigate("/instructor/certificates/new")}
-          className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-light text-sm transition-colors shadow-sm"
+          className="flex items-center gap-2 px-5 py-2.5 bg-amber-500 hover:bg-amber-600 text-white rounded-xl font-extralight text-base transition-colors shadow-sm"
         >
           <Plus size={16} /> New Certificate
         </button>
@@ -174,8 +174,8 @@ const CertificateManager = () => {
             <div key={label} className={`${bg} border rounded-2xl p-4 flex items-center gap-4`}>
               <div className="p-2.5 bg-white rounded-xl shadow-sm">{icon}</div>
               <div>
-                <p className="text-2xl font-light text-gray-800">{value}</p>
-                <p className="text-xs text-gray-500 font-light">{label}</p>
+                <p className="text-3xl font-extralight text-gray-800">{value}</p>
+                <p className="text-sm text-gray-500 font-extralight">{label}</p>
               </div>
             </div>
           ))}
@@ -203,11 +203,11 @@ const CertificateManager = () => {
                 ) : null}
                 <div className="relative z-10 flex flex-col items-center text-white">
                   <Award size={28} />
-                  <p className="text-xs font-light mt-1 opacity-90">{cert.certificateTitle}</p>
+                  <p className="text-sm font-extralight mt-1 opacity-90">{cert.certificateTitle}</p>
                 </div>
                 {/* Issued badge */}
                 {cert.issuedCount > 0 && (
-                  <div className="absolute top-2 right-2 bg-white/90 text-amber-700 text-xs font-light px-2 py-0.5 rounded-full">
+                  <div className="absolute top-2 right-2 bg-white/90 text-amber-700 text-sm font-extralight px-2 py-0.5 rounded-full">
                     {cert.issuedCount} issued
                   </div>
                 )}
@@ -216,29 +216,29 @@ const CertificateManager = () => {
               {/* Content */}
               <div className="p-4 flex flex-col gap-2 flex-1">
                 <div>
-                  <h3 className="font-light text-gray-800 text-sm leading-tight truncate">
+                  <h3 className="font-extralight text-gray-800 text-base leading-tight truncate">
                     {cert.courseName || cert.course?.title}
                   </h3>
-                  <p className="text-xs font-light text-gray-400 mt-0.5">{cert.course?.category}</p>
+                  <p className="text-sm font-extralight text-gray-400 mt-0.5">{cert.course?.category}</p>
                 </div>
 
-                <div className="text-xs text-gray-500 font-light space-y-0.5">
+                <div className="text-sm text-gray-500 font-extralight space-y-0.5">
                   <div className="flex justify-between">
                     <span>Organisation</span>
-                    <span className="font-light text-gray-700 truncate max-w-[140px]">
+                    <span className="font-extralight text-gray-700 truncate max-w-[140px]">
                       {cert.organizationName}
                     </span>
                   </div>
                   {cert.duration && (
                     <div className="flex justify-between">
                       <span>Duration</span>
-                      <span className="font-light text-gray-700">{cert.duration}</span>
+                      <span className="font-extralight text-gray-700">{cert.duration}</span>
                     </div>
                   )}
                   {cert.instructorName && (
                     <div className="flex justify-between">
                       <span>Instructor</span>
-                      <span className="font-light text-gray-700 truncate max-w-[140px]">
+                      <span className="font-extralight text-gray-700 truncate max-w-[140px]">
                         {cert.instructorName}
                       </span>
                     </div>
@@ -250,7 +250,7 @@ const CertificateManager = () => {
               <div className="border-t border-gray-50 p-3 flex items-center gap-2">
                 <button
                   onClick={() => setIssueModalId(cert._id)}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg text-xs font-light transition-colors"
+                  className="flex-1 flex items-center justify-center gap-1.5 py-2 bg-amber-50 hover:bg-amber-100 text-amber-700 rounded-lg text-sm font-extralight transition-colors"
                 >
                   <Send size={13} /> Issue
                 </button>

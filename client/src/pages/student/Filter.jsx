@@ -50,7 +50,7 @@ const Filter = ({ handleFilterChange }) => {
   return (
     <div className="w-full md:w-[280px] space-y-4">
       <div className="flex items-center justify-between">
-        <h1 className="font-normal text-xl">Filter Options</h1>
+        <h1 className="font-light text-2xl">Filter Options</h1>
         <Select onValueChange={selectByPriceHandler} value={sortByPrice}>
           <SelectTrigger className="w-[150px]">
             <SelectValue placeholder="Sort by" />
@@ -69,8 +69,8 @@ const Filter = ({ handleFilterChange }) => {
 
       <div>
         <div className="flex items-center justify-between mb-2">
-          <h2 className="font-normal">CATEGORIES</h2>
-          <span className="text-sm text-gray-500">
+          <h2 className="font-light">CATEGORIES</h2>
+          <span className="text-base text-gray-500">
             {selectedCategories.length} selected
           </span>
         </div>
@@ -78,14 +78,14 @@ const Filter = ({ handleFilterChange }) => {
         <input
           type="text"
           placeholder="Search categories..."
-          className="w-full p-2 mb-3 text-base border rounded-md"
+          className="w-full p-2 mb-3 text-lg border rounded-md"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
 
         <div className="max-h-[400px] overflow-y-auto pr-2">
           {isLoadingCategories ? (
-            <p className="text-base text-gray-500">Loading categories...</p>
+            <p className="text-lg text-gray-500">Loading categories...</p>
           ) : filteredCategories.length > 0 ? (
             filteredCategories.map((category) => (
               <div key={category} className="flex items-center space-x-2 my-2">
@@ -96,14 +96,14 @@ const Filter = ({ handleFilterChange }) => {
                 />
                 <Label
                   htmlFor={category}
-                  className="text-base font-light leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  className="text-lg font-extralight leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
                 >
                   {category}
                 </Label>
               </div>
             ))
           ) : (
-            <p className="text-base text-gray-500">No categories found</p>
+            <p className="text-lg text-gray-500">No categories found</p>
           )}
         </div>
       </div>

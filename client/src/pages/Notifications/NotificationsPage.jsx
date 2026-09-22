@@ -122,15 +122,15 @@ const NotificationsPage = () => {
         <div className="max-w-4xl mx-auto px-6 py-12 min-h-screen text-left font-sans">
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-3xl font-extrabold text-[#1c1d1f] tracking-tight">Notifications</h1>
-                    <p className="text-sm text-slate-500 mt-1">Stay updated with course announcements, reviews, and account updates.</p>
+                    <h1 className="text-4xl font-bold text-[#1c1d1f] tracking-tight">Notifications</h1>
+                    <p className="text-base text-slate-500 mt-1">Stay updated with course announcements, reviews, and account updates.</p>
                 </div>
                 {filteredNotifications.length > 0 && (
                     <Button 
                         variant="outline" 
                         onClick={handleClearAll}
                         disabled={isClearing}
-                        className="text-xs font-bold border-slate-300 hover:bg-slate-50 text-slate-700 h-10 px-4 rounded-md shrink-0 transition-colors"
+                        className="text-sm font-semibold border-slate-300 hover:bg-slate-50 text-slate-700 h-10 px-4 rounded-md shrink-0 transition-colors"
                     >
                         {isClearing ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Trash2 className="mr-2 h-4 w-4" />}
                         Clear All
@@ -145,7 +145,7 @@ const NotificationsPage = () => {
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
-                            className={`pb-3 text-sm font-bold capitalize transition-all border-b-2 ${
+                            className={`pb-3 text-base font-semibold capitalize transition-all border-b-2 ${
                                 activeTab === tab
                                     ? "border-[#1c1d1f] text-[#1c1d1f]"
                                     : "border-transparent text-slate-400 hover:text-slate-600"
@@ -164,7 +164,7 @@ const NotificationsPage = () => {
                         <div 
                             key={n._id} 
                             className={`group relative p-5 transition-all hover:bg-slate-50/60 flex items-start gap-4 ${
-                                !n.read ? 'bg-slate-50/30 font-semibold' : ''
+                                !n.read ? 'bg-slate-50/30 font-medium' : ''
                             }`}
                         >
                             {/* Icon Indicator */}
@@ -177,14 +177,14 @@ const NotificationsPage = () => {
                                 {n.link ? (
                                     <Link 
                                         to={n.link} 
-                                        className="text-sm text-slate-800 hover:text-[#5624d0] leading-relaxed transition-colors hover:underline"
+                                        className="text-base text-slate-800 hover:text-[#5624d0] leading-relaxed transition-colors hover:underline"
                                     >
                                         {n.message}
                                     </Link>
                                 ) : (
-                                    <p className="text-sm text-slate-800 leading-relaxed">{n.message}</p>
+                                    <p className="text-base text-slate-800 leading-relaxed">{n.message}</p>
                                 )}
-                                <p className="text-xs text-slate-400 font-bold mt-2">{timeAgo(n.createdAt)}</p>
+                                <p className="text-sm text-slate-400 font-semibold mt-2">{timeAgo(n.createdAt)}</p>
                             </div>
 
                             {/* Delete Action */}
@@ -200,7 +200,7 @@ const NotificationsPage = () => {
                     ))
                 ) : (
                     <div className="flex flex-col items-center justify-center py-20 text-center px-4">
-                        <p className="text-[14px] text-slate-500 font-normal">No notifications.</p>
+                        <p className="text-[14px] text-slate-500 font-light">No notifications.</p>
                     </div>
                 )}
             </div>

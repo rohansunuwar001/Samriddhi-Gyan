@@ -112,7 +112,7 @@ const InstructorSidebar = () => {
               <div className="w-9 h-9 rounded-lg bg-gradient-to-tr from-[#a435f0] to-[#8720cf] flex items-center justify-center shadow-md shrink-0">
                 <BookOpen className="w-5 h-5 text-white" />
               </div>
-              <span className="font-normal text-white text-lg tracking-tight whitespace-nowrap">
+              <span className="font-light text-white text-xl tracking-tight whitespace-nowrap">
                 Samriddhi <span className="text-[#a435f0]">Gyan</span>
               </span>
             </div>
@@ -139,7 +139,7 @@ const InstructorSidebar = () => {
                     onClick={() => navigate(item.to)}
                     className={`w-full flex items-center gap-4 py-3.5 px-3 transition-colors rounded-lg group ${
                       isMenuBtnActive
-                        ? "bg-white/10 text-white font-normal"
+                        ? "bg-white/10 text-white font-light"
                         : "hover:bg-white/5 hover:text-white"
                     }`}
                     title={!isHovered ? item.label : undefined}
@@ -151,7 +151,7 @@ const InstructorSidebar = () => {
                       {item.icon}
                     </div>
                     {isHovered && (
-                      <span className="text-base tracking-wide transition-opacity duration-300 font-light">
+                      <span className="text-lg tracking-wide transition-opacity duration-300 font-extralight">
                         {item.label}
                       </span>
                     )}
@@ -168,7 +168,7 @@ const InstructorSidebar = () => {
                   onClick={() => isHovered && toggleSubMenu(item.id)}
                   className={`w-full flex items-center justify-between py-3.5 px-3 transition-colors rounded-lg group ${
                     isMenuBtnActive 
-                      ? "bg-white/10 text-white font-normal" 
+                      ? "bg-white/10 text-white font-light" 
                       : "hover:bg-white/5 hover:text-white"
                   }`}
                   title={!isHovered ? item.label : undefined}
@@ -182,7 +182,7 @@ const InstructorSidebar = () => {
                       {item.icon}
                     </div>
                     {isHovered && (
-                      <span className="text-base tracking-wide transition-opacity duration-300 font-light">
+                      <span className="text-lg tracking-wide transition-opacity duration-300 font-extralight">
                         {item.label}
                       </span>
                     )}
@@ -208,9 +208,9 @@ const InstructorSidebar = () => {
                           key={sub.to}
                           to={sub.to}
                           end
-                          className={`flex items-center gap-3 py-2 px-3 text-sm rounded transition-colors ${
+                          className={`flex items-center gap-3 py-2 px-3 text-base rounded transition-colors ${
                             isSubActive
-                              ? "text-white font-normal bg-[#a435f0]/20"
+                              ? "text-white font-light bg-[#a435f0]/20"
                               : "text-gray-400 hover:text-white hover:bg-white/5"
                           }`}
                         >

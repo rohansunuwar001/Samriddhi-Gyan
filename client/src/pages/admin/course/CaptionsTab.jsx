@@ -88,17 +88,17 @@ const CaptionsTab = () => {
   };
 
   return (
-    <div className="bg-white border border-[#d1d7dc] p-10 shadow-sm relative font-sans text-lg font-normal text-[#1c1d1f]">
+    <div className="bg-white border border-[#d1d7dc] p-10 shadow-sm relative font-sans text-xl font-light text-[#1c1d1f]">
       
       {/* HEADER SECTION */}
       <div className="flex items-center justify-between border-b border-[#d1d7dc] pb-5 mb-6">
         <div className="flex items-center gap-4">
-          <h2 className="text-3xl font-normal">Captions</h2>
+          <h2 className="text-4xl font-light">Captions</h2>
           
           <select
             value={selectedLanguage}
             onChange={(e) => setSelectedLanguage(e.target.value)}
-            className="border border-[#1c1d1f] px-3 py-1.5 text-lg font-normal outline-none bg-white"
+            className="border border-[#1c1d1f] px-3 py-1.5 text-xl font-light outline-none bg-white"
           >
             <option value="English (US)">English (US)</option>
             <option value="Spanish">Spanish</option>
@@ -107,7 +107,7 @@ const CaptionsTab = () => {
             <option value="Nepali">Nepali</option>
           </select>
 
-          <span className="text-lg text-[#6a6f73] flex items-center gap-1.5">
+          <span className="text-xl text-[#6a6f73] flex items-center gap-1.5">
             {captionedLecturesCount}/{totalLecturesCount} published lectures captioned
             <Info className="w-4 h-4 text-[#6a6f73] cursor-pointer" />
           </span>
@@ -116,13 +116,13 @@ const CaptionsTab = () => {
         <button
           onClick={handleToggleGlobalDisable}
           disabled={isToggling}
-          className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-normal text-lg px-5 py-2 transition-colors rounded-sm"
+          className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-light text-xl px-5 py-2 transition-colors rounded-sm"
         >
           {isGlobalDisabled ? "Enable" : "Disable"}
         </button>
       </div>
 
-      <p className="text-lg text-[#6a6f73] mb-6 font-light">
+      <p className="text-xl text-[#6a6f73] mb-6 font-extralight">
         Learners of all levels of language proficiency highly value subtitles as it helps follow, understand and memorize the content. Also having subtitles to ensure the content is accessible for those that are deaf or hard of hearing is crucial. <span className="text-[#5624d0] underline cursor-pointer">Learn more.</span>
       </p>
 
@@ -130,11 +130,11 @@ const CaptionsTab = () => {
       <div className="bg-[#f7f9fa] border border-[#d1d7dc] p-5 mb-8 flex gap-4 items-start rounded-sm">
         <Info className="w-6 h-6 text-[#5624d0] shrink-0 mt-0.5" />
         <div>
-          <h4 className="font-normal text-xl text-[#1c1d1f] mb-1">Reach more students with captions</h4>
-          <p className="text-lg text-[#6a6f73] font-light">
+          <h4 className="font-light text-2xl text-[#1c1d1f] mb-1">Reach more students with captions</h4>
+          <p className="text-xl text-[#6a6f73] font-extralight">
             Samriddhi Gyan will add auto-generated captions to your course to make course content more accessible. Captions will be available within 48 hours of publishing your course. You can review and edit your captions on this page once they have been generated.
           </p>
-          <p className="text-[#5624d0] hover:underline cursor-pointer text-lg font-normal mt-3">
+          <p className="text-[#5624d0] hover:underline cursor-pointer text-xl font-light mt-3">
             Find out more about captions here.
           </p>
         </div>
@@ -144,13 +144,13 @@ const CaptionsTab = () => {
       <div className="flex gap-4 mb-8">
         <button
           onClick={() => setActiveTab("all")}
-          className={`px-5 py-2 text-lg font-normal transition-colors border ${activeTab === "all" ? "bg-[#1c1d1f] text-white border-[#1c1d1f]" : "bg-white text-[#1c1d1f] border-[#d1d7dc] hover:bg-slate-50"}`}
+          className={`px-5 py-2 text-xl font-light transition-colors border ${activeTab === "all" ? "bg-[#1c1d1f] text-white border-[#1c1d1f]" : "bg-white text-[#1c1d1f] border-[#d1d7dc] hover:bg-slate-50"}`}
         >
           All
         </button>
         <button
           onClick={() => setActiveTab("uncaptioned")}
-          className={`px-5 py-2 text-lg font-normal transition-colors border ${activeTab === "uncaptioned" ? "bg-[#1c1d1f] text-white border-[#1c1d1f]" : "bg-white text-[#1c1d1f] border-[#d1d7dc] hover:bg-slate-50"}`}
+          className={`px-5 py-2 text-xl font-light transition-colors border ${activeTab === "uncaptioned" ? "bg-[#1c1d1f] text-white border-[#1c1d1f]" : "bg-white text-[#1c1d1f] border-[#d1d7dc] hover:bg-slate-50"}`}
         >
           Uncaptioned ({uncaptionedLecturesCount})
         </button>
@@ -171,7 +171,7 @@ const CaptionsTab = () => {
 
           return (
             <div key={section._id} className="space-y-4">
-              <h3 className="text-xl font-normal text-[#1c1d1f] border-b border-[#e4e8eb] pb-2">
+              <h3 className="text-2xl font-light text-[#1c1d1f] border-b border-[#e4e8eb] pb-2">
                 {section.title}
               </h3>
 
@@ -192,7 +192,7 @@ const CaptionsTab = () => {
                           <Circle className="w-5 h-5 text-[#9a9fa5] shrink-0" />
                         )}
                         <div className="min-w-0">
-                          <span className="text-lg text-[#1c1d1f] block truncate">
+                          <span className="text-xl text-[#1c1d1f] block truncate">
                             Lecture {lecIdx + 1}: {lecture.title}
                           </span>
                           {hasLecCaptions ? (
@@ -200,7 +200,7 @@ const CaptionsTab = () => {
                               {lecture.captions.map((cap) => (
                                 <span
                                   key={cap._id}
-                                  className="bg-purple-50 text-[#5624d0] border border-purple-100 text-base px-2.5 py-0.5 rounded-full flex items-center gap-1.5"
+                                  className="bg-purple-50 text-[#5624d0] border border-purple-100 text-lg px-2.5 py-0.5 rounded-full flex items-center gap-1.5"
                                 >
                                   {cap.language}
                                   <button
@@ -213,7 +213,7 @@ const CaptionsTab = () => {
                               ))}
                             </div>
                           ) : (
-                            <span className="text-base text-[#6a6f73] font-light block mt-0.5">
+                            <span className="text-lg text-[#6a6f73] font-extralight block mt-0.5">
                               Uncaptioned
                             </span>
                           )}
@@ -230,7 +230,7 @@ const CaptionsTab = () => {
                         />
                         <label
                           htmlFor={`caption-input-${lecture._id}`}
-                          className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-normal text-lg px-5 py-2.5 transition-colors cursor-pointer rounded-sm flex items-center gap-1.5"
+                          className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-light text-xl px-5 py-2.5 transition-colors cursor-pointer rounded-sm flex items-center gap-1.5"
                         >
                           {isUploadingLec ? (
                             <Loader2 className="w-4 h-4 animate-spin" />

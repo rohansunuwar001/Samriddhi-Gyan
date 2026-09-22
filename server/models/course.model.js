@@ -223,37 +223,7 @@ courseSchema.pre("save", async function () {
   }
 });
 
-// Step 1.5: Auto-tag topics using Aho-Corasick Multi-Pattern Search
-courseSchema.pre("save", async function () {
-  if (this.isNew || this.isModified("title") || this.isModified("subtitle") || this.isModified("description")) {
-    try {
-      const CategoryModel = mongoose.model("Category");
-      const dbCategories = await CategoryModel.find().select("name").lean();
-      const categoryNames = dbCategories.map(c => c.name);
 
-      const TECH_TOPICS = [
-        "React", "Angular", "Vue", "JavaScript", "HTML", "CSS", "Sass", "TypeScript",
-        "Node.js", "Express", "Django", "Flask", "Ruby on Rails", "Laravel", "Spring Boot",
-        "SQL", "MongoDB", "PostgreSQL", "MySQL", "Redis", "Docker", "Kubernetes",
-        "AWS", "Google Cloud", "Azure", "Python", "Java", "C++", "C#", "Go", "Rust", "Swift"
-      ];
-
-      const combinedDict = Array.from(new Set([...TECH_TOPICS, ...categoryNames]));
-      const tagger = new AhoCorasickTagger(combinedDict);
-
-      const textToScan = `${this.title || ""} ${this.subtitle || ""} ${this.description || ""}`;
-      const matched = tagger.tagText(textToScan);
-
-      if (matched.length > 0) {
-        const currentTopics = new Set(this.topics || []);
-        matched.forEach(t => currentTopics.add(t));
-        this.topics = Array.from(currentTopics);
-      }
-    } catch (err) {
-      console.warn("Aho-Corasick auto-tagging failed:", err.message);
-    }
-  }
-});
 
 // Step 2: Add Mongoose middleware to automatically generate embeddings
 courseSchema.pre("save", async function () {

@@ -81,16 +81,16 @@ function CourseRow({ course, index, navigate, onDelete, isDeleting }) {
       {/* Title + DRAFT Public */}
       <div className="min-w-0 w-52 shrink-0">
         <p
-          className="font-normal text-[#1c1d1f] text-lg leading-snug truncate"
+          className="font-light text-[#1c1d1f] text-xl leading-snug truncate"
           style={{ opacity: hovered ? 0.45 : 1 }}
         >
           {course.title}
         </p>
         <div className="flex items-center gap-1.5 mt-2">
-          <span className="text-base text-[#6a6f73] uppercase font-normal tracking-wide">
+          <span className="text-lg text-[#6a6f73] uppercase font-light tracking-wide">
             {isPublished ? "Published" : "Draft"}
           </span>
-          <span className="text-base font-normal text-[#1c1d1f]">
+          <span className="text-lg font-light text-[#1c1d1f]">
             {course.courseLevel || "Public"}
           </span>
         </div>
@@ -101,7 +101,7 @@ function CourseRow({ course, index, navigate, onDelete, isDeleting }) {
         {hovered ? (
           /* Hover state: show Edit / manage course text */
           <span
-            className="text-xl font-normal text-[#5624d0] whitespace-nowrap"
+            className="text-2xl font-light text-[#5624d0] whitespace-nowrap"
             onClick={(e) => { e.stopPropagation(); navigate(`${course._id}`); }}
           >
             Edit / manage course
@@ -109,7 +109,7 @@ function CourseRow({ course, index, navigate, onDelete, isDeleting }) {
         ) : (
           /* Default: show progress bar */
           <div className="flex items-center gap-4 w-full">
-            <span className="text-base text-[#6a6f73] whitespace-nowrap shrink-0">
+            <span className="text-lg text-[#6a6f73] whitespace-nowrap shrink-0">
               {pct < 100 ? "Finish your course" : "Course complete"}
             </span>
             <div className="flex-1 bg-[#d1d7dc] rounded-full h-1.5">
@@ -129,7 +129,7 @@ function CourseRow({ course, index, navigate, onDelete, isDeleting }) {
           onClick={(e) => e.stopPropagation()}
         >
           <button
-            className="text-base text-red-500 font-normal border border-red-200 px-3 py-1.5 rounded hover:bg-red-50 transition-colors"
+            className="text-lg text-red-500 font-light border border-red-200 px-3 py-1.5 rounded hover:bg-red-50 transition-colors"
             onClick={() => onDelete(course._id)}
             disabled={isDeleting}
           >
@@ -147,7 +147,7 @@ function CourseBundles({ navigate }) {
     <div className="flex flex-col items-center justify-center py-16 px-4">
       {/* Illustration */}
       <div className="mb-8 w-[340px] bg-[#f7f9fa] rounded-lg border border-[#d1d7dc] p-5 select-none">
-        <p className="text-lg font-normal text-[#1c1d1f] mb-3">Bundle title</p>
+        <p className="text-xl font-light text-[#1c1d1f] mb-3">Bundle title</p>
         <div className="space-y-2">
           {/* item 1 */}
           <div className="flex items-center gap-3 bg-white border border-[#d1d7dc] rounded p-2">
@@ -178,27 +178,27 @@ function CourseBundles({ navigate }) {
         </div>
         <div className="flex items-center justify-between mt-3">
           <div className="flex items-center gap-1">
-            <span className="text-base text-[#6a6f73]">Total:</span>
+            <span className="text-lg text-[#6a6f73]">Total:</span>
             <div className="h-2 w-10 bg-[#d1d7dc] rounded" />
           </div>
-          <div className="px-3 py-1 bg-[#5624d0] rounded text-[10px] text-white font-normal">
+          <div className="px-3 py-1 bg-[#5624d0] rounded text-[10px] text-white font-light">
             Add all to cart
           </div>
         </div>
       </div>
 
       {/* CTA text */}
-      <p className="text-xl font-normal text-[#1c1d1f] mb-2">
+      <p className="text-2xl font-light text-[#1c1d1f] mb-2">
         Create your first course bundle
       </p>
-      <p className="text-lg text-[#6a6f73] text-center max-w-xs mb-6">
+      <p className="text-xl text-[#6a6f73] text-center max-w-xs mb-6">
         Curate and combine your courses to increase the{" "}
         <span className="text-[#5624d0]">visibility</span> of your courses.
       </p>
 
       {/* Create button */}
       <button
-        className="flex items-center gap-2 bg-[#5624d0] hover:bg-[#4019a4] text-white font-normal text-lg px-6 py-3 rounded transition-colors"
+        className="flex items-center gap-2 bg-[#5624d0] hover:bg-[#4019a4] text-white font-light text-xl px-6 py-3 rounded transition-colors"
         onClick={() => toast.success("Course bundle creation coming soon!")}
       >
         <PlusCircle className="w-4 h-4" />
@@ -272,7 +272,7 @@ let CourseTable = () => {
     <div className="min-h-screen bg-white">
       {/* Page header */}
       <div className="px-8 pt-8 pb-0">
-        <h1 className="text-5xl font-normal text-[#1c1d1f] mb-6">Courses</h1>
+        <h1 className="text-6xl font-light text-[#1c1d1f] mb-6">Courses</h1>
 
         {/* Tabs */}
         <div className="flex gap-0 border-b border-[#d1d7dc]">
@@ -280,7 +280,7 @@ let CourseTable = () => {
             <button
               key={tab}
               onClick={() => setActiveTab(tab)}
-              className={`px-4 pb-3 text-lg font-normal capitalize transition-colors ${
+              className={`px-4 pb-3 text-xl font-light capitalize transition-colors ${
                 activeTab === tab
                   ? "text-[#1c1d1f] border-b-2 border-[#1c1d1f] -mb-px"
                   : "text-[#6a6f73] hover:text-[#1c1d1f]"
@@ -300,19 +300,19 @@ let CourseTable = () => {
             <div className="flex items-start gap-4 border border-[#d1d7dc] rounded p-4 mb-6">
               <Info className="w-5 h-5 text-[#5624d0] shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="text-lg font-normal text-[#1c1d1f]">
+                <p className="text-xl font-light text-[#1c1d1f]">
                   Get a better mobile experience with the Samriddhi Gyan app.
                 </p>
-                <p className="text-base text-[#5624d0] mt-0.5">
+                <p className="text-lg text-[#5624d0] mt-0.5">
                   View key course metrics, reply to your students, and get instant
                   notifications.
                 </p>
                 <div className="flex gap-3 mt-3">
-                  <button className="text-base font-normal border border-[#1c1d1f] px-3 py-1.5 rounded hover:bg-[#f7f9fa] transition-colors text-[#1c1d1f]">
+                  <button className="text-lg font-light border border-[#1c1d1f] px-3 py-1.5 rounded hover:bg-[#f7f9fa] transition-colors text-[#1c1d1f]">
                     Get the app
                   </button>
                   <button
-                    className="text-base font-normal text-[#1c1d1f] hover:underline"
+                    className="text-lg font-light text-[#1c1d1f] hover:underline"
                     onClick={() => setAppBannerDismissed(true)}
                   >
                     Dismiss
@@ -337,7 +337,7 @@ let CourseTable = () => {
                 placeholder="Search your courses"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="px-3 py-2 text-lg text-[#1c1d1f] outline-none w-48 bg-white"
+                className="px-3 py-2 text-xl text-[#1c1d1f] outline-none w-48 bg-white"
               />
               <button className="px-3 py-2 bg-[#f7f9fa] border-l border-[#d1d7dc] hover:bg-[#ebebeb] transition-colors">
                 <Search className="w-4 h-4 text-[#1c1d1f]" />
@@ -347,7 +347,7 @@ let CourseTable = () => {
             {/* Sort dropdown */}
             <div className="relative">
               <button
-                className="flex items-center gap-2 border border-[#5624d0] text-[#5624d0] text-lg font-normal px-3 py-2 rounded hover:bg-[#f0e6ff] transition-colors"
+                className="flex items-center gap-2 border border-[#5624d0] text-[#5624d0] text-xl font-light px-3 py-2 rounded hover:bg-[#f0e6ff] transition-colors"
                 onClick={() => setSortOpen(!sortOpen)}
               >
                 {sort}
@@ -358,8 +358,8 @@ let CourseTable = () => {
                   {SORT_OPTIONS.map((opt) => (
                     <button
                       key={opt}
-                      className={`w-full text-left px-4 py-2 text-lg hover:bg-[#f7f9fa] transition-colors ${
-                        sort === opt ? "font-normal text-[#5624d0]" : "text-[#1c1d1f]"
+                      className={`w-full text-left px-4 py-2 text-xl hover:bg-[#f7f9fa] transition-colors ${
+                        sort === opt ? "font-light text-[#5624d0]" : "text-[#1c1d1f]"
                       }`}
                       onClick={() => {
                         setSort(opt);
@@ -378,7 +378,7 @@ let CourseTable = () => {
 
             {/* New course button */}
             <button
-              className="flex items-center gap-2 bg-[#5624d0] hover:bg-[#4019a4] text-white font-normal text-lg px-5 py-2.5 rounded transition-colors"
+              className="flex items-center gap-2 bg-[#5624d0] hover:bg-[#4019a4] text-white font-light text-xl px-5 py-2.5 rounded transition-colors"
               onClick={() => navigate("create")}
             >
               New course
@@ -402,12 +402,12 @@ let CourseTable = () => {
           ) : (
             <div className="flex flex-col items-center justify-center py-24 text-center">
               <BookOpen className="w-12 h-12 text-[#d1d7dc] mb-4" />
-              <p className="text-2xl font-normal text-[#1c1d1f] mb-1">
+              <p className="text-3xl font-light text-[#1c1d1f] mb-1">
                 {search ? "No courses match your search" : "You haven't created any courses yet"}
               </p>
               {!search && (
                 <button
-                  className="mt-4 bg-[#5624d0] hover:bg-[#4019a4] text-white font-normal text-lg px-5 py-2.5 rounded transition-colors"
+                  className="mt-4 bg-[#5624d0] hover:bg-[#4019a4] text-white font-light text-xl px-5 py-2.5 rounded transition-colors"
                   onClick={() => navigate("create")}
                 >
                   Create your first course
@@ -418,7 +418,7 @@ let CourseTable = () => {
 
           {/* Footer hint */}
           {courses.length > 0 && (
-            <p className="text-center text-lg text-[#6a6f73] mt-10">
+            <p className="text-center text-xl text-[#6a6f73] mt-10">
               Based on your experience, we think these resources will be helpful.
             </p>
           )}

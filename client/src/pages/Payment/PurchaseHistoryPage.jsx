@@ -24,14 +24,14 @@ const PurchaseHistoryPage = () => {
   return (
     <div className="max-w-5xl mx-auto px-6 py-12 min-h-screen text-left font-sans">
       <div className="mb-8">
-        <h1 className="text-4xl font-normal text-[#1c1d1f] tracking-tight">Purchase History</h1>
-        <p className="text-base text-slate-500 mt-1">View and manage all your course receipts and transactions.</p>
+        <h1 className="text-5xl font-light text-[#1c1d1f] tracking-tight">Purchase History</h1>
+        <p className="text-lg text-slate-500 mt-1">View and manage all your course receipts and transactions.</p>
       </div>
 
       {purchases.length > 0 ? (
         <div className="bg-white border border-[#d1d7dc] rounded-none overflow-hidden shadow-sm">
           {/* Table Header for medium/large screens */}
-          <div className="hidden md:grid grid-cols-12 gap-4 bg-slate-50 border-b border-[#d1d7dc] p-4 text-sm font-normal text-slate-500 uppercase tracking-wider">
+          <div className="hidden md:grid grid-cols-12 gap-4 bg-slate-50 border-b border-[#d1d7dc] p-4 text-base font-light text-slate-500 uppercase tracking-wider">
             <div className="col-span-4">Courses</div>
             <div className="col-span-2">Date Purchased</div>
             <div className="col-span-2">Order ID</div>
@@ -60,11 +60,11 @@ const PurchaseHistoryPage = () => {
                         <div className="min-w-0">
                           <Link 
                             to={`/course-detail/${course._id}`} 
-                            className="text-base font-normal text-slate-800 hover:text-[#5624d0] hover:underline line-clamp-1"
+                            className="text-lg font-light text-slate-800 hover:text-[#5624d0] hover:underline line-clamp-1"
                           >
                             {course.title}
                           </Link>
-                          <p className="text-sm text-slate-400 font-normal mt-0.5">Price: NPR {item.priceAtPurchase}</p>
+                          <p className="text-base text-slate-400 font-light mt-0.5">Price: NPR {item.priceAtPurchase}</p>
                         </div>
                       </div>
                     );
@@ -72,30 +72,30 @@ const PurchaseHistoryPage = () => {
                 </div>
 
                 {/* Date Purchased */}
-                <div className="col-span-1 md:col-span-2 flex items-center gap-2 text-base text-slate-650">
+                <div className="col-span-1 md:col-span-2 flex items-center gap-2 text-lg text-slate-650">
                   <Calendar className="w-4 h-4 text-slate-400 md:hidden" />
-                  <span className="font-normal text-sm md:text-base">
+                  <span className="font-light text-base md:text-lg">
                     {formatDate(purchase.createdAt)}
                   </span>
                 </div>
 
                 {/* Order ID */}
-                <div className="col-span-1 md:col-span-2 flex items-center gap-2 text-sm md:text-base text-slate-600 font-mono">
-                  <span className="text-slate-400 md:hidden font-sans font-normal">Order ID: </span>
+                <div className="col-span-1 md:col-span-2 flex items-center gap-2 text-base md:text-lg text-slate-600 font-mono">
+                  <span className="text-slate-400 md:hidden font-sans font-light">Order ID: </span>
                   {purchase.orderId}
                 </div>
 
                 {/* Payment Method */}
-                <div className="col-span-1 md:col-span-2 flex items-center gap-2 text-base text-slate-655 capitalize">
+                <div className="col-span-1 md:col-span-2 flex items-center gap-2 text-lg text-slate-655 capitalize">
                   <CreditCard className="w-4 h-4 text-slate-400 md:hidden" />
-                  <span className="bg-slate-100 px-2 py-0.5 rounded text-sm font-normal text-slate-700">
+                  <span className="bg-slate-100 px-2 py-0.5 rounded text-base font-light text-slate-700">
                     {purchase.paymentMethod}
                   </span>
                 </div>
 
                 {/* Total Price */}
-                <div className="col-span-1 md:col-span-2 text-left md:text-right font-normal text-base md:text-lg text-[#1c1d1f]">
-                  <span className="text-slate-400 md:hidden font-normal text-sm mr-1">Total:</span>
+                <div className="col-span-1 md:col-span-2 text-left md:text-right font-light text-lg md:text-xl text-[#1c1d1f]">
+                  <span className="text-slate-400 md:hidden font-light text-base mr-1">Total:</span>
                   NPR {purchase.totalAmount.toFixed(2)}
                 </div>
               </div>
@@ -105,13 +105,13 @@ const PurchaseHistoryPage = () => {
       ) : (
         <div className="flex flex-col items-center justify-center py-20 bg-white border border-[#d1d7dc] text-center px-4 shadow-sm">
           <ShoppingBag className="w-12 h-12 text-slate-350 mb-4" />
-          <h3 className="text-xl font-normal text-slate-800 mb-1">No Purchases Found</h3>
-          <p className="text-base text-slate-500 font-normal max-w-sm mb-6">
+          <h3 className="text-2xl font-light text-slate-800 mb-1">No Purchases Found</h3>
+          <p className="text-lg text-slate-500 font-light max-w-sm mb-6">
             You haven't bought any courses yet. Once you enroll in a course, your purchase history and invoices will show up here.
           </p>
           <Link 
             to="/" 
-            className="bg-[#1c1d1f] text-white hover:bg-slate-800 text-base font-normal py-2.5 px-6 transition-colors"
+            className="bg-[#1c1d1f] text-white hover:bg-slate-800 text-lg font-light py-2.5 px-6 transition-colors"
           >
             Explore Courses
           </Link>

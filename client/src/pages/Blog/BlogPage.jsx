@@ -105,7 +105,7 @@ const BlogPage = () => {
                         <Input
                             type="text"
                             placeholder="Search articles by title..."
-                            className="pl-12 pr-4 py-3 text-lg h-14 w-full"
+                            className="pl-12 pr-4 py-3 text-xl h-14 w-full"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                         />
@@ -132,7 +132,7 @@ const BlogPage = () => {
                         >
                             {selectedCategory === 'All' && !searchQuery && popularArticles.length > 0 && (
                                 <section className="container mx-auto px-6 animate-on-scroll">
-                                    <h2 className="text-4xl font-normal text-gray-900 dark:text-white mb-8">Popular Articles</h2>
+                                    <h2 className="text-5xl font-light text-gray-900 dark:text-white mb-8">Popular Articles</h2>
                                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
                                         <AnimatePresence>
                                             {popularArticles.map(article => (
@@ -166,7 +166,7 @@ const BlogPage = () => {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0 }}
                         >
-                            <h3 className="text-3xl font-normal">No articles found for &quot;{searchQuery}&quot;</h3>
+                            <h3 className="text-4xl font-light">No articles found for &quot;{searchQuery}&quot;</h3>
                             <p className="mt-2">Try searching for something else or clearing your search.</p>
                         </motion.div>
                     )}

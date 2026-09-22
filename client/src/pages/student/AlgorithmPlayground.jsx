@@ -192,13 +192,13 @@ const ASTNodeRenderer = ({ node, name = "Root" }) => {
   const keys = Object.keys(node).filter((k) => k !== "fail" && k !== "output");
 
   return (
-    <div className="pl-4 border-l border-slate-200/60 my-1 font-mono text-xs">
+    <div className="pl-4 border-l border-slate-200/60 my-1 font-mono text-sm">
       <div
         className="flex items-center gap-1 cursor-pointer hover:bg-slate-50 p-0.5 rounded transition-all select-none"
         onClick={() => setCollapsed(!collapsed)}
       >
-        <span className="text-slate-500 font-semibold">{name}:</span>
-        <span className="text-indigo-600 font-bold">
+        <span className="text-slate-500 font-medium">{name}:</span>
+        <span className="text-indigo-600 font-semibold">
           {isArray ? `Array [${node.length}]` : node.type || "Object"}
         </span>
         <span className="text-[10px] text-slate-400">
@@ -214,7 +214,7 @@ const ASTNodeRenderer = ({ node, name = "Root" }) => {
                 <ASTNodeRenderer node={node[key]} name={key} />
               ) : (
                 <>
-                  <span className="text-slate-600 font-medium">{key}:</span>
+                  <span className="text-slate-600 font-normal">{key}:</span>
                   <span className="text-amber-700">
                     {JSON.stringify(node[key])}
                   </span>
@@ -586,11 +586,11 @@ const AlgorithmPlayground = () => {
     <div className="max-w-6xl mx-auto px-4 py-12">
       {/* Header */}
       <div className="text-center space-y-4 mb-10">
-        <h1 className="text-4xl font-light text-slate-900 tracking-tight flex items-center justify-center gap-2.5">
+        <h1 className="text-5xl font-extralight text-slate-900 tracking-tight flex items-center justify-center gap-2.5">
           <FileCode className="h-9 w-9 text-indigo-600 animate-pulse shrink-0" />
           Advanced Algorithms Playground
         </h1>
-        <p className="text-slate-600 max-w-xl mx-auto text-base font-light mt-1">
+        <p className="text-slate-600 max-w-xl mx-auto text-lg font-extralight mt-1">
           Inspect, play with, and trigger advanced NLP and Compiler parsing algorithms compiled from our platform backend.
         </p>
       </div>
@@ -599,7 +599,7 @@ const AlgorithmPlayground = () => {
       <div className="flex border-b border-slate-200 mb-8 max-w-md mx-auto justify-center bg-slate-100 p-1.5 rounded-lg border">
         <button
           onClick={() => setActiveTab("ast")}
-          className={`flex items-center gap-2 px-5 py-2.5 text-sm font-light rounded-md transition-all ${
+          className={`flex items-center gap-2 px-5 py-2.5 text-base font-extralight rounded-md transition-all ${
             activeTab === "ast"
               ? "bg-white text-indigo-600 shadow-sm"
               : "text-slate-600 hover:text-slate-900"
@@ -610,7 +610,7 @@ const AlgorithmPlayground = () => {
         </button>
         <button
           onClick={() => setActiveTab("plagiarism")}
-          className={`flex items-center gap-2 px-5 py-2.5 text-sm font-light rounded-md transition-all ${
+          className={`flex items-center gap-2 px-5 py-2.5 text-base font-extralight rounded-md transition-all ${
             activeTab === "plagiarism"
               ? "bg-white text-indigo-600 shadow-sm"
               : "text-slate-600 hover:text-slate-900"
@@ -629,7 +629,7 @@ const AlgorithmPlayground = () => {
             <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
               <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex justify-between items-center">
                 <div className="flex items-center gap-3">
-                  <span className="text-lg font-light text-slate-800 flex items-center gap-2">
+                  <span className="text-xl font-extralight text-slate-800 flex items-center gap-2">
                     <FileCode className="h-4 w-4 text-indigo-500 shrink-0" />
                     Code Submission Editor
                   </span>
@@ -652,26 +652,26 @@ const AlgorithmPlayground = () => {
                         setCode(LANGUAGE_SAMPLES[newLang] || "");
                       }
                     }}
-                    className="text-xs border border-slate-200 bg-white rounded px-2 py-0.5 font-light outline-none text-slate-700 focus:border-indigo-500 cursor-pointer capitalize"
+                    className="text-sm border border-slate-200 bg-white rounded px-2 py-0.5 font-extralight outline-none text-slate-700 focus:border-indigo-500 cursor-pointer capitalize"
                   >
                     {dynamicLanguages.map((lang) => (
                       <option key={lang} value={lang}>
                         {lang === "cpp" ? "C++" : lang === "cobol" ? "COBOL" : lang === "sql" ? "SQL" : lang === "html" ? "HTML" : lang === "php" ? "PHP" : lang === "csharp" ? "C#" : lang}
                       </option>
                     ))}
-                    <option value="custom_add" className="text-indigo-600 font-normal">+ Add Custom Language</option>
+                    <option value="custom_add" className="text-indigo-600 font-light">+ Add Custom Language</option>
                   </select>
                 </div>
                 <button
                   type="button"
                   onClick={(e) => { e.preventDefault(); setCode(""); }}
-                  className="text-xs text-slate-500 hover:text-indigo-600 flex items-center gap-1 font-light"
+                  className="text-sm text-slate-500 hover:text-indigo-600 flex items-center gap-1 font-extralight"
                 >
                   <RefreshCw className="h-3 w-3" />
                   Clear Editor
                 </button>
               </div>
-              <div className="p-4 bg-slate-950 font-mono text-sm text-indigo-300">
+              <div className="p-4 bg-slate-950 font-mono text-base text-indigo-300">
                 <textarea
                   value={code}
                   onChange={(e) => handleCodeChange(e.target.value)}
@@ -683,18 +683,18 @@ const AlgorithmPlayground = () => {
 
             {/* Checklist Selection */}
             <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm space-y-4">
-              <span className="text-2xl font-light text-slate-800 flex items-center gap-2">
+              <span className="text-3xl font-extralight text-slate-800 flex items-center gap-2">
                 <Sliders className="h-5 w-5 text-slate-500 shrink-0" />
                 Required AST Structures to Validate
               </span>
-              <p className="text-sm font-light text-slate-500">
+              <p className="text-base font-extralight text-slate-500">
                 The parser validation will verify if all selected structure nodes exist inside the abstract tree.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
                 {AVAILABLE_STRUCTURES.map((struct) => (
                   <label
                     key={struct.value}
-                    className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer select-none text-xs font-light text-slate-700 transition-all"
+                    className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer select-none text-sm font-extralight text-slate-700 transition-all"
                   >
                     <input
                       type="checkbox"
@@ -711,7 +711,7 @@ const AlgorithmPlayground = () => {
                 <Button
                   onClick={handleRunASTValidation}
                   disabled={isASTLoading || !code.trim()}
-                  className="w-full h-11 bg-indigo-600 text-white font-light text-sm hover:bg-indigo-700 flex justify-center items-center gap-2 shadow-sm rounded-lg"
+                  className="w-full h-11 bg-indigo-600 text-white font-extralight text-base hover:bg-indigo-700 flex justify-center items-center gap-2 shadow-sm rounded-lg"
                 >
                   {isASTLoading ? (
                     <>
@@ -733,7 +733,7 @@ const AlgorithmPlayground = () => {
           <div className="lg:col-span-5 space-y-6">
             <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
               <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
-                <span className="text-2xl font-light text-slate-800 flex items-center gap-2">
+                <span className="text-3xl font-extralight text-slate-800 flex items-center gap-2">
                   <Eye className="h-4 w-4 text-slate-600" />
                   AST Compiler Results
                 </span>
@@ -743,27 +743,27 @@ const AlgorithmPlayground = () => {
                   <>
                     {/* Status Alert */}
                     {astResult.error ? (
-                      <div className="p-4 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-xs font-light flex gap-3">
+                      <div className="p-4 rounded-lg bg-rose-50 border border-rose-200 text-rose-800 text-sm font-extralight flex gap-3">
                         <XCircle className="h-5 w-5 text-rose-600 shrink-0" />
                         <div>
-                          <span className="font-normal block text-sm">Compilation Parsing Failed</span>
-                          <p className="mt-1 font-light">{astResult.error}</p>
+                          <span className="font-light block text-base">Compilation Parsing Failed</span>
+                          <p className="mt-1 font-extralight">{astResult.error}</p>
                         </div>
                       </div>
                     ) : astResult.isValid ? (
-                      <div className="p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-light flex gap-3">
+                      <div className="p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-extralight flex gap-3">
                         <CheckCircle className="h-5 w-5 text-emerald-600 shrink-0" />
                         <div>
-                          <span className="font-normal block text-sm">AST Code Validation Passed!</span>
-                          <p className="mt-1 font-light">All selected AST syntax components were identified successfully in the tree.</p>
+                          <span className="font-light block text-base">AST Code Validation Passed!</span>
+                          <p className="mt-1 font-extralight">All selected AST syntax components were identified successfully in the tree.</p>
                         </div>
                       </div>
                     ) : (
-                      <div className="p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-xs font-light flex gap-3">
+                      <div className="p-4 rounded-lg bg-amber-50 border border-amber-200 text-amber-800 text-sm font-extralight flex gap-3">
                         <AlertTriangle className="h-5 w-5 text-amber-600 shrink-0" />
                         <div>
-                          <span className="font-normal block text-sm">AST Validation Failed</span>
-                          <p className="mt-1 font-light">
+                          <span className="font-light block text-base">AST Validation Failed</span>
+                          <p className="mt-1 font-extralight">
                             Your code parsed correctly, but is missing one or more required syntax structures selected in the checklist.
                           </p>
                         </div>
@@ -773,7 +773,7 @@ const AlgorithmPlayground = () => {
                     {/* AST Node Tree Visualizer */}
                     {astResult.ast && (
                       <div className="border border-slate-200 rounded-lg bg-slate-50 p-4 max-h-[420px] overflow-y-auto">
-                        <span className="text-[11px] font-light text-slate-500 uppercase tracking-wider block mb-2">
+                        <span className="text-[11px] font-extralight text-slate-500 uppercase tracking-wider block mb-2">
                           Interactive Abstract Syntax Tree (AST)
                         </span>
                         <ASTNodeRenderer node={astResult.ast} />
@@ -781,7 +781,7 @@ const AlgorithmPlayground = () => {
                     )}
                   </>
                 ) : (
-                  <div className="text-center py-20 border-2 border-dashed border-slate-200 rounded-lg text-slate-400 text-sm font-light space-y-2">
+                  <div className="text-center py-20 border-2 border-dashed border-slate-200 rounded-lg text-slate-400 text-base font-extralight space-y-2">
                     <Info className="h-8 w-8 text-slate-355 mx-auto" />
                     <p>Submit JavaScript code to view parsing trees and structure status.</p>
                   </div>
@@ -799,9 +799,9 @@ const AlgorithmPlayground = () => {
           <div className="flex bg-slate-100 p-1 rounded-lg max-w-md border border-slate-200">
             <button
               onClick={() => setPlagiarismMode("single")}
-              className={`flex-1 py-1.5 px-3 rounded text-xs font-light transition-all flex items-center justify-center gap-1.5 ${
+              className={`flex-1 py-1.5 px-3 rounded text-sm font-extralight transition-all flex items-center justify-center gap-1.5 ${
                 plagiarismMode === "single"
-                  ? "bg-white text-indigo-600 shadow-sm border border-slate-200/50 font-normal"
+                  ? "bg-white text-indigo-600 shadow-sm border border-slate-200/50 font-light"
                   : "text-slate-600 hover:text-slate-800"
               }`}
             >
@@ -810,9 +810,9 @@ const AlgorithmPlayground = () => {
             </button>
             <button
               onClick={() => setPlagiarismMode("bulk")}
-              className={`flex-1 py-1.5 px-3 rounded text-xs font-light transition-all flex items-center justify-center gap-1.5 ${
+              className={`flex-1 py-1.5 px-3 rounded text-sm font-extralight transition-all flex items-center justify-center gap-1.5 ${
                 plagiarismMode === "bulk"
-                  ? "bg-white text-indigo-600 shadow-sm border border-slate-200/50 font-normal"
+                  ? "bg-white text-indigo-600 shadow-sm border border-slate-200/50 font-light"
                   : "text-slate-600 hover:text-slate-800"
               }`}
             >
@@ -828,14 +828,14 @@ const AlgorithmPlayground = () => {
                 {/* Target Document Text */}
                 <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                   <div className="bg-slate-50 border-b border-slate-200 px-6 py-4 flex justify-between items-center">
-                    <span className="text-lg font-light text-slate-800 flex items-center gap-2">
+                    <span className="text-xl font-extralight text-slate-800 flex items-center gap-2">
                       <FileText className="h-4 w-4 text-slate-600 shrink-0" />
                       Target Document Submission
                     </span>
                     <button
                       type="button"
                       onClick={(e) => { e.preventDefault(); setDocText(""); }}
-                      className="text-xs text-slate-500 hover:text-indigo-600 flex items-center gap-1 font-light"
+                      className="text-sm text-slate-500 hover:text-indigo-600 flex items-center gap-1 font-extralight"
                     >
                       <RefreshCw className="h-3 w-3" />
                       Clear Editor
@@ -845,7 +845,7 @@ const AlgorithmPlayground = () => {
                     <textarea
                       value={docText}
                       onChange={(e) => setDocText(e.target.value)}
-                      className="w-full h-36 border border-slate-200 rounded-lg p-3 text-sm font-light text-slate-700 outline-none focus:border-indigo-500 resize-none font-sans leading-relaxed"
+                      className="w-full h-36 border border-slate-200 rounded-lg p-3 text-base font-extralight text-slate-700 outline-none focus:border-indigo-500 resize-none font-sans leading-relaxed"
                       placeholder="Paste or write the student submission text to compare..."
                     />
                   </div>
@@ -854,16 +854,16 @@ const AlgorithmPlayground = () => {
                 {/* Threshold Slider and Settings */}
                 <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm space-y-4">
                   <div className="flex justify-between items-center">
-                    <span className="text-2xl font-light text-slate-800 flex items-center gap-2">
+                    <span className="text-3xl font-extralight text-slate-800 flex items-center gap-2">
                       <Sliders className="h-5 w-5 text-slate-500 shrink-0" />
                       Jaccard Similarity LSH Threshold
                     </span>
-                    <Badge className="bg-indigo-100 text-indigo-800 border-indigo-200 font-light">
+                    <Badge className="bg-indigo-100 text-indigo-800 border-indigo-200 font-extralight">
                       {(threshold * 100).toFixed(0)}% Match
                     </Badge>
                   </div>
                   <div className="flex items-center gap-4">
-                    <span className="text-xs text-slate-400 font-light">0% (All Matches)</span>
+                    <span className="text-sm text-slate-400 font-extralight">0% (All Matches)</span>
                     <input
                       type="range"
                       min="0.1"
@@ -873,16 +873,16 @@ const AlgorithmPlayground = () => {
                       onChange={(e) => setThreshold(Number(e.target.value))}
                       className="flex-1 accent-indigo-600 cursor-pointer h-2 bg-slate-200 rounded-lg outline-none"
                     />
-                    <span className="text-xs text-slate-400 font-light">100% (Exact Only)</span>
+                    <span className="text-sm text-slate-400 font-extralight">100% (Exact Only)</span>
                   </div>
-                  <p className="text-xs font-light text-slate-500">
+                  <p className="text-sm font-extralight text-slate-500">
                     LSH clusters candidate shingle collisions. Matches equal to or exceeding the threshold will be flagged as duplicates.
                   </p>
                 </div>
 
                 {/* Reference Documents Library Manager */}
                 <div className="bg-white border border-slate-200 p-6 rounded-xl shadow-sm space-y-5">
-                  <span className="text-2xl font-light text-slate-800 flex items-center gap-2">
+                  <span className="text-3xl font-extralight text-slate-800 flex items-center gap-2">
                     <FileCode className="h-5 w-5 text-indigo-500 shrink-0" />
                     Comparison Reference Library ({comparisonDocs.length} files)
                   </span>
@@ -892,11 +892,11 @@ const AlgorithmPlayground = () => {
                     {comparisonDocs.map((doc, idx) => (
                       <div
                         key={idx}
-                        className="border border-slate-200 p-3.5 rounded-lg bg-slate-50 flex items-start justify-between gap-3 text-xs font-light"
+                        className="border border-slate-200 p-3.5 rounded-lg bg-slate-50 flex items-start justify-between gap-3 text-sm font-extralight"
                       >
                         <div className="space-y-1.5">
-                          <span className="text-sm font-light text-slate-800 block">{doc.id}</span>
-                          <p className="text-slate-500 font-light line-clamp-2 leading-relaxed">{doc.text}</p>
+                          <span className="text-base font-extralight text-slate-800 block">{doc.id}</span>
+                          <p className="text-slate-500 font-extralight line-clamp-2 leading-relaxed">{doc.text}</p>
                         </div>
                         <button
                           onClick={() => handleDeleteReferenceDoc(idx)}
@@ -910,24 +910,24 @@ const AlgorithmPlayground = () => {
 
                   {/* Add Reference Document Form */}
                   <div className="border-t border-slate-100 pt-4 space-y-3">
-                    <span className="text-sm font-light text-slate-700 block">Add Document to Comparison Group</span>
+                    <span className="text-base font-extralight text-slate-700 block">Add Document to Comparison Group</span>
                     <div className="space-y-3">
                       <input
                         type="text"
                         placeholder="Document Title (e.g. Reference C)"
                         value={newDocTitle}
                         onChange={(e) => setNewDocTitle(e.target.value)}
-                        className="w-full h-9 px-3 border border-slate-200 rounded-lg text-xs text-slate-800 bg-white outline-none focus:border-indigo-500 font-light"
+                        className="w-full h-9 px-3 border border-slate-200 rounded-lg text-sm text-slate-800 bg-white outline-none focus:border-indigo-500 font-extralight"
                       />
                       <textarea
                         placeholder="Document text content to compare shingles..."
                         value={newDocText}
                         onChange={(e) => setNewDocText(e.target.value)}
-                        className="w-full h-18 p-3 border border-slate-200 rounded-lg text-xs text-slate-800 bg-white outline-none focus:border-indigo-500 resize-none font-light"
+                        className="w-full h-18 p-3 border border-slate-200 rounded-lg text-sm text-slate-800 bg-white outline-none focus:border-indigo-500 resize-none font-extralight"
                       />
                       <Button
                         onClick={handleAddReferenceDoc}
-                        className="w-full h-9 bg-slate-800 hover:bg-slate-900 text-white font-light text-sm rounded-lg flex items-center justify-center gap-1.5"
+                        className="w-full h-9 bg-slate-800 hover:bg-slate-900 text-white font-extralight text-base rounded-lg flex items-center justify-center gap-1.5"
                       >
                         <Plus className="h-3.5 w-3.5" />
                         Add Comparison Document
@@ -939,7 +939,7 @@ const AlgorithmPlayground = () => {
                     <Button
                       onClick={handleRunPlagiarismCheck}
                       disabled={isPlagiarismLoading || !docText.trim() || comparisonDocs.length === 0}
-                      className="w-full h-11 bg-indigo-600 text-white font-light text-sm hover:bg-indigo-700 flex justify-center items-center gap-2 rounded-lg shadow-sm"
+                      className="w-full h-11 bg-indigo-600 text-white font-extralight text-base hover:bg-indigo-700 flex justify-center items-center gap-2 rounded-lg shadow-sm"
                     >
                       {isPlagiarismLoading ? (
                         <>
@@ -961,7 +961,7 @@ const AlgorithmPlayground = () => {
               <div className="lg:col-span-5 space-y-6">
                 <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                   <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
-                    <span className="text-2xl font-light text-slate-800 flex items-center gap-2">
+                    <span className="text-3xl font-extralight text-slate-800 flex items-center gap-2">
                       <Eye className="h-5 w-5 text-slate-600 shrink-0" />
                       MinHash & LSH Results
                     </span>
@@ -969,29 +969,29 @@ const AlgorithmPlayground = () => {
                   <div className="p-6 space-y-4">
                     {plagiarismResult ? (
                       <>
-                        <div className="p-4 rounded-lg bg-indigo-50/50 border border-indigo-100 text-indigo-900 text-xs font-light">
-                          <span className="font-normal block text-sm text-indigo-950 mb-1">LSH Hashing Overview</span>
-                          <p className="leading-relaxed font-light">
+                        <div className="p-4 rounded-lg bg-indigo-50/50 border border-indigo-100 text-indigo-900 text-sm font-extralight">
+                          <span className="font-light block text-base text-indigo-950 mb-1">LSH Hashing Overview</span>
+                          <p className="leading-relaxed font-extralight">
                             Scanned target shingles (5-grams) against {plagiarismResult.totalCompared} files using MinHash signature hashes at threshold {(plagiarismResult.threshold * 100).toFixed(0)}%.
                           </p>
                         </div>
 
                         {plagiarismResult.matches && plagiarismResult.matches.length > 0 ? (
                           <div className="space-y-4">
-                            <span className="text-[11px] font-light text-rose-500 uppercase tracking-wider block">
+                            <span className="text-[11px] font-extralight text-rose-500 uppercase tracking-wider block">
                               ⚠️ Plagiarism Duplication Flags
                             </span>
 
                             {plagiarismResult.matches.map((match) => (
                               <div
                                 key={match.id}
-                                className="border border-rose-200 bg-rose-50/10 p-4 rounded-lg space-y-2.5 text-xs font-light"
+                                className="border border-rose-200 bg-rose-50/10 p-4 rounded-lg space-y-2.5 text-sm font-extralight"
                               >
                                 <div className="flex justify-between items-center">
-                                  <span className="text-sm font-light text-slate-800 truncate max-w-[200px]">
+                                  <span className="text-base font-extralight text-slate-800 truncate max-w-[200px]">
                                     {match.id}
                                   </span>
-                                  <Badge className="bg-rose-100 text-rose-800 border-rose-200 font-light">
+                                  <Badge className="bg-rose-100 text-rose-800 border-rose-200 font-extralight">
                                     {(match.similarity * 100).toFixed(0)}% Match
                                   </Badge>
                                 </div>
@@ -1001,18 +1001,18 @@ const AlgorithmPlayground = () => {
                                     style={{ width: `${match.similarity * 100}%` }}
                                   />
                                 </div>
-                                <p className="text-xs font-light text-slate-500">
+                                <p className="text-sm font-extralight text-slate-500">
                                   Estimated Jaccard similarity exceeds the threshold limit. Shingle collision flagged.
                                 </p>
                               </div>
                             ))}
                           </div>
                         ) : (
-                          <div className="p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-light flex gap-3">
+                          <div className="p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-extralight flex gap-3">
                             <CheckCircle className="h-5 w-5 text-emerald-600 shrink-0" />
                             <div>
-                              <span className="font-normal block text-sm">No Plagiarism Matches Flagged</span>
-                              <p className="mt-1 font-light">
+                              <span className="font-light block text-base">No Plagiarism Matches Flagged</span>
+                              <p className="mt-1 font-extralight">
                                 Estimated document shingle similarity is below the set threshold across all comparison reference documents.
                               </p>
                             </div>
@@ -1020,7 +1020,7 @@ const AlgorithmPlayground = () => {
                         )}
                       </>
                     ) : (
-                      <div className="text-center py-20 border-2 border-dashed border-slate-200 rounded-lg text-slate-400 text-sm font-light space-y-2">
+                      <div className="text-center py-20 border-2 border-dashed border-slate-200 rounded-lg text-slate-400 text-base font-extralight space-y-2">
                         <Info className="h-8 w-8 text-slate-355 mx-auto" />
                         <p>Run plagiarism checks to generate MinHash shingle signatures and LSH comparisons.</p>
                       </div>
@@ -1034,15 +1034,15 @@ const AlgorithmPlayground = () => {
               {/* Left Column: Upload box */}
               <div className="lg:col-span-7 space-y-6">
                 <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-6 space-y-5">
-                  <span className="text-lg font-light text-slate-800 flex items-center gap-2">
+                  <span className="text-xl font-extralight text-slate-800 flex items-center gap-2">
                     <UploadCloud className="h-4 w-4 text-indigo-500" />
                     Upload Documents for Cross-Plagiarism check
                   </span>
 
                   <label className="border-2 border-dashed border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center gap-2 cursor-pointer hover:bg-slate-50 transition-all text-center">
                     <UploadCloud className="h-8 w-8 text-slate-400" />
-                    <span className="text-sm font-light text-slate-700">Drag & drop files here, or <span className="text-indigo-600 font-normal">browse</span></span>
-                    <span className="text-xs text-slate-400 font-light">Supports .txt, .js, .py, .cpp, .html, etc. (Text based files)</span>
+                    <span className="text-base font-extralight text-slate-700">Drag & drop files here, or <span className="text-indigo-600 font-light">browse</span></span>
+                    <span className="text-sm text-slate-400 font-extralight">Supports .txt, .js, .py, .cpp, .html, etc. (Text based files)</span>
                     <input
                       type="file"
                       multiple
@@ -1055,18 +1055,18 @@ const AlgorithmPlayground = () => {
                   {/* List of uploaded files */}
                   {bulkFiles.length > 0 && (
                     <div className="space-y-3">
-                      <div className="flex justify-between items-center text-xs text-slate-500 font-light">
+                      <div className="flex justify-between items-center text-sm text-slate-500 font-extralight">
                         <span>Uploaded Documents ({bulkFiles.length})</span>
                         <button
                           onClick={() => setBulkFiles([])}
-                          className="text-rose-500 hover:text-rose-600 transition-all font-light"
+                          className="text-rose-500 hover:text-rose-600 transition-all font-extralight"
                         >
                           Clear All
                         </button>
                       </div>
                       <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                         {bulkFiles.map((file, idx) => (
-                          <div key={idx} className="border border-slate-100 p-2.5 rounded-lg bg-slate-50 flex items-center justify-between gap-3 text-xs font-light text-slate-700">
+                          <div key={idx} className="border border-slate-100 p-2.5 rounded-lg bg-slate-50 flex items-center justify-between gap-3 text-sm font-extralight text-slate-700">
                             <div className="flex items-center gap-2 truncate">
                               <File className="h-3.5 w-3.5 text-slate-400 shrink-0" />
                               <span className="truncate">{file.id}</span>
@@ -1087,16 +1087,16 @@ const AlgorithmPlayground = () => {
                   {/* Threshold Settings */}
                   <div className="border-t border-slate-100 pt-4 space-y-4">
                     <div className="flex justify-between items-center">
-                      <span className="text-sm font-light text-slate-800 flex items-center gap-2">
+                      <span className="text-base font-extralight text-slate-800 flex items-center gap-2">
                         <Sliders className="h-4 w-4 text-slate-500" />
                         Cross-Comparison Similarity Threshold
                       </span>
-                      <Badge className="bg-indigo-100 text-indigo-800 border-indigo-200 font-light">
+                      <Badge className="bg-indigo-100 text-indigo-800 border-indigo-200 font-extralight">
                         {(threshold * 100).toFixed(0)}% Match
                       </Badge>
                     </div>
                     <div className="flex items-center gap-4">
-                      <span className="text-xs text-slate-400 font-light">0%</span>
+                      <span className="text-sm text-slate-400 font-extralight">0%</span>
                       <input
                         type="range"
                         min="0.1"
@@ -1106,7 +1106,7 @@ const AlgorithmPlayground = () => {
                         onChange={(e) => setThreshold(Number(e.target.value))}
                         className="flex-1 accent-indigo-600 cursor-pointer h-2 bg-slate-200 rounded-lg outline-none"
                       />
-                      <span className="text-xs text-slate-400 font-light">100%</span>
+                      <span className="text-sm text-slate-400 font-extralight">100%</span>
                     </div>
                   </div>
 
@@ -1114,7 +1114,7 @@ const AlgorithmPlayground = () => {
                     <Button
                       onClick={handleRunCrossPlagiarismCheck}
                       disabled={isCrossLoading || bulkFiles.length < 2}
-                      className="w-full h-11 bg-indigo-600 text-white font-light text-sm hover:bg-indigo-700 flex justify-center items-center gap-2 rounded-lg shadow-sm"
+                      className="w-full h-11 bg-indigo-600 text-white font-extralight text-base hover:bg-indigo-700 flex justify-center items-center gap-2 rounded-lg shadow-sm"
                     >
                       {isCrossLoading ? (
                         <>
@@ -1136,7 +1136,7 @@ const AlgorithmPlayground = () => {
               <div className="lg:col-span-5 space-y-6">
                 <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
                   <div className="bg-slate-50 border-b border-slate-200 px-6 py-4">
-                    <span className="text-2xl font-light text-slate-800 flex items-center gap-2">
+                    <span className="text-3xl font-extralight text-slate-800 flex items-center gap-2">
                       <Eye className="h-5 w-5 text-slate-600 shrink-0" />
                       Cross Plagiarism Matrices
                     </span>
@@ -1144,9 +1144,9 @@ const AlgorithmPlayground = () => {
                   <div className="p-6 space-y-4">
                     {crossPlagiarismResult ? (
                       <div className="space-y-4">
-                        <div className="p-4 rounded-lg bg-indigo-50/50 border border-indigo-100 text-indigo-900 text-xs font-light">
-                          <span className="font-normal block text-sm text-indigo-950 mb-1">Cross-Check Overview</span>
-                          <p className="leading-relaxed font-light">
+                        <div className="p-4 rounded-lg bg-indigo-50/50 border border-indigo-100 text-indigo-900 text-sm font-extralight">
+                          <span className="font-light block text-base text-indigo-950 mb-1">Cross-Check Overview</span>
+                          <p className="leading-relaxed font-extralight">
                             Compared {bulkFiles.length} files pair-wise. Flags are triggered if similarity is &ge; {(threshold * 100).toFixed(0)}%.
                           </p>
                         </div>
@@ -1171,21 +1171,21 @@ const AlgorithmPlayground = () => {
                           if (flaggedPairs.length > 0) {
                             return (
                               <div className="space-y-3">
-                                <span className="text-[11px] font-light text-rose-500 uppercase tracking-wider block">
+                                <span className="text-[11px] font-extralight text-rose-500 uppercase tracking-wider block">
                                   ⚠️ Flagged Plagiarism Connections
                                 </span>
                                 {flaggedPairs.map((pair, idx) => (
                                   <div
                                     key={idx}
-                                    className="border border-rose-200 bg-rose-50/10 p-4 rounded-lg space-y-2.5 text-xs font-light"
+                                    className="border border-rose-200 bg-rose-50/10 p-4 rounded-lg space-y-2.5 text-sm font-extralight"
                                   >
                                     <div className="flex justify-between items-center gap-2">
-                                      <div className="truncate max-w-[220px] text-slate-800 font-light flex flex-col gap-0.5">
+                                      <div className="truncate max-w-[220px] text-slate-800 font-extralight flex flex-col gap-0.5">
                                         <span className="truncate">{pair.docA}</span>
                                         <span className="text-[10px] text-slate-400">copied with</span>
                                         <span className="truncate">{pair.docB}</span>
                                       </div>
-                                      <Badge className="bg-rose-100 text-rose-800 border-rose-200 font-light shrink-0">
+                                      <Badge className="bg-rose-100 text-rose-800 border-rose-200 font-extralight shrink-0">
                                         {(pair.similarity * 100).toFixed(0)}% Match
                                       </Badge>
                                     </div>
@@ -1201,11 +1201,11 @@ const AlgorithmPlayground = () => {
                             );
                           } else {
                             return (
-                              <div className="p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-light flex gap-3">
+                              <div className="p-4 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm font-extralight flex gap-3">
                                 <CheckCircle className="h-5 w-5 text-emerald-600 shrink-0" />
                                 <div>
-                                  <span className="font-normal block text-sm">No Cross-Plagiarism Detected</span>
-                                  <p className="mt-1 font-light">
+                                  <span className="font-light block text-base">No Cross-Plagiarism Detected</span>
+                                  <p className="mt-1 font-extralight">
                                     All pair-wise document comparisons scored below the similarity threshold limit.
                                   </p>
                                 </div>
@@ -1215,7 +1215,7 @@ const AlgorithmPlayground = () => {
                         })()}
                       </div>
                     ) : (
-                      <div className="text-center py-20 border-2 border-dashed border-slate-200 rounded-lg text-slate-400 text-sm font-light space-y-2">
+                      <div className="text-center py-20 border-2 border-dashed border-slate-200 rounded-lg text-slate-400 text-base font-extralight space-y-2">
                         <Info className="h-8 w-8 text-slate-355 mx-auto" />
                         <p>Upload at least 2 documents and run bulk check to compare them against each other.</p>
                       </div>
@@ -1233,7 +1233,7 @@ const AlgorithmPlayground = () => {
 
 // Simple inline Badge component to prevent shadcn dependencies issues
 const Badge = ({ children, className = "" }) => (
-  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-light border ${className}`}>
+  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-extralight border ${className}`}>
     {children}
   </span>
 );

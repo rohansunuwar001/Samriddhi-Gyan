@@ -60,7 +60,7 @@ const SupAdmSubscriptions = () => {
     <div className="flex-1 space-y-6 p-8 pt-6 bg-slate-50 min-h-screen">
       <header className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight text-[#1c1d1f]">Subscription Logs</h2>
+          <h2 className="text-4xl font-semibold tracking-tight text-[#1c1d1f]">Subscription Logs</h2>
           <p className="text-muted-foreground mt-1">
             View all students who purchased a tiered subscription plan.
           </p>
@@ -98,35 +98,35 @@ const SupAdmSubscriptions = () => {
               ) : subscriptions.length > 0 ? (
                 subscriptions.map((sub) => (
                   <TableRow key={sub._id} className="hover:bg-slate-50/50">
-                    <TableCell className="font-mono text-xs text-gray-500">
+                    <TableCell className="font-mono text-sm text-gray-500">
                       {sub.orderId}
                     </TableCell>
                     <TableCell>
-                      <div className="font-semibold text-gray-900">{sub.userId?.name || "Guest"}</div>
-                      <div className="text-xs text-muted-foreground">{sub.userId?.email || "-"}</div>
+                      <div className="font-medium text-gray-900">{sub.userId?.name || "Guest"}</div>
+                      <div className="text-sm text-muted-foreground">{sub.userId?.email || "-"}</div>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1.5 font-medium">
+                      <div className="flex items-center gap-1.5 font-normal">
                         <CreditCard size={14} className="text-purple-600" />
                         {sub.planName}
                       </div>
                     </TableCell>
-                    <TableCell className="text-sm">
+                    <TableCell className="text-base">
                       {sub.durationMonths} {sub.durationMonths === 1 ? "month" : "months"}
                     </TableCell>
-                    <TableCell className="text-sm text-gray-600">
+                    <TableCell className="text-base text-gray-600">
                       {sub.status === "completed" && sub.createdAt
                         ? format(new Date(sub.createdAt), "yyyy-MM-dd")
                         : "-"}
                     </TableCell>
-                    <TableCell className="text-sm text-gray-600">
+                    <TableCell className="text-base text-gray-600">
                       {sub.status === "completed" && sub.userId?.subscription?.expiresAt
                         ? format(new Date(sub.userId.subscription.expiresAt), "yyyy-MM-dd")
                         : "-"}
                     </TableCell>
                     <TableCell>
                       <Badge
-                        className="rounded-full font-bold px-2.5 py-0.5"
+                        className="rounded-full font-semibold px-2.5 py-0.5"
                         variant={
                           sub.status === "completed"
                             ? "default"
@@ -138,7 +138,7 @@ const SupAdmSubscriptions = () => {
                         {sub.status}
                       </Badge>
                     </TableCell>
-                    <TableCell className="text-right font-extrabold text-gray-900">
+                    <TableCell className="text-right font-bold text-gray-900">
                       Rs {sub.amount.toLocaleString()}
                     </TableCell>
                   </TableRow>
@@ -156,7 +156,7 @@ const SupAdmSubscriptions = () => {
           {/* --- Pagination --- */}
           {pagination.totalPages > 1 && (
             <div className="flex items-center justify-between pt-4 border-t mt-4 border-gray-150">
-              <span className="text-sm text-muted-foreground">
+              <span className="text-base text-muted-foreground">
                 Page {pagination.currentPage} of {pagination.totalPages}
               </span>
               <div className="flex items-center gap-2">

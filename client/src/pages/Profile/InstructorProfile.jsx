@@ -177,9 +177,9 @@ const InstructorProfile = () => {
   };
 
   const tabClass = (tabId) => `
-    pb-3 text-lg font-light transition-all border-b-2 cursor-pointer whitespace-nowrap
+    pb-3 text-xl font-extralight transition-all border-b-2 cursor-pointer whitespace-nowrap
     ${activeTab === tabId 
-      ? "border-[#1c1d1f] text-[#1c1d1f] font-normal" 
+      ? "border-[#1c1d1f] text-[#1c1d1f] font-light" 
       : "border-transparent text-[#6a6f73] hover:text-[#1c1d1f]"}
   `;
 
@@ -192,9 +192,9 @@ const InstructorProfile = () => {
   }
 
   return (
-    <div className="max-w-6xl mx-auto py-10 px-6 font-light text-base text-[#1c1d1f]">
+    <div className="max-w-6xl mx-auto py-10 px-6 font-extralight text-lg text-[#1c1d1f]">
       {/* Page Title */}
-      <h1 className="text-3xl font-bold text-[#1c1d1f] mb-8 font-sans">Profile & settings</h1>
+      <h1 className="text-4xl font-semibold text-[#1c1d1f] mb-8 font-sans">Profile & settings</h1>
 
       {/* Tabs */}
       <div className="flex gap-6 border-b border-[#d1d7dc] mb-8 overflow-x-auto">
@@ -215,48 +215,48 @@ const InstructorProfile = () => {
           {/* Left Column: Basic Info */}
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-bold mb-2">First Name</label>
+              <label className="block text-base font-semibold mb-2">First Name</label>
               <input
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 placeholder="First Name"
-                className="w-full border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus:border-[#1c1d1f] outline-none py-3 px-4 text-sm transition-colors font-normal"
+                className="w-full border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus:border-[#1c1d1f] outline-none py-3 px-4 text-base transition-colors font-light"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold mb-2">Last Name</label>
+              <label className="block text-base font-semibold mb-2">Last Name</label>
               <input
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 placeholder="Last Name"
-                className="w-full border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus:border-[#1c1d1f] outline-none py-3 px-4 text-sm transition-colors font-normal"
+                className="w-full border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus:border-[#1c1d1f] outline-none py-3 px-4 text-base transition-colors font-light"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-bold mb-2">Headline</label>
-              <div className="relative flex items-center border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus-within:border-[#1c1d1f] transition-colors w-full font-normal">
+              <label className="block text-base font-semibold mb-2">Headline</label>
+              <div className="relative flex items-center border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus-within:border-[#1c1d1f] transition-colors w-full font-light">
                 <input
                   type="text"
                   maxLength={60}
                   value={headline}
                   onChange={(e) => setHeadline(e.target.value)}
                   placeholder="Headline"
-                  className="flex-1 px-4 py-3 text-sm text-[#1c1d1f] outline-none bg-transparent pr-12"
+                  className="flex-1 px-4 py-3 text-base text-[#1c1d1f] outline-none bg-transparent pr-12"
                 />
-                <span className="absolute right-4 text-sm text-[#6a6f73] pointer-events-none">
+                <span className="absolute right-4 text-base text-[#6a6f73] pointer-events-none">
                   {60 - (headline?.length || 0)}
                 </span>
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-bold mb-2">Biography</label>
+              <label className="block text-base font-semibold mb-2">Biography</label>
               {/* Mock biography Rich-text toolbar */}
-              <div className="border border-[#6a6f73] border-b-0 bg-white px-4 py-2 flex gap-4 text-sm font-bold select-none text-slate-700">
+              <div className="border border-[#6a6f73] border-b-0 bg-white px-4 py-2 flex gap-4 text-base font-semibold select-none text-slate-700">
                 <button type="button" className="hover:text-black">B</button>
                 <button type="button" className="italic hover:text-black">I</button>
               </div>
@@ -265,9 +265,9 @@ const InstructorProfile = () => {
                 value={biography}
                 onChange={(e) => setBiography(e.target.value)}
                 placeholder="Biography"
-                className="w-full border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus:border-[#1c1d1f] outline-none py-3 px-4 text-sm transition-colors resize-y font-normal"
+                className="w-full border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus:border-[#1c1d1f] outline-none py-3 px-4 text-base transition-colors resize-y font-light"
               />
-              <div className="mt-2 text-xs text-[#6a6f73] leading-relaxed space-y-1">
+              <div className="mt-2 text-sm text-[#6a6f73] leading-relaxed space-y-1">
                 <p>
                   To help learners learn more about you, your bio should reflect your Credibility, Empathy, Passion, and Personality.
                 </p>
@@ -280,11 +280,11 @@ const InstructorProfile = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-bold mb-2">Language</label>
+              <label className="block text-base font-semibold mb-2">Language</label>
               <select
                 value={language}
                 onChange={(e) => setLanguage(e.target.value)}
-                className="w-full md:w-80 border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus:border-[#1c1d1f] outline-none py-3 px-4 text-sm transition-colors font-normal"
+                className="w-full md:w-80 border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus:border-[#1c1d1f] outline-none py-3 px-4 text-base transition-colors font-light"
               >
                 {LANGUAGES.map((lang) => (
                   <option key={lang} value={lang}>
@@ -299,7 +299,7 @@ const InstructorProfile = () => {
               <button
                 type="submit"
                 disabled={isUpdatingInfo}
-                className="bg-[#a435f0] hover:bg-[#8710d8] disabled:bg-[#d1d7dc] text-white text-sm font-bold py-3 px-6 transition-all h-12 flex items-center justify-center"
+                className="bg-[#a435f0] hover:bg-[#8710d8] disabled:bg-[#d1d7dc] text-white text-base font-semibold py-3 px-6 transition-all h-12 flex items-center justify-center"
               >
                 {isUpdatingInfo ? (
                   <Loader2 className="w-5 h-5 animate-spin mr-2" />
@@ -312,9 +312,9 @@ const InstructorProfile = () => {
           {/* Right Column: Social Links */}
           <div className="space-y-6">
             <div>
-              <label className="block text-sm font-bold mb-2">Website</label>
-              <div className="flex items-center border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus-within:border-[#1c1d1f] font-normal">
-                <span className="px-3 border-r border-[#6a6f73] text-[#6a6f73] bg-[#f7f9fa] py-3 text-sm shrink-0">
+              <label className="block text-base font-semibold mb-2">Website</label>
+              <div className="flex items-center border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus-within:border-[#1c1d1f] font-light">
+                <span className="px-3 border-r border-[#6a6f73] text-[#6a6f73] bg-[#f7f9fa] py-3 text-base shrink-0">
                   URL
                 </span>
                 <input
@@ -322,15 +322,15 @@ const InstructorProfile = () => {
                   value={website}
                   onChange={(e) => setWebsite(e.target.value)}
                   placeholder="URL"
-                  className="flex-1 px-4 py-3 text-sm outline-none bg-transparent"
+                  className="flex-1 px-4 py-3 text-base outline-none bg-transparent"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-bold mb-2">Facebook</label>
-              <div className="flex items-center border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus-within:border-[#1c1d1f] font-normal">
-                <span className="px-3 border-r border-[#6a6f73] text-[#6a6f73] bg-[#f7f9fa] py-3 text-sm shrink-0">
+              <label className="block text-base font-semibold mb-2">Facebook</label>
+              <div className="flex items-center border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus-within:border-[#1c1d1f] font-light">
+                <span className="px-3 border-r border-[#6a6f73] text-[#6a6f73] bg-[#f7f9fa] py-3 text-base shrink-0">
                   facebook.com/
                 </span>
                 <input
@@ -338,15 +338,15 @@ const InstructorProfile = () => {
                   value={facebook}
                   onChange={(e) => setFacebook(e.target.value)}
                   placeholder="Username"
-                  className="flex-1 px-4 py-3 text-sm outline-none bg-transparent"
+                  className="flex-1 px-4 py-3 text-base outline-none bg-transparent"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-bold mb-2">Instagram</label>
-              <div className="flex items-center border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus-within:border-[#1c1d1f] font-normal">
-                <span className="px-3 border-r border-[#6a6f73] text-[#6a6f73] bg-[#f7f9fa] py-3 text-sm shrink-0">
+              <label className="block text-base font-semibold mb-2">Instagram</label>
+              <div className="flex items-center border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus-within:border-[#1c1d1f] font-light">
+                <span className="px-3 border-r border-[#6a6f73] text-[#6a6f73] bg-[#f7f9fa] py-3 text-base shrink-0">
                   instagram.com/
                 </span>
                 <input
@@ -354,15 +354,15 @@ const InstructorProfile = () => {
                   value={instagram}
                   onChange={(e) => setInstagram(e.target.value)}
                   placeholder="Username"
-                  className="flex-1 px-4 py-3 text-sm outline-none bg-transparent"
+                  className="flex-1 px-4 py-3 text-base outline-none bg-transparent"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-bold mb-2">LinkedIn</label>
-              <div className="flex items-center border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus-within:border-[#1c1d1f] font-normal">
-                <span className="px-3 border-r border-[#6a6f73] text-[#6a6f73] bg-[#f7f9fa] py-3 text-sm shrink-0">
+              <label className="block text-base font-semibold mb-2">LinkedIn</label>
+              <div className="flex items-center border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus-within:border-[#1c1d1f] font-light">
+                <span className="px-3 border-r border-[#6a6f73] text-[#6a6f73] bg-[#f7f9fa] py-3 text-base shrink-0">
                   linkedin.com/
                 </span>
                 <input
@@ -370,15 +370,15 @@ const InstructorProfile = () => {
                   value={linkedin}
                   onChange={(e) => setLinkedin(e.target.value)}
                   placeholder="Public profile URL"
-                  className="flex-1 px-4 py-3 text-sm outline-none bg-transparent"
+                  className="flex-1 px-4 py-3 text-base outline-none bg-transparent"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-bold mb-2">TikTok</label>
-              <div className="flex items-center border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus-within:border-[#1c1d1f] font-normal">
-                <span className="px-3 border-r border-[#6a6f73] text-[#6a6f73] bg-[#f7f9fa] py-3 text-sm shrink-0">
+              <label className="block text-base font-semibold mb-2">TikTok</label>
+              <div className="flex items-center border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus-within:border-[#1c1d1f] font-light">
+                <span className="px-3 border-r border-[#6a6f73] text-[#6a6f73] bg-[#f7f9fa] py-3 text-base shrink-0">
                   tiktok.com/
                 </span>
                 <input
@@ -386,15 +386,15 @@ const InstructorProfile = () => {
                   value={tiktok}
                   onChange={(e) => setTiktok(e.target.value)}
                   placeholder="@Username"
-                  className="flex-1 px-4 py-3 text-sm outline-none bg-transparent"
+                  className="flex-1 px-4 py-3 text-base outline-none bg-transparent"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-bold mb-2">X</label>
-              <div className="flex items-center border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus-within:border-[#1c1d1f] font-normal">
-                <span className="px-3 border-r border-[#6a6f73] text-[#6a6f73] bg-[#f7f9fa] py-3 text-sm shrink-0">
+              <label className="block text-base font-semibold mb-2">X</label>
+              <div className="flex items-center border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus-within:border-[#1c1d1f] font-light">
+                <span className="px-3 border-r border-[#6a6f73] text-[#6a6f73] bg-[#f7f9fa] py-3 text-base shrink-0">
                   x.com/
                 </span>
                 <input
@@ -402,15 +402,15 @@ const InstructorProfile = () => {
                   value={twitter}
                   onChange={(e) => setTwitter(e.target.value)}
                   placeholder="Username"
-                  className="flex-1 px-4 py-3 text-sm outline-none bg-transparent"
+                  className="flex-1 px-4 py-3 text-base outline-none bg-transparent"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-bold mb-2">YouTube</label>
-              <div className="flex items-center border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus-within:border-[#1c1d1f] font-normal">
-                <span className="px-3 border-r border-[#6a6f73] text-[#6a6f73] bg-[#f7f9fa] py-3 text-sm shrink-0">
+              <label className="block text-base font-semibold mb-2">YouTube</label>
+              <div className="flex items-center border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus-within:border-[#1c1d1f] font-light">
+                <span className="px-3 border-r border-[#6a6f73] text-[#6a6f73] bg-[#f7f9fa] py-3 text-base shrink-0">
                   youtube.com/
                 </span>
                 <input
@@ -418,7 +418,7 @@ const InstructorProfile = () => {
                   value={youtube}
                   onChange={(e) => setYoutube(e.target.value)}
                   placeholder="Username"
-                  className="flex-1 px-4 py-3 text-sm outline-none bg-transparent"
+                  className="flex-1 px-4 py-3 text-base outline-none bg-transparent"
                 />
               </div>
             </div>
@@ -430,8 +430,8 @@ const InstructorProfile = () => {
       {activeTab === "photo" && (
         <form onSubmit={handleSaveAvatar} className="space-y-6">
           <div className="space-y-2">
-            <h2 className="text-lg font-bold text-[#1c1d1f] font-sans">Image preview</h2>
-            <p className="text-sm text-[#6a6f73]">Minimum 200x200 pixels, Maximum 6000x6000 pixels</p>
+            <h2 className="text-xl font-semibold text-[#1c1d1f] font-sans">Image preview</h2>
+            <p className="text-base text-[#6a6f73]">Minimum 200x200 pixels, Maximum 6000x6000 pixels</p>
           </div>
 
           <div className="w-[300px] h-[300px] border border-[#d1d7dc] flex items-center justify-center bg-white p-4">
@@ -446,11 +446,11 @@ const InstructorProfile = () => {
             </div>
           </div>
 
-          <div className="flex max-w-xl font-normal">
-            <div className="flex-1 border border-[#6a6f73] bg-white py-3 px-4 text-sm text-[#6a6f73] truncate flex items-center">
+          <div className="flex max-w-xl font-light">
+            <div className="flex-1 border border-[#6a6f73] bg-white py-3 px-4 text-base text-[#6a6f73] truncate flex items-center">
               {avatarFile ? avatarFile.name : "No file selected"}
             </div>
-            <label className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] text-sm font-bold py-3 px-6 cursor-pointer whitespace-nowrap select-none shrink-0 flex items-center justify-center">
+            <label className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] text-base font-semibold py-3 px-6 cursor-pointer whitespace-nowrap select-none shrink-0 flex items-center justify-center">
               Upload image
               <input
                 type="file"
@@ -465,7 +465,7 @@ const InstructorProfile = () => {
             <button
               type="submit"
               disabled={isUpdatingAvatar || !avatarFile}
-              className="bg-[#a435f0] hover:bg-[#8710d8] disabled:bg-[#d1d7dc] disabled:text-[#6a6f73] text-white text-sm font-bold py-3 px-6 transition-all h-12 flex items-center justify-center"
+              className="bg-[#a435f0] hover:bg-[#8710d8] disabled:bg-[#d1d7dc] disabled:text-[#6a6f73] text-white text-base font-semibold py-3 px-6 transition-all h-12 flex items-center justify-center"
             >
               {isUpdatingAvatar ? (
                 <Loader2 className="w-5 h-5 animate-spin mr-2" />
@@ -487,7 +487,7 @@ const InstructorProfile = () => {
                 onChange={(e) => setShowProfileToLoggedIn(e.target.checked)}
                 className="w-5 h-5 accent-[#a435f0] shrink-0 mt-0.5 border-[#6a6f73] rounded"
               />
-              <span className="text-sm font-normal text-[#1c1d1f]">
+              <span className="text-base font-light text-[#1c1d1f]">
                 Show your profile to logged-in users
               </span>
             </label>
@@ -499,7 +499,7 @@ const InstructorProfile = () => {
                 onChange={(e) => setShowCoursesTaking(e.target.checked)}
                 className="w-5 h-5 accent-[#a435f0] shrink-0 mt-0.5 border-[#6a6f73] rounded"
               />
-              <span className="text-sm font-normal text-[#1c1d1f]">
+              <span className="text-base font-light text-[#1c1d1f]">
                 Show courses you're taking on your profile page
               </span>
             </label>
@@ -509,7 +509,7 @@ const InstructorProfile = () => {
             <button
               type="submit"
               disabled={isUpdatingInfo}
-              className="bg-[#a435f0] hover:bg-[#8710d8] disabled:bg-[#d1d7dc] text-white text-sm font-bold py-3 px-6 transition-all h-12 flex items-center justify-center"
+              className="bg-[#a435f0] hover:bg-[#8710d8] disabled:bg-[#d1d7dc] text-white text-base font-semibold py-3 px-6 transition-all h-12 flex items-center justify-center"
             >
               {isUpdatingInfo ? (
                 <Loader2 className="w-5 h-5 animate-spin mr-2" />

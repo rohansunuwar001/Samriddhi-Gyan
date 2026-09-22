@@ -15,7 +15,7 @@ const OriginsSection = ({ data }) => {
         <div className="max-w-prose mx-auto text-center">
 
           {/* Section Title */}
-          <h2 className="font-serif text-4xl sm:text-5xl font-bold text-gray-900 mb-8">
+          <h2 className="font-serif text-5xl sm:text-6xl font-semibold text-gray-900 mb-8">
             {data.title}
           </h2>
 
@@ -23,7 +23,7 @@ const OriginsSection = ({ data }) => {
           {data.paragraphs.map((paragraph, index) => (
             <p
               key={index}
-              className="text-lg text-gray-700 leading-relaxed"
+              className="text-xl text-gray-700 leading-relaxed"
             >
               {paragraph}
               {/* Add space between paragraphs but not after the last one */}

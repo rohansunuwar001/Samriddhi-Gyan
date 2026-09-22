@@ -26,7 +26,7 @@ const StatusBadge = ({ status, phase, progress }) => {
   };
   const c = config[status] || config.pending;
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-sm font-light ${c.cls}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-base font-extralight ${c.cls}`}>
       {status === "transcoding" && <Loader2 className="w-3 h-3 animate-spin" />}
       {status === "ready"       && <CheckCircle2 className="w-3 h-3" />}
       {status === "failed"      && <AlertCircle className="w-3 h-3" />}
@@ -38,7 +38,7 @@ const StatusBadge = ({ status, phase, progress }) => {
 
 const ProgressBar = ({ value, label, color = "bg-blue-500" }) => (
   <div className="space-y-1">
-    <div className="flex justify-between text-sm text-muted-foreground">
+    <div className="flex justify-between text-base text-muted-foreground">
       <span>{label}</span><span>{value}%</span>
     </div>
     <div className="w-full bg-secondary rounded-full h-2 overflow-hidden">
@@ -220,7 +220,7 @@ const EditLectureForm = () => {
         <button
           type="button"
           onClick={() => setActiveTab("info")}
-          className={`flex-1 py-3 text-center text-sm font-semibold tracking-wide border-b-2 transition-all rounded-none ${
+          className={`flex-1 py-3 text-center text-base font-medium tracking-wide border-b-2 transition-all rounded-none ${
             activeTab === "info"
               ? "border-[#1c1d1f] text-slate-800"
               : "border-transparent text-slate-500 hover:text-slate-800"
@@ -231,7 +231,7 @@ const EditLectureForm = () => {
         <button
           type="button"
           onClick={() => setActiveTab("subtitles")}
-          className={`flex-1 py-3 text-center text-sm font-semibold tracking-wide border-b-2 transition-all rounded-none ${
+          className={`flex-1 py-3 text-center text-base font-medium tracking-wide border-b-2 transition-all rounded-none ${
             activeTab === "subtitles"
               ? "border-[#1c1d1f] text-slate-800"
               : "border-transparent text-slate-500 hover:text-slate-800"
@@ -282,7 +282,7 @@ const EditLectureForm = () => {
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               placeholder="Enter lecture description..."
-              className="w-full rounded-md border border-input bg-background px-3 py-2 text-base focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+              className="w-full rounded-md border border-input bg-background px-3 py-2 text-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
             />
           </div>
 
@@ -295,14 +295,14 @@ const EditLectureForm = () => {
                 <button
                   type="button"
                   onClick={() => setVideoSource("upload")}
-                  className={`text-[11px] font-normal px-2.5 py-1 border transition-all ${videoSource === "upload" ? "bg-[#1c1d1f] text-white border-[#1c1d1f]" : "bg-white text-[#1c1d1f] border-[#d1d7dc] hover:bg-[#f7f9fa]"}`}
+                  className={`text-[11px] font-light px-2.5 py-1 border transition-all ${videoSource === "upload" ? "bg-[#1c1d1f] text-white border-[#1c1d1f]" : "bg-white text-[#1c1d1f] border-[#d1d7dc] hover:bg-[#f7f9fa]"}`}
                 >
                   Upload Video
                 </button>
                 <button
                   type="button"
                   onClick={() => setVideoSource("library")}
-                  className={`text-[11px] font-normal px-2.5 py-1 border transition-all ${videoSource === "library" ? "bg-[#1c1d1f] text-white border-[#1c1d1f]" : "bg-white text-[#1c1d1f] border-[#d1d7dc] hover:bg-[#f7f9fa]"}`}
+                  className={`text-[11px] font-light px-2.5 py-1 border transition-all ${videoSource === "library" ? "bg-[#1c1d1f] text-white border-[#1c1d1f]" : "bg-white text-[#1c1d1f] border-[#d1d7dc] hover:bg-[#f7f9fa]"}`}
                 >
                   Video Library
                 </button>
@@ -318,7 +318,7 @@ const EditLectureForm = () => {
                     <button
                       type="button"
                       onClick={() => xhrRef.current?.abort()}
-                      className="text-sm text-red-500 hover:text-red-700 flex items-center gap-1"
+                      className="text-base text-red-500 hover:text-red-700 flex items-center gap-1"
                     >
                       <X className="w-3 h-3" /> Cancel
                     </button>
@@ -333,7 +333,7 @@ const EditLectureForm = () => {
                       label={processingPhase || "FFmpeg transcoding…"}
                       color="bg-amber-500"
                     />
-                    <p className="text-sm text-amber-700">
+                    <p className="text-base text-amber-700">
                       You can close this — processing continues in the background.
                     </p>
                   </div>
@@ -363,11 +363,11 @@ const EditLectureForm = () => {
                     {selectedFile ? (
                       <div className="space-y-1">
                         <Film className="w-8 h-8 text-primary mx-auto" />
-                        <p className="font-light text-base">{selectedFile.name}</p>
-                        <p className="text-sm text-muted-foreground">{formatSize(selectedFile.size)}</p>
+                        <p className="font-extralight text-lg">{selectedFile.name}</p>
+                        <p className="text-base text-muted-foreground">{formatSize(selectedFile.size)}</p>
                         <button
                           type="button"
-                          className="text-sm text-muted-foreground hover:text-destructive"
+                          className="text-base text-muted-foreground hover:text-destructive"
                           onClick={(e) => { e.stopPropagation(); setSelectedFile(null); }}
                         >
                           Remove
@@ -376,14 +376,14 @@ const EditLectureForm = () => {
                     ) : (
                       <div className="space-y-1">
                         <Upload className="w-8 h-8 text-muted-foreground mx-auto" />
-                        <p className="text-base font-light text-muted-foreground">
+                        <p className="text-lg font-extralight text-muted-foreground">
                           Drop video here or click to browse
                         </p>
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-base text-muted-foreground">
                           MP4, MOV, MKV · Up to 20 GB · Up to 4K supported
                         </p>
                         {processingStatus === "ready" && (
-                          <p className="text-sm text-green-600 mt-1">
+                          <p className="text-base text-green-600 mt-1">
                             Current video is live. Upload to replace it.
                           </p>
                         )}
@@ -404,7 +404,7 @@ const EditLectureForm = () => {
 
             {videoSource === "library" && (
               <div className="border border-[#d1d7dc] p-5 bg-[#f7f9fa] rounded-lg">
-                <h4 className="font-normal text-base text-[#1c1d1f] mb-3">Course Video Library</h4>
+                <h4 className="font-light text-lg text-[#1c1d1f] mb-3">Course Video Library</h4>
                 {courseData?.course?.videoLibrary?.length > 0 ? (
                   <div className="space-y-2 max-h-[220px] overflow-y-auto pr-2">
                     {courseData.course.videoLibrary.map((vid, idx) => {
@@ -413,11 +413,11 @@ const EditLectureForm = () => {
                         <div
                           key={idx}
                           onClick={() => setSelectedLibVideo(vid)}
-                          className={`flex items-center justify-between p-3 border cursor-pointer transition-colors ${isSelected ? "border-[#a435f0] bg-[#f0e6ff]/20 font-normal" : "border-[#d1d7dc] bg-white hover:bg-slate-50"}`}
+                          className={`flex items-center justify-between p-3 border cursor-pointer transition-colors ${isSelected ? "border-[#a435f0] bg-[#f0e6ff]/20 font-light" : "border-[#d1d7dc] bg-white hover:bg-slate-50"}`}
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
                             <Film className="w-4 h-4 text-[#6a6f73] shrink-0" />
-                            <span className="text-sm text-[#1c1d1f] truncate">{vid.filename}</span>
+                            <span className="text-base text-[#1c1d1f] truncate">{vid.filename}</span>
                           </div>
                           <span className="text-[10px] text-[#6a6f73] shrink-0 ml-4">
                             {Math.round((vid.sizeBytes || 0) / (1024 * 1024))} MB
@@ -427,7 +427,7 @@ const EditLectureForm = () => {
                     })}
                   </div>
                 ) : (
-                  <p className="text-sm text-[#6a6f73] italic">No videos in the course library yet. Use the Bulk Uploader under Curriculum to upload files.</p>
+                  <p className="text-base text-[#6a6f73] italic">No videos in the course library yet. Use the Bulk Uploader under Curriculum to upload files.</p>
                 )}
 
                 {selectedLibVideo && (
@@ -451,7 +451,7 @@ const EditLectureForm = () => {
                         toast.error("Failed to link video.");
                       }
                     }}
-                    className="w-full mt-4 bg-[#a435f0] hover:bg-[#8710d8] text-white font-normal text-sm py-2.5 transition-colors"
+                    className="w-full mt-4 bg-[#a435f0] hover:bg-[#8710d8] text-white font-light text-base py-2.5 transition-colors"
                   >
                     Use Selected Video
                   </button>

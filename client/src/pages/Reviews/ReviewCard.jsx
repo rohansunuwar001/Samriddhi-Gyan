@@ -21,10 +21,10 @@ const ReviewCard = ({ review }) => {
       <div className="flex items-start gap-4">
         <div className="flex-shrink-0 mt-1">{avatar}</div>
         <div className="flex-1">
-          <p className="text-md font-semibold text-gray-900">{review.user?.name || 'Anonymous User'}</p>
+          <p className="text-md font-medium text-gray-900">{review.user?.name || 'Anonymous User'}</p>
           <div className="flex items-center gap-3 mt-1">
             <StarRating rating={review.rating} />
-            <p className="text-sm text-gray-500">{reviewDate}</p>
+            <p className="text-base text-gray-500">{reviewDate}</p>
           </div>
           <p className="mt-3 text-gray-700 whitespace-pre-wrap">{review.comment}</p>
         </div>

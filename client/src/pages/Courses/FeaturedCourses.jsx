@@ -28,7 +28,7 @@ const FeaturedCourses = () => {
   return (
     <section className="mb-12">
       {/* Title Header Section */}
-      <h2 className="text-2xl font-bold text-slate-800 mb-4">Featured courses</h2>
+      <h2 className="text-3xl font-semibold text-slate-800 mb-4">Featured courses</h2>
 
       {/* Tab Navigation Switches */}
       <div className="flex gap-6 border-b mb-6">
@@ -36,7 +36,7 @@ const FeaturedCourses = () => {
           <button
             key={tab.key}
             onClick={() => setActiveTab(tab.key)}
-            className={`pb-3 text-sm font-medium border-b-2 -mb-px transition-colors ${
+            className={`pb-3 text-base font-normal border-b-2 -mb-px transition-colors ${
               activeTab === tab.key
                 ? "border-slate-800 text-slate-800"
                 : "border-transparent text-slate-500 hover:text-slate-700"
@@ -55,7 +55,7 @@ const FeaturedCourses = () => {
           ))}
         </div>
       ) : courses.length === 0 ? (
-        <p className="text-sm text-slate-500">No courses to show yet.</p>
+        <p className="text-base text-slate-500">No courses to show yet.</p>
       ) : (
         /* Reusing CourseRow directly removes redundant state, ref, and arrow layout code */
         <CourseRow

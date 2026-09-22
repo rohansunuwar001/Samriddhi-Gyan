@@ -108,21 +108,12 @@ export class SVD {
   predict(userId, courseId) {
     const u = userId ? userId.toString() : null;
     const c = courseId ? courseId.toString() : null;
+    const bu = (u && this.bUser[u]) || 0;
+    const bc = (c && this.bCourse[c]) || 0;
+    const pu = u && this.pUser[u];
+    const qc = c && this.qCourse[c];
 
-    const bu = u ? (this.bUser[u] ?? 0) : 0;
-    const bc = c ? (this.bCourse[c] ?? 0) : 0;
-    const pu = u ? this.pUser[u] : null;
-    const qc = c ? this.qCourse[c] : null;
-
-    let dot = 0;
-    if (pu && qc) {
-      for (let k = 0; k < this.latentFactors; k++) {
-        dot += pu[k] * qc[k];
-      }
-    }
-
-    const predicted = this.mu + bu + bc + dot;
-    // Clamp predicted rating between 1.0 and 5.0
-    return Math.min(Math.max(predicted, 1.0), 5.0);
+    const dot = (pu && qc) ? pu.reduce((sum, val, k) => sum + val * qc[k], 0) : 0;
+    return Math.min(Math.max(this.mu + bu + bc + dot, 1.0), 5.0);
   }
 }

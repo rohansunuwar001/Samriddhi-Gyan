@@ -30,50 +30,50 @@ const CourseCard = ({ course }) => {
                         className="w-full h-full object-cover"
                     />
                 ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-300 text-base font-light">
+                    <div className="w-full h-full flex items-center justify-center text-gray-300 text-lg font-extralight">
                         No Image
                     </div>
                 )}
             </div>
             <div className="p-4 flex flex-col flex-1">
                 {/* Title */}
-                <h3 className="text-base font-normal text-[#1c1d1f] line-clamp-2 leading-tight min-h-[40px] mb-1">
+                <h3 className="text-lg font-light text-[#1c1d1f] line-clamp-2 leading-tight min-h-[40px] mb-1">
                     {course.title}
                 </h3>
                 
                 {/* Subtitle / Achievements */}
                 {course.subtitle && (
-                    <p className="text-xs text-slate-500 font-light line-clamp-2 mb-2 leading-normal min-h-[32px]">
+                    <p className="text-sm text-slate-500 font-extralight line-clamp-2 mb-2 leading-normal min-h-[32px]">
                         {course.subtitle}
                     </p>
                 )}
 
                 {/* Creator name and position */}
-                <p className="text-xs text-slate-400 font-light truncate mb-2">
+                <p className="text-sm text-slate-400 font-extralight truncate mb-2">
                     {course.creator?.name || "Instructor"}{course.creator?.headline ? `, ${course.creator.headline}` : ""}
                 </p>
 
                 {/* Info Capsules Row */}
                 <div className="flex flex-wrap items-center gap-1.5 mt-auto mb-3">
-                    <div className="border border-[#d1d7dc] px-1.5 py-0.5 rounded-sm flex items-center gap-1 text-[#b4690e] font-normal text-xs bg-amber-50/10">
+                    <div className="border border-[#d1d7dc] px-1.5 py-0.5 rounded-sm flex items-center gap-1 text-[#b4690e] font-light text-sm bg-amber-50/10">
                         <Star className="w-3 h-3 fill-current text-[#b4690e]" />
                         <span>{(course.ratings || 0).toFixed(1)}</span>
                     </div>
-                    <div className="border border-[#d1d7dc] px-1.5 py-0.5 rounded-sm text-slate-500 font-light text-xs bg-slate-50/10">
+                    <div className="border border-[#d1d7dc] px-1.5 py-0.5 rounded-sm text-slate-500 font-extralight text-sm bg-slate-50/10">
                         {course.numOfReviews || 0} ratings
                     </div>
-                    <div className="border border-[#d1d7dc] px-1.5 py-0.5 rounded-sm text-slate-500 font-light text-xs capitalize bg-slate-50/10">
+                    <div className="border border-[#d1d7dc] px-1.5 py-0.5 rounded-sm text-slate-500 font-extralight text-sm capitalize bg-slate-50/10">
                         {course.level || "All levels"}
                     </div>
                 </div>
 
                 {/* Price Section */}
                 <div className="flex items-baseline gap-2">
-                    <span className="text-base font-normal text-[#1c1d1f]">
+                    <span className="text-lg font-light text-[#1c1d1f]">
                         {currentPrice ? `NPR ${currentPrice}` : "Free"}
                     </span>
                     {hasDiscount && (
-                        <span className="text-sm text-slate-400 line-through font-light">
+                        <span className="text-base text-slate-400 line-through font-extralight">
                             NPR {originalPrice}
                         </span>
                     )}
@@ -113,7 +113,7 @@ const MoreCoursesFromInstructor = ({ instructor, currentCourseId }) => {
 
     return (
         <div className="pt-8 border-t border-gray-200 mt-8 font-sans">
-            <h2 className="text-2xl font-normal text-[#1c1d1f] mb-6 text-left leading-normal">
+            <h2 className="text-3xl font-light text-[#1c1d1f] mb-6 text-left leading-normal">
                 More Courses by{" "}
                 <Link 
                     to={`/${profilePath}/${usernameSlug}`}
@@ -130,7 +130,7 @@ const MoreCoursesFromInstructor = ({ instructor, currentCourseId }) => {
                 ))}
             </div>
 
-            <button className="w-full border border-[#a435f0] text-[#a435f0] hover:bg-[#a435f0]/5 font-normal py-3 text-base mt-8 transition-colors rounded-sm focus:outline-none">
+            <button className="w-full border border-[#a435f0] text-[#a435f0] hover:bg-[#a435f0]/5 font-light py-3 text-lg mt-8 transition-colors rounded-sm focus:outline-none">
                 Report abuse
             </button>
         </div>

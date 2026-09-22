@@ -142,7 +142,7 @@ const CookieConsentBanner = () => {
             <div className="p-2 rounded-lg bg-indigo-50 dark:bg-indigo-950/20 text-indigo-600 dark:text-indigo-400">
               <ShieldCheck className="w-5 h-5" />
             </div>
-            <h4 className="font-semibold text-sm text-slate-900 dark:text-white">
+            <h4 className="font-medium text-base text-slate-900 dark:text-white">
               Cookie & Location Consent
             </h4>
           </div>
@@ -153,19 +153,19 @@ const CookieConsentBanner = () => {
             <X className="w-4 h-4" />
           </button>
         </div>
-        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed font-light">
+        <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-extralight">
           We use cookies and coarse geolocation data to optimize your learning workspace, analyze demographic metrics, and coordinate security measures. By accepting, you consent to our privacy policies.
         </p>
         <div className="flex items-center gap-3 justify-end pt-1">
           <button
             onClick={handleDecline}
-            className="px-3.5 py-1.5 rounded-lg text-xs font-medium border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors"
+            className="px-3.5 py-1.5 rounded-lg text-sm font-normal border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors"
           >
             Decline
           </button>
           <button
             onClick={handleAccept}
-            className="px-4 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-sm"
+            className="px-4 py-1.5 rounded-lg text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-colors shadow-sm"
           >
             Accept All
           </button>

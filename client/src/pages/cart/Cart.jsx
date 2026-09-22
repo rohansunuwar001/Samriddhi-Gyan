@@ -134,20 +134,20 @@ const Cart = () => {
   return (
     <div className="bg-white text-[#2d2f31] min-h-screen">
       <div className="mx-auto max-w-[1400px] px-6 py-12 sm:px-8 lg:px-10">
-        <h1 className="text-4xl font-extrabold tracking-tight text-[#2d2f31] mb-2">Shopping Cart</h1>
-        <p className="text-base font-bold text-[#2d2f31] mb-8">
+        <h1 className="text-5xl font-bold tracking-tight text-[#2d2f31] mb-2">Shopping Cart</h1>
+        <p className="text-lg font-semibold text-[#2d2f31] mb-8">
           {totalItems} Item{totalItems !== 1 ? "s" : ""} in Cart
         </p>
 
         {totalItems === 0 ? (
           <div className="text-center py-20 flex flex-col justify-center items-center bg-[#f7f9fa] rounded border border-[#d1d7dc]">
             <ShoppingCart className="h-20 w-20 text-[#6a6f73] mb-6" />
-            <h2 className="text-2xl font-extrabold text-[#2d2f31] mb-2">Your cart is empty</h2>
-            <p className="text-[#6a6f73] mb-8 text-base">
+            <h2 className="text-3xl font-bold text-[#2d2f31] mb-2">Your cart is empty</h2>
+            <p className="text-[#6a6f73] mb-8 text-lg">
               Looks like you haven&apos;t added any items to your cart yet.
             </p>
             <Link to="/courses">
-              <Button className="h-12 px-8 bg-[#a435f0] text-white hover:bg-[#8710d8] font-bold text-base rounded-none">
+              <Button className="h-12 px-8 bg-[#a435f0] text-white hover:bg-[#8710d8] font-semibold text-lg rounded-none">
                 Keep shopping
               </Button>
             </Link>
@@ -188,27 +188,27 @@ const Cart = () => {
                       <div className="min-w-0 space-y-1">
                         <Link
                           to={`/course-detail/${course._id}`}
-                          className="font-bold text-[#2d2f31] text-base leading-snug hover:text-[#5624d0] line-clamp-2"
+                          className="font-semibold text-[#2d2f31] text-lg leading-snug hover:text-[#5624d0] line-clamp-2"
                         >
                           {course.title}
                         </Link>
-                        <p className="text-xs text-[#6a6f73]">
+                        <p className="text-sm text-[#6a6f73]">
                           By {instructorName}
                         </p>
 
                         {/* Rating, hours, lectures */}
-                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-xs">
+                        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-sm">
                           {course.isBestseller && (
-                            <span className="bg-[#ecebfa] text-[#2d2f31] font-bold px-2 py-0.5 rounded text-[10px] uppercase">
+                            <span className="bg-[#ecebfa] text-[#2d2f31] font-semibold px-2 py-0.5 rounded text-[10px] uppercase">
                               Bestseller
                             </span>
                           )}
-                          <span className="text-[#b4690e] font-extrabold">{ratingValue.toFixed(1)}</span>
+                          <span className="text-[#b4690e] font-bold">{ratingValue.toFixed(1)}</span>
                           {renderStars(ratingValue)}
                           <span className="text-[#6a6f73]">({reviewsCount.toLocaleString()} ratings)</span>
                         </div>
 
-                        <div className="text-xs text-[#6a6f73] flex flex-wrap gap-2 pt-1">
+                        <div className="text-sm text-[#6a6f73] flex flex-wrap gap-2 pt-1">
                           <span>{totalHours} total hours</span>
                           <span>•</span>
                           <span>{totalLectures} lectures</span>
@@ -218,7 +218,7 @@ const Cart = () => {
 
                         {/* Premium check badge */}
                         <div className="pt-2">
-                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-[#ecebfa] text-[#5624d0]">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold bg-[#ecebfa] text-[#5624d0]">
                             Premium
                           </span>
                         </div>
@@ -226,7 +226,7 @@ const Cart = () => {
                     </div>
 
                     {/* Actions Panel */}
-                    <div className="flex md:flex-col items-center md:items-end gap-4 text-xs font-bold text-[#5624d0] md:min-w-[120px]">
+                    <div className="flex md:flex-col items-center md:items-end gap-4 text-sm font-semibold text-[#5624d0] md:min-w-[120px]">
                       <button
                         onClick={() => handleRemove(course._id)}
                         disabled={isRemoving}
@@ -244,16 +244,16 @@ const Cart = () => {
 
                     {/* Price panel */}
                     <div className="text-right flex-shrink-0 md:min-w-[100px]">
-                      <div className="flex items-center justify-end gap-1.5 text-[#5624d0] font-extrabold text-lg">
+                      <div className="flex items-center justify-end gap-1.5 text-[#5624d0] font-bold text-xl">
                         <span>Rs {current.toLocaleString()}</span>
                         <Tag className="h-4 w-4" />
                       </div>
                       {hasDiscount && (
                         <div className="space-y-0.5">
-                          <span className="text-sm text-[#6a6f73] line-through block">
+                          <span className="text-base text-[#6a6f73] line-through block">
                             Rs {original.toLocaleString()}
                           </span>
-                          <span className="text-xs text-[#2d2f31] block">
+                          <span className="text-sm text-[#2d2f31] block">
                             {itemDiscount}% off
                           </span>
                         </div>
@@ -282,14 +282,14 @@ const Cart = () => {
                       <div className="min-w-0 space-y-1">
                         <Link
                           to={`/certification/${cert.slug}`}
-                          className="font-bold text-[#2d2f31] text-base leading-snug hover:text-[#5624d0] line-clamp-2"
+                          className="font-semibold text-[#2d2f31] text-lg leading-snug hover:text-[#5624d0] line-clamp-2"
                         >
                           {cert.name} Exam Voucher
                         </Link>
-                        <p className="text-xs text-[#6a6f73]">
+                        <p className="text-sm text-[#6a6f73]">
                           Issuer: {issuerName}
                         </p>
-                        <div className="text-xs text-[#6a6f73] flex flex-wrap gap-2 pt-1">
+                        <div className="text-sm text-[#6a6f73] flex flex-wrap gap-2 pt-1">
                           <span>Verified Credential</span>
                           <span>•</span>
                           <span>Official Exam Attempt</span>
@@ -298,7 +298,7 @@ const Cart = () => {
                     </div>
 
                     {/* Actions Panel */}
-                    <div className="flex md:flex-col items-center md:items-end gap-4 text-xs font-bold text-[#5624d0] md:min-w-[120px]">
+                    <div className="flex md:flex-col items-center md:items-end gap-4 text-sm font-semibold text-[#5624d0] md:min-w-[120px]">
                       <button
                         onClick={() => handleRemoveCertification(cert._id)}
                         disabled={isRemoving}
@@ -310,7 +310,7 @@ const Cart = () => {
 
                     {/* Price panel */}
                     <div className="text-right flex-shrink-0 md:min-w-[100px]">
-                      <div className="flex items-center justify-end gap-1.5 text-[#5624d0] font-extrabold text-lg">
+                      <div className="flex items-center justify-end gap-1.5 text-[#5624d0] font-bold text-xl">
                         <span>Rs {current.toLocaleString()}</span>
                         <Tag className="h-4 w-4" />
                       </div>
@@ -324,19 +324,19 @@ const Cart = () => {
             <div className="space-y-6">
               <div className="space-y-4">
                 <div className="text-[#2d2f31]">
-                  <p className="text-base font-bold text-[#6a6f73]">Total:</p>
-                  <p className="text-4xl font-extrabold mt-1">Rs {finalTotal.toLocaleString()}</p>
+                  <p className="text-lg font-semibold text-[#6a6f73]">Total:</p>
+                  <p className="text-5xl font-bold mt-1">Rs {finalTotal.toLocaleString()}</p>
                   {couponDiscount > 0 && (
-                    <p className="text-sm font-semibold text-[#38755b] mt-1">
+                    <p className="text-base font-medium text-[#38755b] mt-1">
                       Coupon savings: Rs {couponDiscount.toLocaleString()}
                     </p>
                   )}
                   {discountPct > 0 && (
                     <div className="mt-1 flex items-center gap-2">
-                      <span className="text-[#6a6f73] line-through text-base">
+                      <span className="text-[#6a6f73] line-through text-lg">
                         Rs {originalTotal.toLocaleString()}
                       </span>
-                      <span className="text-[#2d2f31] text-sm">
+                      <span className="text-[#2d2f31] text-base">
                         {discountPct}% off
                       </span>
                     </div>
@@ -344,14 +344,14 @@ const Cart = () => {
                 </div>
 
                 <Button
-                  className="w-full h-14 bg-[#a435f0] text-white hover:bg-[#8710d8] font-bold text-lg rounded-none flex items-center justify-center gap-2 shadow-none transition-colors"
+                  className="w-full h-14 bg-[#a435f0] text-white hover:bg-[#8710d8] font-semibold text-xl rounded-none flex items-center justify-center gap-2 shadow-none transition-colors"
                   onClick={() => navigate("/checkout")}
                 >
                   Proceed to Checkout
                   <ArrowRight className="h-5 w-5" />
                 </Button>
 
-                <p className="text-xs text-[#6a6f73] text-center">
+                <p className="text-sm text-[#6a6f73] text-center">
                   You won&apos;t be charged yet
                 </p>
               </div>
@@ -360,20 +360,20 @@ const Cart = () => {
 
               {/* Promotions Section */}
               <div className="space-y-3">
-                <h3 className="text-sm font-extrabold text-[#2d2f31]">Promotions</h3>
+                <h3 className="text-base font-bold text-[#2d2f31]">Promotions</h3>
                 
                 {appliedCoupon ? (
-                  <div className="flex items-center justify-between border border-[#38755b] bg-[#e6f4ea] px-4 py-2.5 text-sm">
+                  <div className="flex items-center justify-between border border-[#38755b] bg-[#e6f4ea] px-4 py-2.5 text-base">
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-[#1e4620]">
+                      <span className="font-semibold text-[#1e4620]">
                         {appliedCoupon.coupon?.code || appliedCoupon.code}
                       </span>
-                      <span className="font-medium text-[#2e6930]">Applied!</span>
+                      <span className="font-normal text-[#2e6930]">Applied!</span>
                     </div>
                     <button
                       type="button"
                       onClick={handleRemoveCoupon}
-                      className="text-xs font-semibold text-red-600 hover:underline"
+                      className="text-sm font-medium text-red-600 hover:underline"
                     >
                       Remove
                     </button>
@@ -385,12 +385,12 @@ const Cart = () => {
                       value={couponCode}
                       onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
                       placeholder="Enter Coupon"
-                      className="h-10 border border-[#2d2f31] bg-white px-3 text-sm uppercase outline-none focus:border-[#5624d0]"
+                      className="h-10 border border-[#2d2f31] bg-white px-3 text-base uppercase outline-none focus:border-[#5624d0]"
                     />
                     <Button
                       type="submit"
                       disabled={isValidatingCoupon}
-                      className="h-10 bg-white border border-[#2d2f31] text-[#2d2f31] hover:bg-[#f7f9fa] font-bold text-sm rounded-none shadow-none"
+                      className="h-10 bg-white border border-[#2d2f31] text-[#2d2f31] hover:bg-[#f7f9fa] font-semibold text-base rounded-none shadow-none"
                     >
                       {isValidatingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
                     </Button>

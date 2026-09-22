@@ -7,7 +7,7 @@ const ContactHero = () => {
           
           {/* Left Column: Text Content */}
           <div className="text-center lg:text-left">
-            <h1 className="text-4xl lg:text-6xl font-bold text-gray-900 leading-tight font-serif">
+            <h1 className="text-5xl lg:text-7xl font-semibold text-gray-900 leading-tight font-serif">
               Connecting people <br /> with knowledge
             </h1>
           </div>

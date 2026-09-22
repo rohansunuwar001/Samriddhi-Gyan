@@ -53,9 +53,9 @@ const InstructorAccount = () => {
   };
 
   const tabClass = (tabId) => `
-    pb-3 text-sm sm:text-base font-light transition-all border-b-2 cursor-pointer whitespace-nowrap
+    pb-3 text-base sm:text-lg font-extralight transition-all border-b-2 cursor-pointer whitespace-nowrap
     ${activeTab === tabId 
-      ? "border-[#1c1d1f] text-[#1c1d1f] font-normal" 
+      ? "border-[#1c1d1f] text-[#1c1d1f] font-light" 
       : "border-transparent text-[#6a6f73] hover:text-[#1c1d1f]"}
   `;
 
@@ -68,9 +68,9 @@ const InstructorAccount = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto py-10 px-6 font-light text-base text-[#1c1d1f]">
+    <div className="max-w-4xl mx-auto py-10 px-6 font-extralight text-lg text-[#1c1d1f]">
       {/* Page Title */}
-      <h1 className="text-3xl font-bold text-[#1c1d1f] mb-8 font-sans">Account</h1>
+      <h1 className="text-4xl font-semibold text-[#1c1d1f] mb-8 font-sans">Account</h1>
 
       {/* Tabs */}
       <div className="flex gap-6 border-b border-[#d1d7dc] mb-8 overflow-x-auto">
@@ -86,10 +86,10 @@ const InstructorAccount = () => {
         <button onClick={() => handleTabChange("api")} className={tabClass("api")}>
           API clients
         </button>
-        <button disabled className="pb-3 text-sm sm:text-base font-light border-b-2 border-transparent text-[#d1d7dc] cursor-not-allowed whitespace-nowrap">
+        <button disabled className="pb-3 text-base sm:text-lg font-extralight border-b-2 border-transparent text-[#d1d7dc] cursor-not-allowed whitespace-nowrap">
           GenAI program
         </button>
-        <button disabled className="pb-3 text-sm sm:text-base font-light border-b-2 border-transparent text-[#d1d7dc] cursor-not-allowed whitespace-nowrap">
+        <button disabled className="pb-3 text-base sm:text-lg font-extralight border-b-2 border-transparent text-[#d1d7dc] cursor-not-allowed whitespace-nowrap">
           Close account
         </button>
       </div>
@@ -98,23 +98,23 @@ const InstructorAccount = () => {
       {activeTab === "security" && (
         <div className="space-y-6 max-w-[600px]">
           <div>
-            <label className="block text-sm font-bold mb-2">Email:</label>
+            <label className="block text-base font-semibold mb-2">Email:</label>
             <input
               type="email"
               readOnly
               value={user?.email || ""}
-              className="w-full border border-[#d1d7dc] bg-gray-50 text-gray-500 py-3 px-4 text-sm font-normal outline-none cursor-not-allowed"
+              className="w-full border border-[#d1d7dc] bg-gray-50 text-gray-500 py-3 px-4 text-base font-light outline-none cursor-not-allowed"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-bold mb-2">Password:</label>
-            <div className="flex items-center border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus-within:border-[#1c1d1f] transition-colors w-full font-normal">
+            <label className="block text-base font-semibold mb-2">Password:</label>
+            <div className="flex items-center border border-[#6a6f73] bg-white hover:border-[#1c1d1f] focus-within:border-[#1c1d1f] transition-colors w-full font-light">
               <input
                 type="password"
                 readOnly
                 value="********"
-                className="flex-1 px-4 py-3 text-sm text-[#1c1d1f] outline-none bg-transparent"
+                className="flex-1 px-4 py-3 text-base text-[#1c1d1f] outline-none bg-transparent"
               />
               <button 
                 onClick={() => toast.info("Password change flow can be completed by updating credentials.")}
@@ -127,13 +127,13 @@ const InstructorAccount = () => {
 
           {/* Multi-factor Authentication card */}
           <div className="border border-[#d1d7dc] p-6 space-y-4 bg-white mt-8">
-            <h3 className="text-base font-bold font-sans">Multi-factor Authentication</h3>
-            <p className="text-sm text-gray-650 leading-relaxed font-normal">
+            <h3 className="text-lg font-semibold font-sans">Multi-factor Authentication</h3>
+            <p className="text-base text-gray-650 leading-relaxed font-light">
               Increase your account security by requiring a code emailed to you to be entered when you log in. For more information on how multi-factor authentication works, refer to our <span className="text-[#5624d0] underline cursor-pointer">Help Center article</span>.
             </p>
             <button
               onClick={() => toast.success("Multi-factor authentication enabled.")}
-              className="bg-[#a435f0] hover:bg-[#8710d8] text-white text-sm font-bold py-2.5 px-4 transition-all"
+              className="bg-[#a435f0] hover:bg-[#8710d8] text-white text-base font-semibold py-2.5 px-4 transition-all"
             >
               Enable
             </button>
@@ -146,7 +146,7 @@ const InstructorAccount = () => {
         <form onSubmit={handleSaveNotifications} className="space-y-8 max-w-[650px]">
           {/* As an instructor */}
           <div className="space-y-4">
-            <h3 className="text-base font-bold font-sans">As an instructor, I want to receive:</h3>
+            <h3 className="text-lg font-semibold font-sans">As an instructor, I want to receive:</h3>
             <div className="border border-[#a435f0] p-5 flex gap-4 bg-white">
               <input
                 type="checkbox"
@@ -154,16 +154,16 @@ const InstructorAccount = () => {
                 onChange={(e) => setInstructorNotif(e.target.checked)}
                 className="w-5 h-5 accent-[#a435f0] shrink-0 mt-0.5"
               />
-              <div className="text-sm font-normal leading-relaxed text-[#1c1d1f]">
-                <p className="font-bold mb-1">Helpful resources and important updates related to being an instructor on Samriddhi Gyan.</p>
-                <p className="text-gray-550 text-xs">To adjust this preference by course, leave this box checked and go to 'Course Settings' on the course management dashboard to opt in or out of specific notifications.</p>
+              <div className="text-base font-light leading-relaxed text-[#1c1d1f]">
+                <p className="font-semibold mb-1">Helpful resources and important updates related to being an instructor on Samriddhi Gyan.</p>
+                <p className="text-gray-550 text-sm">To adjust this preference by course, leave this box checked and go to 'Course Settings' on the course management dashboard to opt in or out of specific notifications.</p>
               </div>
             </div>
           </div>
 
           {/* As a student */}
           <div className="space-y-4">
-            <h3 className="text-base font-bold font-sans">As a student, I want to receive:</h3>
+            <h3 className="text-lg font-semibold font-sans">As a student, I want to receive:</h3>
             
             {/* Promotions */}
             <div className="border border-[#d1d7dc] p-5 flex gap-4 bg-white">
@@ -176,9 +176,9 @@ const InstructorAccount = () => {
                 }}
                 className="w-5 h-5 accent-[#a435f0] shrink-0 mt-0.5"
               />
-              <div className="text-sm font-normal leading-relaxed text-gray-550">
-                <p className="font-bold text-[#1c1d1f] mb-1">Promotions, course recommendations, and helpful resources from Samriddhi Gyan.</p>
-                <p className="text-xs">Because you are an instructor, you will not receive course promotional emails from Samriddhi Gyan.</p>
+              <div className="text-base font-light leading-relaxed text-gray-550">
+                <p className="font-semibold text-[#1c1d1f] mb-1">Promotions, course recommendations, and helpful resources from Samriddhi Gyan.</p>
+                <p className="text-sm">Because you are an instructor, you will not receive course promotional emails from Samriddhi Gyan.</p>
               </div>
             </div>
 
@@ -193,9 +193,9 @@ const InstructorAccount = () => {
                 }}
                 className="w-5 h-5 accent-[#a435f0] shrink-0 mt-0.5"
               />
-              <div className="text-sm font-normal leading-relaxed text-[#1c1d1f]">
-                <p className="font-bold mb-1">Announcements from instructors whose course(s) I'm enrolled in.</p>
-                <p className="text-gray-550 text-xs">To adjust this preference by course, leave this box checked and go to the course dashboard and click on "Options" to opt in or out of specific announcements.</p>
+              <div className="text-base font-light leading-relaxed text-[#1c1d1f]">
+                <p className="font-semibold mb-1">Announcements from instructors whose course(s) I'm enrolled in.</p>
+                <p className="text-gray-550 text-sm">To adjust this preference by course, leave this box checked and go to the course dashboard and click on "Options" to opt in or out of specific announcements.</p>
               </div>
             </div>
 
@@ -213,9 +213,9 @@ const InstructorAccount = () => {
                 }}
                 className="w-5 h-5 accent-[#a435f0] shrink-0 mt-0.5"
               />
-              <div className="text-sm font-normal leading-relaxed text-gray-550">
-                <p className="font-bold text-[#1c1d1f] mb-1">Don't send me any promotional emails.</p>
-                <p className="text-xs">If this box is checked, please note that you will continue to receive important transactional emails like purchase receipts.</p>
+              <div className="text-base font-light leading-relaxed text-gray-550">
+                <p className="font-semibold text-[#1c1d1f] mb-1">Don't send me any promotional emails.</p>
+                <p className="text-sm">If this box is checked, please note that you will continue to receive important transactional emails like purchase receipts.</p>
               </div>
             </div>
           </div>
@@ -224,7 +224,7 @@ const InstructorAccount = () => {
           <div className="pt-4">
             <button
               type="submit"
-              className="bg-[#a435f0] hover:bg-[#8710d8] text-white text-sm font-bold py-3 px-6 transition-all h-12 flex items-center justify-center"
+              className="bg-[#a435f0] hover:bg-[#8710d8] text-white text-base font-semibold py-3 px-6 transition-all h-12 flex items-center justify-center"
             >
               Save
             </button>
@@ -242,16 +242,16 @@ const InstructorAccount = () => {
               onChange={(e) => setTurnOffDirectMessaging(e.target.checked)}
               className="w-5 h-5 accent-[#a435f0] shrink-0 mt-0.5"
             />
-            <div className="text-sm font-normal leading-relaxed text-gray-550">
-              <p className="font-bold text-[#1c1d1f] mb-1">Turn off direct messaging</p>
-              <p className="text-xs">When you turn off direct messages, you will no longer be able to send or receive direct messages as an instructor.</p>
+            <div className="text-base font-light leading-relaxed text-gray-550">
+              <p className="font-semibold text-[#1c1d1f] mb-1">Turn off direct messaging</p>
+              <p className="text-sm">When you turn off direct messages, you will no longer be able to send or receive direct messages as an instructor.</p>
             </div>
           </div>
 
           <div className="pt-4">
             <button
               type="submit"
-              className="bg-[#a435f0] hover:bg-[#8710d8] text-white text-sm font-bold py-3 px-6 transition-all h-12 flex items-center justify-center"
+              className="bg-[#a435f0] hover:bg-[#8710d8] text-white text-base font-semibold py-3 px-6 transition-all h-12 flex items-center justify-center"
             >
               Save
             </button>
@@ -264,19 +264,19 @@ const InstructorAccount = () => {
         <div className="space-y-6">
           <div className="flex justify-between items-start border-b border-[#d1d7dc] pb-5">
             <div>
-              <h2 className="text-xl font-bold font-sans">API Clients</h2>
-              <p className="text-xs text-gray-500 mt-1 font-normal">Create and list your API clients.</p>
+              <h2 className="text-2xl font-semibold font-sans">API Clients</h2>
+              <p className="text-sm text-gray-500 mt-1 font-light">Create and list your API clients.</p>
             </div>
           </div>
 
           <div className="space-y-4">
-            <h3 className="text-base font-bold font-sans">Affiliate API</h3>
-            <p className="text-sm text-gray-650 leading-relaxed font-normal">
+            <h3 className="text-lg font-semibold font-sans">Affiliate API</h3>
+            <p className="text-base text-gray-650 leading-relaxed font-light">
               To request access to the Affiliate API, please read our Affiliate API terms first. If you agree to the terms, click the button below. You can find more information in our <span className="text-[#5624d0] underline cursor-pointer">Samriddhi Gyan Affiliate API documentation</span>.
             </p>
             <button
               onClick={() => toast.success("Affiliate API client requested.")}
-              className="bg-[#a435f0] hover:bg-[#8710d8] text-white text-sm font-bold py-2.5 px-4 transition-all"
+              className="bg-[#a435f0] hover:bg-[#8710d8] text-white text-base font-semibold py-2.5 px-4 transition-all"
             >
               Request Affiliate API Client
             </button>
@@ -284,8 +284,8 @@ const InstructorAccount = () => {
 
           {/* Info notification */}
           <div className="border border-[#d1d7dc] p-5 bg-white flex items-center gap-3">
-            <div className="w-5 h-5 rounded-full bg-[#1c1d1f] text-white flex items-center justify-center text-xs font-bold font-sans">!</div>
-            <span className="text-sm font-normal text-gray-650">You don't have any API clients yet.</span>
+            <div className="w-5 h-5 rounded-full bg-[#1c1d1f] text-white flex items-center justify-center text-sm font-semibold font-sans">!</div>
+            <span className="text-base font-light text-gray-650">You don't have any API clients yet.</span>
           </div>
         </div>
       )}

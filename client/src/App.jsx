@@ -84,6 +84,7 @@ const SupAdmCourseAnalytics = lazy(() => import("./pages/superAdmin/SupAdmCourse
 const SupAdmDashboard = lazy(() => import("./pages/superAdmin/SupAdmDashboard"));
 const SupAdmSubscriptions = lazy(() => import("./pages/superAdmin/SupAdmSubscriptions"));
 const CategoryManager = lazy(() => import("./pages/admin/CategoryManager"));
+const ExploreMenuManager = lazy(() => import("./pages/admin/ExploreMenuManager"));
 const TopicSearchResultsPage = lazy(() => import("./pages/Courses/TopicSearchResultsPage"));
 const PaymentFailed = lazy(() => import("./pages/Payment/PaymentFailed"));
 const BlogImporter = lazy(() => import("./pages/admin/blog/BlogImporter"));
@@ -91,6 +92,8 @@ const TopicPage = lazy(() => import("./pages/student/TopicPage"));
 const TopicManager = lazy(() => import("./pages/admin/TopicManager"));
 const DiscountManager = lazy(() => import("./pages/admin/DiscountManager"));
 const SubscribePage = lazy(() => import("./pages/student/SubscribePage"));
+const BusinessPlansPage = lazy(() => import("./pages/business/BusinessPlansPage"));
+const RequestDemoPage = lazy(() => import("./pages/business/RequestDemoPage"));
 const Terms = lazy(() => import("./pages/Terms/Terms"));
 const PersonalizeWizard = lazy(() => import("./pages/student/PersonalizeWizard"));
 const NotificationsPage = lazy(() => import("./pages/Notifications/NotificationsPage"));
@@ -163,6 +166,62 @@ const appRouter = createBrowserRouter([
             <BlogPage />
           </StudentRoute>
         ),
+      },
+      {
+        path: "/subscribe",
+        element: (
+          <StudentRoute>
+            <SubscribePage />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/business/plans",
+        element: (
+          <StudentRoute>
+            <BusinessPlansPage />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/business/request-demo",
+        element: (
+          <StudentRoute>
+            <RequestDemoPage />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/business/request-demo-mx",
+        element: (
+          <StudentRoute>
+            <RequestDemoPage />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/request-demo",
+        element: (
+          <StudentRoute>
+            <RequestDemoPage />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/request-demo-mx",
+        element: (
+          <StudentRoute>
+            <RequestDemoPage />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/business",
+        element: <Navigate to="/business/plans" replace />,
+      },
+      {
+        path: "/plans",
+        element: <Navigate to="/business/plans" replace />,
       },
       {
         path: "/wishlist",
@@ -253,6 +312,38 @@ const appRouter = createBrowserRouter([
         element: (
           <StudentRoute>
             <SubscribePage />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/personal-plan",
+        element: (
+          <StudentRoute>
+            <SubscribePage />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/business/plans",
+        element: (
+          <StudentRoute>
+            <BusinessPlansPage />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/business",
+        element: (
+          <StudentRoute>
+            <BusinessPlansPage />
+          </StudentRoute>
+        ),
+      },
+      {
+        path: "/plans",
+        element: (
+          <StudentRoute>
+            <BusinessPlansPage />
           </StudentRoute>
         ),
       },
@@ -610,6 +701,7 @@ const appRouter = createBrowserRouter([
           { path: "users", element: <SupAdmAllUser /> },
           { path: "revenue", element: <SupAdmAllRevenueDetails /> },
           { path: "categories", element: <CategoryManager /> },
+          { path: "explore-menu", element: <ExploreMenuManager /> },
           { path: "topics", element: <TopicManager /> },
           { path: "blog-import", element: <BlogImporter /> },
           { path: "cms", element: <HomeCms /> },

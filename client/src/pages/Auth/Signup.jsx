@@ -91,7 +91,7 @@ const Signup = () => {
 
         <div className="w-full max-w-md md:w-1/2">
           <div className="w-full">
-            <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center md:text-left">
+            <h1 className="text-4xl font-semibold text-gray-900 mb-6 text-center md:text-left">
               Sign up to start your learning journey
             </h1>
 
@@ -107,7 +107,7 @@ const Signup = () => {
                   className="text-black w-full px-4 py-3 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
                 {errors.name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.name}</p>
+                  <p className="mt-1 text-base text-red-600">{errors.name}</p>
                 )}
               </div>
 
@@ -122,7 +122,7 @@ const Signup = () => {
                   className="text-black w-full px-4 py-3 border border-gray-400 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                 />
                 {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                  <p className="mt-1 text-base text-red-600">{errors.email}</p>
                 )}
               </div>
 
@@ -150,7 +150,7 @@ const Signup = () => {
                 </div>
                 <PasswordStrengthMeter password={password} />
                 {errors.password && (
-                  <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                  <p className="mt-1 text-base text-red-600">{errors.password}</p>
                 )}
               </div>
 
@@ -183,7 +183,7 @@ const Signup = () => {
                 {/* NEW: Live match indicator */}
                 {confirmPassword && (
                   <p
-                    className={`mt-1 text-sm flex items-center gap-1 ${
+                    className={`mt-1 text-base flex items-center gap-1 ${
                       password === confirmPassword
                         ? "text-green-600"
                         : "text-red-600"
@@ -202,20 +202,20 @@ const Signup = () => {
                 )}
 
                 {errors.confirmPassword && (
-                  <p className="mt-1 text-sm text-red-600">
+                  <p className="mt-1 text-base text-red-600">
                     {errors.confirmPassword}
                   </p>
                 )}
               </div>
 
               {errors.api && (
-                <p className="text-sm text-red-600 text-center">{errors.api}</p>
+                <p className="text-base text-red-600 text-center">{errors.api}</p>
               )}
 
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white font-bold py-3 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-300 disabled:bg-indigo-400"
+                className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white font-semibold py-3 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-300 disabled:bg-indigo-400"
               >
                 {isLoading && <FiLoader className="animate-spin h-5 w-5" />}
                 <span>{isLoading ? "Creating account..." : "Sign Up"}</span>
@@ -229,7 +229,7 @@ const Signup = () => {
               >
                 <div className="w-full border-t border-gray-300" />
               </div>
-              <div className="relative flex justify-center text-sm">
+              <div className="relative flex justify-center text-base">
                 <span className="px-2 bg-white text-gray-500">
                   Other sign-up options
                 </span>
@@ -244,11 +244,11 @@ const Signup = () => {
             </div> */}
 
             <div className="mt-8 text-center">
-              <p className="text-sm text-gray-700">
+              <p className="text-base text-gray-700">
                 Already have an account?{" "}
                 <Link
                   to="/login"
-                  className="font-bold text-indigo-600 hover:underline"
+                  className="font-semibold text-indigo-600 hover:underline"
                 >
                   Log in
                 </Link>

@@ -261,15 +261,15 @@ const LectureItem = ({ lecture, courseId, index }) => {
                 value={editedTitle}
                 onChange={(e) => setEditedTitle(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleUpdateTitle()}
-                className="border border-[#6a6f73] px-2 py-1 text-base text-[#1c1d1f] w-full outline-none focus:border-[#1c1d1f]"
+                className="border border-[#6a6f73] px-2 py-1 text-lg text-[#1c1d1f] w-full outline-none focus:border-[#1c1d1f]"
               />
-              <button onClick={handleUpdateTitle} className="text-base text-[#5624d0] font-normal">Save</button>
-              <button onClick={() => setIsEditingTitle(false)} className="text-base text-[#6a6f73]">Cancel</button>
+              <button onClick={handleUpdateTitle} className="text-lg text-[#5624d0] font-light">Save</button>
+              <button onClick={() => setIsEditingTitle(false)} className="text-lg text-[#6a6f73]">Cancel</button>
             </div>
           ) : (
             <div className="flex items-center gap-2 min-w-0">
-              <span className="text-base text-[#1c1d1f] font-normal shrink-0">Lecture {index}:</span>
-              <span className="text-base text-[#1c1d1f] truncate">{lecture.title}</span>
+              <span className="text-lg text-[#1c1d1f] font-light shrink-0">Lecture {index}:</span>
+              <span className="text-lg text-[#1c1d1f] truncate">{lecture.title}</span>
               
               <button onClick={() => setIsEditingTitle(true)} className="text-[#6a6f73] hover:text-[#1c1d1f] p-0.5">
                 <Edit className="w-3.5 h-3.5" />
@@ -289,7 +289,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
                 setPanelType("select-type");
                 setIsPanelOpen(true);
               }}
-              className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-normal text-base px-3 py-1.5 transition-colors"
+              className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-light text-lg px-3 py-1.5 transition-colors"
             >
               + Content
             </button>
@@ -313,7 +313,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
           {!showLinkedVideo && !uploadingFile && panelType === "select-type" && (
             <div className="relative">
               <div className="flex items-center justify-between border-b border-[#d1d7dc] pb-3 mb-4">
-                <span className="text-base font-normal text-[#1c1d1f]">Select content type</span>
+                <span className="text-lg font-light text-[#1c1d1f]">Select content type</span>
                 <button
                   onClick={() => {
                     if (hasVideo) {
@@ -327,7 +327,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
                   <X className="w-4.5 h-4.5" />
                 </button>
               </div>
-              <p className="text-base text-[#6a6f73] mb-5">
+              <p className="text-lg text-[#6a6f73] mb-5">
                 Select the main type of content. Files and links can be added as resources. <span className="text-[#5624d0] underline cursor-pointer">Learn about content types.</span>
               </p>
 
@@ -339,7 +339,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
                   className="w-24 h-24 border border-[#d1d7dc] bg-white hover:border-[#1c1d1f] transition-all flex flex-col items-center justify-center p-3 text-center rounded-sm"
                 >
                   <PlayCircle className="w-8 h-8 text-[#6a6f73] mb-2" />
-                  <span className="text-[11px] font-normal text-[#1c1d1f]">Video</span>
+                  <span className="text-[11px] font-light text-[#1c1d1f]">Video</span>
                 </button>
 
                 <button
@@ -348,7 +348,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
                   className="w-24 h-24 border border-[#d1d7dc] bg-white hover:border-[#1c1d1f] transition-all flex flex-col items-center justify-center p-3 text-center rounded-sm opacity-60 cursor-not-allowed"
                 >
                   <FileText className="w-8 h-8 text-[#6a6f73] mb-2" />
-                  <span className="text-[11px] font-normal text-[#1c1d1f] leading-tight">Video &amp; Slide Mashup</span>
+                  <span className="text-[11px] font-light text-[#1c1d1f] leading-tight">Video &amp; Slide Mashup</span>
                 </button>
 
                 <button
@@ -357,7 +357,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
                   className="w-24 h-24 border border-[#d1d7dc] bg-white hover:border-[#1c1d1f] transition-all flex flex-col items-center justify-center p-3 text-center rounded-sm opacity-60 cursor-not-allowed"
                 >
                   <FileText className="w-8 h-8 text-[#6a6f73] mb-2" />
-                  <span className="text-[11px] font-normal text-[#1c1d1f]">Article</span>
+                  <span className="text-[11px] font-light text-[#1c1d1f]">Article</span>
                 </button>
               </div>
             </div>
@@ -367,7 +367,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
           {!showLinkedVideo && !uploadingFile && panelType === "add-video" && (
             <div>
               <div className="flex items-center justify-between border-b border-[#d1d7dc] pb-3 mb-4">
-                <span className="text-base font-normal text-[#1c1d1f]">Add Video</span>
+                <span className="text-lg font-light text-[#1c1d1f]">Add Video</span>
                 <button
                   onClick={() => {
                     if (hasVideo) {
@@ -386,13 +386,13 @@ const LectureItem = ({ lecture, courseId, index }) => {
               <div className="flex gap-6 border-b border-[#d1d7dc] mb-4">
                 <button
                   onClick={() => setVideoTab("upload")}
-                  className={`text-base font-normal pb-2 transition-all border-b-2 ${videoTab === "upload" ? "border-[#1c1d1f] text-[#1c1d1f]" : "border-transparent text-[#6a6f73] hover:text-[#1c1d1f]"}`}
+                  className={`text-lg font-light pb-2 transition-all border-b-2 ${videoTab === "upload" ? "border-[#1c1d1f] text-[#1c1d1f]" : "border-transparent text-[#6a6f73] hover:text-[#1c1d1f]"}`}
                 >
                   Upload Video
                 </button>
                 <button
                   onClick={() => setVideoTab("library")}
-                  className={`text-base font-normal pb-2 transition-all border-b-2 ${videoTab === "library" ? "border-[#1c1d1f] text-[#1c1d1f]" : "border-transparent text-[#6a6f73] hover:text-[#1c1d1f]"}`}
+                  className={`text-lg font-light pb-2 transition-all border-b-2 ${videoTab === "library" ? "border-[#1c1d1f] text-[#1c1d1f]" : "border-transparent text-[#6a6f73] hover:text-[#1c1d1f]"}`}
                 >
                   Add from library
                 </button>
@@ -402,7 +402,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
               {videoTab === "upload" && (
                 <div className="space-y-4">
                   <div className="flex items-center gap-3">
-                    <div className="flex-grow border border-[#6a6f73] px-3 py-2.5 bg-white text-base text-[#6a6f73] truncate">
+                    <div className="flex-grow border border-[#6a6f73] px-3 py-2.5 bg-white text-lg text-[#6a6f73] truncate">
                       {selectedFileToUpload ? selectedFileToUpload.name : "No file selected"}
                     </div>
                     <input
@@ -419,7 +419,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
                     />
                     <label
                       htmlFor={`file-input-${lecture._id}`}
-                      className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-normal text-base px-5 py-2.5 transition-colors cursor-pointer"
+                      className="border border-[#1c1d1f] hover:bg-[#f7f9fa] text-[#1c1d1f] font-light text-lg px-5 py-2.5 transition-colors cursor-pointer"
                     >
                       Select Video
                     </label>
@@ -427,13 +427,13 @@ const LectureItem = ({ lecture, courseId, index }) => {
                   {selectedFileToUpload && (
                     <button
                       onClick={handleStartSingleUpload}
-                      className="bg-[#5624d0] hover:bg-[#3b1990] text-white font-normal text-base px-5 py-2"
+                      className="bg-[#5624d0] hover:bg-[#3b1990] text-white font-light text-lg px-5 py-2"
                     >
                       Upload Video
                     </button>
                   )}
                   <p className="text-[10px] text-[#6a6f73]">
-                    <span className="font-normal">Note:</span> All files should be at least 720p and less than 4.0 GB.
+                    <span className="font-light">Note:</span> All files should be at least 720p and less than 4.0 GB.
                   </p>
                 </div>
               )}
@@ -448,16 +448,16 @@ const LectureItem = ({ lecture, courseId, index }) => {
                       placeholder="Search files by name"
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      className="w-full border border-[#6a6f73] pl-3 pr-10 py-2 text-base text-[#1c1d1f] outline-none bg-white focus:border-[#1c1d1f]"
+                      className="w-full border border-[#6a6f73] pl-3 pr-10 py-2 text-lg text-[#1c1d1f] outline-none bg-white focus:border-[#1c1d1f]"
                     />
                     <Search className="absolute right-3 top-2.5 w-4 h-4 text-[#6a6f73]" />
                   </div>
 
                   {/* Videos Table */}
                   <div className="border border-[#d1d7dc] bg-white overflow-hidden">
-                    <table className="w-full text-left text-base text-[#1c1d1f] border-collapse">
+                    <table className="w-full text-left text-lg text-[#1c1d1f] border-collapse">
                       <thead>
-                        <tr className="bg-slate-50 border-b border-[#d1d7dc] text-[#6a6f73] font-normal">
+                        <tr className="bg-slate-50 border-b border-[#d1d7dc] text-[#6a6f73] font-light">
                           <th className="p-3">Filename</th>
                           <th className="p-3">Type</th>
                           <th className="p-3">Status</th>
@@ -469,9 +469,9 @@ const LectureItem = ({ lecture, courseId, index }) => {
                         {filteredVideos.length > 0 ? (
                           filteredVideos.map((vid, idx) => (
                             <tr key={idx} className="border-b border-[#e4e8eb] hover:bg-slate-50 transition-colors">
-                              <td className="p-3 font-light truncate max-w-[200px]">{vid.filename}</td>
+                              <td className="p-3 font-extralight truncate max-w-[200px]">{vid.filename}</td>
                               <td className="p-3 text-[#6a6f73]">Video</td>
-                              <td className="p-3 text-green-600 font-normal flex items-center gap-1">
+                              <td className="p-3 text-green-600 font-light flex items-center gap-1">
                                 <CheckCircle className="w-3.5 h-3.5" /> Success
                               </td>
                               <td className="p-3 text-[#6a6f73]">
@@ -480,7 +480,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
                               <td className="p-3 text-right">
                                 <button
                                   onClick={() => handleLinkVideo(vid)}
-                                  className="text-[#5624d0] hover:underline font-normal"
+                                  className="text-[#5624d0] hover:underline font-light"
                                 >
                                   Select
                                 </button>
@@ -506,12 +506,12 @@ const LectureItem = ({ lecture, courseId, index }) => {
           {!showLinkedVideo && uploadingFile && (
             <div className="space-y-4">
               <div className="flex items-center justify-between border-b border-[#d1d7dc] pb-3">
-                <span className="text-base font-normal text-[#1c1d1f]">Video Status</span>
+                <span className="text-lg font-light text-[#1c1d1f]">Video Status</span>
               </div>
               <div className="border border-[#d1d7dc] bg-white overflow-hidden">
-                <table className="w-full text-left text-base text-[#1c1d1f] border-collapse">
+                <table className="w-full text-left text-lg text-[#1c1d1f] border-collapse">
                   <thead>
-                    <tr className="bg-slate-50 border-b border-[#d1d7dc] text-[#6a6f73] font-normal">
+                    <tr className="bg-slate-50 border-b border-[#d1d7dc] text-[#6a6f73] font-light">
                       <th className="p-3 w-1/3">Filename</th>
                       <th className="p-3">Type</th>
                       <th className="p-3 w-1/3">Status</th>
@@ -521,7 +521,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
                   </thead>
                   <tbody>
                     <tr className="border-b border-[#e4e8eb] hover:bg-slate-50 transition-colors">
-                      <td className="p-3 font-light truncate max-w-[200px]">{uploadingFile.name}</td>
+                      <td className="p-3 font-extralight truncate max-w-[200px]">{uploadingFile.name}</td>
                       <td className="p-3 text-[#6a6f73]">Video</td>
                       <td className="p-3">
                         {uploadingFile.status === "uploading" ? (
@@ -532,13 +532,13 @@ const LectureItem = ({ lecture, courseId, index }) => {
                             <span className="text-[10px] text-[#6a6f73] font-mono shrink-0">{uploadingFile.progress}%</span>
                           </div>
                         ) : (
-                          <span className="text-amber-600 font-normal">{uploadingFile.status}</span>
+                          <span className="text-amber-600 font-light">{uploadingFile.status}</span>
                         )}
                       </td>
                       <td className="p-3 text-[#6a6f73]">07/03/2026</td>
                       <td className="p-3 text-right">
                         {uploadingFile.status === "uploading" ? (
-                          <button onClick={handleCancelUpload} className="text-[#6a6f73] hover:text-red-500 font-normal p-1">
+                          <button onClick={handleCancelUpload} className="text-[#6a6f73] hover:text-red-500 font-light p-1">
                             <X className="w-4 h-4" />
                           </button>
                         ) : (
@@ -549,7 +549,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
                               setVideoTab("upload");
                               setPanelType("add-video");
                             }}
-                            className="text-[#5624d0] hover:underline font-normal"
+                            className="text-[#5624d0] hover:underline font-light"
                           >
                             Replace
                           </button>
@@ -561,7 +561,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
               </div>
 
               {uploadingFile.status === "Processing" && (
-                <p className="text-[11px] text-[#6a6f73] font-normal italic">
+                <p className="text-[11px] text-[#6a6f73] font-light italic">
                   Note: This video is still being processed. We will send you an email when it is ready.
                 </p>
               )}
@@ -570,19 +570,19 @@ const LectureItem = ({ lecture, courseId, index }) => {
               <div className="flex gap-2.5 pt-2">
                 <button
                   onClick={() => setShowDesc(!showDesc)}
-                  className={`border hover:bg-slate-50 text-[#1c1d1f] font-normal text-[10px] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1 ${showDesc ? "border-[#1c1d1f] bg-[#f7f9fa]" : "border-[#6a6f73]"}`}
+                  className={`border hover:bg-slate-50 text-[#1c1d1f] font-light text-[10px] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1 ${showDesc ? "border-[#1c1d1f] bg-[#f7f9fa]" : "border-[#6a6f73]"}`}
                 >
                   <Plus className="w-3 h-3" /> Description
                 </button>
                 <button
                   onClick={() => setShowResources(!showResources)}
-                  className={`border hover:bg-slate-50 text-[#1c1d1f] font-normal text-[10px] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1 ${showResources ? "border-[#1c1d1f] bg-[#f7f9fa]" : "border-[#6a6f73]"}`}
+                  className={`border hover:bg-slate-50 text-[#1c1d1f] font-light text-[10px] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1 ${showResources ? "border-[#1c1d1f] bg-[#f7f9fa]" : "border-[#6a6f73]"}`}
                 >
                   <Plus className="w-3 h-3" /> Resources
                 </button>
                 <button
                   onClick={() => setShowLab(!showLab)}
-                  className={`border hover:bg-slate-50 text-[#1c1d1f] font-normal text-[10px] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1 ${showLab ? "border-[#1c1d1f] bg-[#f7f9fa]" : "border-[#6a6f73]"}`}
+                  className={`border hover:bg-slate-50 text-[#1c1d1f] font-light text-[10px] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1 ${showLab ? "border-[#1c1d1f] bg-[#f7f9fa]" : "border-[#6a6f73]"}`}
                 >
                   <Plus className="w-3 h-3" /> Lab
                 </button>
@@ -591,9 +591,9 @@ const LectureItem = ({ lecture, courseId, index }) => {
               {/* description text editor (Photo 5 style) */}
               {showDesc && (
                 <div className="bg-white border border-[#d1d7dc] p-5 space-y-4">
-                  <h4 className="font-normal text-base text-[#1c1d1f]">Lecture Description</h4>
-                  <div className="flex gap-1.5 items-center border border-[#d1d7dc] bg-slate-50 p-1.5 text-base text-[#6a6f73]">
-                    <button className="font-normal px-2 py-0.5 hover:bg-white border hover:border-[#d1d7dc]">B</button>
+                  <h4 className="font-light text-lg text-[#1c1d1f]">Lecture Description</h4>
+                  <div className="flex gap-1.5 items-center border border-[#d1d7dc] bg-slate-50 p-1.5 text-lg text-[#6a6f73]">
+                    <button className="font-light px-2 py-0.5 hover:bg-white border hover:border-[#d1d7dc]">B</button>
                     <button className="italic px-2 py-0.5 hover:bg-white border hover:border-[#d1d7dc]">I</button>
                     <button className="px-2 py-0.5 hover:bg-white border hover:border-[#d1d7dc]">List</button>
                   </div>
@@ -602,11 +602,11 @@ const LectureItem = ({ lecture, courseId, index }) => {
                     value={lectureDesc}
                     onChange={(e) => setLectureDesc(e.target.value)}
                     placeholder="Add a description. Include what students will be able to do after completing the lecture."
-                    className="w-full border border-[#6a6f73] p-3 text-base text-[#1c1d1f] outline-none focus:border-[#1c1d1f]"
+                    className="w-full border border-[#6a6f73] p-3 text-lg text-[#1c1d1f] outline-none focus:border-[#1c1d1f]"
                   />
                   <div className="flex justify-end gap-2.5">
-                    <button onClick={() => setShowDesc(false)} className="text-base text-[#6a6f73] font-normal">Cancel</button>
-                    <button onClick={handleSaveDescription} className="bg-[#1c1d1f] text-white font-normal text-base px-5 py-2 hover:bg-black transition-colors">
+                    <button onClick={() => setShowDesc(false)} className="text-lg text-[#6a6f73] font-light">Cancel</button>
+                    <button onClick={handleSaveDescription} className="bg-[#1c1d1f] text-white font-light text-lg px-5 py-2 hover:bg-black transition-colors">
                       Save
                     </button>
                   </div>
@@ -641,7 +641,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
                 {/* Info details */}
                 <div className="flex-grow min-w-0 pr-4">
                   <div className="flex items-center gap-2">
-                    <span className="text-base font-normal text-[#1c1d1f] truncate max-w-[320px]">
+                    <span className="text-lg font-light text-[#1c1d1f] truncate max-w-[320px]">
                       {lecture.originalName || lecture.title}
                     </span>
                     <button
@@ -650,14 +650,14 @@ const LectureItem = ({ lecture, courseId, index }) => {
                         setPanelType("add-video");
                         setVideoTab("upload");
                       }}
-                      className="text-[#5624d0] hover:underline text-[11px] font-normal"
+                      className="text-[#5624d0] hover:underline text-[11px] font-light"
                     >
                       Edit Content
                     </button>
                     <span className="text-gray-300 text-[10px] select-none">|</span>
                     <Link
                       to={`/instructor/course/${courseId}/lecture/${lecture._id}`}
-                      className="text-[#5624d0] hover:underline text-[11px] font-normal"
+                      className="text-[#5624d0] hover:underline text-[11px] font-light"
                     >
                       Subtitles & Aligner
                     </Link>
@@ -672,14 +672,14 @@ const LectureItem = ({ lecture, courseId, index }) => {
                   <div className="relative">
                     <button
                       onClick={() => setShowPreviewDropdown(!showPreviewDropdown)}
-                      className="bg-[#a435f0] hover:bg-[#8710d8] text-white font-normal text-base py-2 px-4 flex items-center gap-1.5 transition-colors"
+                      className="bg-[#a435f0] hover:bg-[#8710d8] text-white font-light text-lg py-2 px-4 flex items-center gap-1.5 transition-colors"
                     >
                       Preview <ChevronDown className="w-3.5 h-3.5" />
                     </button>
                     {showPreviewDropdown && (
                       <>
                         <div className="fixed inset-0 z-40" onClick={() => setShowPreviewDropdown(false)} />
-                        <div className="absolute right-0 mt-1.5 w-40 bg-white border border-[#d1d7dc] shadow-lg z-50 py-1 font-sans text-base">
+                        <div className="absolute right-0 mt-1.5 w-40 bg-white border border-[#d1d7dc] shadow-lg z-50 py-1 font-sans text-lg">
                           <button
                             onClick={() => {
                               setShowPreviewDropdown(false);
@@ -705,7 +705,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
                   
                   {/* Downloadable Toggle */}
                   <div className="flex items-center gap-2 mt-1">
-                    <span className="text-base text-[#6a6f73]">Downloadable:</span>
+                    <span className="text-lg text-[#6a6f73]">Downloadable:</span>
                     <button
                       onClick={handleToggleDownloadable}
                       className={`w-9 h-5 rounded-full p-0.5 transition-colors ${lecture.downloadable ? "bg-[#5624d0]" : "bg-[#d1d7dc]"}`}
@@ -725,7 +725,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
                     setShowResources(false);
                     setShowLab(false);
                   }}
-                  className={`border hover:bg-slate-50 text-[#1c1d1f] font-normal text-[10px] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1 ${showDesc ? "border-[#1c1d1f] bg-[#f7f9fa]" : "border-[#6a6f73]"}`}
+                  className={`border hover:bg-slate-50 text-[#1c1d1f] font-light text-[10px] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1 ${showDesc ? "border-[#1c1d1f] bg-[#f7f9fa]" : "border-[#6a6f73]"}`}
                 >
                   <Plus className="w-3 h-3" /> Description
                 </button>
@@ -735,7 +735,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
                     setShowDesc(false);
                     setShowLab(false);
                   }}
-                  className={`border hover:bg-slate-50 text-[#1c1d1f] font-normal text-[10px] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1 ${showResources ? "border-[#1c1d1f] bg-[#f7f9fa]" : "border-[#6a6f73]"}`}
+                  className={`border hover:bg-slate-50 text-[#1c1d1f] font-light text-[10px] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1 ${showResources ? "border-[#1c1d1f] bg-[#f7f9fa]" : "border-[#6a6f73]"}`}
                 >
                   <Plus className="w-3 h-3" /> Resources
                 </button>
@@ -745,7 +745,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
                     setShowDesc(false);
                     setShowResources(false);
                   }}
-                  className={`border hover:bg-slate-50 text-[#1c1d1f] font-normal text-[10px] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1 ${showLab ? "border-[#1c1d1f] bg-[#f7f9fa]" : "border-[#6a6f73]"}`}
+                  className={`border hover:bg-slate-50 text-[#1c1d1f] font-light text-[10px] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1 ${showLab ? "border-[#1c1d1f] bg-[#f7f9fa]" : "border-[#6a6f73]"}`}
                 >
                   <Plus className="w-3 h-3" /> Lab
                 </button>
@@ -754,9 +754,9 @@ const LectureItem = ({ lecture, courseId, index }) => {
               {/* description text editor (Photo 5 style) */}
               {showDesc && (
                 <div className="bg-white border border-[#d1d7dc] p-5 space-y-4">
-                  <h4 className="font-normal text-base text-[#1c1d1f]">Lecture Description</h4>
-                  <div className="flex gap-1.5 items-center border border-[#d1d7dc] bg-slate-50 p-1.5 text-base text-[#6a6f73]">
-                    <button className="font-normal px-2 py-0.5 hover:bg-white border hover:border-[#d1d7dc]">B</button>
+                  <h4 className="font-light text-lg text-[#1c1d1f]">Lecture Description</h4>
+                  <div className="flex gap-1.5 items-center border border-[#d1d7dc] bg-slate-50 p-1.5 text-lg text-[#6a6f73]">
+                    <button className="font-light px-2 py-0.5 hover:bg-white border hover:border-[#d1d7dc]">B</button>
                     <button className="italic px-2 py-0.5 hover:bg-white border hover:border-[#d1d7dc]">I</button>
                     <button className="px-2 py-0.5 hover:bg-white border hover:border-[#d1d7dc]">List</button>
                   </div>
@@ -765,11 +765,11 @@ const LectureItem = ({ lecture, courseId, index }) => {
                     value={lectureDesc}
                     onChange={(e) => setLectureDesc(e.target.value)}
                     placeholder="Add a description. Include what students will be able to do after completing the lecture."
-                    className="w-full border border-[#6a6f73] p-3 text-base text-[#1c1d1f] outline-none focus:border-[#1c1d1f]"
+                    className="w-full border border-[#6a6f73] p-3 text-lg text-[#1c1d1f] outline-none focus:border-[#1c1d1f]"
                   />
                   <div className="flex justify-end gap-2.5">
-                    <button onClick={() => setShowDesc(false)} className="text-base text-[#6a6f73] font-normal">Cancel</button>
-                    <button onClick={handleSaveDescription} className="bg-[#1c1d1f] text-white font-normal text-base px-5 py-2 hover:bg-black transition-colors">
+                    <button onClick={() => setShowDesc(false)} className="text-lg text-[#6a6f73] font-light">Cancel</button>
+                    <button onClick={handleSaveDescription} className="bg-[#1c1d1f] text-white font-light text-lg px-5 py-2 hover:bg-black transition-colors">
                       Save
                     </button>
                   </div>
@@ -779,14 +779,14 @@ const LectureItem = ({ lecture, courseId, index }) => {
               {/* Resources Panel */}
               {showResources && (
                 <div className="bg-white border border-[#d1d7dc] p-5 space-y-4">
-                  <h4 className="font-normal text-base text-[#1c1d1f]">Lecture Resources</h4>
+                  <h4 className="font-light text-lg text-[#1c1d1f]">Lecture Resources</h4>
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
                       placeholder="Add external link (e.g. Github Repo, PDF URL)"
                       value={resourceLink}
                       onChange={(e) => setResourceLink(e.target.value)}
-                      className="flex-grow border border-[#6a6f73] px-3 py-2 text-base text-[#1c1d1f] outline-none focus:border-[#1c1d1f]"
+                      className="flex-grow border border-[#6a6f73] px-3 py-2 text-lg text-[#1c1d1f] outline-none focus:border-[#1c1d1f]"
                     />
                     <button
                       onClick={() => {
@@ -795,7 +795,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
                         setShowResources(false);
                         setResourceLink("");
                       }}
-                      className="bg-[#1c1d1f] text-white font-normal text-base px-4 py-2 hover:bg-black transition-colors shrink-0"
+                      className="bg-[#1c1d1f] text-white font-light text-lg px-4 py-2 hover:bg-black transition-colors shrink-0"
                     >
                       Add Link
                     </button>
@@ -806,14 +806,14 @@ const LectureItem = ({ lecture, courseId, index }) => {
               {/* Lab Panel */}
               {showLab && (
                 <div className="bg-white border border-[#d1d7dc] p-5 space-y-4">
-                  <h4 className="font-normal text-base text-[#1c1d1f]">Lab Configuration</h4>
+                  <h4 className="font-light text-lg text-[#1c1d1f]">Lab Configuration</h4>
                   <div className="flex items-center gap-2">
                     <input
                       type="text"
                       placeholder="Config workspace labs docker image / setup URL"
                       value={labConfig}
                       onChange={(e) => setLabConfig(e.target.value)}
-                      className="flex-grow border border-[#6a6f73] px-3 py-2 text-base text-[#1c1d1f] outline-none focus:border-[#1c1d1f]"
+                      className="flex-grow border border-[#6a6f73] px-3 py-2 text-lg text-[#1c1d1f] outline-none focus:border-[#1c1d1f]"
                     />
                     <button
                       onClick={() => {
@@ -822,7 +822,7 @@ const LectureItem = ({ lecture, courseId, index }) => {
                         setShowLab(false);
                         setLabConfig("");
                       }}
-                      className="bg-[#1c1d1f] text-white font-normal text-base px-4 py-2 hover:bg-black transition-colors shrink-0"
+                      className="bg-[#1c1d1f] text-white font-light text-lg px-4 py-2 hover:bg-black transition-colors shrink-0"
                     >
                       Save Lab
                     </button>

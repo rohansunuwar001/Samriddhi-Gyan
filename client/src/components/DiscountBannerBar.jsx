@@ -45,7 +45,7 @@ const DiscountBannerBar = () => {
           {parts[0]}
           <Link
             to={linkUrl}
-            className="underline font-normal transition-all opacity-90 hover:opacity-100 mx-1"
+            className="underline font-light transition-all opacity-90 hover:opacity-100 mx-1"
           >
             {linkText}
           </Link>
@@ -60,7 +60,7 @@ const DiscountBannerBar = () => {
         {text}{" "}
         <Link
           to={linkUrl}
-          className="underline font-normal transition-all opacity-90 hover:opacity-100 ml-1"
+          className="underline font-light transition-all opacity-90 hover:opacity-100 ml-1"
         >
           {linkText}
         </Link>
@@ -70,13 +70,13 @@ const DiscountBannerBar = () => {
 
   return (
     <div
-      className="relative w-full flex items-center justify-center text-center py-2.5 px-10 text-sm sm:text-base transition-all duration-300 shadow-sm z-45"
+      className="relative w-full flex items-center justify-center text-center py-2.5 px-10 text-base sm:text-lg transition-all duration-300 shadow-sm z-45"
       style={{
         backgroundColor: banner.bgColor || "#dbf5f6",
         color: banner.textColor || "#1c1d1f"
       }}
     >
-      <div className="max-w-6xl mx-auto flex items-center justify-center font-light">
+      <div className="max-w-6xl mx-auto flex items-center justify-center font-extralight">
         {renderContent()}
       </div>
 

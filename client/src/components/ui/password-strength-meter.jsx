@@ -45,8 +45,8 @@ export const PasswordStrengthMeter = ({ password }) => {
         ))}
       </div>
       {password && (
-        <p className="text-sm text-gray-500">
-          Strength: <span className="font-light">{strengthText}</span>
+        <p className="text-base text-gray-500">
+          Strength: <span className="font-extralight">{strengthText}</span>
         </p>
       )}
     </div>

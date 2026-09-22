@@ -45,7 +45,7 @@ const TopicPage = () => {
   const { isAuthenticated } = useSelector((store) => store.auth);
 
   // Fetch API data
-  const { data, isLoading, isError, refetch } = useGetTopicBySlugQuery(topicSlug);
+  const { data, isLoading, isError, error, refetch } = useGetTopicBySlugQuery(topicSlug);
   const { data: categoryData } = useGetAllCategoriesQuery();
   const { data: cartData } = useGetCartQuery(undefined, { skip: !isAuthenticated });
   const [addToCart] = useAddToCartMutation();
@@ -103,8 +103,7 @@ const TopicPage = () => {
     // Filter by Rating
     if (selectedRating > 0) {
       list = list.filter((c) => {
-        const ratings = c.ratings || [];
-        const avg = ratings.length ? ratings.reduce((s, r) => s + r, 0) / ratings.length : 4.0;
+        const avg = c.avgRating !== undefined ? c.avgRating : (c.ratings?.length ? c.ratings.reduce((s, r) => s + r, 0) / c.ratings.length : 0);
         return avg >= selectedRating;
       });
     }
@@ -141,15 +140,18 @@ const TopicPage = () => {
     );
     const course1 = sorted[0];
     const course2 = sorted[1];
-    const originalSum = (course1.price?.original || course1.price?.current || 2999) + 
-                         (course2.price?.original || course2.price?.current || 2999);
-    const currentSum = (course1.price?.current || 1999) + (course2.price?.current || 1999);
+    const p1 = getCourseNumericPrice(course1);
+    const p2 = getCourseNumericPrice(course2);
+    const orig1 = course1.price?.original || p1;
+    const orig2 = course2.price?.original || p2;
+    const originalSum = orig1 + orig2;
+    const currentSum = p1 + p2;
     
     return {
       courses: [course1, course2],
       originalSum,
       currentSum,
-      discountPercentage: Math.round(((originalSum - currentSum) / originalSum) * 100),
+      discountPercentage: originalSum > currentSum ? Math.round(((originalSum - currentSum) / originalSum) * 100) : 0,
     };
   }, [courses]);
 
@@ -176,55 +178,37 @@ const TopicPage = () => {
     }
   };
 
-  // Dynamic list of instructors in this topic
+  // Dynamic list of real instructors in this topic
   const instructors = useMemo(() => {
     const map = {};
     courses.forEach((c) => {
       if (c.creator?._id) {
-        map[c.creator._id] = c.creator;
+        if (!map[c.creator._id]) {
+          map[c.creator._id] = {
+            ...c.creator,
+            coursesCount: 1,
+          };
+        } else {
+          map[c.creator._id].coursesCount++;
+        }
       }
     });
-    const list = Object.values(map);
-    if (list.length > 0) return list.slice(0, 4);
-    // Fallback standard high-quality instructors if empty
-    return [
-      { name: "Brad Traversy", photoUrl: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=100&q=80", headline: "Expert Web Developer & Educator" },
-      { name: "Colt Steele", photoUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100&q=80", headline: "Senior Coding Bootcamp Coach" },
-      { name: "Jonas Schmedtmann", photoUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100&q=80", headline: "Fullstack JS Architect" },
-      { name: "Mosh Hamedani", photoUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100&q=80", headline: "Software Engineer & Author" }
-    ];
+    return Object.values(map);
   }, [courses]);
 
-  // Fallback high-quality reviews if database query is empty
+  // Real reviews from database
   const reviews = useMemo(() => {
-    if (dbReviews.length > 0) return dbReviews;
-    return [
-      {
-        _id: "r1",
-        rating: 5,
-        comment: `Excellent topic coverage. The concepts are explained with great real-world examples. Essential for frontend developers!`,
-        user: { name: "Ramesh Thapa", photoUrl: "" },
-        course: { title: `${topic?.name || "JavaScript"} Masterclass` },
-        createdAt: new Date().toISOString()
-      },
-      {
-        _id: "r2",
-        rating: 5,
-        comment: `Very practical. The hands-on coding exercises really helped solidify my understanding. Highly recommend this path.`,
-        user: { name: "Sita Sharma", photoUrl: "" },
-        course: { title: `Modern ${topic?.name || "JavaScript"} from Beginning` },
-        createdAt: new Date().toISOString()
-      },
-      {
-        _id: "r3",
-        rating: 4.8,
-        comment: `Clear explanations, good pacing. The certification path gives a highly structured way to level up.`,
-        user: { name: "Anish Sunuwar", photoUrl: "" },
-        course: { title: `${topic?.name || "JavaScript"} and Web Dev Essentials` },
-        createdAt: new Date().toISOString()
-      }
-    ];
-  }, [dbReviews, topic]);
+    return Array.isArray(dbReviews) ? dbReviews : [];
+  }, [dbReviews]);
+
+  // Real practice / hands-on courses
+  const practiceCourses = useMemo(() => {
+    return courses.filter(
+      (c) =>
+        (c.courseIncludes?.codingExercises > 0) ||
+        /exam|practice|test|quiz|assessment/i.test(c.title || "")
+    );
+  }, [courses]);
 
   const toggleLevelFilter = (level) => {
     setSelectedLevels((prev) =>
@@ -238,12 +222,29 @@ const TopicPage = () => {
 
   if (isError || !topic) {
     return (
-      <div className="max-w-md mx-auto py-24 text-center space-y-4">
-        <h2 className="text-3xl font-normal text-red-600">Failed to load topic details</h2>
-        <p className="text-gray-600">The topic you are looking for might have been removed or doesn't exist.</p>
-        <Button onClick={refetch} variant="outline" className="gap-2">
-          <RefreshCw className="w-4 h-4" /> Retry
-        </Button>
+      <div className="min-h-[70vh] flex flex-col items-center justify-center px-6 py-20 text-center bg-white">
+        <div className="max-w-lg mx-auto space-y-6">
+          <div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-red-50 text-red-500 mb-2">
+            <span className="text-4xl font-extralight tracking-widest">404</span>
+          </div>
+          <h1 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900">
+            Page Not Found
+          </h1>
+          <p className="text-lg text-slate-600 leading-relaxed font-light">
+            {error?.data?.message ||
+              "The page or topic you are looking for doesn't exist or is not directly accessible. Parent and child categories do not have dedicated topic pages."}
+          </p>
+          <div className="pt-4 flex items-center justify-center gap-4 flex-wrap">
+            <Button asChild size="lg" className="bg-[#a435f0] hover:bg-[#8710d8] text-white">
+              <Link to="/" className="flex items-center gap-2">
+                <Compass className="w-4 h-4" /> Go to Homepage
+              </Link>
+            </Button>
+            <Button asChild variant="outline" size="lg">
+              <Link to="/courses">Explore All Courses</Link>
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }
@@ -262,43 +263,43 @@ const TopicPage = () => {
         <header className="bg-[#1c1d1f] text-white py-12 px-6 sm:px-12 lg:px-16">
           <div className="max-w-7xl mx-auto flex flex-col md:flex-row gap-8 items-center justify-between">
             <div className="space-y-4 flex-1">
-              <nav className="text-sm font-semibold text-purple-400 flex items-center gap-2 flex-wrap">
+              <nav className="text-base font-medium text-purple-400 flex items-center gap-2 flex-wrap">
                 <Link to="/" className="hover:underline flex items-center gap-1">
                   <Compass className="w-4 h-4" /> Home
                 </Link>
                 {certification.categoryFilterParent?.name && (
                   <>
                     <span>/</span>
-                    <Link to={`/topic/${certification.categoryFilterParent.slug || '#'}`} className="hover:underline capitalize">
+                    <span className="text-slate-300 capitalize">
                       {certification.categoryFilterParent.name}
-                    </Link>
+                    </span>
                   </>
                 )}
                 {certification.categoryFilterChild?.name && (
                   <>
                     <span>/</span>
-                    <Link to={`/topic/${certification.categoryFilterChild.slug || '#'}`} className="hover:underline capitalize">
+                    <span className="text-slate-300 capitalize">
                       {certification.categoryFilterChild.name}
-                    </Link>
+                    </span>
                   </>
                 )}
                 <span>/</span>
                 <span className="text-white capitalize">{certification.issuer?.name}</span>
               </nav>
-              <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight">
+              <h1 className="text-5xl sm:text-6xl font-bold tracking-tight">
                 {certification.name}
               </h1>
-              <p className="text-lg text-slate-300 max-w-4xl leading-relaxed">
+              <p className="text-xl text-slate-300 max-w-4xl leading-relaxed">
                 {certification.description || `Prepare for the official certification. Earn your verified badge and credentials with curated courses and practice exams.`}
               </p>
-              <div className="flex items-center gap-6 text-sm text-slate-400">
+              <div className="flex items-center gap-6 text-base text-slate-400">
                 <span className="flex items-center gap-1.5">
                   <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <span className="text-yellow-400 font-bold">{topic.rating !== undefined ? topic.rating.toFixed(1) : "4.5"}</span> rating
+                  <span className="text-yellow-400 font-semibold">{topic.rating !== undefined ? topic.rating.toFixed(1) : "4.5"}</span> rating
                 </span>
                 <span className="flex items-center gap-1.5">
                   <Users className="w-4 h-4 text-purple-400" />
-                  <span className="text-white font-semibold">{(topic.numLearners ?? 0).toLocaleString()}</span> candidates
+                  <span className="text-white font-medium">{(topic.numLearners ?? 0).toLocaleString()}</span> candidates
                 </span>
               </div>
             </div>
@@ -325,7 +326,7 @@ const TopicPage = () => {
             {/* Left/Middle Column - Curated prep & course suggestions */}
             <div className="lg:col-span-2 space-y-10">
               <div>
-                <h2 className="text-2xl font-bold text-slate-800 mb-6">Get Certified with Top Prep Courses</h2>
+                <h2 className="text-3xl font-semibold text-slate-800 mb-6">Get Certified with Top Prep Courses</h2>
                 {courses.length === 0 ? (
                   <div className="p-8 border border-dashed rounded-3xl text-center text-slate-400">
                     No courses matching this certification's categories are currently available.
@@ -347,17 +348,17 @@ const TopicPage = () => {
                             />
                           </div>
                           <div className="p-5 space-y-2">
-                            <h4 className="font-bold text-slate-800 text-sm line-clamp-2 leading-snug">
+                            <h4 className="font-semibold text-slate-800 text-base line-clamp-2 leading-snug">
                               {c.title}
                             </h4>
-                            <p className="text-xs text-slate-400">By {c.creator?.name || "Instructor"}</p>
+                            <p className="text-sm text-slate-400">By {c.creator?.name || "Instructor"}</p>
                           </div>
                         </div>
-                        <div className="p-5 pt-0 flex justify-between items-center text-xs border-t mt-auto">
-                          <span className="font-extrabold text-purple-700 text-sm">
+                        <div className="p-5 pt-0 flex justify-between items-center text-sm border-t mt-auto">
+                          <span className="font-bold text-purple-700 text-base">
                             {getCourseNumericPrice(c) > 0 ? `Rs ${getCourseNumericPrice(c)}` : "Free"}
                           </span>
-                          <span className="text-slate-400 font-semibold">{c.enrolledStudents?.length || 0} students</span>
+                          <span className="text-slate-400 font-medium">{c.enrolledStudents?.length || 0} students</span>
                         </div>
                       </div>
                     ))}
@@ -374,18 +375,18 @@ const TopicPage = () => {
                     className="w-32 aspect-video object-cover rounded-xl border border-purple-100 shrink-0"
                   />
                   <div className="space-y-2 text-center md:text-left">
-                    <span className="px-2.5 py-0.5 text-[10px] font-bold text-purple-700 bg-purple-100 rounded-full uppercase tracking-wider">
+                    <span className="px-2.5 py-0.5 text-[10px] font-semibold text-purple-700 bg-purple-100 rounded-full uppercase tracking-wider">
                       Highly Rated Course
                     </span>
-                    <h3 className="font-bold text-slate-800 text-base leading-tight">
+                    <h3 className="font-semibold text-slate-800 text-lg leading-tight">
                       {topCourse.title}
                     </h3>
-                    <p className="text-xs text-slate-500">
+                    <p className="text-sm text-slate-500">
                       Highest rated course in this certification preparation path. Start with this course for optimal preparation.
                     </p>
                     <button
                       onClick={() => navigate(`/course-detail/${topCourse._id}`)}
-                      className="text-xs font-bold text-purple-700 hover:text-purple-800 inline-flex items-center gap-1 mt-1"
+                      className="text-sm font-semibold text-purple-700 hover:text-purple-800 inline-flex items-center gap-1 mt-1"
                     >
                       Start Learning Now <ChevronRight size={14} />
                     </button>
@@ -398,55 +399,55 @@ const TopicPage = () => {
             <div>
               <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm sticky top-28 space-y-6">
                 <div>
-                  <h3 className="font-bold text-slate-800 text-lg mb-2">Practice Exam & Voucher</h3>
-                  <p className="text-xs text-slate-400 leading-relaxed">
+                  <h3 className="font-semibold text-slate-800 text-xl mb-2">Practice Exam & Voucher</h3>
+                  <p className="text-sm text-slate-400 leading-relaxed">
                     Access the practice exams and register for the certification. Complete prep courses to unlock the test environments.
                   </p>
                 </div>
 
-                <div className="space-y-3.5 text-xs text-slate-600">
+                <div className="space-y-3.5 text-sm text-slate-600">
                   <div className="flex justify-between border-b pb-2">
-                    <span className="flex items-center gap-1.5 font-medium">
+                    <span className="flex items-center gap-1.5 font-normal">
                       <HelpCircle size={14} className="text-purple-500" /> Exam Price
                     </span>
-                    <span className="font-bold text-slate-800">Rs {certification.examPrice || 0}</span>
+                    <span className="font-semibold text-slate-800">Rs {certification.examPrice || 0}</span>
                   </div>
                   <div className="flex justify-between border-b pb-2">
-                    <span className="flex items-center gap-1.5 font-medium">
+                    <span className="flex items-center gap-1.5 font-normal">
                       <Clock size={14} className="text-purple-500" /> Duration
                     </span>
-                    <span className="font-bold text-slate-800">{certification.duration || 90} mins</span>
+                    <span className="font-semibold text-slate-800">{certification.duration || 90} mins</span>
                   </div>
                   <div className="flex justify-between border-b pb-2">
-                    <span className="flex items-center gap-1.5 font-medium">
+                    <span className="flex items-center gap-1.5 font-normal">
                       <Star className="text-purple-500" size={14} /> Passing Grade
                     </span>
-                    <span className="font-bold text-slate-800">{certification.passingScore || 70}% Score</span>
+                    <span className="font-semibold text-slate-800">{certification.passingScore || 70}% Score</span>
                   </div>
                   <div className="flex justify-between border-b pb-2">
-                    <span className="flex items-center gap-1.5 font-medium">
+                    <span className="flex items-center gap-1.5 font-normal">
                       <Award className="text-purple-500" size={14} /> Total / Pass Marks
                     </span>
-                    <span className="font-bold text-slate-800">{certification.totalMarks || 100} / {certification.passMarks || 40} Marks</span>
+                    <span className="font-semibold text-slate-800">{certification.totalMarks || 100} / {certification.passMarks || 40} Marks</span>
                   </div>
                   <div className="flex justify-between border-b pb-2">
-                    <span className="flex items-center gap-1.5 font-medium">
+                    <span className="flex items-center gap-1.5 font-normal">
                       <Award className="text-purple-500" size={14} /> Grades
                     </span>
-                    <span className="font-bold text-slate-800">{certification.grades || "A, B, C, Pass"}</span>
+                    <span className="font-semibold text-slate-800">{certification.grades || "A, B, C, Pass"}</span>
                   </div>
                   <div className="flex justify-between pb-1">
-                    <span className="flex items-center gap-1.5 font-medium">
+                    <span className="flex items-center gap-1.5 font-normal">
                       <DollarSign className="text-purple-500" size={14} /> Registry Fee
                     </span>
-                    <span className="font-bold text-slate-800">Rs {certification.certificatePrice || 0}</span>
+                    <span className="font-semibold text-slate-800">Rs {certification.certificatePrice || 0}</span>
                   </div>
                 </div>
 
                 <div className="pt-2">
                   <button
                     onClick={() => navigate(`/certification/${certification.slug}`)}
-                    className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-2xl text-xs font-bold tracking-wide transition-all shadow-md"
+                    className="w-full flex items-center justify-center gap-2 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-2xl text-sm font-semibold tracking-wide transition-all shadow-md"
                   >
                     Go to official Certification Portal <ArrowRight size={14} />
                   </button>
@@ -465,18 +466,21 @@ const TopicPage = () => {
       <header className="bg-[#1c1d1f] text-white py-12 px-6 sm:px-12 lg:px-16">
         <div className="max-w-7xl mx-auto space-y-6">
           {/* Breadcrumbs */}
-          <nav className="text-base font-normal text-[#c084fc] flex items-center gap-2 flex-wrap">
+          <nav className="text-lg font-light text-[#c084fc] flex items-center gap-2 flex-wrap">
             <Link to="/" className="hover:underline flex items-center gap-1">
               <Compass className="w-4 h-4" /> Home
             </Link>
-            {breadcrumbs.map((crumb, idx) => (
-              <React.Fragment key={crumb._id}>
-                <span>/</span>
-                <Link to={`/topic/${crumb.slug}`} className="hover:underline capitalize">
-                  {crumb.name}
-                </Link>
-              </React.Fragment>
-            ))}
+            {breadcrumbs.map((crumb, idx) => {
+              const isLast = idx === breadcrumbs.length - 1;
+              return (
+                <React.Fragment key={crumb._id}>
+                  <span>/</span>
+                  <span className={isLast ? "text-white font-normal capitalize" : "text-[#c084fc]/80 capitalize"}>
+                    {crumb.name}
+                  </span>
+                </React.Fragment>
+              );
+            })}
           </nav>
 
           <div className="flex flex-col lg:flex-row gap-8 items-start lg:items-center">
@@ -492,54 +496,63 @@ const TopicPage = () => {
             )}
 
             <div className="space-y-4 flex-1">
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-normal tracking-tight">
+              <h1 className="text-5xl sm:text-6xl lg:text-7xl font-light tracking-tight">
                 {topic.bannerTitle || `${topic.name} Courses`}
               </h1>
-              <p className="text-lg sm:text-xl text-gray-300 max-w-4xl leading-relaxed">
+              <p className="text-xl sm:text-2xl text-gray-300 max-w-4xl leading-relaxed">
                 {topic.description || `Explore top-rated online courses in ${topic.name}. Learn from expert instructors and achieve your professional goals.`}
               </p>
 
               {/* Statistics Grid */}
-              <div className="flex flex-wrap gap-x-8 gap-y-3 pt-2 text-base text-gray-300">
-                <div className="flex items-center gap-1.5 font-normal">
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <span className="text-yellow-400 text-lg">
-                    {topic.rating !== undefined && topic.rating !== null ? topic.rating.toFixed(1) : "4.5"}
-                  </span>
-                  <span>rating</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <Users className="w-4 h-4 text-purple-400" />
-                  <span className="font-normal text-white">{(topic.numLearners ?? 0).toLocaleString()}</span>
-                  <span>learners</span>
-                </div>
-                <div className="flex items-center gap-1.5">
-                  <CheckCircle className="w-4 h-4 text-green-400" />
-                  <span className="font-normal text-white">
-                    {topic.handsOnPracticeCount > 0 ? (topic.handsOnPracticeCount ?? 0).toLocaleString() : "4,883"}
-                  </span>
-                  <span>hands-on practice</span>
-                </div>
+              <div className="flex flex-wrap gap-x-8 gap-y-3 pt-2 text-lg text-gray-300">
+                {topic.rating > 0 && (
+                  <div className="flex items-center gap-1.5 font-light">
+                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                    <span className="text-yellow-400 text-xl">
+                      {topic.rating.toFixed(1)}
+                    </span>
+                    <span>rating</span>
+                  </div>
+                )}
+                {topic.numLearners > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <Users className="w-4 h-4 text-purple-400" />
+                    <span className="font-light text-white">{topic.numLearners.toLocaleString()}</span>
+                    <span>learners</span>
+                  </div>
+                )}
+                {topic.handsOnPracticeCount > 0 && (
+                  <div className="flex items-center gap-1.5">
+                    <CheckCircle className="w-4 h-4 text-green-400" />
+                    <span className="font-light text-white">
+                      {topic.handsOnPracticeCount.toLocaleString()}
+                    </span>
+                    <span>hands-on practice</span>
+                  </div>
+                )}
                 <div className="flex items-center gap-1.5">
                   <Award className="w-4 h-4 text-blue-400" />
-                  <span className="font-normal text-white">{courses.length}</span>
-                  <span>courses available</span>
+                  <span className="font-light text-white">{courses.length}</span>
+                  <span>{courses.length === 1 ? 'course' : 'courses'} available</span>
                 </div>
               </div>
 
-              {/* Related pills hierarchy */}
-              {breadcrumbs.length > 0 && (
-                <div className="flex items-center gap-2 pt-2 text-sm flex-wrap">
-                  <span className="text-slate-400 uppercase tracking-wider font-normal">Related</span>
-                  {breadcrumbs.map((crumb) => (
-                    <Link
-                      key={crumb._id}
-                      to={`/topic/${crumb.slug}`}
-                      className="px-3 py-1 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-white font-normal transition-colors"
-                    >
-                      {crumb.name}
-                    </Link>
-                  ))}
+              {/* Related pills */}
+              {topic.relatedTopics && topic.relatedTopics.length > 0 && (
+                <div className="flex items-center gap-2 pt-2 text-base flex-wrap">
+                  <span className="text-slate-400 uppercase tracking-wider font-light">Related</span>
+                  {topic.relatedTopics.map((rel, rIdx) => {
+                    const relSlug = typeof rel === "string" ? rel.toLowerCase().replace(/[^a-z0-9]+/g, "-") : "";
+                    return (
+                      <Link
+                        key={`rel-${rIdx}`}
+                        to={`/topic/${relSlug}`}
+                        className="px-3 py-1 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-white font-light transition-colors"
+                      >
+                        {rel}
+                      </Link>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -556,17 +569,17 @@ const TopicPage = () => {
             <div className="space-y-3">
               <div className="flex items-center gap-2">
                 <GraduationCap className="h-6 w-6 text-[#13c2c2]" />
-                <span className="text-sm font-normal uppercase tracking-widest text-[#13c2c2]">Professional Certificate</span>
+                <span className="text-base font-light uppercase tracking-widest text-[#13c2c2]">Professional Certificate</span>
               </div>
-              <h2 className="text-3xl sm:text-4xl font-normal tracking-tight leading-snug">
+              <h2 className="text-4xl sm:text-5xl font-light tracking-tight leading-snug">
                 {topic.bannerTitle || `${topic.name} Professional Certificate`}
               </h2>
-              <p className="text-slate-300 text-base leading-relaxed">
+              <p className="text-slate-300 text-lg leading-relaxed">
                 {topic.description || `Build job-ready fluency in ${topic.name} and get certified. Master fundamental concepts, complete real-world project portfolios, and earn an industry-recognized credential.`}
               </p>
             </div>
             <div className="space-y-4">
-              <div className="flex items-center gap-3 text-sm text-slate-300 flex-wrap">
+              <div className="flex items-center gap-3 text-base text-slate-300 flex-wrap">
                 {topic.rating > 0 && (
                   <>
                     <span className="flex items-center gap-1"><Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" /> {topic.rating.toFixed(1)}</span>
@@ -583,7 +596,7 @@ const TopicPage = () => {
                   <span>{topic.numLearners.toLocaleString()} learners</span>
                 )}
               </div>
-              <Button onClick={() => navigate("/subscribe")} className="bg-[#a435f0] hover:bg-[#8d24d9] text-white font-normal h-12 w-full max-w-[240px] rounded-lg">
+              <Button onClick={() => navigate("/subscribe")} className="bg-[#a435f0] hover:bg-[#8d24d9] text-white font-light h-12 w-full max-w-[240px] rounded-lg">
                 Learn more
               </Button>
             </div>
@@ -592,7 +605,7 @@ const TopicPage = () => {
           {/* Right Card Track List — Real courses */}
           <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-slate-700/50 scrollbar-track-transparent select-none items-stretch">
             {courses.length === 0 ? (
-              <div className="flex items-center justify-center w-full text-slate-400 text-sm py-8">
+              <div className="flex items-center justify-center w-full text-slate-400 text-base py-8">
                 No courses found for this topic yet.
               </div>
             ) : (
@@ -604,8 +617,8 @@ const TopicPage = () => {
                 >
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="text-[10px] uppercase font-normal text-purple-600 bg-purple-50 px-2 py-0.5 rounded">Course {idx + 1} of {courses.length}</span>
-                      <span className="text-[10px] text-slate-400 font-normal">{course.level || "All Levels"}</span>
+                      <span className="text-[10px] uppercase font-light text-purple-600 bg-purple-50 px-2 py-0.5 rounded">Course {idx + 1} of {courses.length}</span>
+                      <span className="text-[10px] text-slate-400 font-light">{course.level || "All Levels"}</span>
                     </div>
                     {course.thumbnail && (
                       <img
@@ -614,14 +627,14 @@ const TopicPage = () => {
                         className="w-full h-24 object-cover rounded-lg mt-1"
                       />
                     )}
-                    <h4 className="font-normal text-sm text-slate-800 leading-snug line-clamp-3 pt-1">
+                    <h4 className="font-light text-base text-slate-800 leading-snug line-clamp-3 pt-1">
                       {course.title}
                     </h4>
                     <p className="text-[10px] text-slate-400">By {course.creator?.name || "Instructor"}</p>
                   </div>
                   <div className="flex items-center gap-2 pt-4">
-                    <span className="h-6 w-6 rounded-full bg-slate-100 flex items-center justify-center text-sm font-normal text-slate-600">{idx + 1}</span>
-                    <span className="text-xs font-normal text-slate-500">Core requirement</span>
+                    <span className="h-6 w-6 rounded-full bg-slate-100 flex items-center justify-center text-base font-light text-slate-600">{idx + 1}</span>
+                    <span className="text-sm font-light text-slate-500">Core requirement</span>
                   </div>
                 </div>
               ))
@@ -633,10 +646,10 @@ const TopicPage = () => {
         {bundle && (
           <section className="bg-slate-50 border border-slate-200/60 rounded-2xl p-6 sm:p-8 space-y-6">
             <div>
-              <h2 className="text-3xl sm:text-4xl font-normal tracking-tight text-slate-900">
+              <h2 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900">
                 Looking to advance your skills in {topic.name}? We've got you.
               </h2>
-              <p className="text-slate-500 mt-1 text-base sm:text-lg">
+              <p className="text-slate-500 mt-1 text-lg sm:text-xl">
                 Get everything you need to reach your goals in one convenient bundle.
               </p>
             </div>
@@ -644,18 +657,18 @@ const TopicPage = () => {
             <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] gap-8 items-center">
               {/* Bundle Checkout details */}
               <div className="space-y-4">
-                <ul className="space-y-2.5 text-base font-normal text-slate-700">
-                  <li className="flex items-center gap-2"><Check className="h-4.5 w-4.5 text-green-600 font-normal" /> Top-rated courses</li>
-                  <li className="flex items-center gap-2"><Check className="h-4.5 w-4.5 text-green-600 font-normal" /> Popular with learners just like you</li>
-                  <li className="flex items-center gap-2"><Check className="h-4.5 w-4.5 text-green-600 font-normal" /> Guidance from real-world experts</li>
+                <ul className="space-y-2.5 text-lg font-light text-slate-700">
+                  <li className="flex items-center gap-2"><Check className="h-4.5 w-4.5 text-green-600 font-light" /> Top-rated courses</li>
+                  <li className="flex items-center gap-2"><Check className="h-4.5 w-4.5 text-green-600 font-light" /> Popular with learners just like you</li>
+                  <li className="flex items-center gap-2"><Check className="h-4.5 w-4.5 text-green-600 font-light" /> Guidance from real-world experts</li>
                 </ul>
                 <div className="border-t border-slate-200 pt-4 space-y-2">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-3xl font-normal text-[#a435f0]">Rs {bundle.currentSum}</span>
-                    <span className="text-slate-400 line-through text-base">Rs {bundle.originalSum}</span>
-                    <span className="text-sm bg-red-100 text-red-800 font-normal px-1.5 py-0.5 rounded">{bundle.discountPercentage}% OFF</span>
+                    <span className="text-4xl font-light text-[#a435f0]">Rs {bundle.currentSum}</span>
+                    <span className="text-slate-400 line-through text-lg">Rs {bundle.originalSum}</span>
+                    <span className="text-base bg-red-100 text-red-800 font-light px-1.5 py-0.5 rounded">{bundle.discountPercentage}% OFF</span>
                   </div>
-                  <Button onClick={handleAddBundleToCart} className="bg-[#a435f0] hover:bg-[#8720cf] text-white font-normal h-12 w-full">
+                  <Button onClick={handleAddBundleToCart} className="bg-[#a435f0] hover:bg-[#8720cf] text-white font-light h-12 w-full">
                     Add all to cart
                   </Button>
                 </div>
@@ -668,18 +681,23 @@ const TopicPage = () => {
                     {idx > 0 && <Plus className="h-6 w-6 text-slate-400 shrink-0" />}
                     <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm p-4 flex flex-col justify-between w-full max-w-[280px] hover:shadow-md transition-shadow">
                       <img src={course.thumbnail} className="w-full h-32 object-cover rounded-lg" alt={course.title} />
-                      <h4 className="font-normal text-base text-slate-800 leading-snug line-clamp-2 mt-3 min-h-[40px]">
+                      <h4 className="font-light text-lg text-slate-800 leading-snug line-clamp-2 mt-3 min-h-[40px]">
                         {course.title}
                       </h4>
-                      <p className="text-sm text-slate-500 mt-1">{course.creator?.name || "Expert Creator"}</p>
-                      <div className="flex items-center gap-1 mt-2 text-sm font-normal text-yellow-600">
-                        <span>4.7</span>
-                        <Star className="h-3 w-3 fill-current" />
-                        <span className="text-slate-400">({(course.enrolledStudents?.length || 10) * 3 + 24})</span>
+                      <div className="flex items-center gap-1 mt-2 text-base font-light text-yellow-600">
+                        {course.avgRating > 0 && (
+                          <>
+                            <span>{course.avgRating.toFixed(1)}</span>
+                            <Star className="h-3 w-3 fill-current" />
+                          </>
+                        )}
+                        <span className="text-slate-400">
+                          ({course.enrolledStudents?.length || 0} {course.enrolledStudents?.length === 1 ? 'student' : 'students'})
+                        </span>
                       </div>
                       <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-2">
-                        <span className="text-base font-normal text-slate-900">Rs {course.price?.current}</span>
-                        <Link to={`/course-detail/${course._id}`} className="text-sm font-normal text-purple-600 hover:underline">View</Link>
+                        <span className="text-lg font-light text-slate-900">Rs {course.price?.current}</span>
+                        <Link to={`/course-detail/${course._id}`} className="text-base font-light text-purple-600 hover:underline">View</Link>
                       </div>
                     </div>
                   </React.Fragment>
@@ -692,16 +710,16 @@ const TopicPage = () => {
         {/* Section: Courses to Get You Started (Photo 2) */}
         <section className="space-y-6">
           <div>
-            <h2 className="text-3xl sm:text-4xl font-normal tracking-tight">
+            <h2 className="text-4xl sm:text-5xl font-light tracking-tight">
               Courses to get you started
             </h2>
-            <p className="text-slate-500 mt-1 text-base sm:text-lg">
+            <p className="text-slate-500 mt-1 text-lg sm:text-xl">
               Explore courses from experienced, real-world experts.
             </p>
           </div>
 
           {/* Tabs header */}
-          <div className="flex border-b border-slate-200 gap-6 text-base font-normal">
+          <div className="flex border-b border-slate-200 gap-6 text-lg font-light">
             <button
               onClick={() => setActiveTab("popular")}
               className={`pb-3 transition-colors ${
@@ -721,7 +739,7 @@ const TopicPage = () => {
           </div>
 
           {tabbedCourses.length === 0 ? (
-            <div className="text-center py-12 text-slate-400 font-light">No courses to display in this plan.</div>
+            <div className="text-center py-12 text-slate-400 font-extralight">No courses to display in this plan.</div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {tabbedCourses.map((course) => (
@@ -734,7 +752,7 @@ const TopicPage = () => {
         {/* Section: Students Also Learn (Photo 3) */}
         {topic.relatedTopics?.length > 0 && (
           <section className="space-y-6">
-            <h2 className="text-3xl sm:text-4xl font-normal tracking-tight text-slate-900">
+            <h2 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900">
               {topic.name} students also learn
             </h2>
             <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3">
@@ -742,7 +760,7 @@ const TopicPage = () => {
                 <Link
                   key={idx}
                   to={`/topic/${slugify(tag)}`}
-                  className="px-4 py-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 text-base font-normal rounded-xl text-center transition-colors shadow-sm block leading-snug"
+                  className="px-4 py-3 bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 text-lg font-light rounded-xl text-center transition-colors shadow-sm block leading-snug"
                 >
                   {tag}
                 </Link>
@@ -751,134 +769,153 @@ const TopicPage = () => {
           </section>
         )}
 
-        {/* Section: Simulated Practice Exams (Photo 4 & 5) */}
-        <section className="space-y-6">
-          <div className="bg-purple-50/50 border border-purple-100 rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row items-center gap-6 justify-between">
-            <div className="space-y-2 max-w-2xl">
-              <span className="inline-block px-2.5 py-0.5 bg-purple-100 text-purple-700 text-sm font-normal rounded">Practice Exams</span>
-              <h3 className="text-2xl sm:text-3xl font-normal text-slate-900">Practice like it's the real exam</h3>
-              <p className="text-slate-600 text-base leading-relaxed">
-                Put your knowledge to the test with realistic exam questions and build confidence before test day. With interactive practice tests, get instant explanations and identify weak areas.
+        {/* Section: Real Practice Courses / Hands-on (Rendered only if real practice courses exist) */}
+        {practiceCourses.length > 0 && (
+          <section className="space-y-6">
+            <div className="bg-purple-50/50 border border-purple-100 rounded-2xl p-6 sm:p-8 flex flex-col md:flex-row items-center gap-6 justify-between">
+              <div className="space-y-2 max-w-2xl">
+                <span className="inline-block px-2.5 py-0.5 bg-purple-100 text-purple-700 text-base font-light rounded">Practice & Exercises</span>
+                <h3 className="text-3xl sm:text-4xl font-light text-slate-900">Practice with hands-on exercises</h3>
+                <p className="text-slate-600 text-lg leading-relaxed">
+                  Put your knowledge to the test with real-world coding exercises and practice tests from actual courses in {topic.name}.
+                </p>
+              </div>
+              <Button onClick={() => navigate("/course/search?query=" + encodeURIComponent(topic.name))} className="bg-[#a435f0] hover:bg-[#8d24d9] text-white font-light h-12 shrink-0">
+                Browse All Courses
+              </Button>
+            </div>
+
+            <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
+              {practiceCourses.map((c) => (
+                <div
+                  key={c._id}
+                  onClick={() => navigate(`/course-detail/${c._id}`)}
+                  className="w-[280px] shrink-0 bg-white border border-slate-200 p-5 rounded-2xl flex flex-col justify-between hover:shadow-md transition-shadow cursor-pointer"
+                >
+                  <div className="space-y-3">
+                    <img src={c.thumbnail} alt={c.title} className="w-full h-32 object-cover rounded-lg" />
+                    <h4 className="font-light text-lg text-slate-850 leading-snug line-clamp-2 min-h-[40px] pt-1">
+                      {c.title}
+                    </h4>
+                    <p className="text-base text-slate-500 line-clamp-2 leading-relaxed">
+                      {c.subTitle || c.subtitle || c.description || ""}
+                    </p>
+                  </div>
+                  <div className="pt-4 border-t border-slate-100 mt-4 space-y-2">
+                    <p className="text-[10px] text-slate-400 font-light">BY {(c.creator?.name || "Instructor").toUpperCase()}</p>
+                    <div className="flex items-center justify-between text-base">
+                      {c.avgRating > 0 && (
+                        <div className="flex items-center gap-1 font-light text-yellow-600">
+                          <span>{c.avgRating.toFixed(1)}</span>
+                          <Star className="h-3 w-3 fill-current" />
+                          <span className="text-slate-400">({c.reviewCount || 0})</span>
+                        </div>
+                      )}
+                      <span className="font-light text-slate-900">
+                        {getCourseNumericPrice(c) > 0 ? `Rs ${getCourseNumericPrice(c)}` : "Free"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Section: Real Instructors (only when instructors exist) */}
+        {instructors.length > 0 && (
+          <section className="space-y-6">
+            <div>
+              <h2 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900">Course Instructors</h2>
+              <p className="text-slate-500 mt-1 text-lg sm:text-xl">Learn from instructors teaching courses in {topic.name}.</p>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {instructors.map((ins, idx) => (
+                <div key={idx} className="bg-slate-50 border border-slate-200/50 rounded-2xl p-6 text-center space-y-3 hover:bg-slate-100/50 transition-colors">
+                  <div className="w-20 h-20 rounded-full overflow-hidden mx-auto border-2 border-white shadow-md bg-purple-100 flex items-center justify-center">
+                    {ins.photoUrl ? (
+                      <img src={ins.photoUrl} className="w-full h-full object-cover" alt={ins.name} />
+                    ) : (
+                      <span className="text-2xl font-light text-purple-700">
+                        {(ins.name || "I")[0].toUpperCase()}
+                      </span>
+                    )}
+                  </div>
+                  <div>
+                    <h4 className="font-light text-xl text-slate-800 leading-snug">{ins.name}</h4>
+                    <p className="text-base text-slate-500 mt-1 line-clamp-2 leading-normal min-h-[32px]">{ins.headline || "Course Instructor"}</p>
+                  </div>
+                  <div className="text-base font-light text-slate-600 pt-1">
+                    <span>{ins.coursesCount} {ins.coursesCount === 1 ? "course" : "courses"} in this topic</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* TOP RATED AND GOOD REVIEWS FROM DATABASE (only when real reviews exist) */}
+        {reviews.length > 0 && (
+          <section className="space-y-6 pt-4 border-t border-slate-100">
+            <div>
+              <h2 className="text-4xl sm:text-5xl font-light tracking-tight text-slate-900">
+                Student Reviews
+              </h2>
+              <p className="text-slate-500 mt-1 text-lg sm:text-xl">
+                See what students are saying about courses in {topic.name}.
               </p>
             </div>
-            <Button onClick={() => navigate("/course/search?query=Exam")} className="bg-[#a435f0] hover:bg-[#8d24d9] text-white font-normal h-12 shrink-0">
-              Browse Practice Exams
-            </Button>
-          </div>
 
-          <div className="flex gap-6 overflow-x-auto pb-4 scrollbar-thin scrollbar-thumb-slate-200 scrollbar-track-transparent">
-            {[
-              { title: `${topic.name} Practice Test: Latest Questions & Answers 2026`, desc: "Certification Prep with 4 Latest Practice Tests: Exam simulation, DOM, asynchronous JS.", author: "Samriddhi Academy", rating: "5.0", reviews: "87" },
-              { title: `${topic.name} Exams: Master Concepts & Best Practices`, desc: "Full-length mock exams regarding syntax, scoping, closures, and data structures.", author: "Temotec Learning", rating: "4.7", reviews: "124" },
-              { title: `${topic.name} Interview Questions: Basics to Advanced`, desc: "Latest Practice Tests for any tech interview. Code execution and logic analysis.", author: "Madhu Sudhan", rating: "4.4", reviews: "23" }
-            ].map((exam, idx) => (
-              <div key={idx} className="w-[280px] shrink-0 bg-white border border-slate-200 p-5 rounded-2xl flex flex-col justify-between hover:shadow-md transition-shadow">
-                <div className="space-y-3">
-                  <div className="h-10 w-10 bg-orange-50 rounded-lg flex items-center justify-center text-orange-600 font-normal text-xl">5</div>
-                  <h4 className="font-normal text-base text-slate-850 leading-snug line-clamp-2 min-h-[40px] pt-1">
-                    {exam.title}
-                  </h4>
-                  <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed">{exam.desc}</p>
-                </div>
-                <div className="pt-4 border-t border-slate-100 mt-4 space-y-2">
-                  <p className="text-[10px] text-slate-400 font-normal">BY {exam.author.toUpperCase()}</p>
-                  <div className="flex items-center justify-between text-sm">
-                    <div className="flex items-center gap-1 font-normal text-yellow-600">
-                      <span>{exam.rating}</span>
-                      <Star className="h-3 w-3 fill-current" />
-                      <span className="text-slate-400">({exam.reviews})</span>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {reviews.map((rev) => (
+                <div
+                  key={rev._id}
+                  className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3 flex flex-col justify-between hover:shadow-md transition-shadow"
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-3">
+                      <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-light text-lg">
+                        {rev.user?.name ? rev.user.name.split(" ").map(n => n[0]).join("").toUpperCase() : "S"}
+                      </div>
+                      <div>
+                        <h4 className="font-light text-lg text-slate-800">{rev.user?.name || "Student"}</h4>
+                        <p className="text-[10px] text-slate-400">{new Date(rev.createdAt).toLocaleDateString()}</p>
+                      </div>
                     </div>
-                    <span className="font-normal text-slate-900">Rs 1,499</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Section: Popular Instructors (Photo 5) */}
-        <section className="space-y-6">
-          <div>
-            <h2 className="text-3xl sm:text-4xl font-normal tracking-tight text-slate-900">Popular Instructors</h2>
-            <p className="text-slate-500 mt-1 text-base sm:text-lg">These real-world experts are highly rated by learners like you.</p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {instructors.map((ins, idx) => (
-              <div key={idx} className="bg-slate-50 border border-slate-200/50 rounded-2xl p-6 text-center space-y-3 hover:bg-slate-100/50 transition-colors">
-                <div className="w-20 h-20 rounded-full overflow-hidden mx-auto border-2 border-white shadow-md">
-                  <img src={ins.photoUrl || "https://github.com/shadcn.png"} className="w-full h-full object-cover" alt={ins.name} />
-                </div>
-                <div>
-                  <h4 className="font-normal text-lg text-slate-800 leading-snug">{ins.name}</h4>
-                  <p className="text-sm text-slate-500 mt-1 line-clamp-2 leading-normal min-h-[32px]">{ins.headline || "Experienced Professional & Mentor"}</p>
-                </div>
-                <div className="flex items-center justify-center gap-1 text-sm font-normal text-slate-700 pt-1">
-                  <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-                  <span>4.8 Instructor Rating</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* TOP RATED AND GOOD REVIEWS FROM DATABASE (Requested Section) */}
-        <section className="space-y-6 pt-4 border-t border-slate-100">
-          <div>
-            <h2 className="text-3xl sm:text-4xl font-normal tracking-tight text-slate-900">
-              Student Reviews
-            </h2>
-            <p className="text-slate-500 mt-1 text-base sm:text-lg">
-              See what students are saying about courses in this sub-child category.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            {reviews.map((rev) => (
-              <div
-                key={rev._id}
-                className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-3 flex flex-col justify-between hover:shadow-md transition-shadow"
-              >
-                <div className="space-y-2">
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-700 font-normal text-base">
-                      {rev.user?.name ? rev.user.name.split(" ").map(n => n[0]).join("").toUpperCase() : "S"}
+                    <div className="flex items-center gap-1 text-yellow-500 text-base">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          className={`h-3.5 w-3.5 ${
+                            i < Math.round(rev.rating) ? "fill-current" : "text-slate-200"
+                          }`}
+                        />
+                      ))}
+                      <span className="font-light ml-1 text-slate-700">{rev.rating.toFixed(1)}</span>
                     </div>
-                    <div>
-                      <h4 className="font-normal text-base text-slate-800">{rev.user?.name || "Student"}</h4>
-                      <p className="text-[10px] text-slate-400">{new Date(rev.createdAt).toLocaleDateString()}</p>
+                    <p className="text-base text-slate-600 leading-relaxed line-clamp-4">
+                      "{rev.comment}"
+                    </p>
+                  </div>
+                  {rev.course?.title && (
+                    <div className="pt-3 border-t border-slate-100 text-[10px] font-light text-slate-400 truncate">
+                      Course: <span className="text-[#a435f0]">{rev.course.title}</span>
                     </div>
-                  </div>
-                  <div className="flex items-center gap-1 text-yellow-500 text-sm">
-                    {Array.from({ length: 5 }).map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`h-3.5 w-3.5 ${
-                          i < Math.round(rev.rating) ? "fill-current" : "text-slate-200"
-                        }`}
-                      />
-                    ))}
-                    <span className="font-normal ml-1 text-slate-700">{rev.rating.toFixed(1)}</span>
-                  </div>
-                  <p className="text-sm text-slate-600 leading-relaxed line-clamp-4">
-                    "{rev.comment}"
-                  </p>
+                  )}
                 </div>
-                <div className="pt-3 border-t border-slate-100 text-[10px] font-normal text-slate-400 truncate">
-                  Course: <span className="text-[#a435f0]">{rev.course?.title}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </section>
+              ))}
+            </div>
+          </section>
+        )}
 
         {/* Section: All Topic Courses with Sidebar Filters (The main catalog) */}
         <section className="space-y-6 pt-4 border-t border-slate-100">
           <div>
-            <h2 className="text-3xl sm:text-4xl font-normal tracking-tight">
+            <h2 className="text-4xl sm:text-5xl font-light tracking-tight">
               All {topic.name} courses
             </h2>
-            <p className="text-slate-500 mt-1 text-base sm:text-lg">
+            <p className="text-slate-500 mt-1 text-lg sm:text-xl">
               Not sure? All courses have a 30-day money-back guarantee.
             </p>
           </div>
@@ -889,24 +926,24 @@ const TopicPage = () => {
               <Button
                 variant="outline"
                 onClick={() => setShowFilters(!showFilters)}
-                className="gap-2 font-normal h-11 bg-white"
+                className="gap-2 font-light h-11 bg-white"
               >
                 <SlidersHorizontal className="w-4 h-4" />
                 <span>Filter</span>
               </Button>
-              <span className="text-base font-normal text-slate-700">
+              <span className="text-lg font-light text-slate-700">
                 {filteredAndSortedCourses.length} results
               </span>
             </div>
 
             {/* Sort Dropdown */}
             <div className="flex items-center gap-2">
-              <span className="text-sm font-normal text-slate-400 uppercase tracking-wider">Sort by</span>
+              <span className="text-base font-light text-slate-400 uppercase tracking-wider">Sort by</span>
               <div className="relative">
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value)}
-                  className="h-11 pl-4 pr-10 border border-slate-200 rounded-lg bg-white text-base font-normal text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500 appearance-none cursor-pointer"
+                  className="h-11 pl-4 pr-10 border border-slate-200 rounded-lg bg-white text-lg font-light text-slate-800 focus:outline-none focus:ring-2 focus:ring-purple-500 appearance-none cursor-pointer"
                 >
                   <option value="popular">Most Popular</option>
                   <option value="newest">Newest</option>
@@ -925,10 +962,10 @@ const TopicPage = () => {
               <aside className="space-y-6 lg:sticky lg:top-20 bg-white border border-slate-200 p-6 rounded-xl">
                 {/* Section: Price */}
                 <div className="space-y-3">
-                  <h4 className="font-normal text-base text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">
+                  <h4 className="font-light text-lg text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">
                     Price
                   </h4>
-                  <div className="space-y-2 text-base font-light text-slate-600">
+                  <div className="space-y-2 text-lg font-extralight text-slate-600">
                     <label className="flex items-center gap-2.5 cursor-pointer">
                       <input
                         type="radio"
@@ -964,10 +1001,10 @@ const TopicPage = () => {
 
                 {/* Section: Level */}
                 <div className="space-y-3">
-                  <h4 className="font-normal text-base text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">
+                  <h4 className="font-light text-lg text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">
                     Level
                   </h4>
-                  <div className="space-y-2 text-base font-light text-slate-600">
+                  <div className="space-y-2 text-lg font-extralight text-slate-600">
                     {["Beginner", "Intermediate", "Expert", "All Levels"].map((level) => (
                       <label key={level} className="flex items-center gap-2.5 cursor-pointer">
                         <input
@@ -984,10 +1021,10 @@ const TopicPage = () => {
 
                 {/* Section: Ratings */}
                 <div className="space-y-3">
-                  <h4 className="font-normal text-base text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">
+                  <h4 className="font-light text-lg text-slate-800 uppercase tracking-wider border-b border-slate-100 pb-2">
                     Ratings
                   </h4>
-                  <div className="space-y-2 text-base font-light text-slate-600">
+                  <div className="space-y-2 text-lg font-extralight text-slate-600">
                     {[4.5, 4.0, 3.5].map((ratingVal) => (
                       <label key={ratingVal} className="flex items-center gap-2.5 cursor-pointer">
                         <input
@@ -1004,7 +1041,7 @@ const TopicPage = () => {
                     ))}
                     <button
                       onClick={() => setSelectedRating(0)}
-                      className="text-sm text-purple-600 hover:text-purple-800 font-normal block pt-1"
+                      className="text-base text-purple-600 hover:text-purple-800 font-light block pt-1"
                     >
                       Clear Rating Filter
                     </button>
@@ -1016,16 +1053,19 @@ const TopicPage = () => {
             {/* Catalog Course Listings */}
             <div className="space-y-6">
               {filteredAndSortedCourses.length === 0 ? (
-                <div className="bg-slate-50 border border-slate-100 rounded-xl p-12 text-center text-gray-500 font-normal">
+                <div className="bg-slate-50 border border-slate-100 rounded-xl p-12 text-center text-gray-500 font-light">
                   No courses found matching the selected filters.
                 </div>
               ) : (
                 <div className="flex flex-col gap-6">
                   {filteredAndSortedCourses.map((course) => {
                     const ratings = course.ratings || [];
-                    const avgRating = ratings.length
+                    const avgRating = course.avgRating > 0
+                      ? course.avgRating.toFixed(1)
+                      : ratings.length
                       ? (ratings.reduce((s, r) => s + r, 0) / ratings.length).toFixed(1)
-                      : "4.5";
+                      : null;
+                    const reviewCount = course.reviewCount ?? ratings.length ?? 0;
 
                     return (
                       <div
@@ -1043,50 +1083,56 @@ const TopicPage = () => {
 
                         {/* Middle Info */}
                         <div className="space-y-2">
-                          <h3 className="text-lg sm:text-xl font-normal text-slate-800 leading-snug">
+                          <h3 className="text-xl sm:text-2xl font-light text-slate-800 leading-snug">
                             <Link to={`/course-detail/${course._id}`} className="hover:text-purple-700">
                               {course.title}
                             </Link>
                           </h3>
-                          <p className="text-sm text-slate-500 line-clamp-2 leading-relaxed">
+                          <p className="text-base text-slate-500 line-clamp-2 leading-relaxed">
                             {course.subTitle || "Master this topic with expert explanations, step-by-step logic, and deep examples."}
                           </p>
-                          <div className="flex items-center gap-3 text-sm text-slate-500 flex-wrap">
-                            <span className="font-normal text-slate-700">
+                          <div className="flex items-center gap-3 text-base text-slate-500 flex-wrap">
+                            <span className="font-light text-slate-700">
                               Instructor: {course.creator?.name || "Expert Coach"}
                             </span>
                             <span>•</span>
-                            <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-light">
+                            <span className="bg-slate-100 px-2 py-0.5 rounded text-slate-600 font-extralight">
                               {course.level || "All Levels"}
                             </span>
                           </div>
 
                           {/* Ratings info */}
-                          <div className="flex items-center gap-1.5 text-sm text-slate-500">
-                            <span className="text-[#a435f0] font-normal text-base">{avgRating}</span>
-                            <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
-                            <span>({(course.enrolledStudents?.length * 3 + 24 || 120)} reviews)</span>
+                          <div className="flex items-center gap-1.5 text-base text-slate-500">
+                            {avgRating && (
+                              <>
+                                <span className="text-[#a435f0] font-light text-lg">{avgRating}</span>
+                                <Star className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                              </>
+                            )}
+                            <span>
+                              ({reviewCount} {reviewCount === 1 ? 'review' : 'reviews'} • {course.enrolledStudents?.length || 0} learners)
+                            </span>
                           </div>
                         </div>
 
                         {/* Price and Actions Column */}
                         <div className="flex flex-col items-start md:items-end justify-center gap-3 border-t md:border-t-0 pt-4 md:pt-0 border-slate-100">
                           <div className="text-right">
-                            <span className="text-2xl font-normal text-slate-900">
+                            <span className="text-3xl font-light text-slate-900">
                               {getCourseNumericPrice(course) > 0 ? `Rs ${getCourseNumericPrice(course)}` : "Free"}
                             </span>
                           </div>
                           
                           {/* bestseller badge */}
-                          {parseFloat(avgRating) >= 4.5 && (
-                            <span className="px-2.5 py-0.5 bg-[#ecebfa] text-[#2d2f31] font-normal text-[10px] uppercase rounded tracking-wider">
+                          {avgRating && parseFloat(avgRating) >= 4.5 && (
+                            <span className="px-2.5 py-0.5 bg-[#ecebfa] text-[#2d2f31] font-light text-[10px] uppercase rounded tracking-wider">
                               Bestseller
                             </span>
                           )}
 
                           <Button
                             onClick={() => navigate(`/course-detail/${course._id}`)}
-                            className="bg-slate-900 hover:bg-slate-800 text-white font-normal w-full text-sm h-9 rounded-lg"
+                            className="bg-slate-900 hover:bg-slate-800 text-white font-light w-full text-base h-9 rounded-lg"
                           >
                             Learn more
                           </Button>

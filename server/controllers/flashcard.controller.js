@@ -63,32 +63,11 @@ export const reviewFlashcard = async (req, res) => {
     let { repetitions, interval: stability, easeFactor: difficulty } = card;
 
     // Map quality score q (0-5) to FSRS rating (1: Again, 2: Hard, 3: Good, 4: Easy)
-    let rating = 3; // default Good
-    if (q <= 2) rating = 1;       // Again (Forgot)
-    else if (q === 3) rating = 2; // Hard (Struggled to recall)
-    else if (q === 4) rating = 3; // Good (Standard correct recall)
-    else if (q === 5) rating = 4; // Easy (Recalled effortlessly)
+    const rating = q <= 2 ? 1 : q === 3 ? 2 : q === 4 ? 3 : 4;
+    const INITIAL_FSRS = { 1: [0.5, 8.0], 2: [1.2, 6.0], 3: [2.5, 4.5], 4: [5.0, 3.0] };
 
     if (repetitions === 0) {
-      // First review initialization
-      switch (rating) {
-        case 1:
-          stability = 0.5;
-          difficulty = 8.0;
-          break;
-        case 2:
-          stability = 1.2;
-          difficulty = 6.0;
-          break;
-        case 3:
-          stability = 2.5;
-          difficulty = 4.5;
-          break;
-        case 4:
-          stability = 5.0;
-          difficulty = 3.0;
-          break;
-      }
+      [stability, difficulty] = INITIAL_FSRS[rating];
       repetitions = 1;
     } else {
       // Subsequent review steps

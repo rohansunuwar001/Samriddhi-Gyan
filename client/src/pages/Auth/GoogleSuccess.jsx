@@ -39,7 +39,7 @@ const GoogleSuccess = () => {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="text-center p-8 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-4 text-gray-800">
+        <h2 className="text-3xl font-semibold mb-4 text-gray-800">
           Finalizing Login...
         </h2>
         <p className="text-gray-600">

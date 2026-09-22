@@ -81,7 +81,7 @@ const LoginPage = () => {
 
         <div className="w-full max-w-md md:w-1/2">
           <div className="w-full">
-            <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center md:text-left">
+            <h1 className="text-4xl font-semibold text-gray-900 mb-6 text-center md:text-left">
               Log in to continue your learning journey
             </h1>
             <form onSubmit={handleLogin} className="space-y-4">
@@ -121,7 +121,7 @@ const LoginPage = () => {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white font-bold py-3 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-300 disabled:bg-indigo-400"
+                className="w-full flex items-center justify-center gap-2 bg-indigo-600 text-white font-semibold py-3 px-4 rounded-md hover:bg-indigo-700 transition-colors duration-300 disabled:bg-indigo-400"
               >
                 {isLoading ? (
                   <FiLoader className="animate-spin h-5 w-5" />
@@ -138,7 +138,7 @@ const LoginPage = () => {
               >
                 <div className="w-full border-t border-gray-300" />
               </div>
-              <div className="relative flex justify-center text-sm">
+              <div className="relative flex justify-center text-base">
                 <span className="px-2 bg-white text-gray-500">
                   Or log in with
                 </span>
@@ -152,11 +152,11 @@ const LoginPage = () => {
               />
             </div>
             <div className="mt-8 text-center">
-              <p className="text-sm text-gray-700">
+              <p className="text-base text-gray-700">
                 Don`t have an account?{" "}
                 <Link
                   to="/register"
-                  className="font-bold text-indigo-600 hover:underline"
+                  className="font-semibold text-indigo-600 hover:underline"
                 >
                   Sign up
                 </Link>

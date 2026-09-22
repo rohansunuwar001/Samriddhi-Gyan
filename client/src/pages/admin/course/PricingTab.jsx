@@ -82,24 +82,24 @@ const PricingTab = () => {
   };
 
   return (
-    <div className="bg-white border border-[#d1d7dc] p-10 shadow-sm relative font-sans text-lg font-normal text-[#1c1d1f]">
+    <div className="bg-white border border-[#d1d7dc] p-10 shadow-sm relative font-sans text-xl font-light text-[#1c1d1f]">
       
       {/* HEADER SECTION */}
       <div className="border-b border-[#d1d7dc] pb-5 mb-8">
-        <h2 className="text-3xl font-normal">Pricing</h2>
+        <h2 className="text-4xl font-light">Pricing</h2>
       </div>
 
       {/* PREMIUM APPLICATION WARNING BANNER */}
       <div className="bg-amber-50/40 border border-amber-500/50 p-6 mb-8 flex gap-4 items-start rounded-sm">
         <AlertTriangle className="w-6 h-6 text-amber-600 shrink-0 mt-0.5" />
         <div>
-          <h4 className="font-normal text-xl text-[#1c1d1f] mb-1.5">Please finish your premium application</h4>
-          <p className="text-lg text-[#6a6f73] font-light">
+          <h4 className="font-light text-2xl text-[#1c1d1f] mb-1.5">Please finish your premium application</h4>
+          <p className="text-xl text-[#6a6f73] font-extralight">
             You'll be able to set your price once your payout method is approved.
           </p>
           <button
             onClick={() => toast.info("Premium instructor application workflow is currently mock.")}
-            className="border border-[#b4690e] text-[#b4690e] hover:bg-amber-50 text-lg font-normal px-5 py-2.5 mt-3 transition-colors bg-white rounded-sm"
+            className="border border-[#b4690e] text-[#b4690e] hover:bg-amber-50 text-xl font-light px-5 py-2.5 mt-3 transition-colors bg-white rounded-sm"
           >
             Complete the premium application
           </button>
@@ -109,8 +109,8 @@ const PricingTab = () => {
       {/* SET PRICE FORM */}
       <div className="space-y-6">
         <div>
-          <h3 className="text-xl font-normal text-[#1c1d1f] mb-2">Set a price for your course</h3>
-          <p className="text-lg text-[#6a6f73] font-light max-w-2xl leading-relaxed">
+          <h3 className="text-2xl font-light text-[#1c1d1f] mb-2">Set a price for your course</h3>
+          <p className="text-xl text-[#6a6f73] font-extralight max-w-2xl leading-relaxed">
             Please select the currency and the price tier for your course. If you'd like to offer your course for free, it must have a total video length of less than 2 hours. Also, courses with practice tests can not be free.
           </p>
         </div>
@@ -118,11 +118,11 @@ const PricingTab = () => {
         <div className="flex gap-6 max-w-lg">
           {/* Currency dropdown */}
           <div className="flex-1">
-            <label className="block text-base font-normal text-[#1c1d1f] mb-2">Currency</label>
+            <label className="block text-lg font-light text-[#1c1d1f] mb-2">Currency</label>
             <select
               value={currency}
               onChange={(e) => setCurrency(e.target.value)}
-              className="w-full border border-[#6a6f73] px-3.5 py-3 text-lg font-normal outline-none bg-white focus:border-[#1c1d1f]"
+              className="w-full border border-[#6a6f73] px-3.5 py-3 text-xl font-light outline-none bg-white focus:border-[#1c1d1f]"
             >
               <option value="NPR">NPR</option>
               <option value="USD">USD</option>
@@ -132,11 +132,11 @@ const PricingTab = () => {
 
           {/* Price Tier dropdown */}
           <div className="flex-1">
-            <label className="block text-base font-normal text-[#1c1d1f] mb-2">Price Tier</label>
+            <label className="block text-lg font-light text-[#1c1d1f] mb-2">Price Tier</label>
             <select
               value={priceTier}
               onChange={(e) => setPriceTier(e.target.value)}
-              className="w-full border border-[#6a6f73] px-3.5 py-3 text-lg font-normal outline-none bg-white focus:border-[#1c1d1f]"
+              className="w-full border border-[#6a6f73] px-3.5 py-3 text-xl font-light outline-none bg-white focus:border-[#1c1d1f]"
             >
               {activeTiers.map((tier) => (
                 <option key={tier.value} value={tier.value}>
@@ -151,7 +151,7 @@ const PricingTab = () => {
           <button
             onClick={handleSave}
             disabled={isSaving}
-            className="bg-[#a435f0] hover:bg-[#8710d8] disabled:bg-slate-300 text-white font-normal text-lg px-6 py-2.5 transition-colors rounded-sm"
+            className="bg-[#a435f0] hover:bg-[#8710d8] disabled:bg-slate-300 text-white font-light text-xl px-6 py-2.5 transition-colors rounded-sm"
           >
             {isSaving ? "Saving..." : "Save"}
           </button>

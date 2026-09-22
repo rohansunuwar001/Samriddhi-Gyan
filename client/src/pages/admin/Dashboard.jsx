@@ -49,11 +49,11 @@ import {
 const StatCard = ({ title, value, icon: Icon, prefix = "" }) => (
   <Card>
     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-      <CardTitle className="text-base font-light">{title}</CardTitle>
+      <CardTitle className="text-lg font-extralight">{title}</CardTitle>
       <Icon className="h-4 w-4 text-muted-foreground" />
     </CardHeader>
     <CardContent>
-      <div className="text-3xl font-normal">
+      <div className="text-4xl font-light">
         <CountUp
           start={0}
           end={value}
@@ -93,10 +93,10 @@ const TopCoursesTable = ({ courses }) => {
           <TableBody>
             {topCourses.map((course) => (
               <TableRow key={course.courseId}>
-                <TableCell className="font-light">
+                <TableCell className="font-extralight">
                   {course.courseTitle}
                 </TableCell>
-                <TableCell className="text-right font-normal">
+                <TableCell className="text-right font-light">
                   Rs{course.totalRevenue.toLocaleString()}
                 </TableCell>
               </TableRow>
@@ -174,7 +174,7 @@ const Dashboard = () => {
   return (
     <div className="flex-1 space-y-6 p-8 pt-6 bg-slate-50 min-h-screen">
       <header>
-        <h2 className="text-4xl font-normal tracking-tight">
+        <h2 className="text-5xl font-light tracking-tight">
           Instructor Dashboard
         </h2>
         <p className="text-muted-foreground">

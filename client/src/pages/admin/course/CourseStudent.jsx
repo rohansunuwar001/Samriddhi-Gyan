@@ -86,7 +86,7 @@ const CourseStudent = () => {
     return (
         <div className="flex-1 space-y-6 p-8 pt-6 bg-slate-50 min-h-screen">
             <header>
-                <h2 className="text-5xl font-normal tracking-tight">Enrolled Students</h2>
+                <h2 className="text-6xl font-light tracking-tight">Enrolled Students</h2>
                 <p className="text-muted-foreground">View and manage students enrolled in your courses.</p>
             </header>
 
@@ -147,10 +147,10 @@ const CourseStudent = () => {
                                         <TableCell>
                                             <div className="flex items-center gap-3">
                                                 <Avatar><AvatarImage src={enrollment.photoUrl} alt={enrollment.name || "Student"} /><AvatarFallback>{(enrollment.name || "ST").slice(0, 2).toUpperCase()}</AvatarFallback></Avatar>
-                                                <p className="font-light">{enrollment.name || "Anonymous Student"}</p>
+                                                <p className="font-extralight">{enrollment.name || "Anonymous Student"}</p>
                                             </div>
                                         </TableCell>
-                                        <TableCell><span className="font-light text-muted-foreground">{enrollment.courseTitle}</span></TableCell>
+                                        <TableCell><span className="font-extralight text-muted-foreground">{enrollment.courseTitle}</span></TableCell>
                                         <TableCell className="hidden md:table-cell text-muted-foreground">{enrollment.email || "—"}</TableCell>
                                     </TableRow>
                                 ))
@@ -163,7 +163,7 @@ const CourseStudent = () => {
                     {/* --- Pagination Controls --- */}
                     {totalPages > 1 && (
                         <div className="flex items-center justify-between pt-4">
-                            <span className="text-lg text-muted-foreground">
+                            <span className="text-xl text-muted-foreground">
                                 Showing <strong>{Math.min((currentPage - 1) * ITEMS_PER_PAGE + 1, totalFilteredCount)} - {Math.min(currentPage * ITEMS_PER_PAGE, totalFilteredCount)}</strong> of <strong>{totalFilteredCount}</strong> students
                             </span>
                             <div className="flex items-center gap-2">

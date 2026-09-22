@@ -18,7 +18,10 @@ export const categoryApi = apiSlice.injectEndpoints({
         method: "POST",
         body: normalizeCategoryPayload(payload),
       }),
-      invalidatesTags: [{ type: "Category", id: "LIST" }],
+      invalidatesTags: [
+        { type: "Category", id: "LIST" },
+        { type: "Topic", id: "LIST" },
+      ],
     }),
 
     updateCategory: builder.mutation({
@@ -27,7 +30,10 @@ export const categoryApi = apiSlice.injectEndpoints({
         method: "PATCH",
         body: { name, parent },
       }),
-      invalidatesTags: [{ type: "Category", id: "LIST" }],
+      invalidatesTags: [
+        { type: "Category", id: "LIST" },
+        { type: "Topic", id: "LIST" },
+      ],
     }),
 
     deleteCategory: builder.mutation({
@@ -35,7 +41,10 @@ export const categoryApi = apiSlice.injectEndpoints({
         url: `/categories/${id}`,
         method: "DELETE",
       }),
-      invalidatesTags: [{ type: "Category", id: "LIST" }],
+      invalidatesTags: [
+        { type: "Category", id: "LIST" },
+        { type: "Topic", id: "LIST" },
+      ],
     }),
   }),
   overrideExisting: false,

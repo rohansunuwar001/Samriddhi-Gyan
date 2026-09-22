@@ -341,8 +341,8 @@ const AdminCertifications = () => {
           <Award size={28} />
         </div>
         <div>
-          <h1 className="text-3xl font-extrabold text-slate-800">Certifications & Exam CRUD</h1>
-          <p className="text-sm text-slate-500 mt-1">Manage certification categories, mock exams, and exam tickets.</p>
+          <h1 className="text-4xl font-bold text-slate-800">Certifications & Exam CRUD</h1>
+          <p className="text-base text-slate-500 mt-1">Manage certification categories, mock exams, and exam tickets.</p>
         </div>
       </div>
 
@@ -357,13 +357,13 @@ const AdminCertifications = () => {
           <button
             key={t.id}
             onClick={() => setActiveTab(t.id)}
-            className={`pb-3 text-sm font-semibold tracking-wide transition-all shrink-0 ${
+            className={`pb-3 text-base font-medium tracking-wide transition-all shrink-0 ${
               activeTab === t.id
-                ? "border-b-2 border-purple-600 text-purple-600 font-bold"
+                ? "border-b-2 border-purple-600 text-purple-600 font-semibold"
                 : "text-slate-400 hover:text-slate-600"
             }`}
           >
-            {t.label} <span className="ml-1 px-1.5 py-0.5 text-xs bg-gray-100 rounded-full font-normal">{t.count}</span>
+            {t.label} <span className="ml-1 px-1.5 py-0.5 text-sm bg-gray-100 rounded-full font-light">{t.count}</span>
           </button>
         ))}
       </div>
@@ -372,10 +372,10 @@ const AdminCertifications = () => {
       {activeTab === "issuers" && (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold text-slate-800">Certification Issuers / Subjects</h2>
+            <h2 className="text-xl font-semibold text-slate-800">Certification Issuers / Subjects</h2>
             <button
               onClick={() => setIssuerModal({ open: true, mode: "create", id: null, name: "", type: "issuer", description: "" })}
-              className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-semibold tracking-wide transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-medium tracking-wide transition-colors"
             >
               <Plus size={14} /> Add Category
             </button>
@@ -389,19 +389,19 @@ const AdminCertifications = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-gray-100 text-slate-400 text-xs font-bold uppercase tracking-wider">
+                  <tr className="border-b border-gray-100 text-slate-400 text-sm font-semibold uppercase tracking-wider">
                     <th className="pb-3">Name</th>
                     <th className="pb-3">Type</th>
                     <th className="pb-3">Description</th>
                     <th className="pb-3 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50 text-sm text-slate-600">
+                <tbody className="divide-y divide-gray-50 text-base text-slate-600">
                   {issuers.map((item) => (
                     <tr key={item._id} className="hover:bg-slate-50/50">
-                      <td className="py-3 font-semibold text-slate-800">{item.name}</td>
+                      <td className="py-3 font-medium text-slate-800">{item.name}</td>
                       <td className="py-3 capitalize">
-                        <span className="px-2 py-0.5 text-xs bg-slate-100 rounded-full font-medium">
+                        <span className="px-2 py-0.5 text-sm bg-slate-100 rounded-full font-normal">
                           {item.type}
                         </span>
                       </td>
@@ -433,10 +433,10 @@ const AdminCertifications = () => {
       {activeTab === "certs" && (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-lg font-bold text-slate-800">Available Certifications</h2>
+            <h2 className="text-xl font-semibold text-slate-800">Available Certifications</h2>
             <button
               onClick={handleOpenCreateModal}
-              className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-semibold tracking-wide transition-colors"
+              className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-medium tracking-wide transition-colors"
             >
               <Plus size={14} /> Add Certification
             </button>
@@ -450,7 +450,7 @@ const AdminCertifications = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-gray-100 text-slate-400 text-xs font-bold uppercase tracking-wider">
+                  <tr className="border-b border-gray-100 text-slate-400 text-sm font-semibold uppercase tracking-wider">
                     <th className="pb-3">Badge</th>
                     <th className="pb-3">Certification</th>
                     <th className="pb-3">Parent Category</th>
@@ -460,26 +460,26 @@ const AdminCertifications = () => {
                     <th className="pb-3 text-right">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-50 text-sm text-slate-600">
+                <tbody className="divide-y divide-gray-50 text-base text-slate-600">
                   {certifications.map((item) => (
                     <tr key={item._id} className="hover:bg-slate-50/50">
                       <td className="py-3">
                         {item.badgeUrl ? (
                            <img src={item.badgeUrl} alt="" className="w-10 h-10 object-contain rounded-lg border bg-slate-50" />
                         ) : (
-                          <div className="w-10 h-10 bg-purple-50 text-purple-600 flex items-center justify-center rounded-lg font-bold"><Award size={18} /></div>
+                          <div className="w-10 h-10 bg-purple-50 text-purple-600 flex items-center justify-center rounded-lg font-semibold"><Award size={18} /></div>
                         )}
                       </td>
                       <td className="py-3">
-                        <p className="font-semibold text-slate-800 leading-tight">{item.name}</p>
-                        <p className="text-xs text-slate-400 mt-0.5">slug: {item.slug}</p>
+                        <p className="font-medium text-slate-800 leading-tight">{item.name}</p>
+                        <p className="text-sm text-slate-400 mt-0.5">slug: {item.slug}</p>
                       </td>
-                      <td className="py-3 text-slate-700 font-medium">{item.issuer?.name}</td>
+                      <td className="py-3 text-slate-700 font-normal">{item.issuer?.name}</td>
                       <td className="py-3 text-slate-500 truncate max-w-xs">
                         {item.categoryFilterSubChild?.name || item.categoryFilterChild?.name || item.categoryFilterParent?.name || "All"}
                       </td>
-                      <td className="py-3 font-semibold text-emerald-600">Rs {item.examPrice}</td>
-                      <td className="py-3 text-slate-400 font-medium">{item.questions?.length || 0} Qs</td>
+                      <td className="py-3 font-medium text-emerald-600">Rs {item.examPrice}</td>
+                      <td className="py-3 text-slate-400 font-normal">{item.questions?.length || 0} Qs</td>
                       <td className="py-3 text-right space-x-2">
                         <button
                           onClick={() => handleOpenEditModal(item)}
@@ -519,14 +519,14 @@ const AdminCertifications = () => {
             {/* Header */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-6 py-4 flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-bold text-slate-800">Exam Registrations by Certification</h2>
-                <p className="text-xs text-slate-400 mt-0.5">Registrations grouped by certification category.</p>
+                <h2 className="text-xl font-semibold text-slate-800">Exam Registrations by Certification</h2>
+                <p className="text-sm text-slate-400 mt-0.5">Registrations grouped by certification category.</p>
               </div>
               <div className="flex items-center gap-3">
-                <span className="px-3 py-1.5 bg-purple-50 text-purple-700 text-xs font-bold rounded-full">
+                <span className="px-3 py-1.5 bg-purple-50 text-purple-700 text-sm font-semibold rounded-full">
                   {registrations.length} Total Students
                 </span>
-                <span className="px-3 py-1.5 bg-slate-100 text-slate-600 text-xs font-bold rounded-full">
+                <span className="px-3 py-1.5 bg-slate-100 text-slate-600 text-sm font-semibold rounded-full">
                   {groups.length} Certifications
                 </span>
               </div>
@@ -553,7 +553,7 @@ const AdminCertifications = () => {
                       </div>
                     )}
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-extrabold text-slate-800 text-base leading-tight truncate">
+                      <h3 className="font-bold text-slate-800 text-lg leading-tight truncate">
                         {group.cert?.name || "Unknown Certification"}
                       </h3>
                       {group.cert?.slug && (
@@ -561,15 +561,15 @@ const AdminCertifications = () => {
                       )}
                     </div>
                     <div className="shrink-0 flex items-center gap-2">
-                      <span className="px-3 py-1 bg-white text-purple-700 border border-purple-200 text-xs font-bold rounded-full flex items-center gap-1.5">
+                      <span className="px-3 py-1 bg-white text-purple-700 border border-purple-200 text-sm font-semibold rounded-full flex items-center gap-1.5">
                         <Users size={12} />
                         {group.items.length} Registered
                       </span>
-                      <span className="px-3 py-1 bg-white text-emerald-700 border border-emerald-200 text-xs font-bold rounded-full">
+                      <span className="px-3 py-1 bg-white text-emerald-700 border border-emerald-200 text-sm font-semibold rounded-full">
                         {group.items.filter(i => i.paymentStatus === "completed").length} Paid
                       </span>
                       {group.items.some(i => i.examStatus === "completed" && i.passed) && (
-                        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 text-xs font-bold rounded-full">
+                        <span className="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-100 text-sm font-semibold rounded-full">
                           {group.items.filter(i => i.examStatus === "completed" && i.passed).length} Passed
                         </span>
                       )}
@@ -580,7 +580,7 @@ const AdminCertifications = () => {
                   <div className="overflow-x-auto">
                     <table className="w-full text-left border-collapse min-w-[780px]">
                       <thead>
-                        <tr className="border-b border-gray-100 text-slate-400 text-[11px] font-bold uppercase tracking-wider bg-slate-50/60">
+                        <tr className="border-b border-gray-100 text-slate-400 text-[11px] font-semibold uppercase tracking-wider bg-slate-50/60">
                           <th className="py-2.5 px-6">Student</th>
                           <th className="py-2.5 px-4">Registered On</th>
                           <th className="py-2.5 px-4">Attempt #</th>
@@ -592,7 +592,7 @@ const AdminCertifications = () => {
                           <th className="py-2.5 px-4">Result</th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-gray-50 text-sm text-slate-600">
+                      <tbody className="divide-y divide-gray-50 text-base text-slate-600">
                         {group.items.map((item) => (
                           <tr key={item._id} className="hover:bg-purple-50/20 transition-colors align-top">
                             {/* Student */}
@@ -601,18 +601,18 @@ const AdminCertifications = () => {
                                 {item.student?.photoUrl ? (
                                   <img src={item.student.photoUrl} alt="" className="w-9 h-9 rounded-full object-cover border-2 border-purple-100 shrink-0" />
                                 ) : (
-                                  <div className="w-9 h-9 bg-gradient-to-br from-purple-500 to-indigo-500 text-white flex items-center justify-center font-bold text-sm rounded-full shrink-0">
+                                  <div className="w-9 h-9 bg-gradient-to-br from-purple-500 to-indigo-500 text-white flex items-center justify-center font-semibold text-base rounded-full shrink-0">
                                     {item.student?.name?.[0]?.toUpperCase() || "?"}
                                   </div>
                                 )}
                                 <div className="min-w-0">
-                                  <p className="font-semibold text-slate-800 leading-tight">{item.student?.name || "—"}</p>
+                                  <p className="font-medium text-slate-800 leading-tight">{item.student?.name || "—"}</p>
                                   <p className="text-[10px] text-slate-400">{item.student?.email || "—"}</p>
                                 </div>
                               </div>
                             </td>
                             {/* Registered On */}
-                            <td className="py-3.5 px-4 text-xs text-slate-500 whitespace-nowrap">
+                            <td className="py-3.5 px-4 text-sm text-slate-500 whitespace-nowrap">
                               {item.createdAt
                                 ? new Date(item.createdAt).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" })
                                 : "—"}
@@ -623,11 +623,11 @@ const AdminCertifications = () => {
                             </td>
                             {/* Attempt # */}
                             <td className="py-3.5 px-4">
-                              <span className="px-2 py-0.5 text-xs bg-slate-100 text-slate-700 rounded-full font-bold">#{item.attemptNumber || 1}</span>
+                              <span className="px-2 py-0.5 text-sm bg-slate-100 text-slate-700 rounded-full font-semibold">#{item.attemptNumber || 1}</span>
                             </td>
                             {/* Payment Status */}
                             <td className="py-3.5 px-4">
-                              <span className={`px-2.5 py-1 text-xs font-bold rounded-full capitalize ${
+                              <span className={`px-2.5 py-1 text-sm font-semibold rounded-full capitalize ${
                                 item.paymentStatus === "completed"
                                   ? "bg-green-50 text-green-700 border border-green-100"
                                   : "bg-yellow-50 text-yellow-700 border border-yellow-100"
@@ -636,11 +636,11 @@ const AdminCertifications = () => {
                               </span>
                             </td>
                             {/* Paid Amount */}
-                            <td className="py-3.5 px-4 font-semibold text-slate-800">
+                            <td className="py-3.5 px-4 font-medium text-slate-800">
                               Rs. {(item.amountPaid || 0).toLocaleString()}
                             </td>
                             {/* Method */}
-                            <td className="py-3.5 px-4 capitalize font-medium text-slate-600 text-xs">
+                            <td className="py-3.5 px-4 capitalize font-normal text-slate-600 text-sm">
                               {item.paymentMethod || "eSewa"}
                             </td>
                             {/* Transaction ID */}
@@ -651,7 +651,7 @@ const AdminCertifications = () => {
                             </td>
                             {/* Exam Status */}
                             <td className="py-3.5 px-4">
-                              <span className={`px-2.5 py-1 text-xs font-bold rounded-full capitalize ${
+                              <span className={`px-2.5 py-1 text-sm font-semibold rounded-full capitalize ${
                                 item.examStatus === "completed"
                                   ? "bg-blue-50 text-blue-700 border border-blue-100"
                                   : item.examStatus === "started"
@@ -665,7 +665,7 @@ const AdminCertifications = () => {
                             <td className="py-3.5 px-4">
                               {item.examStatus === "completed" ? (
                                 <div className="flex flex-col gap-1">
-                                  <span className={`px-2.5 py-0.5 text-xs font-bold rounded-full ${
+                                  <span className={`px-2.5 py-0.5 text-sm font-semibold rounded-full ${
                                     item.passed ? "bg-emerald-100 text-emerald-800" : "bg-red-100 text-red-800"
                                   }`}>
                                     {item.passed ? "✓ PASSED" : "✗ FAILED"}
@@ -676,7 +676,7 @@ const AdminCertifications = () => {
                                   )}
                                 </div>
                               ) : (
-                                <span className="text-slate-300 text-xs">—</span>
+                                <span className="text-slate-300 text-sm">—</span>
                               )}
                             </td>
                           </tr>
@@ -696,14 +696,14 @@ const AdminCertifications = () => {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6 border-b pb-4">
             <div className="space-y-1">
-              <h2 className="text-lg font-bold text-slate-800">Exam Questions Manager</h2>
-              <p className="text-xs text-slate-400">Select a certification to manage its multiple choice exam questions.</p>
+              <h2 className="text-xl font-semibold text-slate-800">Exam Questions Manager</h2>
+              <p className="text-sm text-slate-400">Select a certification to manage its multiple choice exam questions.</p>
             </div>
             <div className="flex items-center gap-3">
               <select
                 value={selectedQuestionsCertId}
                 onChange={(e) => setSelectedQuestionsCertId(e.target.value)}
-                className="border border-gray-200 rounded-xl px-3 py-2 text-xs font-semibold bg-white focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none cursor-pointer"
+                className="border border-gray-200 rounded-xl px-3 py-2 text-sm font-medium bg-white focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none cursor-pointer"
               >
                 <option value="">Select Certification...</option>
                 {certifications.map((c) => (
@@ -723,7 +723,7 @@ const AdminCertifications = () => {
                       correctOptionIndex: 0,
                     })
                   }
-                  className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-semibold tracking-wide transition-colors shrink-0"
+                  className="flex items-center gap-1.5 px-4 py-2 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-sm font-medium tracking-wide transition-colors shrink-0"
                 >
                   <Plus size={14} /> Add Question
                 </button>
@@ -732,7 +732,7 @@ const AdminCertifications = () => {
           </div>
 
           {!selectedQuestionsCertId ? (
-            <div className="text-center py-16 text-slate-400 font-medium">
+            <div className="text-center py-16 text-slate-400 font-normal">
               Please select a certification from the dropdown above to manage its exam questions.
             </div>
           ) : (() => {
@@ -743,8 +743,8 @@ const AdminCertifications = () => {
             if (certQuestions.length === 0) {
               return (
                 <div className="text-center py-16 text-slate-400">
-                  <p className="font-semibold text-slate-500 mb-1">No questions created yet</p>
-                  <p className="text-xs max-w-sm mx-auto mb-4">You can add multiple choice questions here to compile the mock exam for {selectedCert.name}.</p>
+                  <p className="font-medium text-slate-500 mb-1">No questions created yet</p>
+                  <p className="text-sm max-w-sm mx-auto mb-4">You can add multiple choice questions here to compile the mock exam for {selectedCert.name}.</p>
                   <button
                     onClick={() =>
                       setQuestionModal({
@@ -756,7 +756,7 @@ const AdminCertifications = () => {
                         correctOptionIndex: 0,
                       })
                     }
-                    className="px-4 py-2 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded-xl text-xs font-semibold transition-colors"
+                    className="px-4 py-2 bg-purple-50 text-purple-700 hover:bg-purple-100 rounded-xl text-sm font-medium transition-colors"
                   >
                     Add Your First Question
                   </button>
@@ -768,7 +768,7 @@ const AdminCertifications = () => {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-gray-100 text-slate-400 text-xs font-bold uppercase tracking-wider">
+                    <tr className="border-b border-gray-100 text-slate-400 text-sm font-semibold uppercase tracking-wider">
                       <th className="pb-3 w-12 text-center">#</th>
                       <th className="pb-3 max-w-xs">Question text</th>
                       <th className="pb-3">Options</th>
@@ -776,30 +776,30 @@ const AdminCertifications = () => {
                       <th className="pb-3 text-right w-24">Actions</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50 text-sm text-slate-600">
+                  <tbody className="divide-y divide-gray-50 text-base text-slate-600">
                     {certQuestions.map((q, idx) => (
                       <tr key={idx} className="hover:bg-slate-50/50">
-                        <td className="py-4 text-center font-bold text-slate-400">{idx + 1}</td>
-                        <td className="py-4 font-semibold text-slate-800 leading-snug">{q.questionText}</td>
+                        <td className="py-4 text-center font-semibold text-slate-400">{idx + 1}</td>
+                        <td className="py-4 font-medium text-slate-800 leading-snug">{q.questionText}</td>
                         <td className="py-4">
-                          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-slate-500 max-w-md">
+                          <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-sm text-slate-500 max-w-md">
                             {q.options?.map((o, optionIdx) => (
                               <div
                                 key={optionIdx}
                                 className={`flex items-center gap-1.5 py-0.5 px-2 rounded-lg ${
                                   optionIdx === q.correctOptionIndex
-                                    ? "bg-green-50 text-green-700 font-bold border border-green-200"
+                                    ? "bg-green-50 text-green-700 font-semibold border border-green-200"
                                     : ""
                                 }`}
                               >
-                                <span className="font-bold opacity-60">{String.fromCharCode(65 + optionIdx)}.</span>
+                                <span className="font-semibold opacity-60">{String.fromCharCode(65 + optionIdx)}.</span>
                                 <span className="truncate">{o}</span>
                               </div>
                             ))}
                           </div>
                         </td>
                         <td className="py-4 text-center">
-                          <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full font-bold text-xs">
+                          <span className="px-3 py-1 bg-green-100 text-green-800 rounded-full font-semibold text-sm">
                             Option {q.correctOptionIndex + 1} ({String.fromCharCode(65 + q.correctOptionIndex)})
                           </span>
                         </td>
@@ -838,26 +838,26 @@ const AdminCertifications = () => {
       {issuerModal.open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-6">
-            <h3 className="font-bold text-slate-800 text-lg mb-4">
+            <h3 className="font-semibold text-slate-800 text-xl mb-4">
               {issuerModal.mode === "create" ? "Add Parent Category / Issuer" : "Edit Parent Category"}
             </h3>
             <div className="flex flex-col gap-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Name</label>
+                <label className="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Name</label>
                 <input
                   type="text"
                   value={issuerModal.name}
                   onChange={(e) => setIssuerModal({ ...issuerModal, name: e.target.value })}
                   placeholder="e.g. Amazon Web Services (AWS) Certifications"
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Type</label>
+                <label className="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Type</label>
                 <select
                   value={issuerModal.type}
                   onChange={(e) => setIssuerModal({ ...issuerModal, type: e.target.value })}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
                 >
                   <option value="issuer">Issuer (e.g. Amazon, Cisco)</option>
                   <option value="subject">Subject (e.g. Cloud Certification)</option>
@@ -865,25 +865,25 @@ const AdminCertifications = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Description</label>
+                <label className="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Description</label>
                 <textarea
                   value={issuerModal.description}
                   onChange={(e) => setIssuerModal({ ...issuerModal, description: e.target.value })}
                   rows={3}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none resize-none"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none resize-none"
                 />
               </div>
             </div>
             <div className="flex justify-end gap-2 mt-6">
               <button
                 onClick={() => setIssuerModal({ open: false })}
-                className="px-4 py-2 rounded-xl border border-gray-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold transition-colors"
+                className="px-4 py-2 rounded-xl border border-gray-200 text-slate-600 hover:bg-slate-50 text-sm font-medium transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveIssuer}
-                className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold tracking-wide transition-colors"
+                className="px-4 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-medium tracking-wide transition-colors"
               >
                 Save Category
               </button>
@@ -900,7 +900,7 @@ const AdminCertifications = () => {
             <div className="p-6 border-b border-gray-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Award className="text-purple-600" />
-                <h3 className="font-bold text-slate-800 text-lg">
+                <h3 className="font-semibold text-slate-800 text-xl">
                   {certModal.mode === "create" ? "Add Certification" : "Edit Certification"}
                 </h3>
               </div>
@@ -930,23 +930,23 @@ const AdminCertifications = () => {
 
             {/* Scrollable content */}
             <div className="flex-1 overflow-y-auto p-6 space-y-4">
-              <h4 className="font-bold text-slate-700 text-sm border-b pb-1">Certification Details</h4>
+              <h4 className="font-semibold text-slate-700 text-base border-b pb-1">Certification Details</h4>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Name</label>
+                <label className="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Name</label>
                 <input
                   type="text"
                   value={certModal.name}
                   onChange={(e) => setCertModal({ ...certModal, name: e.target.value })}
                   placeholder="e.g. AWS Certified Developer - Associate"
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
                 />
               </div>
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Parent Category</label>
+                <label className="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Parent Category</label>
                 <select
                   value={certModal.issuer}
                   onChange={(e) => setCertModal({ ...certModal, issuer: e.target.value })}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none cursor-pointer"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none cursor-pointer"
                 >
                   <option value="">Select Parent...</option>
                   {issuers.map((iss) => (
@@ -957,13 +957,13 @@ const AdminCertifications = () => {
 
               {/* Badge Image Uploader */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Badge Image</label>
+                <label className="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Badge Image</label>
                 <div className="flex items-center gap-3">
                   {certModal.badgeUrl && !certModal.badgeImageFile && (
                     <img src={certModal.badgeUrl} alt="Badge Preview" className="w-10 h-10 object-contain rounded border" />
                   )}
                   {certModal.badgeImageFile && (
-                    <div className="w-10 h-10 bg-purple-50 text-purple-700 rounded border flex items-center justify-center font-bold text-xs">
+                    <div className="w-10 h-10 bg-purple-50 text-purple-700 rounded border flex items-center justify-center font-semibold text-sm">
                       New
                     </div>
                   )}
@@ -975,7 +975,7 @@ const AdminCertifications = () => {
                         setCertModal({ ...certModal, badgeImageFile: e.target.files[0] });
                       }
                     }}
-                    className="w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 cursor-pointer"
+                    className="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-medium file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100 cursor-pointer"
                   />
                 </div>
               </div>
@@ -983,12 +983,12 @@ const AdminCertifications = () => {
               {/* Course Category Tree Linkage (Deploy from Start) */}
               <div className="bg-slate-50/50 p-3 rounded-2xl border border-slate-100 space-y-2">
                 <div className="flex flex-col">
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Prep Course Category Linkage</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">Prep Course Category Linkage</span>
                   <span className="text-[9px] text-slate-400">All courses in the chosen category path will be automatically suggested for student preparation.</span>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="block text-[10px] font-medium text-slate-500 mb-0.5">Parent Category</label>
+                    <label className="block text-[10px] font-normal text-slate-500 mb-0.5">Parent Category</label>
                     <select
                       value={certModal.categoryFilterParent}
                       onChange={(e) => {
@@ -999,7 +999,7 @@ const AdminCertifications = () => {
                           categoryFilterSubChild: "",
                         });
                       }}
-                      className="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs bg-white focus:ring-1 focus:ring-purple-400 focus:border-transparent outline-none cursor-pointer"
+                      className="w-full border border-gray-200 rounded-lg px-2 py-1 text-sm bg-white focus:ring-1 focus:ring-purple-400 focus:border-transparent outline-none cursor-pointer"
                     >
                       <option value="">Select Category...</option>
                       {parentCategories.map((c) => (
@@ -1009,7 +1009,7 @@ const AdminCertifications = () => {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-medium text-slate-500 mb-0.5">Child Category</label>
+                    <label className="block text-[10px] font-normal text-slate-500 mb-0.5">Child Category</label>
                     <select
                       value={certModal.categoryFilterChild}
                       onChange={(e) => {
@@ -1020,7 +1020,7 @@ const AdminCertifications = () => {
                         });
                       }}
                       disabled={!certModal.categoryFilterParent}
-                      className="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs bg-white focus:ring-1 focus:ring-purple-400 focus:border-transparent outline-none disabled:bg-slate-100 disabled:text-slate-400 cursor-pointer"
+                      className="w-full border border-gray-200 rounded-lg px-2 py-1 text-sm bg-white focus:ring-1 focus:ring-purple-400 focus:border-transparent outline-none disabled:bg-slate-100 disabled:text-slate-400 cursor-pointer"
                     >
                       <option value="">All Children</option>
                       {childCategories.map((c) => (
@@ -1030,7 +1030,7 @@ const AdminCertifications = () => {
                   </div>
 
                   <div>
-                    <label className="block text-[10px] font-medium text-slate-500 mb-0.5">Sub Child Category</label>
+                    <label className="block text-[10px] font-normal text-slate-500 mb-0.5">Sub Child Category</label>
                     <select
                       value={certModal.categoryFilterSubChild}
                       onChange={(e) => {
@@ -1040,7 +1040,7 @@ const AdminCertifications = () => {
                         });
                       }}
                       disabled={!certModal.categoryFilterChild}
-                      className="w-full border border-gray-200 rounded-lg px-2 py-1 text-xs bg-white focus:ring-1 focus:ring-purple-400 focus:border-transparent outline-none disabled:bg-slate-100 disabled:text-slate-400 cursor-pointer"
+                      className="w-full border border-gray-200 rounded-lg px-2 py-1 text-sm bg-white focus:ring-1 focus:ring-purple-400 focus:border-transparent outline-none disabled:bg-slate-100 disabled:text-slate-400 cursor-pointer"
                     >
                       <option value="">All Sub-Children</option>
                       {subChildCategories.map((c) => (
@@ -1053,80 +1053,80 @@ const AdminCertifications = () => {
 
               <div className="grid grid-cols-3 gap-2">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Exam Price</label>
+                  <label className="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Exam Price</label>
                   <input
                     type="number"
                     value={certModal.examPrice}
                     onChange={(e) => setCertModal({ ...certModal, examPrice: Number(e.target.value) })}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Certificate Price</label>
+                  <label className="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Certificate Price</label>
                   <input
                     type="number"
                     value={certModal.certificatePrice}
                     onChange={(e) => setCertModal({ ...certModal, certificatePrice: Number(e.target.value) })}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Duration (m)</label>
+                  <label className="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Duration (m)</label>
                   <input
                     type="number"
                     value={certModal.duration}
                     onChange={(e) => setCertModal({ ...certModal, duration: Number(e.target.value) })}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-4 gap-2">
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Total Marks</label>
+                  <label className="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Total Marks</label>
                   <input
                     type="number"
                     value={certModal.totalMarks}
                     onChange={(e) => setCertModal({ ...certModal, totalMarks: Number(e.target.value) })}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Pass Marks</label>
+                  <label className="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Pass Marks</label>
                   <input
                     type="number"
                     value={certModal.passMarks}
                     onChange={(e) => setCertModal({ ...certModal, passMarks: Number(e.target.value) })}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Passing score (%)</label>
+                  <label className="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Passing score (%)</label>
                   <input
                     type="number"
                     value={certModal.passingScore}
                     onChange={(e) => setCertModal({ ...certModal, passingScore: Number(e.target.value) })}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Grades</label>
+                  <label className="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Grades</label>
                   <input
                     type="text"
                     value={certModal.grades}
                     onChange={(e) => setCertModal({ ...certModal, grades: e.target.value })}
-                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
+                    className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">Description</label>
+                <label className="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">Description</label>
                 <textarea
                   value={certModal.description}
                   onChange={(e) => setCertModal({ ...certModal, description: e.target.value })}
                   rows={2}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none resize-none"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none resize-none"
                 />
               </div>
             </div>
@@ -1157,13 +1157,13 @@ const AdminCertifications = () => {
                     questions: [],
                   })
                 }
-                className="px-4 py-2 rounded-xl border border-gray-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold transition-colors"
+                className="px-4 py-2 rounded-xl border border-gray-200 text-slate-600 hover:bg-slate-50 text-sm font-medium transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveCert}
-                className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold tracking-wide transition-colors"
+                className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold tracking-wide transition-colors"
               >
                 Save Certification
               </button>
@@ -1180,7 +1180,7 @@ const AdminCertifications = () => {
             <div className="p-6 border-b border-gray-100 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <HelpCircle className="text-purple-600" />
-                <h3 className="font-bold text-slate-800 text-lg">
+                <h3 className="font-semibold text-slate-800 text-xl">
                   {questionModal.mode === "add" ? "Add Exam Question" : "Edit Exam Question"}
                 </h3>
               </div>
@@ -1197,7 +1197,7 @@ const AdminCertifications = () => {
             {/* Content */}
             <div className="p-6 space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
+                <label className="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">
                   Question Text
                 </label>
                 <textarea
@@ -1210,17 +1210,17 @@ const AdminCertifications = () => {
                     }))
                   }
                   rows={3}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none resize-none"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none resize-none"
                 />
               </div>
 
               <div className="space-y-3">
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
+                <label className="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">
                   Multiple Choice Options
                 </label>
                 {questionModal.options.map((opt, idx) => (
                   <div key={idx} className="flex items-center gap-2">
-                    <span className="w-6 font-bold text-slate-400 text-sm">
+                    <span className="w-6 font-semibold text-slate-400 text-base">
                       {String.fromCharCode(65 + idx)}.
                     </span>
                     <input
@@ -1235,14 +1235,14 @@ const AdminCertifications = () => {
                           options: nextOpts,
                         }))
                       }}
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none"
                     />
                   </div>
                 ))}
               </div>
 
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-1">
+                <label className="block text-sm font-semibold uppercase tracking-wider text-slate-400 mb-1">
                   Correct Answer
                 </label>
                 <select
@@ -1253,7 +1253,7 @@ const AdminCertifications = () => {
                       correctOptionIndex: Number(e.target.value),
                     }))
                   }
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none cursor-pointer"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2 text-base focus:ring-2 focus:ring-purple-400 focus:border-transparent outline-none cursor-pointer"
                 >
                   <option value={0}>Option 1 (A)</option>
                   <option value={1}>Option 2 (B)</option>
@@ -1269,13 +1269,13 @@ const AdminCertifications = () => {
                 onClick={() =>
                   setQuestionModal((prev) => ({ ...prev, open: false }))
                 }
-                className="px-4 py-2 rounded-xl border border-gray-200 text-slate-600 hover:bg-slate-50 text-xs font-semibold transition-colors"
+                className="px-4 py-2 rounded-xl border border-gray-200 text-slate-600 hover:bg-slate-50 text-sm font-medium transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSaveQuestion}
-                className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold tracking-wide transition-colors"
+                className="px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-sm font-semibold tracking-wide transition-colors"
               >
                 Save Question
               </button>
