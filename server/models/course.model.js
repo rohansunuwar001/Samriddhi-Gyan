@@ -49,7 +49,7 @@ const courseSchema = new mongoose.Schema(
     },
     thumbnail: {
       type: String,
-      default: "https://via.placeholder.com/720x405.png?text=Course+Thumbnail",
+      default: "https://placehold.co/720x405/e2e8f0/475569.png?text=Course+Thumbnail",
     },
     promoVideoUrl: {
       type: String,
@@ -124,6 +124,7 @@ const courseSchema = new mongoose.Schema(
       downloadableResources: { type: Number,  default: 0    },
       hasMobileAccess:       { type: Boolean, default: true },
       hasCertificate:        { type: Boolean, default: true },
+      hasCaptions:           { type: Boolean, default: false },
     },
     // --- USER RELATIONSHIPS & PUBLISHING ---
     creator: {

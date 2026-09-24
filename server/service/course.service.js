@@ -7,6 +7,7 @@ import fs from "fs";
 import mongoose from "mongoose";
 import { Course } from "../models/course.model.js";
 import { Certification } from "../models/certification.model.js";
+import { CertificationIssuer } from "../models/certificationIssuer.model.js";
 import { Review } from "../models/review.model.js";
 import { CoursePurchase } from "../models/coursePurchase.model.js";
 import { CourseProgress } from "../models/courseProgress.model.js";
@@ -16,31 +17,32 @@ import { Lecture } from "../models/lecture.model.js";
 import { SearchSuggestion } from "../models/searchSuggestion.js";
 import Category from "../models/category.model.js";
 import Topic from "../models/topic.model.js";
+import axios from "axios";
 import { uploadMedia, deleteFromCloudinary } from "../utils/cloudinary.js";
-import { uploadHLSToB2, deleteHLSFromB2, isB2Configured } from "../utils/b2Storage.js";
+import { uploadHLSToB2, uploadRawFileToB2, deleteHLSFromB2, isB2Configured } from "../utils/b2Storage.js";
 import { createEmbeddingForText, cosineSimilarity } from "../utils/embedding.js";
 import { extractCloudinaryPublicId } from "../helpers/cloudinary.helper.js";
 import { upsertSearchSuggestion } from "../helpers/searchSuggestion.helper.js";
 import { BaseService } from "../core/base.service.js";
+import { sanitizeTopics } from "../helpers/topic.helper.js";
+import { updateCourseStats } from "../helpers/courseStats.helper.js";
 
 const normalizeTopicName = (value) => value?.trim().toLowerCase();
 
 const removeDuplicateCategoryTopics = (topics, category) => {
-  if (!Array.isArray(topics) || topics.length === 0) return [];
+  const sanitized = sanitizeTopics(topics);
+  if (sanitized.length === 0) return [];
   const categoryName = normalizeTopicName(category);
   const seen = new Set();
 
-  return topics
-    .map((topic) => topic?.trim())
-    .filter(Boolean)
-    .filter((topic) => {
-      const normalizedTopic = normalizeTopicName(topic);
-      if (!normalizedTopic || normalizedTopic === categoryName || seen.has(normalizedTopic)) {
-        return false;
-      }
-      seen.add(normalizedTopic);
-      return true;
-    });
+  return sanitized.filter((topic) => {
+    const normalizedTopic = normalizeTopicName(topic);
+    if (!normalizedTopic || normalizedTopic === categoryName || seen.has(normalizedTopic)) {
+      return false;
+    }
+    seen.add(normalizedTopic);
+    return true;
+  });
 };
 
 const getCategoryDisplayInfo = async (categoryName) => {
@@ -181,80 +183,54 @@ export class CourseService extends BaseService {
     }
 
     if (promoVideoFile) {
+      // Clean up previous promo video if any from B2 and local directory
+      await deleteHLSFromB2(`promo/promo-${courseId}`).catch(() => {});
+      const previousOutputDir = path.join(process.cwd(), "public", "hls", `promo-${courseId}`);
+      if (fs.existsSync(previousOutputDir)) {
+        try { fs.rmSync(previousOutputDir, { recursive: true, force: true }); } catch (_) {}
+      }
+
       course.promoVideoStatus = "processing";
       course.promoVideoUrl = "";
+      course.promoVideoProgress = 5;
       await course.save();
 
       const rawPath = path.resolve(promoVideoFile.path);
-      const outputDir = path.join(process.cwd(), "public", "hls", `promo-${courseId}`);
 
-      if (fs.existsSync(outputDir)) {
-        fs.rmSync(outputDir, { recursive: true, force: true });
-      }
+      // Trigger asynchronous video-server pipeline
+      (async () => {
+        try {
+          console.log(`[Promo Upload] Processing promotional video for course ${courseId}...`);
+          const cleanName = path.basename(rawPath).replace(/[^a-zA-Z0-9._-]/g, "_");
+          const rawKey = `raw-uploads/promo/${courseId}/${Date.now()}-${cleanName}`;
 
-      import("../utils/transcoder.js").then(({ transcodeToHLS, extractThumbnail }) => {
-        transcodeToHLS(rawPath, outputDir, async (pct) => {
+          // 1. Upload raw video file to Backblaze B2 (Class A PutObject)
           try {
-            await Course.findByIdAndUpdate(courseId, { promoVideoProgress: pct });
-          } catch (err) {
-            console.error("Failed to update transcode progress:", err.message);
-          }
-        })
-        .then(async () => {
-          const thumbnailFilename = "thumbnail.jpg";
-          const thumbnailDest = path.join(outputDir, thumbnailFilename);
-          try {
-            await extractThumbnail(rawPath, thumbnailDest);
-          } catch (thumbErr) {
-            console.error("[Promo Transcoder] Failed to extract thumbnail:", thumbErr.message);
+            await uploadRawFileToB2(rawPath, rawKey);
+          } catch (b2UploadErr) {
+            console.warn(`[Promo Upload] B2 raw file upload warning: ${b2UploadErr.message}`);
           }
 
-          let masterUrl = "";
-          let promoVideoThumbnail = "";
-
-          if (isB2Configured()) {
-            const b2Result = await uploadHLSToB2(
-              outputDir,
-              `promo/promo-${courseId}`,
-              async (pct) => {
-                try {
-                  await Course.findByIdAndUpdate(courseId, {
-                    promoVideoProgress: 80 + Math.round(pct * 0.2),
-                  });
-                } catch (_) {}
-              },
-            );
-            masterUrl = b2Result.masterUrl;
-            promoVideoThumbnail = b2Result.thumbnailUrl;
-
-            // Remove local temp directory
-            try {
-              fs.rmSync(outputDir, { recursive: true, force: true });
-            } catch (_) {}
-          } else {
-            const backendUrl = process.env.BACKEND_URI || "http://localhost:8080";
-            masterUrl = `${backendUrl}/hls/promo-${courseId}/master.m3u8`;
-            if (fs.existsSync(thumbnailDest)) {
-              promoVideoThumbnail = `${backendUrl}/hls/promo-${courseId}/${thumbnailFilename}`;
-            }
-          }
-
-          await Course.findByIdAndUpdate(courseId, {
-            promoVideoStatus: "ready",
-            promoVideoUrl: masterUrl,
-            promoVideoThumbnail: promoVideoThumbnail,
-            promoVideoProgress: 100,
-          });
-          try { fs.rmSync(rawPath, { force: true }); } catch (_) {}
-        })
-        .catch(async (err) => {
-          console.error("[Promo Transcoder] Error processing promo video:", err.message);
-          await Course.findByIdAndUpdate(courseId, { promoVideoStatus: "failed" });
-          try { fs.rmSync(rawPath, { force: true }); } catch (_) {}
-        });
-      }).catch(err => {
-        console.error("Failed to load HLS transcoder:", err);
-      });
+          // 2. Dispatch transcode job to dedicated video-server (port 8081)
+          const videoServerUrl = process.env.VIDEO_SERVER_URL || "http://localhost:8081";
+          console.log(`[Promo Upload] Dispatching transcoding job to ${videoServerUrl}...`);
+          await axios.post(
+            `${videoServerUrl}/api/v1/jobs/transcode`,
+            {
+              type: "promo",
+              courseId,
+              lectureId: `promo-${courseId}`,
+              rawKey,
+              rawLocalPath: rawPath,
+            },
+            { timeout: 10000 }
+          );
+          console.log(`[Promo Upload] Transcoder job accepted for course ${courseId}`);
+        } catch (err) {
+          console.error("[Promo Upload] Error dispatching promotional video to video-server:", err.message);
+          await Course.findByIdAndUpdate(courseId, { promoVideoStatus: "failed", promoVideoProgress: 0 });
+        }
+      })();
     }
 
     const textFields = ["title", "subtitle", "description", "category", "language", "level", "learnings", "requirements", "whoIsThisFor", "enrollmentType", "primaryTopic"];
@@ -287,13 +263,30 @@ export class CourseService extends BaseService {
         course.relatedCertificates = parsed
           .map((id) => (typeof id === "object" && id?._id ? id._id : id))
           .filter((id) => mongoose.Types.ObjectId.isValid(id));
+        course.markModified("relatedCertificates");
       }
     }
 
     if (fields.topics !== undefined) {
-      course.topics = await validateTopics(fields.topics, fields.category ?? course.category);
+      const sanitized = sanitizeTopics(fields.topics);
+      course.topics = await validateTopics(sanitized, fields.category ?? course.category);
+      course.markModified("topics");
     } else if (fields.category !== undefined) {
       course.topics = removeDuplicateCategoryTopics(course.topics, course.category);
+      course.markModified("topics");
+    }
+
+    // Synchronize primaryTopic based on updated course.topics
+    if (fields.primaryTopic !== undefined) {
+      const cleanedPrimary = sanitizeTopics(fields.primaryTopic);
+      course.primaryTopic = cleanedPrimary[0] || (typeof fields.primaryTopic === "string" ? fields.primaryTopic.trim() : "");
+    }
+    if (course.topics && course.topics.length > 0) {
+      if (!course.primaryTopic || !course.topics.includes(course.primaryTopic)) {
+        course.primaryTopic = course.topics[0];
+      }
+    } else {
+      course.primaryTopic = "";
     }
 
     if (fields.courseIncludes) {
@@ -310,14 +303,25 @@ export class CourseService extends BaseService {
           ? ci.hasCertificate === true || ci.hasCertificate === "true"
           : (existing.hasCertificate ?? true),
       };
+      course.markModified("courseIncludes");
     }
 
     if (fields.price) {
-      if (fields.price.original !== undefined && fields.price.original !== null) course.price.original = fields.price.original;
-      if (fields.price.current !== undefined && fields.price.current !== null)  course.price.current  = fields.price.current;
+      if (fields.price.original !== undefined && fields.price.original !== null && fields.price.original !== "") {
+        course.price.original = Number(fields.price.original) || 0;
+      }
+      if (fields.price.current !== undefined && fields.price.current !== null && fields.price.current !== "") {
+        course.price.current = Number(fields.price.current) || 0;
+      }
     }
 
-    return await course.save();
+    const saved = await course.save();
+    try {
+      await updateCourseStats(course._id);
+    } catch (statsErr) {
+      console.warn("[editCourse] Failed to recalculate course stats:", statsErr.message);
+    }
+    return saved;
   }
 
   async removeCourse(courseId) {
@@ -368,7 +372,12 @@ export class CourseService extends BaseService {
       throw error;
     }
 
-    await deleteHLSFromB2(`promo/promo-${courseId}`);
+    if (course.promoVideoUrl && course.promoVideoUrl.includes("cloudinary.com")) {
+      const publicId = extractCloudinaryPublicId(course.promoVideoUrl);
+      if (publicId) await deleteFromCloudinary(publicId, "video").catch(() => {});
+    }
+
+    await deleteHLSFromB2(`promo/promo-${courseId}`).catch(() => {});
     const outputDir = path.join(process.cwd(), "public", "hls", `promo-${courseId}`);
     if (fs.existsSync(outputDir)) {
       try { fs.rmSync(outputDir, { recursive: true, force: true }); } catch (_) {}
@@ -399,19 +408,31 @@ export class CourseService extends BaseService {
   }
 
   async getPublishedCourses(userId = null, enrolledIds = []) {
-    const courses = await Course.find({ isPublished: true })
+    // Build query — exclude courses the user already owns so they don't
+    // appear on the "Explore All Courses" page for the purchasing user.
+    const query = { isPublished: true };
+    if (enrolledIds.length > 0) {
+      query._id = { $nin: enrolledIds };
+    }
+
+    const courses = await Course.find(query)
       .populate({ path: "creator", select: "name photoUrl headline" })
       .populate("sections")
       .lean();
 
     return courses.map((course) => ({
       ...course,
-      isPurchased: enrolledIds.some((id) => id.toString() === course._id.toString()),
+      isPurchased: false, // all returned courses are not yet purchased by the user
     }));
   }
 
   async getCourseById(courseId, userId = null) {
-    const course = await Course.findById(courseId)
+    const isObjectId = mongoose.Types.ObjectId.isValid(courseId);
+    const query = isObjectId
+      ? { $or: [{ _id: courseId }, { slug: courseId }] }
+      : { slug: courseId };
+
+    const course = await Course.findOne(query)
       .populate({ path: "creator", select: "name photoUrl headline description" })
       .populate({ path: "sections", populate: { path: "lectures" } })
       .populate({ path: "relatedCertificates", populate: { path: "issuer", select: "name type" } })

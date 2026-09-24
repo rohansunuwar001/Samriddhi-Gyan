@@ -14,14 +14,14 @@ const PurchaseCourseProtectedRoute = ({ children }) => {
 
     // If there was an error fetching, redirect back as a fallback
     if (isError) {
-        return <Navigate to={`/course-detail/${courseId}`} />;
+        return <Navigate to={`/course/${courseId}`} />;
     }
 
     // --- FIX: Access the 'purchaseStatus' from the nested 'course' object ---
     // The API returns { success: true, course: { purchaseStatus: 'completed' } }
     const isCompleted = data?.course?.purchaseStatus === "completed";
 
-    return isCompleted ? children : <Navigate to={`/course-detail/${courseId}`} />;
+    return isCompleted ? children : <Navigate to={`/course/${data?.course?.slug || courseId}`} />;
 };
 
 PurchaseCourseProtectedRoute.propTypes = {

@@ -9,9 +9,21 @@
 //    .map() is for transforming arrays, not mutating them. Same result, correct intent.
 //  - getCourseProgress: added a 500 response for the catch block (was swallowing errors silently).
 
+import mongoose from "mongoose";
 import { CourseProgress } from "../models/courseProgress.model.js";
 import { Course } from "../models/course.model.js";
 import { createNotification } from "../service/notification.service.js";
+
+// Helper to find a course by ObjectId or slug
+const resolveCourse = async (identifier, populateOptions = null) => {
+  const isObjectId = mongoose.Types.ObjectId.isValid(identifier);
+  const query = isObjectId
+    ? { $or: [{ _id: identifier }, { slug: identifier }] }
+    : { slug: identifier };
+  let q = Course.findOne(query);
+  if (populateOptions) q = q.populate(populateOptions);
+  return q;
+};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // GET PROGRESS FOR A COURSE
@@ -21,21 +33,21 @@ export const getCourseProgress = async (req, res) => {
     const { courseId } = req.params;
     const userId = req.user._id;
 
-    const [courseProgress, courseDetails] = await Promise.all([
-      CourseProgress.findOne({ courseId, userId }).populate("courseId"),
-      Course.findById(courseId).populate({
-        path: "sections",
-        populate: {
-          path: "lectures",
-          select: "title videoUrl durationInSeconds isPreview",
-        },
-        select: "title lectures totalDurationInSeconds",
-      }),
-    ]);
+    const courseDetails = await resolveCourse(courseId, {
+      path: "sections",
+      populate: {
+        path: "lectures",
+        select: "title videoUrl durationInSeconds isPreview",
+      },
+      select: "title lectures totalDurationInSeconds",
+    });
 
     if (!courseDetails) {
       return res.status(404).json({ success: false, message: "Course not found." });
     }
+
+    const realCourseId = courseDetails._id;
+    const courseProgress = await CourseProgress.findOne({ courseId: realCourseId, userId }).populate("courseId");
 
     // No progress yet — return course with empty progress
     if (!courseProgress) {
@@ -65,13 +77,24 @@ export const updateLectureProgress = async (req, res) => {
     const { courseId, lectureId } = req.params;
     const { viewed } = req.body;
     const userId = req.user._id;
+
+    const courseDetails = await resolveCourse(courseId, {
+      path: "sections",
+      select: "lectures",
+    });
+
+    if (!courseDetails) {
+      return res.status(404).json({ success: false, message: "Course not found." });
+    }
+
+    const realCourseId = courseDetails._id;
  
-    let courseProgress = await CourseProgress.findOne({ courseId, userId });
+    let courseProgress = await CourseProgress.findOne({ courseId: realCourseId, userId });
  
     if (!courseProgress) {
       courseProgress = new CourseProgress({
         userId,
-        courseId,
+        courseId: realCourseId,
         completed: false,
         lectureProgress: [],
       });
@@ -91,11 +114,6 @@ export const updateLectureProgress = async (req, res) => {
       courseProgress.lectureProgress.push({ lectureId, viewed: viewed !== undefined ? viewed : true });
     }
  
-    const courseDetails = await Course.findById(courseId).populate({
-      path: "sections",
-      select: "lectures",
-    });
- 
     const totalLectures = courseDetails.sections.reduce(
       (sum, section) => sum + (section.lectures?.length || 0),
       0
@@ -110,7 +128,7 @@ export const updateLectureProgress = async (req, res) => {
       await createNotification(
         userId,
         `Congratulations! You have completed the course "${courseDetails.title}".`,
-        `/course-detail/${courseDetails._id}/content`,
+        `/course/${courseDetails.slug || courseDetails._id}/content`,
         "course_completion"
       );
     }
@@ -133,7 +151,13 @@ export const markAsCompleted = async (req, res) => {
     const { courseId } = req.params;
     const userId = req.user._id;
 
-    const courseProgress = await CourseProgress.findOne({ courseId, userId });
+    const courseDetails = await resolveCourse(courseId);
+    if (!courseDetails) {
+      return res.status(404).json({ success: false, message: "Course not found." });
+    }
+
+    const realCourseId = courseDetails._id;
+    const courseProgress = await CourseProgress.findOne({ courseId: realCourseId, userId });
     if (!courseProgress) {
       return res.status(404).json({ success: false, message: "Course progress not found." });
     }
@@ -158,7 +182,13 @@ export const markAsInCompleted = async (req, res) => {
     const { courseId } = req.params;
     const userId = req.user._id;
 
-    const courseProgress = await CourseProgress.findOne({ courseId, userId });
+    const courseDetails = await resolveCourse(courseId);
+    if (!courseDetails) {
+      return res.status(404).json({ success: false, message: "Course not found." });
+    }
+
+    const realCourseId = courseDetails._id;
+    const courseProgress = await CourseProgress.findOne({ courseId: realCourseId, userId });
     if (!courseProgress) {
       return res.status(404).json({ success: false, message: "Course progress not found." });
     }

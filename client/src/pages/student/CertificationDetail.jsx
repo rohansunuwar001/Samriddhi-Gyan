@@ -170,7 +170,7 @@ const CertificationDetail = () => {
                   {relatedCourses.map((c) => (
                     <div
                       key={c._id}
-                      onClick={() => navigate(`/course-detail/${c._id}`)}
+                      onClick={() => navigate(`/course/${c.slug || c._id}`)}
                       className="flex items-center gap-2 p-2 border border-slate-100 rounded-xl bg-slate-50/50 hover:bg-purple-50/30 hover:border-purple-100 transition-all cursor-pointer"
                     >
                       <img src={c.thumbnail || "/default-thumbnail.jpg"} alt="" className="w-9 h-9 object-cover rounded-lg border shrink-0" />
@@ -392,7 +392,7 @@ const CertificationDetail = () => {
               {relatedCourses.map((c) => (
                 <div
                   key={c._id}
-                  onClick={() => navigate(`/course-detail/${c._id}`)}
+                  onClick={() => navigate(`/course/${c.slug || c._id}`)}
                   className="bg-white border border-slate-100 rounded-2xl overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between h-full"
                 >
                   <div>

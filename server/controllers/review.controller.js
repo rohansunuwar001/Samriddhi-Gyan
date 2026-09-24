@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Course } from "../models/course.model.js";
 import { Review } from "../models/review.model.js";
 import { User } from "../models/user.model.js";
@@ -27,27 +28,33 @@ export const createReview = async (req, res) => {
   const userId = req.user._id;
  
   try {
-    const course = await Course.findById(courseId);
+    const isObjectId = mongoose.Types.ObjectId.isValid(courseId);
+    const courseQuery = isObjectId ? { $or: [{ _id: courseId }, { slug: courseId }] } : { slug: courseId };
+    const course = await Course.findOne(courseQuery);
  
     if (!course) {
       return res.status(404).json({ message: "Course not found." });
     }
+
+    const realCourseId = course._id;
  
-    const isEnrolled = course.enrolledStudents.includes(userId);
+    const isEnrolled = course.enrolledStudents.some(
+      (studentId) => studentId.toString() === userId.toString()
+    );
     if (!isEnrolled) {
       return res.status(403).json({ message: "You must be enrolled in this course to leave a review." });
     }
  
-    const existingReview = await Review.findOne({ course: courseId, user: userId });
+    const existingReview = await Review.findOne({ course: realCourseId, user: userId });
     if (existingReview) {
       return res.status(400).json({ message: "You have already reviewed this course." });
     }
  
-    const review = await Review.create({ rating, comment, user: userId, course: courseId });
+    const review = await Review.create({ rating, comment, user: userId, course: realCourseId });
  
     course.reviews.push(review._id);
     await course.save();
-    await updateCourseRating(courseId);
+    await updateCourseRating(realCourseId);
  
     // Notify the instructor about the new review
     const student = await User.findById(userId).select("name");

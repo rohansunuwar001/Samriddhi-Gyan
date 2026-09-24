@@ -1,4 +1,4 @@
-import React from 'react';
+/* eslint-disable react/prop-types, no-unused-vars */
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import InstructorSidebar from './InstructorSidebar';
@@ -50,7 +50,6 @@ const instructorLinks = [
     { to: 'course', icon: <BookCopy size={20} />, label: 'My Courses' },
     { to: 'course/students', icon: <Users size={20} />, label: 'Students' },
     { to: 'course/reviews', icon: <MessageSquare size={20} />, label: 'Reviews' },
-    { to: 'course/payouts', icon: <DollarSign size={20} />, label: 'Payouts' },
 ];
 
 // Links for the Admin role, as per your request
@@ -80,7 +79,10 @@ const Sidebar = () => {
         !location.pathname.startsWith('/instructor/profile') &&
         !location.pathname.startsWith('/instructor/account') &&
         !location.pathname.startsWith('/instructor/tools') &&
-        !location.pathname.startsWith('/instructor/resources');
+        !location.pathname.startsWith('/instructor/resources') &&
+        !location.pathname.startsWith('/instructor/assignments') &&
+        !location.pathname.startsWith('/instructor/playground');
+
 
     // If the user is an instructor, render the custom Samriddhi Gyan-style expandable sidebar
     if (user?.role === 'instructor') {

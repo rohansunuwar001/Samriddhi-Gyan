@@ -74,6 +74,28 @@ const lectureSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    // Lecture Resources (Cloudinary uploaded files/PDFs or external links like Google Drive)
+    resources: [
+      {
+        title: { type: String, required: true, trim: true },
+        url: { type: String, required: true, trim: true },
+        type: { type: String, enum: ["pdf", "file", "link"], default: "link" },
+        publicId: { type: String, default: "" }, // For Cloudinary cleanup
+        size: { type: String, default: "" },
+        createdAt: { type: Date, default: Date.now },
+      },
+    ],
+    // Lecture Lab Configuration (Lab instructions, Colab/Drive workspace URL, assignment PDF)
+    lab: {
+      title: { type: String, default: "", trim: true },
+      description: { type: String, default: "", trim: true },
+      url: { type: String, default: "", trim: true }, // e.g. Colab / GitHub / Google Drive URL
+      pdfUrl: { type: String, default: "" }, // Cloudinary or Google Drive PDF URL
+      pdfPublicId: { type: String, default: "" },
+      pdfName: { type: String, default: "" },
+      isActive: { type: Boolean, default: false },
+      updatedAt: { type: Date, default: Date.now },
+    },
   },
   { timestamps: true },
 );

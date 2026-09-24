@@ -1,4 +1,4 @@
-import { useLogoutUserMutation } from "@/features/api/authApi";
+import { useLogoutUserMutation, useSaveSearchTermMutation } from "@/features/api/authApi";
 // --- NEW: Import the NotificationBell component ---
 import {
   // --- REMOVED: `Bell` is no longer needed here as it's inside NotificationBell ---
@@ -14,7 +14,6 @@ import {
   ChevronRight,
   TrendingUp,
   Globe,
-  Compass,
   LayoutDashboard,
   Building2
 } from "lucide-react";
@@ -218,7 +217,7 @@ const WishlistDropdown = ({ navigate }) => {
                 <li key={course._id || course.id || `wishlist-course-${idx}`} className="px-4 pt-4 pb-3">
                   {/* Row: thumbnail + info */}
                   <div
-                    onClick={() => navigate(`/course-detail/${course._id}`)}
+                    onClick={() => navigate(`/course/${course.slug || course._id}`)}
                     className="flex gap-3 cursor-pointer group mb-3"
                   >
                     {/* Square thumbnail */}
@@ -337,7 +336,7 @@ const CartDropdown = ({ navigate }) => {
                 <li
                   key={course._id || course.id || `cart-course-${idx}`}
                   className="p-4 flex gap-3 hover:bg-gray-50 transition-colors cursor-pointer group"
-                  onClick={() => navigate(`/course-detail/${course._id}`)}
+                  onClick={() => navigate(`/course/${course.slug || course._id}`)}
                 >
                   {/* Thumbnail */}
                   <div className="w-[72px] h-[72px] rounded overflow-hidden shrink-0 bg-gray-100">
@@ -560,29 +559,6 @@ const UserAvatar = ({ user, onLogout, t, cartCount = 0 }) => {
                 </Link>
               </div>
 
-              {/* Section 2.5: Student Features */}
-              <div className="py-2 flex flex-col">
-                <span className="px-4 py-1 text-[11px] font-semibold text-gray-400 uppercase tracking-wider select-none">
-                  Features
-                </span>
-                <Link 
-                  to="/nearby-hub" 
-                  onClick={() => setIsOpen(false)}
-                  className="px-4 py-2 text-[14px] text-slate-750 hover:text-[#5624d0] hover:bg-slate-50 transition-colors flex items-center gap-1.5 font-normal"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                  Nearby Hub
-                </Link>
-                <Link 
-                  to="/career-roadmap" 
-                  onClick={() => setIsOpen(false)}
-                  className="px-4 py-2 text-[14px] text-slate-750 hover:text-[#5624d0] hover:bg-slate-50 transition-colors flex items-center gap-1.5 font-normal"
-                >
-                  <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse" />
-                  Career Roadmap
-                </Link>
-              </div>
-
               {/* Section 3: Notifications, Messages */}
               <div className="py-2 flex flex-col">
                 <Link 
@@ -773,6 +749,7 @@ const Navbar = () => {
     : "user";
   const publicProfilePath = user?.role === "student" ? `/user/${usernameSlug}` : user?.role === "admin" ? `/admin/${usernameSlug}` : `/instructor/${usernameSlug}`;
   const [logoutUser, { data, isSuccess }] = useLogoutUserMutation();
+  const [saveSearchTerm] = useSaveSearchTermMutation();
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [results, setResults] = useState({ suggestions: [], courses: [] });
@@ -1269,12 +1246,16 @@ const Navbar = () => {
   const handleSuggestionClick = (suggestion) => {
     navigate(`/course/search?query=${encodeURIComponent(suggestion)}`);
     setIsDropdownVisible(false);
+    // Persist suggestion click as a search term (fire-and-forget, only for logged-in users)
+    if (user) saveSearchTerm(suggestion);
   };
   const handleSearchSubmit = (e) => {
     e.preventDefault();
     if (searchQuery.trim() !== "") {
       navigate(`/course/search?query=${encodeURIComponent(searchQuery)}`);
       setIsDropdownVisible(false);
+      // Persist the search term in DB (fire-and-forget, only for logged-in users)
+      if (user) saveSearchTerm(searchQuery.trim());
     }
   };
 
@@ -1417,8 +1398,8 @@ const Navbar = () => {
   const isHomePage = pathname === "/" || pathname === "/home";
 
   return (
-    <header className={`bg-white border-b border-gray-200 z-40 transition-all duration-300 ease-in-out ${isDashboardPage ? "md:ml-[72px] h-16" : ""}`}>
-      <div className="w-full px-6 md:px-8 h-[72px] flex justify-between items-center gap-6 relative">
+    <header className={`bg-white border-b border-gray-200 relative z-40 transition-all duration-300 ease-in-out ${isDashboardPage ? "md:ml-[72px] h-16" : ""}`}>
+      <div className="w-full px-6 md:px-8 h-[72px] flex justify-between items-center gap-6 relative z-40">
         {/* --- Left side of Navbar (No Changes) --- */}
         <div className="flex items-center gap-4 shrink-0">
           {/* Logo: hide only on instructor/admin dashboard pages, show everywhere else */}
@@ -1689,7 +1670,7 @@ const Navbar = () => {
         {!isDashboardPage && (!user || user.role === "student") && (
           <div
             ref={searchContainerRef}
-            className="flex-1 hidden md:flex items-center mx-6 relative"
+            className="flex-1 hidden md:flex items-center mx-6 relative z-50"
           >
             <form onSubmit={handleSearchSubmit} className="w-full relative flex items-center">
               <Search className="absolute top-1/2 left-4 transform -translate-y-1/2 text-gray-400 z-10 w-4.5 h-4.5" />
@@ -1704,7 +1685,7 @@ const Navbar = () => {
               />
             </form>
             {isDropdownVisible && (
-              <div className="absolute top-full w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-20 max-h-[70vh] overflow-y-auto p-2">
+              <div className="absolute top-full w-full mt-2 bg-white border border-gray-200 rounded-lg shadow-xl z-50 max-h-[70vh] overflow-y-auto p-2">
                 {searchQuery.trim() === "" ? (
                   <div>
                     <h3 className="px-3 py-2 text-lg font-extralight text-gray-400 uppercase tracking-wider flex items-center gap-2 border-b border-gray-50">
@@ -1771,7 +1752,7 @@ const Navbar = () => {
                           {results.courses.map((course, cIdx) => (
                             <li key={course._id || course.id || `search-course-${cIdx}`}>
                               <Link
-                                to={`/course-detail/${course._id}`}
+                                to={`/course/${course.slug || course._id}`}
                                 className="flex items-center gap-3 p-2 rounded-md text-gray-800 hover:bg-gray-100"
                                 onClick={() => setIsDropdownVisible(false)}
                               >
@@ -1974,7 +1955,7 @@ const Navbar = () => {
       {/* --- Secondary Horizontal Category Navigation Bar (Udemy Style: Shown only on Logged-in Student Home Page) --- */}
       {isHomePage && user && user.role === "student" && (
         <nav
-          className="hidden lg:block bg-white border-t border-gray-100 relative z-30 shadow-[0_2px_4px_rgba(0,0,0,0.08)]"
+          className="hidden lg:block bg-white border-t border-gray-100 relative z-20 shadow-[0_2px_4px_rgba(0,0,0,0.08)]"
           onMouseLeave={handleNavCategoryLeave}
         >
           <div className="w-full px-6 md:px-8 flex items-center justify-center gap-6 lg:gap-8 overflow-x-auto scrollbar-none py-0.5">
@@ -2058,12 +2039,6 @@ const Navbar = () => {
                   <>
                     <Link to="/home/my-courses/learning" className="flex items-center gap-3 rounded-lg px-3 py-2 text-2xl font-extralight hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
                       <BookOpen size={16} /> {t("navbar.my_learning")}
-                    </Link>
-                    <Link to="/career-roadmap" className="flex items-center gap-3 rounded-lg px-3 py-2 text-2xl font-extralight hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
-                      <Compass size={16} /> Career Roadmap
-                    </Link>
-                    <Link to="/nearby-hub" className="flex items-center gap-3 rounded-lg px-3 py-2 text-2xl font-extralight hover:bg-gray-100" onClick={() => setMobileMenuOpen(false)}>
-                      <Globe size={16} /> Nearby Hub
                     </Link>
                   </>
                 )}

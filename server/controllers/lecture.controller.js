@@ -1,5 +1,14 @@
 import { transcodeToHLS } from "../utils/transcoder.js";
-import { uploadHLSToB2, deleteHLSFromB2, isB2Configured } from "../utils/b2Storage.js";
+import {
+  uploadHLSToB2,
+  deleteHLSFromB2,
+  isB2Configured,
+  initiateMultipartUpload,
+  getMultipartPartSignedUrls,
+  completeMultipartUpload,
+  abortMultipartUpload,
+} from "../utils/b2Storage.js";
+import axios from "axios";
 import fs from "fs";
 import path from "path";
 import { Lecture } from "../models/lecture.model.js";
@@ -9,6 +18,7 @@ import { spawn } from "child_process";
 import ffmpegStatic from "ffmpeg-static";
 import { GoogleAIFileManager } from "@google/generative-ai/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import { uploadDocument, deleteFromCloudinary } from "../utils/cloudinary.js";
 
 const extractAudioAndTranscribe = async (videoPath, lectureId) => {
   const apiKey = process.env.GEMINI_API_KEY;
@@ -207,13 +217,17 @@ export const uploadVideo = async (req, res) => {
         `[uploadVideo] Done. Renditions: ${renditions.map((r) => r.name).join(", ")}`,
       );
 
-      // Extract and transcribe speech in the background
-      let transcriptText = "";
-      try {
-        transcriptText = await extractAudioAndTranscribe(rawPath, lectureId);
-      } catch (trErr) {
-        console.error("[uploadVideo] Transcription error:", trErr.message);
-      }
+      // Extract and transcribe speech in non-blocking background task
+      extractAudioAndTranscribe(rawPath, lectureId)
+        .then(async (transcriptText) => {
+          if (transcriptText) {
+            await Lecture.findByIdAndUpdate(lectureId, { transcript: transcriptText });
+            console.log(`[uploadVideo] Background transcript updated for ${lectureId}`);
+          }
+        })
+        .catch((trErr) => {
+          console.error("[uploadVideo] Transcription error:", trErr.message);
+        });
 
       // Generate thumbnail from the raw upload
       const thumbFilename = "thumb.jpg";
@@ -282,7 +296,6 @@ export const uploadVideo = async (req, res) => {
         status: "ready",
         durationInSeconds: Math.round(metadata.duration),
         resolution: `${metadata.width}x${metadata.height}`,
-        transcript: transcriptText,
         thumbnail: thumbnailUrl,
       });
 
@@ -321,19 +334,204 @@ export const uploadVideo = async (req, res) => {
   }
 };
 
+// ─── Direct-to-Cloud Chunked (Multipart) Upload ─────────────────────────────
+
+export const initiateChunkedUpload = async (req, res) => {
+  try {
+    const { lectureId } = req.params;
+    const { fileName, fileType = "video/mp4", fileSize, chunkSize = 10 * 1024 * 1024 } = req.body;
+
+    const lecture = await Lecture.findById(lectureId);
+    if (!lecture) {
+      return res.status(404).json({ success: false, message: "Lecture not found" });
+    }
+
+    if (!fileSize || fileSize <= 0) {
+      return res.status(400).json({ success: false, message: "Valid fileSize is required" });
+    }
+
+    const ext = path.extname(fileName || "").toLowerCase() || ".mp4";
+    const cleanFileName = (fileName || "video").replace(/[^a-zA-Z0-9._-]/g, "_");
+    const rawKey = `raw-uploads/${lectureId}/${Date.now()}-${cleanFileName}`;
+
+    const totalParts = Math.ceil(fileSize / chunkSize);
+
+    const { uploadId } = await initiateMultipartUpload(rawKey, fileType);
+    const parts = await getMultipartPartSignedUrls(rawKey, uploadId, totalParts);
+
+    await Lecture.findByIdAndUpdate(lectureId, {
+      status: "uploading",
+      originalName: fileName || "video.mp4",
+    });
+
+    res.json({
+      success: true,
+      uploadId,
+      key: rawKey,
+      totalParts,
+      chunkSize,
+      parts,
+    });
+  } catch (err) {
+    console.error("[initiateChunkedUpload] Error:", err.message);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const completeChunkedUpload = async (req, res) => {
+  try {
+    const { lectureId } = req.params;
+    const { uploadId, key, parts } = req.body;
+
+    if (!uploadId || !key || !parts || !Array.isArray(parts)) {
+      return res.status(400).json({
+        success: false,
+        message: "uploadId, key, and parts array are required",
+      });
+    }
+
+    const lecture = await Lecture.findById(lectureId).populate({
+      path: "section",
+      select: "course",
+    });
+
+    if (!lecture) {
+      return res.status(404).json({ success: false, message: "Lecture not found" });
+    }
+
+    // Assemble parts in Backblaze B2
+    console.log(`[completeChunkedUpload] Completing B2 multipart upload for lecture ${lectureId}...`);
+    await completeMultipartUpload(key, uploadId, parts);
+
+    // Update status to transcoding
+    await Lecture.findByIdAndUpdate(lectureId, {
+      status: "transcoding",
+    });
+
+    // Notify dedicated video transcoder server
+    const videoServerUrl = process.env.VIDEO_SERVER_URL || "http://localhost:8081";
+    try {
+      console.log(`[completeChunkedUpload] Triggering transcoder service at ${videoServerUrl}...`);
+      await axios.post(
+        `${videoServerUrl}/api/v1/jobs/transcode`,
+        {
+          lectureId,
+          rawKey: key,
+          sectionId: lecture.section?._id,
+          courseId: lecture.section?.course,
+        },
+        { timeout: 5000 }
+      );
+      console.log(`[completeChunkedUpload] Job accepted by transcoder service for ${lectureId}`);
+    } catch (workerErr) {
+      console.warn(
+        `[completeChunkedUpload] Transcoder service not reachable at ${videoServerUrl}. (Make sure video-server is running on port 8081). Error:`,
+        workerErr.message
+      );
+    }
+
+    res.json({
+      success: true,
+      message: "Chunked upload complete. Video transcoding dispatched.",
+      lectureId,
+    });
+  } catch (err) {
+    console.error("[completeChunkedUpload] Error:", err.message);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const abortChunkedUpload = async (req, res) => {
+  try {
+    const { uploadId, key } = req.body;
+    if (uploadId && key) {
+      await abortMultipartUpload(key, uploadId);
+    }
+    res.json({ success: true, message: "Upload aborted" });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ─── Webhook for Video Server to Update Lecture on Completion ────────────────
+
+export const webhookLectureComplete = async (req, res) => {
+  try {
+    const { lectureId } = req.params;
+    const {
+      videoUrl,
+      thumbnail,
+      durationInSeconds,
+      resolution,
+      status,
+      transcript,
+      error,
+    } = req.body;
+
+    const lecture = await Lecture.findById(lectureId).populate({
+      path: "section",
+      select: "course",
+    });
+
+    if (!lecture) {
+      return res.status(404).json({ success: false, message: "Lecture not found" });
+    }
+
+    const update = {};
+    if (videoUrl) update.videoUrl = videoUrl;
+    if (thumbnail) update.thumbnail = thumbnail;
+    if (durationInSeconds !== undefined) update.durationInSeconds = durationInSeconds;
+    if (resolution) update.resolution = resolution;
+    if (status) update.status = status;
+    if (transcript) update.transcript = transcript;
+
+    await Lecture.findByIdAndUpdate(lectureId, update);
+
+    if (status === "ready" && lecture.section?.course) {
+      await updateCourseStats(lecture.section.course);
+    }
+
+    console.log(`[webhookLectureComplete] Lecture ${lectureId} updated with status: ${status || 'partial update'}`);
+    res.json({ success: true });
+  } catch (err) {
+    console.error("[webhookLectureComplete] Error:", err.message);
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
 // ─── Get Transcoding Status (polled by frontend every 3s) ────────────────────
 
 export const getLectureStatus = async (req, res) => {
   try {
     const { lectureId } = req.params;
 
-    // In-memory is most current during active transcoding
+    // Prevent browser 304 caching confusion
+    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+
+    // 1. Check dedicated video transcoder server first
+    const videoServerUrl = process.env.VIDEO_SERVER_URL || "http://localhost:8081";
+    try {
+      const { data } = await axios.get(`${videoServerUrl}/api/v1/jobs/${lectureId}/status`, {
+        timeout: 1500,
+      });
+      if (data?.success && data?.job) {
+        return res.json({
+          success: true,
+          lectureId,
+          ...data.job,
+        });
+      }
+    } catch {
+      // Transcoder service either busy or not running local fallback
+    }
+
+    // 2. In-memory local job tracker (for backward compatibility if run locally)
     const job = jobs.get(lectureId);
     if (job) {
       return res.json({ success: true, lectureId, ...job });
     }
 
-    // Fallback to DB (completed before server restart, or never started)
+    // 3. Fallback to DB
     const lecture = await Lecture.findById(lectureId).select(
       "status videoUrl durationInSeconds resolution",
     );
@@ -436,16 +634,34 @@ export const deleteLecture = async (req, res) => {
     } catch {}
 
     // Remove from section
-    await Section.findOneAndUpdate(
+    const updatedSec = await Section.findOneAndUpdate(
       { lectures: lectureId },
       { $pull: { lectures: lectureId } },
+      { new: true }
     );
+
+    if (updatedSec?.course) {
+      await updateCourseStats(updatedSec.course);
+    }
 
     jobs.delete(lectureId);
 
     res.json({ success: true, message: "Lecture deleted" });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ─── Course Stats Helper for Lecture Updates ─────────────────────────────────
+const refreshCourseStatsForLecture = async (lecture) => {
+  try {
+    if (!lecture) return;
+    const section = await Section.findById(lecture.section);
+    if (section?.course) {
+      await updateCourseStats(section.course);
+    }
+  } catch (err) {
+    console.warn("[refreshCourseStatsForLecture] Warning:", err.message);
   }
 };
 
@@ -496,6 +712,7 @@ export const uploadCaption = async (req, res) => {
     });
 
     await lecture.save();
+    await refreshCourseStatsForLecture(lecture);
 
     res.json({ success: true, message: "Caption uploaded successfully", lecture });
   } catch (err) {
@@ -517,6 +734,8 @@ export const toggleCaptionsDisable = async (req, res) => {
     if (!lecture) {
       return res.status(404).json({ success: false, message: "Lecture not found" });
     }
+
+    await refreshCourseStatsForLecture(lecture);
 
     res.json({ success: true, message: "Captions visibility toggled", lecture });
   } catch (err) {
@@ -547,9 +766,227 @@ export const deleteCaption = async (req, res) => {
       
       lecture.captions.pull(captionId);
       await lecture.save();
+      await refreshCourseStatsForLecture(lecture);
     }
 
     res.json({ success: true, message: "Caption deleted successfully", lecture });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ─── Resources Management ───────────────────────────────────────────────────
+
+export const addLectureResourceLink = async (req, res) => {
+  try {
+    const { lectureId } = req.params;
+    const { title, url } = req.body;
+
+    if (!title?.trim() || !url?.trim()) {
+      return res.status(400).json({ success: false, message: "Title and URL are required" });
+    }
+
+    const lecture = await Lecture.findById(lectureId);
+    if (!lecture) {
+      return res.status(404).json({ success: false, message: "Lecture not found" });
+    }
+
+    const isPdf = /\.pdf($|\?)/i.test(url) || /drive\.google\.com.*(pdf|view)/i.test(url);
+    const newResource = {
+      title: title.trim(),
+      url: url.trim(),
+      type: isPdf ? "pdf" : "link",
+    };
+
+    lecture.resources.push(newResource);
+    await lecture.save();
+    await refreshCourseStatsForLecture(lecture);
+
+    res.json({ success: true, message: "Resource link added successfully", lecture });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const uploadLectureResourceFile = async (req, res) => {
+  try {
+    const { lectureId } = req.params;
+    const { title } = req.body;
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No file uploaded" });
+    }
+
+    const lecture = await Lecture.findById(lectureId);
+    if (!lecture) {
+      fs.rmSync(req.file.path, { force: true });
+      return res.status(404).json({ success: false, message: "Lecture not found" });
+    }
+
+    const uploadRes = await uploadDocument(req.file.path, req.file.originalname);
+    if (!uploadRes?.secure_url) {
+      return res.status(500).json({ success: false, message: "Failed to upload file to Cloudinary" });
+    }
+
+    const isPdf = req.file.mimetype === "application/pdf" || req.file.originalname.toLowerCase().endsWith(".pdf");
+    const sizeMb = (req.file.size / (1024 * 1024)).toFixed(2);
+
+    const resourceItem = {
+      title: (title || req.file.originalname).trim(),
+      url: uploadRes.secure_url,
+      type: isPdf ? "pdf" : "file",
+      publicId: uploadRes.public_id,
+      size: `${sizeMb} MB`,
+    };
+
+    lecture.resources.push(resourceItem);
+    await lecture.save();
+    await refreshCourseStatsForLecture(lecture);
+
+    res.json({ success: true, message: "Resource file uploaded successfully to Cloudinary", lecture });
+  } catch (err) {
+    if (req.file?.path && fs.existsSync(req.file.path)) {
+      fs.rmSync(req.file.path, { force: true });
+    }
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const deleteLectureResource = async (req, res) => {
+  try {
+    const { lectureId, resourceId } = req.params;
+
+    const lecture = await Lecture.findById(lectureId);
+    if (!lecture) {
+      return res.status(404).json({ success: false, message: "Lecture not found" });
+    }
+
+    const resItem = lecture.resources.id(resourceId);
+    if (resItem) {
+      if (resItem.publicId) {
+        try {
+          await deleteFromCloudinary(resItem.publicId, "image");
+          await deleteFromCloudinary(resItem.publicId, "raw");
+        } catch (delErr) {
+          console.warn("Failed to delete resource from Cloudinary:", delErr.message);
+        }
+      }
+      lecture.resources.pull(resourceId);
+      await lecture.save();
+      await refreshCourseStatsForLecture(lecture);
+    }
+
+    res.json({ success: true, message: "Resource deleted successfully", lecture });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// ─── Lab Configuration ───────────────────────────────────────────────────────
+
+export const updateLectureLab = async (req, res) => {
+  try {
+    const { lectureId } = req.params;
+    const { title, description, url, pdfUrl, isActive } = req.body;
+
+    const lecture = await Lecture.findById(lectureId);
+    if (!lecture) {
+      return res.status(404).json({ success: false, message: "Lecture not found" });
+    }
+
+    lecture.lab = {
+      ...lecture.lab,
+      title: title !== undefined ? title.trim() : lecture.lab?.title || "",
+      description: description !== undefined ? description.trim() : lecture.lab?.description || "",
+      url: url !== undefined ? url.trim() : lecture.lab?.url || "",
+      pdfUrl: pdfUrl !== undefined ? pdfUrl.trim() : lecture.lab?.pdfUrl || "",
+      isActive: isActive !== undefined ? isActive : true,
+      updatedAt: new Date(),
+    };
+
+    await lecture.save();
+    await refreshCourseStatsForLecture(lecture);
+    res.json({ success: true, message: "Lab configuration updated successfully", lecture });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const uploadLectureLabPdf = async (req, res) => {
+  try {
+    const { lectureId } = req.params;
+
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "No PDF file uploaded" });
+    }
+
+    const lecture = await Lecture.findById(lectureId);
+    if (!lecture) {
+      fs.rmSync(req.file.path, { force: true });
+      return res.status(404).json({ success: false, message: "Lecture not found" });
+    }
+
+    if (lecture.lab?.pdfPublicId) {
+      try {
+        await deleteFromCloudinary(lecture.lab.pdfPublicId, "image");
+        await deleteFromCloudinary(lecture.lab.pdfPublicId, "raw");
+      } catch {}
+    }
+
+    const uploadRes = await uploadDocument(req.file.path, req.file.originalname);
+    if (!uploadRes?.secure_url) {
+      return res.status(500).json({ success: false, message: "Failed to upload Lab PDF to Cloudinary" });
+    }
+
+    if (!lecture.lab) {
+      lecture.lab = {};
+    }
+    lecture.lab.pdfUrl = uploadRes.secure_url;
+    lecture.lab.pdfPublicId = uploadRes.public_id;
+    lecture.lab.pdfName = req.file.originalname;
+    lecture.lab.isActive = true;
+    lecture.lab.updatedAt = new Date();
+
+    await lecture.save();
+    await refreshCourseStatsForLecture(lecture);
+    res.json({ success: true, message: "Lab assignment PDF uploaded successfully to Cloudinary", lecture });
+  } catch (err) {
+    if (req.file?.path && fs.existsSync(req.file.path)) {
+      fs.rmSync(req.file.path, { force: true });
+    }
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+export const deleteLectureLab = async (req, res) => {
+  try {
+    const { lectureId } = req.params;
+
+    const lecture = await Lecture.findById(lectureId);
+    if (!lecture) {
+      return res.status(404).json({ success: false, message: "Lecture not found" });
+    }
+
+    if (lecture.lab?.pdfPublicId) {
+      try {
+        await deleteFromCloudinary(lecture.lab.pdfPublicId, "image");
+        await deleteFromCloudinary(lecture.lab.pdfPublicId, "raw");
+      } catch {}
+    }
+
+    lecture.lab = {
+      title: "",
+      description: "",
+      url: "",
+      pdfUrl: "",
+      pdfPublicId: "",
+      pdfName: "",
+      isActive: false,
+    };
+
+    await lecture.save();
+    await refreshCourseStatsForLecture(lecture);
+    res.json({ success: true, message: "Lab configuration removed", lecture });
   } catch (err) {
     res.status(500).json({ success: false, message: err.message });
   }

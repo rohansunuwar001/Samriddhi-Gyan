@@ -80,15 +80,15 @@ const SearchCourseCard = ({ course }) => {
     }
   };
 
-  const ratingValue = course.ratings ?? course.rating ?? 4.5;
-  const reviewsCount = course.numOfReviews ?? course.numRatings ?? (Math.floor(ratingValue * 850) + 120);
-  const instructorName = course.creator?.name ?? course.instructor?.name ?? "Samriddhi Expert";
-  const courseLevel = course.level ?? "Intermediate";
+  const ratingValue = course.ratings ?? course.rating ?? 0;
+  const reviewsCount = course.numOfReviews ?? course.numRatings ?? (Array.isArray(course.reviews) ? course.reviews.length : 0);
+  const instructorName = course.creator?.name ?? course.instructor?.name ?? "Instructor";
+  const courseLevel = course.level ?? "All Levels";
   const durationHours = course.totalDurationInSeconds
     ? Math.round(course.totalDurationInSeconds / 3600)
-    : course.totalHours ?? 15;
-  const totalLectures = course.totalLectures ?? 135;
-  const totalQuestions = course.totalQuestions ?? (course.isPracticeExam ? 360 : null);
+    : (course.totalHours ?? (course.lectures?.length ? Math.max(1, Math.round(course.lectures.length * 0.5)) : 0));
+  const totalLectures = course.totalLectures ?? (course.lectures?.length || 0);
+  const totalQuestions = course.totalQuestions ?? (course.isPracticeExam ? 0 : null);
 
   const currentPrice = course.price?.current ?? course.coursePrice ?? 1299;
   const originalPrice = course.price?.original;
@@ -119,7 +119,7 @@ const SearchCourseCard = ({ course }) => {
           className="group flex flex-col justify-between h-full bg-white rounded-xl border border-gray-200 hover:border-gray-300 hover:shadow-lg transition-all duration-200 overflow-hidden text-left relative"
         >
           <Link
-            to={`/course-detail/${course._id}`}
+            to={`/course/${course.slug || course._id}`}
             className="flex flex-col flex-1"
             aria-label={`View ${course.title || course.courseTitle} details`}
           >

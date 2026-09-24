@@ -1,6 +1,6 @@
 // src/pages/Courses/CourseDetailPage.jsx
 
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useGetCourseDetailWithStatusQuery } from '@/features/api/purchaseApi';
 import { useTrackCourseViewMutation } from '@/features/api/authApi';
@@ -22,16 +22,30 @@ import LoadingSpinner from '@/components/LoadingSpinner';
 
 const CourseDetailPage = () => {
     const { courseId } = useParams();
+    const navigate = useNavigate();
+    const location = useLocation();
     const { data, isLoading, isError } = useGetCourseDetailWithStatusQuery(courseId);
     const [trackCourseView] = useTrackCourseViewMutation();
 
     const course = data?.course;
 
+    // Track course view in user history using the resolved course _id
     useEffect(() => {
-        if (courseId) {
-            trackCourseView(courseId);
+        if (course?._id) {
+            trackCourseView(course._id);
         }
-    }, [courseId, trackCourseView]);
+    }, [course?._id, trackCourseView]);
+
+    // Udemy-style clean URL sync:
+    // If accessed via an old ID or /course-detail/, update URL in address bar to /course/:slug
+    useEffect(() => {
+        if (course?.slug) {
+            const canonicalPath = `/course/${course.slug}`;
+            if (location.pathname !== canonicalPath) {
+                navigate(canonicalPath, { replace: true });
+            }
+        }
+    }, [course?.slug, location.pathname, navigate]);
 
     useEffect(() => {
         if (course && course.category) {

@@ -135,7 +135,38 @@ const Home = () => {
   const recommendedCourses = recommendedData?.recommendedCourses || [];
 
   // 2. Based on your recent searches
-  const recentSearchesCourses = unpurchasedCourses.slice(3, 11);
+  // Uses the real searchHistory persisted in DB (newest first, max 10 terms).
+  const searchHistory = currentUser?.searchHistory || [];
+
+  const recentSearchesCourses = (() => {
+    if (searchHistory.length === 0) return []; // hide section when no history
+
+    // Build a flat lowercase keyword list from all stored search terms
+    const keywords = [
+      ...new Set(
+        searchHistory
+          .join(" ")
+          .toLowerCase()
+          .split(/\s+/)
+          .filter((w) => w.length > 2)
+      ),
+    ];
+
+    const matched = unpurchasedCourses.filter((course) => {
+      const searchText = [
+        course.title,
+        course.subtitle,
+        course.category,
+        ...(course.tags || []),
+        ...(course.topics || []),
+      ]
+        .join(" ")
+        .toLowerCase();
+      return keywords.some((kw) => searchText.includes(kw));
+    });
+
+    return matched.slice(0, 8);
+  })();
 
   // 3. Because you viewed "[Course Title]"
   const viewHistory = currentUser?.viewHistory || [];
@@ -148,8 +179,33 @@ const Home = () => {
     : unpurchasedCourses.slice(5, 13);
 
   // 4. Popular for [Occupation]
+  // Extract meaningful keywords from the occupation string (ignore short stop-words)
   const occupation = currentUser?.occupation || "Full Stack Web Developer";
-  const popularForOccupationCourses = unpurchasedCourses.slice(2, 10);
+  const STOP_WORDS = new Set(["for", "and", "the", "a", "an", "in", "of", "to", "with", "full", "web"]);
+  const occupationKeywords = occupation
+    .toLowerCase()
+    .split(/[\s/,]+/)
+    .filter((w) => w.length > 2 && !STOP_WORDS.has(w));
+
+  const popularForOccupationCourses = (() => {
+    if (occupationKeywords.length === 0) return unpurchasedCourses.slice(0, 8);
+
+    const matched = unpurchasedCourses.filter((course) => {
+      const searchText = [
+        course.title,
+        course.subtitle,
+        course.category,
+        ...(course.tags || []),
+        ...(course.topics || []),
+      ]
+        .join(" ")
+        .toLowerCase();
+      return occupationKeywords.some((kw) => searchText.includes(kw));
+    });
+
+    // Fallback: if fewer than 3 courses match, show top-rated courses instead
+    return matched.length >= 3 ? matched.slice(0, 8) : unpurchasedCourses.slice(0, 8);
+  })();
 
   // 5. Trending courses
   const trendingCourses = trendingData?.trendingCourses || [];
@@ -181,26 +237,42 @@ const Home = () => {
     if (featuredCourses.length === 0) featuredCourses = unpurchasedCourses.slice(0, 6);
   }
 
-  // 9. Topics recommended for you tags (using sub-categories/child categories)
-  const categoriesList = categoriesData?.categories || [];
-  const subCategories = categoriesList.filter((cat) => cat.parent !== null);
-  const recommendedTopics = subCategories.length > 0
-    ? subCategories.map((cat) => ({
-        label: cat.name,
-        query: cat.name,
-      }))
-    : [
-        { label: "Artificial Intelligence (AI)", query: "AI" },
-        { label: "AI Agents & Agentic AI", query: "AI Agents" },
-        { label: "Large Language Models (LLM)", query: "LLM" },
-        { label: "ChatGPT", query: "ChatGPT" },
-        { label: "Machine Learning", query: "Machine Learning" },
-        { label: "Generative AI (GenAI)", query: "Generative AI" },
-        { label: "Python", query: "Python" },
-        { label: "Data Science", query: "Data Science" },
-        { label: "n8n", query: "n8n" },
-        { label: "AI Content Generation", query: "AI Content" },
-      ];
+  // 9. Topics recommended for you — derived from the user's own activity
+  //    Priority: enrolled course topics/tags → search history terms → viewed categories
+  const recommendedTopics = (() => {
+    const seen = new Set();
+    const topics = [];
+
+    const add = (label) => {
+      if (!label) return;
+      const key = label.trim().toLowerCase();
+      if (key.length < 2 || seen.has(key)) return;
+      seen.add(key);
+      topics.push({ label: label.trim(), query: label.trim() });
+    };
+
+    // 1. Topics & tags from enrolled courses (most relevant signal)
+    learningCourses.forEach((course) => {
+      (course.topics || []).forEach(add);
+      (course.tags || []).forEach(add);
+      if (course.category) add(course.category);
+    });
+
+    // 2. Keywords from search history
+    (currentUser?.searchHistory || []).forEach((term) => {
+      term.split(/\s+/).forEach((word) => {
+        if (word.length > 3) add(word);
+      });
+      add(term); // also add full term as-is
+    });
+
+    // 3. Categories from view history
+    (currentUser?.viewHistory || []).forEach((entry) => {
+      if (entry?.course?.category) add(entry.course.category);
+    });
+
+    return topics.slice(0, 15);
+  })();
 
   return (
     <div className="bg-[#white] min-h-screen text-[#2d2f31] font-sans pb-20 text-left">
@@ -262,7 +334,7 @@ const Home = () => {
                   return (
                     <div
                       key={course._id}
-                      onClick={() => navigate(`/course-detail/${course._id}/content`)}
+                      onClick={() => navigate(`/course/${course.slug || course._id}/content`)}
                       className="w-[380px] shrink-0 bg-white border border-gray-200 rounded-xl hover:border-gray-300 hover:shadow-md transition-all cursor-pointer flex flex-row overflow-hidden select-none"
                     >
                       {/* Left Thumbnail with Play Button */}

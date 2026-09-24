@@ -108,7 +108,7 @@ export const transcodeToHLS = async (inputPath, outputDir, onProgress) => {
       '-maxrate', rendition.maxRate,
       '-bufsize', rendition.bufSize,
       '-b:a', rendition.audioBitrate,
-      '-preset', 'fast',
+      '-preset', process.env.FFMPEG_PRESET || 'veryfast',
       '-profile:v', 'main',
       '-level', '4.1',
       '-movflags', '+faststart',

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import PropTypes from "prop-types";
-import { Play, Check, ChevronDown, ChevronUp, X, Sparkles, Paperclip, Send, Loader2, Bot, Video } from "lucide-react";
+import { Play, Check, ChevronDown, ChevronUp, X, Sparkles, Paperclip, Send, Loader2, Bot, Video, FolderDown, ExternalLink, FileText } from "lucide-react";
 import { Link } from "react-router-dom";
 import axios from "axios";
 import { BASE_URL } from "@/app/constant";
@@ -15,6 +15,7 @@ const CourseSidebar = ({
   onToggleLectureProgress,
 }) => {
   const [activeTab, setActiveTab] = useState("content");
+  const [openResourcesLectureId, setOpenResourcesLectureId] = useState(null);
 
   // AI Assistant states
   const [prompt, setPrompt] = useState("");
@@ -259,6 +260,62 @@ const CourseSidebar = ({
                                 <Video className="h-3.5 w-3.5 text-gray-400" />
                                 <span>{formatDuration(lecture.durationInSeconds)}</span>
                               </div>
+
+                              {/* Resources & Lab badges for students */}
+                              {((lecture.resources && lecture.resources.length > 0) || (lecture.lab?.title || lecture.lab?.pdfUrl)) && (
+                                <div className="mt-2 pt-1 border-t border-[#f0f2f5] flex items-center gap-2 flex-wrap" onClick={(e) => e.stopPropagation()}>
+                                  {lecture.resources && lecture.resources.length > 0 && (
+                                    <div className="relative">
+                                      <button
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          setOpenResourcesLectureId(openResourcesLectureId === lecture._id ? null : lecture._id);
+                                        }}
+                                        className="text-xs flex items-center gap-1 text-[#5624d0] hover:text-[#401b9c] font-medium border border-[#d1d7dc] bg-white hover:bg-slate-50 px-2 py-0.5 rounded shadow-2xs transition-colors"
+                                      >
+                                        <FolderDown className="w-3 h-3" /> Resources ({lecture.resources.length})
+                                        <ChevronDown className="w-3 h-3" />
+                                      </button>
+                                      {openResourcesLectureId === lecture._id && (
+                                        <>
+                                          <div className="fixed inset-0 z-40" onClick={() => setOpenResourcesLectureId(null)} />
+                                          <div className="absolute left-0 mt-1 w-64 bg-white border border-[#d1d7dc] rounded shadow-xl z-50 p-2 divide-y divide-gray-100 text-xs text-[#1c1d1f]">
+                                            <div className="font-semibold pb-1.5 text-gray-500 uppercase tracking-wider text-[10px]">
+                                              Downloadable Resources
+                                            </div>
+                                            <div className="pt-1 space-y-1 max-h-48 overflow-y-auto">
+                                              {lecture.resources.map((resItem) => (
+                                                <a
+                                                  key={resItem._id}
+                                                  href={resItem.url}
+                                                  target="_blank"
+                                                  rel="noopener noreferrer"
+                                                  className="flex items-center justify-between p-1.5 hover:bg-purple-50 rounded transition-colors text-[#1c1d1f]"
+                                                >
+                                                  <span className="truncate flex-1 font-medium">{resItem.title}</span>
+                                                  <ExternalLink className="w-3 h-3 text-[#5624d0] shrink-0 ml-1" />
+                                                </a>
+                                              ))}
+                                            </div>
+                                          </div>
+                                        </>
+                                      )}
+                                    </div>
+                                  )}
+
+                                  {(lecture.lab?.title || lecture.lab?.pdfUrl) && (
+                                    <a
+                                      href={lecture.lab.url || lecture.lab.pdfUrl}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="text-xs flex items-center gap-1 text-[#a435f0] hover:text-[#8710d8] font-medium border border-purple-200 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded shadow-2xs transition-colors"
+                                    >
+                                      <Sparkles className="w-3 h-3 text-[#a435f0]" /> Hands-on Lab
+                                    </a>
+                                  )}
+                                </div>
+                              )}
                             </div>
                           </li>
                         );

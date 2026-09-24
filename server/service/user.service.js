@@ -3,6 +3,7 @@
 // PURPOSE: Business logic for user operations implemented via OOP class hierarchy.
 
 import bcrypt from "bcryptjs";
+import mongoose from "mongoose";
 import { User } from "../models/user.model.js";
 import { Course } from "../models/course.model.js";
 import { CourseProgress } from "../models/courseProgress.model.js";
@@ -263,16 +264,50 @@ export class UserService extends BaseService {
    * Pushes a course to the front of user's view history.
    */
   async trackCourseView(userId, courseId) {
+    let resolvedId = courseId;
+    if (!mongoose.Types.ObjectId.isValid(courseId)) {
+      const found = await Course.findOne({ slug: courseId }).select("_id").lean();
+      if (found) {
+        resolvedId = found._id;
+      } else {
+        return;
+      }
+    }
+
     await User.findByIdAndUpdate(userId, {
-      $pull: { viewHistory: { course: courseId } },
+      $pull: { viewHistory: { course: resolvedId } },
     });
 
     await User.findByIdAndUpdate(userId, {
       $push: {
         viewHistory: {
-          $each: [{ course: courseId, viewedAt: new Date() }],
+          $each: [{ course: resolvedId, viewedAt: new Date() }],
           $position: 0,
           $slice: 20,
+        },
+      },
+    });
+  }
+
+  /**
+   * Saves a search term to the user's searchHistory (newest first, max 10, deduplicated).
+   */
+  async saveSearchTerm(userId, term) {
+    const cleaned = term?.trim();
+    if (!cleaned) return;
+
+    // Remove duplicate of this term first (case-insensitive dedup via exact match)
+    await User.findByIdAndUpdate(userId, {
+      $pull: { searchHistory: cleaned },
+    });
+
+    // Push to front, keep latest 10
+    await User.findByIdAndUpdate(userId, {
+      $push: {
+        searchHistory: {
+          $each: [cleaned],
+          $position: 0,
+          $slice: 10,
         },
       },
     });
@@ -571,6 +606,7 @@ export const updateUserInfo = userService.updateUserInfo.bind(userService);
 export const updateUserAvatar = userService.updateUserAvatar.bind(userService);
 export const updateUserPassword = userService.updateUserPassword.bind(userService);
 export const trackCourseView = userService.trackCourseView.bind(userService);
+export const saveSearchTerm = userService.saveSearchTerm.bind(userService);
 export const getMyLearningCourses = userService.getMyLearningCourses.bind(userService);
 export const archiveCourse = userService.archiveCourse.bind(userService);
 export const unarchiveCourse = userService.unarchiveCourse.bind(userService);

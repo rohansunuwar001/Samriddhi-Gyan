@@ -115,14 +115,32 @@ const CourseHeader = ({ course, purchasePanel }) => {
     const { data: catData } = useGetAllCategoriesQuery();
     const categoryTree = catData?.categoryTree || [];
 
-    const rating = typeof course.ratings === 'number' ? course.ratings : 4.6;
-    const reviewsCount = typeof course.numOfReviews === 'number' ? course.numOfReviews : 0;
-    const learnersCount = Array.isArray(course.enrolledStudents) ? course.enrolledStudents.length : 0;
+    const rating =
+        typeof course.ratings === 'number'
+            ? course.ratings
+            : Array.isArray(course.ratings) && course.ratings.length
+            ? Number(
+                  (
+                      course.ratings.reduce(
+                          (s, r) => s + (typeof r === 'number' ? r : r?.rating || 0),
+                          0
+                      ) / course.ratings.length
+                  ).toFixed(1)
+              )
+            : typeof course.rating === 'number'
+            ? course.rating
+            : 0;
+    const reviewsCount = typeof course.numOfReviews === 'number' 
+        ? course.numOfReviews 
+        : (Array.isArray(course.reviews) ? course.reviews.length : 0);
+    const learnersCount = Array.isArray(course.enrolledStudents) 
+        ? course.enrolledStudents.length 
+        : (typeof course.enrolledStudents === 'number' ? course.enrolledStudents : 0);
     const breadcrumbItems = getBreadcrumbItems(course, categoryTree);
     const creatorName = course.creator?.name || 'Instructor';
     const lastUpdated = course.updatedAt
         ? new Date(course.updatedAt).toLocaleDateString(undefined, { month: 'numeric', year: 'numeric' })
-        : '7/2026';
+        : null;
 
     const renderStars = (size = 'h-3.5 w-3.5') => (
         <div className="flex items-center gap-0.5" aria-label={rating.toFixed(1) + ' out of 5 stars'}>
@@ -252,19 +270,28 @@ const CourseHeader = ({ course, purchasePanel }) => {
 
                     <div className="flex min-h-[72px] flex-col items-center justify-center border-t border-[#d1d7dc] px-4 py-3 text-center md:border-l md:border-t-0">
                         <div className="flex items-center gap-1.5">
-                            <span className="text-[18px] font-semibold text-[#b4690e]">{rating.toFixed(1)}</span>
+                            <span className="text-[18px] font-semibold text-[#b4690e]">
+                                {rating > 0 ? rating.toFixed(1) : '0.0'}
+                            </span>
                             {renderStars('h-3.5 w-3.5')}
                         </div>
-                        <span className="text-[12px] text-[#5624d0] underline underline-offset-2 cursor-pointer mt-0.5">
-                            {reviewsCount > 0 ? reviewsCount.toLocaleString() : '26'} ratings
-                        </span>
+                        <a 
+                            href="#reviews"
+                            className="text-[12px] text-[#5624d0] underline underline-offset-2 cursor-pointer mt-0.5"
+                        >
+                            {reviewsCount > 0 
+                                ? `${reviewsCount.toLocaleString()} rating${reviewsCount === 1 ? '' : 's'}`
+                                : '0 ratings'}
+                        </a>
                     </div>
 
                     <div className="flex min-h-[72px] flex-col items-center justify-center border-t border-[#d1d7dc] px-4 py-3 text-center md:border-l md:border-t-0">
                         <span className="text-[16px] font-semibold text-[#2d2f31]">
-                            {learnersCount > 0 ? learnersCount.toLocaleString() : '401'}
+                            {learnersCount.toLocaleString()}
                         </span>
-                        <span className="text-[12px] text-[#6a6f73]">learners</span>
+                        <span className="text-[12px] text-[#6a6f73]">
+                            {learnersCount === 1 ? 'learner' : 'learners'}
+                        </span>
                     </div>
                 </div>
 
@@ -286,7 +313,8 @@ CourseHeader.propTypes = {
         topics: PropTypes.arrayOf(PropTypes.string),
         categoryHierarchy: PropTypes.arrayOf(PropTypes.string),
         isBestseller: PropTypes.bool,
-        ratings: PropTypes.number,
+        ratings: PropTypes.oneOfType([PropTypes.number, PropTypes.array]),
+        rating: PropTypes.oneOfType([PropTypes.number, PropTypes.array]),
         numOfReviews: PropTypes.number,
         enrolledStudents: PropTypes.array,
         creator: PropTypes.shape({

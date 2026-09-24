@@ -103,6 +103,72 @@ export const lectureApi = apiSlice.injectEndpoints({
       ],
     }),
 
+    // ── Resources Endpoints ──────────────────────────────────────────────────
+    addLectureResourceLink: builder.mutation({
+      query: ({ lectureId, title, url }) => ({
+        url: `/lectures/${lectureId}/resources/link`,
+        method: "POST",
+        body: { title, url },
+      }),
+      invalidatesTags: (result, error, { courseId }) => [
+        { type: "CourseDetail", id: courseId },
+      ],
+    }),
+
+    uploadLectureResourceFile: builder.mutation({
+      query: ({ lectureId, formData }) => ({
+        url: `/lectures/${lectureId}/resources/upload`,
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: (result, error, { courseId }) => [
+        { type: "CourseDetail", id: courseId },
+      ],
+    }),
+
+    deleteLectureResource: builder.mutation({
+      query: ({ lectureId, resourceId }) => ({
+        url: `/lectures/${lectureId}/resources/${resourceId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, { courseId }) => [
+        { type: "CourseDetail", id: courseId },
+      ],
+    }),
+
+    // ── Lab Endpoints ────────────────────────────────────────────────────────
+    updateLectureLab: builder.mutation({
+      query: ({ lectureId, title, description, url, pdfUrl, isActive }) => ({
+        url: `/lectures/${lectureId}/lab`,
+        method: "PUT",
+        body: { title, description, url, pdfUrl, isActive },
+      }),
+      invalidatesTags: (result, error, { courseId }) => [
+        { type: "CourseDetail", id: courseId },
+      ],
+    }),
+
+    uploadLectureLabPdf: builder.mutation({
+      query: ({ lectureId, formData }) => ({
+        url: `/lectures/${lectureId}/lab/upload`,
+        method: "POST",
+        body: formData,
+      }),
+      invalidatesTags: (result, error, { courseId }) => [
+        { type: "CourseDetail", id: courseId },
+      ],
+    }),
+
+    deleteLectureLab: builder.mutation({
+      query: ({ lectureId }) => ({
+        url: `/lectures/${lectureId}/lab`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, { courseId }) => [
+        { type: "CourseDetail", id: courseId },
+      ],
+    }),
+
   }),
 });
 
@@ -115,4 +181,10 @@ export const {
   useUploadCaptionMutation,
   useToggleCaptionsDisableMutation,
   useDeleteCaptionMutation,
-} = lectureApi;
+  useAddLectureResourceLinkMutation,
+  useUploadLectureResourceFileMutation,
+  useDeleteLectureResourceMutation,
+  useUpdateLectureLabMutation,
+  useUploadLectureLabPdfMutation,
+  useDeleteLectureLabMutation,
+} = lectureApi;

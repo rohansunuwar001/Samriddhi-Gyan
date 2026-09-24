@@ -19,6 +19,7 @@ import {
   Infinity as InfinityIcon,
   Info,
   Loader2,
+  Play,
   PlayCircle,
   Share2,
   Tag,
@@ -37,6 +38,13 @@ const PurchaseCard = ({ course }) => {
     course?.includedInSubscription ? "subscription" : "individual"
   );
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+
+  // Promotional or preview video URL
+  const firstPreviewLecture = (course?.sections || [])
+    .flatMap((sec) => sec?.lectures || [])
+    .find((lec) => lec?.isPreview && lec?.videoUrl);
+
+  const previewVideoUrl = course?.promoVideoUrl || firstPreviewLecture?.videoUrl || "";
 
   useEffect(() => {
     setSelectedPlan(course?.includedInSubscription ? "subscription" : "individual");
@@ -285,7 +293,7 @@ const PurchaseCard = ({ course }) => {
       <button
         type="button"
         onClick={() => {
-          if (course.promoVideoStatus === "ready" && course.promoVideoUrl) {
+          if (previewVideoUrl) {
             setIsPreviewOpen(true);
           } else {
             toast.info("No promotional preview video available for this course.");
@@ -299,10 +307,10 @@ const PurchaseCard = ({ course }) => {
           className="aspect-video w-full object-cover"
         />
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 transition-colors group-hover:bg-black/50">
-          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-[#1c1d1f] shadow-lg transition-transform group-hover:scale-110">
-            <PlayCircle className="h-10 w-10 fill-current text-[#1c1d1f]" />
+          <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-[#1c1d1f] shadow-2xl transition-transform duration-200 group-hover:scale-110">
+            <Play className="h-7 w-7 fill-[#1c1d1f] text-[#1c1d1f] translate-x-0.5" />
           </span>
-          <p className="mt-3 text-[15px] font-semibold text-white tracking-tight drop-shadow-sm">
+          <p className="mt-3 text-[15px] font-semibold text-white tracking-tight drop-shadow-md">
             Preview this course
           </p>
         </div>
@@ -565,7 +573,7 @@ const PurchaseCard = ({ course }) => {
               className="h-12 w-full rounded-md bg-purple-700 text-lg font-medium hover:bg-purple-800"
               onClick={(e) => {
                 e.stopPropagation();
-                navigate(`/course-detail/${course._id}/content`);
+                navigate(`/course/${course.slug || course._id}/content`);
               }}
             >
               <PlayCircle className="mr-2 h-5 w-5" />
@@ -580,23 +588,29 @@ const PurchaseCard = ({ course }) => {
       </aside>
 
       {/* ── HLS PROMO VIDEO PREVIEW MODAL ── */}
-      {isPreviewOpen && course.promoVideoUrl && (
+      {isPreviewOpen && previewVideoUrl && (
         <div
           onClick={() => setIsPreviewOpen(false)}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/80 p-4"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/85 p-4 backdrop-blur-xs"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative w-full max-w-3xl bg-black border border-[#3e4143] shadow-2xl"
+            className="relative w-full max-w-3xl bg-black border border-[#3e4143] shadow-2xl overflow-hidden rounded-xs"
           >
-            <button
-              onClick={() => setIsPreviewOpen(false)}
-              className="absolute -top-9 right-0 text-white hover:text-gray-300 text-lg font-extralight flex items-center gap-1"
-            >
-              Close ×
-            </button>
-            <div className="aspect-video w-full">
-              <BolaVideoPlayer src={course.promoVideoUrl} />
+            <div className="flex items-center justify-between px-4 py-2.5 bg-[#1c1d1f] border-b border-[#3e4143]">
+              <span className="text-white font-medium text-[14px] truncate max-w-[80%]">
+                Course Preview: {course.title}
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsPreviewOpen(false)}
+                className="text-gray-300 hover:text-white text-[14px] font-semibold flex items-center gap-1 transition-colors px-2 py-0.5 rounded hover:bg-white/10"
+              >
+                Close ✕
+              </button>
+            </div>
+            <div className="aspect-video w-full bg-black">
+              <BolaVideoPlayer src={previewVideoUrl} />
             </div>
           </div>
         </div>

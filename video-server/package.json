@@ -1,0 +1,36 @@
+{
+  "name": "samriddhi-video-transcoder",
+  "version": "1.0.0",
+  "description": "Dedicated Video Transcoder and Chunk Processing Microservice for Samriddhi Gyan LMS",
+  "main": "src/server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "keywords": [
+    "transcoder",
+    "hls",
+    "ffmpeg",
+    "video-processing",
+    "b2"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.758.0",
+    "@aws-sdk/s3-request-presigner": "^3.758.0",
+    "@google/generative-ai": "^0.24.1",
+    "axios": "^1.8.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "ffmpeg-static": "^5.2.0",
+    "ffprobe-static": "^3.1.0",
+    "fluent-ffmpeg": "^2.1.3",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.9"
+  }
+}

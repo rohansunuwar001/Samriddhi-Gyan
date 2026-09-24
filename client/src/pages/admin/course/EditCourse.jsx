@@ -183,31 +183,42 @@ function IntendedLearnersPanel({ courseId, courseData, onSaveStart, onSaveEnd, o
     }
   }, [courseData]);
 
-  // Check validity reactively
-  const isValid = learnings.filter(v => v.trim()).length >= 4;
+  // Check validity reactively (draft can be saved with at least one filled field)
+  const [isSavingLocal, setIsSavingLocal] = useState(false);
+  const hasContent = learnings.some(v => v.trim()) || requirements.some(v => v.trim()) || whoIsThisFor.some(v => v.trim());
 
   useEffect(() => {
-    onValidationChange?.(isValid);
-  }, [isValid, onValidationChange]);
+    onValidationChange?.(hasContent);
+  }, [hasContent, onValidationChange]);
 
   const handleSave = async () => {
     const activeLearnings = learnings.filter(v => v.trim());
-    if (activeLearnings.length < 4) {
-      toast.error("You must enter at least 4 learning objectives or outcomes.");
+    const activeReqs = requirements.filter(v => v.trim());
+    const activeWho = whoIsThisFor.filter(v => v.trim());
+
+    if (activeLearnings.length === 0 && activeReqs.length === 0 && activeWho.length === 0) {
+      toast.info("Please enter at least one response before saving.");
       return;
     }
+
     const formData = new FormData();
     activeLearnings.forEach(v => formData.append("learnings[]", v));
-    requirements.filter(v => v.trim()).forEach(v => formData.append("requirements[]", v));
-    whoIsThisFor.filter(v => v.trim()).forEach(v => formData.append("whoIsThisFor[]", v));
+    activeReqs.forEach(v => formData.append("requirements[]", v));
+    activeWho.forEach(v => formData.append("whoIsThisFor[]", v));
+
+    setIsSavingLocal(true);
     onSaveStart?.();
     try {
       const res = await editCourse({ courseId, formData }).unwrap();
-      toast.success(res.message || "Saved!");
+      toast.success(res.message || "Saved successfully!");
+      if (activeLearnings.length < 4) {
+        toast.info("Note: At least 4 learning objectives are required to submit for review.", { duration: 4500 });
+      }
     } catch (err) {
       toast.error(err?.data?.message || "Failed to save.");
     }
     onSaveEnd?.();
+    setIsSavingLocal(false);
   };
 
   // Keep a stable ref so onRegisterSave doesn't cause infinite re-registers
@@ -356,6 +367,23 @@ function IntendedLearnersPanel({ courseId, courseData, onSaveStart, onSaveEnd, o
           className="flex items-center gap-1.5 text-xl font-light text-[#5624d0] hover:text-[#4019a4] transition-colors mt-4"
         >
           <PlusCircle className="w-4.5 h-4.5" /> Add more to your response
+        </button>
+      </div>
+
+      {/* ── INSIDE SECTION SAVE BUTTON ── */}
+      <div className="border-t border-[#d1d7dc] pt-6 flex justify-end">
+        <button
+          onClick={handleSave}
+          disabled={isSavingLocal}
+          className="bg-[#a435f0] hover:bg-[#8710d8] disabled:bg-slate-300 text-white font-light text-xl px-7 py-3 transition-colors flex items-center gap-2"
+        >
+          {isSavingLocal ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" /> Saving...
+            </>
+          ) : (
+            "Save"
+          )}
         </button>
       </div>
     </div>
@@ -927,10 +955,30 @@ const EditCourse = () => {
   const navigate = useNavigate();
   const [activeSection, setActiveSection] = useState(() => {
     const params = new URLSearchParams(window.location.search);
-    return params.get("tab") || "intended-learners";
+    const urlTab = params.get("tab");
+    if (urlTab) return urlTab;
+    try {
+      const savedTab = localStorage.getItem(`active_tab_${courseId}`);
+      if (savedTab) return savedTab;
+    } catch (_) {}
+    return "intended-learners";
   });
   const [showSettings, setShowSettings] = useState(false);
-  const [isValid, setIsValid] = useState(false);
+  const [isValid, setIsValid] = useState(true);
+
+  // Sync activeSection with URL search param and localStorage so refresh stays on current section
+  useEffect(() => {
+    if (activeSection) {
+      try {
+        localStorage.setItem(`active_tab_${courseId}`, activeSection);
+      } catch (_) {}
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("tab") !== activeSection) {
+        params.set("tab", activeSection);
+        navigate(`?${params.toString()}`, { replace: true });
+      }
+    }
+  }, [activeSection, courseId, navigate]);
 
   const { data: courseData, isLoading } = useGetCourseByIdQuery(courseId);
   const [removeCourse] = useRemoveCourseMutation();
@@ -1140,13 +1188,19 @@ const EditCourse = () => {
           ) : activeSection === "film-edit" ? (
             <FilmEditPanel />
           ) : activeSection === "curriculum" ? (
-            <CourseCurriculumTab />
+            <CourseCurriculumTab
+              onRegisterSave={(fn) => { saveFnRef.current = fn; }}
+              onValidationChange={(valid) => setIsValid(valid)}
+            />
           ) : activeSection === "assignments" ? (
             <InstructorAssignments />
           ) : activeSection === "captions" ? (
             <CaptionsTab />
           ) : activeSection === "landing-page" ? (
-            <CourseLandingPageTab />
+            <CourseLandingPageTab
+              onRegisterSave={(fn) => { saveFnRef.current = fn; }}
+              onValidationChange={(valid) => setIsValid(valid)}
+            />
           ) : activeSection === "pricing" ? (
             <PricingTab />
           ) : (

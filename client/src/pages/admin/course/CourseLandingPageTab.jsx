@@ -11,11 +11,12 @@ import { useSearchTopicsQuery } from "@/features/api/topicApi";
 import BolaVideoPlayer from "@/pages/admin/lecture/BolaVideoPlayer";
 import axios from "axios";
 import { useGetCertificationsQuery } from "@/features/api/certificationApi";
-import { AlertTriangle, Info, Loader2, PlayCircle, User, X } from "lucide-react";
+import { AlertTriangle, Info, Loader2, Play, PlayCircle, User, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
+import { sanitizeTopics } from "@/utils/topic.helper";
 
 const levels = ["Beginner", "Intermediate", "Advanced", "All Levels"];
 const LANGUAGES = ["English (US)", "Spanish", "French", "German", "Nepali", "Hindi"];
@@ -62,7 +63,7 @@ function MediaPlaceholder() {
   );
 }
 
-const CourseLandingPageTab = () => {
+const CourseLandingPageTab = ({ onRegisterSave, onValidationChange }) => {
   const { courseId } = useParams();
   const { user } = useSelector((state) => state.auth);
 
@@ -179,41 +180,67 @@ const CourseLandingPageTab = () => {
     });
   }, [availableCategories]);
 
+  const [isThumbnailUploading, setIsThumbnailUploading] = useState(false);
+  const isInitialLoadDoneRef = useRef(false);
+
+  const sanitizedTopicsList = useMemo(() => sanitizeTopics(details.topics || []), [details.topics]);
+
   useEffect(() => {
     if (courseData?.course) {
       const { course } = courseData;
-      setDetails({
-        title: course.title || "",
-        subtitle: course.subtitle || "",
-        description: course.description || "",
-        language: course.language || "English (US)",
-        level: course.level || "All Levels",
-        category: course.category || "",
-        price: { current: course.price?.current || "", original: course.price?.original || "" },
-        learnings: course.learnings?.length > 0 ? course.learnings : [""],
-        requirements: course.requirements?.length > 0 ? course.requirements : [""],
-        whoIsThisFor: course.whoIsThisFor?.length > 0 ? course.whoIsThisFor : [""],
-        topics: course.topics?.length > 0 ? course.topics : [],
-        courseIncludes: {
-          codingExercises: course.courseIncludes?.codingExercises ?? 0,
-          articles: course.courseIncludes?.articles ?? 0,
-          downloadableResources: course.courseIncludes?.downloadableResources ?? 0,
-          hasMobileAccess: course.courseIncludes?.hasMobileAccess ?? true,
-          hasCertificate: course.courseIncludes?.hasCertificate ?? true,
-        },
-        includedInSubscription: course.includedInSubscription ?? false,
-        thumbnailFile: null,
-        promoVideoFile: null,
-        primaryTopic: course.primaryTopic || "",
-        promoVideoUrl: course.promoVideoUrl || "",
-        promoVideoStatus: course.promoVideoStatus || "none",
-        promoVideoProgress: course.promoVideoProgress || 0,
-        promoVideoThumbnail: course.promoVideoThumbnail || "",
-        relatedCertificates: course.relatedCertificates?.length > 0
-          ? course.relatedCertificates.map((c) => String(c?._id || c))
-          : [],
-      });
-      setPreviewThumbnail(course.thumbnail || "");
+      if (!isInitialLoadDoneRef.current) {
+        isInitialLoadDoneRef.current = true;
+        const initialTopics = sanitizeTopics(course.topics || []);
+        const effPrimary = course.primaryTopic && initialTopics.includes(course.primaryTopic)
+          ? course.primaryTopic
+          : (initialTopics[0] || "");
+
+        setDetails({
+          title: course.title || "",
+          subtitle: course.subtitle || "",
+          description: course.description || "",
+          language: course.language || "English (US)",
+          level: course.level || "All Levels",
+          category: course.category || "",
+          price: { current: course.price?.current || "", original: course.price?.original || "" },
+          learnings: course.learnings?.length > 0 ? course.learnings : [""],
+          requirements: course.requirements?.length > 0 ? course.requirements : [""],
+          whoIsThisFor: course.whoIsThisFor?.length > 0 ? course.whoIsThisFor : [""],
+          topics: initialTopics,
+          courseIncludes: {
+            codingExercises: course.courseIncludes?.codingExercises ?? 0,
+            articles: course.courseIncludes?.articles ?? 0,
+            downloadableResources: course.courseIncludes?.downloadableResources ?? 0,
+            hasMobileAccess: course.courseIncludes?.hasMobileAccess ?? true,
+            hasCertificate: course.courseIncludes?.hasCertificate ?? true,
+          },
+          includedInSubscription: course.includedInSubscription ?? false,
+          thumbnailFile: null,
+          promoVideoFile: null,
+          primaryTopic: effPrimary,
+          promoVideoUrl: course.promoVideoUrl || "",
+          promoVideoStatus: course.promoVideoStatus || "none",
+          promoVideoProgress: course.promoVideoProgress || 0,
+          promoVideoThumbnail: course.promoVideoThumbnail || "",
+          relatedCertificates: course.relatedCertificates?.length > 0
+            ? course.relatedCertificates
+            : [],
+        });
+        setPreviewThumbnail(course.thumbnail || "");
+      } else {
+        // Subsequent background updates (e.g. transcoding polling):
+        // Only sync background status fields so we NEVER clobber user typing in subtitle, description, topics!
+        setDetails((prev) => ({
+          ...prev,
+          promoVideoUrl: course.promoVideoUrl || prev.promoVideoUrl,
+          promoVideoStatus: course.promoVideoStatus || prev.promoVideoStatus,
+          promoVideoProgress: course.promoVideoProgress ?? prev.promoVideoProgress,
+          promoVideoThumbnail: course.promoVideoThumbnail || prev.promoVideoThumbnail,
+        }));
+        if (course.thumbnail && !previewThumbnail) {
+          setPreviewThumbnail(course.thumbnail);
+        }
+      }
     }
   }, [courseData]);
 
@@ -268,15 +295,20 @@ const CourseLandingPageTab = () => {
   };
 
   const handleAddTopic = (topicName) => {
+    const trimmed = (topicName || "").trim();
+    if (!trimmed) return;
+    const sanitizedInput = sanitizeTopics([trimmed]);
+    if (sanitizedInput.length === 0) return;
+
     setDetails((prev) => {
-      if (prev.topics.includes(topicName)) {
-        return prev;
-      }
-      const newTopics = [...prev.topics, topicName];
-      const newPrimaryTopic = newTopics.length === 1 ? topicName : prev.primaryTopic;
+      const sanitizedCurrent = sanitizeTopics(prev.topics || []);
+      const merged = sanitizeTopics([...sanitizedCurrent, ...sanitizedInput]);
+      const newPrimaryTopic = merged.length === 1
+        ? merged[0]
+        : (merged.includes(prev.primaryTopic) ? prev.primaryTopic : (merged[0] || ""));
       return {
         ...prev,
-        topics: newTopics,
+        topics: merged,
         primaryTopic: newPrimaryTopic,
       };
     });
@@ -286,10 +318,13 @@ const CourseLandingPageTab = () => {
 
   const handleRemoveTopic = (topicName) => {
     setDetails((prev) => {
-      const newTopics = prev.topics.filter((t) => t !== topicName);
+      const sanitizedCurrent = sanitizeTopics(prev.topics || []);
+      const newTopics = sanitizedCurrent.filter(
+        (t) => t.toLowerCase() !== topicName.toLowerCase()
+      );
       let newPrimaryTopic = prev.primaryTopic;
-      if (prev.primaryTopic === topicName || newTopics.length < 2) {
-        newPrimaryTopic = newTopics.length === 1 ? newTopics[0] : "";
+      if (!newTopics.includes(prev.primaryTopic) || newTopics.length < 2) {
+        newPrimaryTopic = newTopics.length >= 1 ? newTopics[0] : "";
       }
       return {
         ...prev,
@@ -299,11 +334,49 @@ const CourseLandingPageTab = () => {
     });
   };
 
-  const handleThumbnailChange = (e) => {
+  const handleThumbnailChange = async (e) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setDetails((prev) => ({ ...prev, thumbnailFile: file }));
-      setPreviewThumbnail(URL.createObjectURL(file));
+    if (!file) return;
+
+    // Show preview immediately and hold local file reference
+    const localPreviewUrl = URL.createObjectURL(file);
+    setPreviewThumbnail(localPreviewUrl);
+    setDetails((prev) => ({ ...prev, thumbnailFile: file }));
+
+    // Upload thumbnail immediately to persist it without overwriting text inputs
+    setIsThumbnailUploading(true);
+    const formData = new FormData();
+    formData.append("courseThumbnail", file);
+
+    try {
+      const token = localStorage.getItem("authToken");
+      const headers = {};
+      if (token) {
+        headers["Authorization"] = `Bearer ${token}`;
+      }
+
+      const response = await axios.put(
+        `${BASE_URL}/api/v1/course/${courseId}`,
+        formData,
+        { headers }
+      );
+
+      if (response.data?.success) {
+        toast.success("Course image uploaded successfully!");
+        if (response.data.course?.thumbnail) {
+          setPreviewThumbnail(response.data.course.thumbnail);
+        }
+        // File saved on server, clear local unsaved file pointer
+        setDetails((prev) => ({ ...prev, thumbnailFile: null }));
+      } else {
+        toast.error("Failed to upload course image.");
+      }
+    } catch (err) {
+      console.error(err);
+      toast.error(err?.response?.data?.message || "Failed to upload course image.");
+    } finally {
+      setIsThumbnailUploading(false);
+      if (thumbnailInputRef.current) thumbnailInputRef.current.value = "";
     }
   };
 
@@ -417,6 +490,7 @@ const CourseLandingPageTab = () => {
       "requirements",
       "whoIsThisFor",
       "topics",
+      "primaryTopic",
       "courseIncludes",
       "thumbnailFile",
       "promoVideoFile",
@@ -427,7 +501,17 @@ const CourseLandingPageTab = () => {
     });
     formData.append("price[current]", details.price.current);
     formData.append("price[original]", details.price.original);
-    details.topics.forEach((t) => formData.append("topics[]", t));
+    
+    // Topics (clean single JSON array string so it handles 0, 1, 2, or 3+ topics reliably)
+    const currentTopics = sanitizeTopics(details.topics || []);
+    formData.append("topics", JSON.stringify(currentTopics));
+
+    // Ensure primaryTopic is synchronized
+    const effPrimaryTopic = currentTopics.length === 1
+      ? currentTopics[0]
+      : (currentTopics.includes(details.primaryTopic) ? details.primaryTopic : (currentTopics[0] || ""));
+    formData.append("primaryTopic", effPrimaryTopic);
+
     formData.append("courseIncludes[codingExercises]", details.courseIncludes.codingExercises);
     formData.append("courseIncludes[articles]", details.courseIncludes.articles);
     formData.append("courseIncludes[downloadableResources]", details.courseIncludes.downloadableResources);
@@ -447,6 +531,14 @@ const CourseLandingPageTab = () => {
       toast.error(err?.data?.message || "Failed to save changes.");
     }
   };
+
+  const handleSubmitRef = useRef(handleSubmit);
+  handleSubmitRef.current = handleSubmit;
+
+  useEffect(() => {
+    onRegisterSave?.(() => handleSubmitRef.current());
+    onValidationChange?.(true);
+  }, [onRegisterSave, onValidationChange]);
 
   // Instructor profile completeness check
   const instructorBioWords = (user?.description || "").trim().split(/\s+/).filter(Boolean).length;
@@ -615,9 +707,9 @@ const CourseLandingPageTab = () => {
             </div>
 
             {/* Display Selected Topic Tags */}
-            {details.topics && details.topics.length > 0 && (
+            {sanitizedTopicsList.length > 0 && (
               <div className="flex flex-wrap gap-2.5 pt-1">
-                {details.topics.map((topic) => (
+                {sanitizedTopicsList.map((topic) => (
                   <div 
                     key={topic} 
                     className="bg-[#5624d0] text-white text-base font-extralight rounded-full px-4 py-2 flex items-center gap-2 shrink-0 transition-all"
@@ -636,22 +728,41 @@ const CourseLandingPageTab = () => {
             )}
 
             {/* Input field and autocomplete suggestions */}
-            {(details.topics.length === 0 || showSearchInput) && (
+            {(sanitizedTopicsList.length === 0 || showSearchInput) && (
               <div className="relative max-w-md w-full pt-1.5">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="e.g. Landscape Photography"
-                  className="w-full border border-[#6a6f73] px-4 py-3 text-xl font-extralight bg-white outline-none focus:border-[#1c1d1f] transition-colors"
-                />
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        if (searchQuery.trim()) {
+                          handleAddTopic(searchQuery.trim());
+                        }
+                      }
+                    }}
+                    placeholder="e.g. Landscape Photography"
+                    className="w-full border border-[#6a6f73] px-4 py-3 text-xl font-extralight bg-white outline-none focus:border-[#1c1d1f] transition-colors"
+                  />
+                  {searchQuery.trim() && (
+                    <button
+                      type="button"
+                      onClick={() => handleAddTopic(searchQuery.trim())}
+                      className="bg-[#1c1d1f] hover:bg-[#2d2f31] text-white px-5 py-3 text-lg font-light shrink-0 transition-colors"
+                    >
+                      Add
+                    </button>
+                  )}
+                </div>
 
                 {/* Suggestions Dropdown */}
-                {searchQuery.trim() && suggestions.length > 0 && (
+                {searchQuery.trim() && (
                   <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-[#d1d7dc] shadow-xl rounded-sm p-4 z-50 max-h-60 overflow-y-auto flex flex-col gap-2">
                     {suggestions.map((suggestion) => (
                       <button
-                        key={suggestion.slug}
+                        key={suggestion.slug || suggestion.name}
                         type="button"
                         onClick={() => handleAddTopic(suggestion.name)}
                         className="w-full border border-[#d1d7dc] hover:border-[#5624d0] rounded-full px-5 py-2 text-left hover:bg-slate-50 cursor-pointer text-base font-extralight text-[#1c1d1f] transition-all focus:outline-none"
@@ -659,18 +770,21 @@ const CourseLandingPageTab = () => {
                         {suggestion.name}
                       </button>
                     ))}
-                  </div>
-                )}
-                {searchQuery.trim() && suggestions.length === 0 && (
-                  <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-[#d1d7dc] shadow-xl rounded-sm p-4 z-50 text-base font-extralight text-[#6a6f73] text-center">
-                    No matching topics found. Please type another topic.
+                    <button
+                      type="button"
+                      onClick={() => handleAddTopic(searchQuery.trim())}
+                      className="w-full border border-dashed border-[#5624d0] hover:bg-purple-50 rounded-full px-5 py-2 text-left cursor-pointer text-base font-light text-[#5624d0] transition-all focus:outline-none flex items-center justify-between"
+                    >
+                      <span>Add &quot;{searchQuery.trim()}&quot; as topic</span>
+                      <span className="text-xs bg-[#5624d0] text-white px-2.5 py-0.5 rounded-full font-extralight">Add</span>
+                    </button>
                   </div>
                 )}
               </div>
             )}
 
             {/* Propose another topic... link */}
-            {details.topics.length > 0 && !showSearchInput && (
+            {sanitizedTopicsList.length > 0 && !showSearchInput && (
               <button
                 type="button"
                 onClick={() => setShowSearchInput(true)}
@@ -682,7 +796,7 @@ const CourseLandingPageTab = () => {
           </div>
 
           {/* Representative Topic Selection */}
-          {details.topics && details.topics.length >= 2 && (
+          {sanitizedTopicsList.length >= 2 && (
             <div className="flex flex-col space-y-2 mt-4">
               <div className="flex items-center gap-2 relative">
                 <label className="text-2xl font-extralight text-[#1c1d1f]">
@@ -714,7 +828,7 @@ const CourseLandingPageTab = () => {
                   }}
                 >
                   <option value="">Select a primary topic</option>
-                  {details.topics.map((t) => (
+                  {sanitizedTopicsList.map((t) => (
                     <option key={t} value={t}>
                       {t}
                     </option>
@@ -744,12 +858,14 @@ const CourseLandingPageTab = () => {
                     onChange={(e) => {
                       const val = e.target.value;
                       if (!val) return;
+                      const certObj = certificationsList.find((c) => String(c._id) === String(val));
                       setDetails((prev) => {
-                        const current = (prev.relatedCertificates || []).map((c) => String(c?._id || c));
-                        if (current.includes(String(val))) return prev;
+                        const current = prev.relatedCertificates || [];
+                        const currentIds = current.map((c) => String(c?._id || c));
+                        if (currentIds.includes(String(val))) return prev;
                         return {
                           ...prev,
-                          relatedCertificates: [...current, String(val)]
+                          relatedCertificates: [...current, certObj || String(val)]
                         };
                       });
                       e.target.value = ""; // Reset dropdown selection
@@ -770,16 +886,18 @@ const CourseLandingPageTab = () => {
                   {(details.relatedCertificates || []).map((item) => {
                     const certId = String(typeof item === "object" && item?._id ? item._id : item);
                     const cert =
-                      certificationsList.find((c) => String(c._id) === certId) ||
-                      (typeof item === "object" ? item : null);
-                    if (!cert) return null;
+                      (typeof item === "object" && item?.name)
+                        ? item
+                        : (certificationsList.find((c) => String(c._id) === certId) || (typeof item === "object" ? item : null));
+                    const certName = cert?.name || "Certification";
+                    const issuerName = cert?.issuer?.name || "Certificate";
                     return (
                       <div
                         key={certId}
                         className="flex items-center gap-2 bg-purple-50 border border-purple-300 text-purple-950 text-base font-normal px-3 py-1.5 rounded-full shadow-sm"
                       >
-                        <span>{cert.name}</span>
-                        <span className="text-sm text-slate-400">({cert.issuer?.name || "Certificate"})</span>
+                        <span>{certName}</span>
+                        <span className="text-sm text-purple-700 font-light">({issuerName})</span>
                         <button
                           type="button"
                           onClick={() => {
@@ -807,11 +925,17 @@ const CourseLandingPageTab = () => {
         <div className="space-y-3">
           <label className="block text-2xl font-light text-[#1c1d1f]">Course image</label>
           <div className="flex gap-6 items-start">
-            <div className="w-64 shrink-0 border border-[#d1d7dc] overflow-hidden">
+            <div className="w-64 shrink-0 border border-[#d1d7dc] overflow-hidden relative">
               {previewThumbnail ? (
                 <img src={previewThumbnail} alt="Course thumbnail" className="w-full h-full object-cover aspect-video" />
               ) : (
                 <MediaPlaceholder />
+              )}
+              {isThumbnailUploading && (
+                <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center text-white gap-2 z-10">
+                  <Loader2 className="w-8 h-8 animate-spin" />
+                  <span className="text-sm font-medium">Uploading...</span>
+                </div>
               )}
             </div>
             <div className="flex-1 min-w-0">
@@ -822,19 +946,32 @@ const CourseLandingPageTab = () => {
               </p>
               <div className="flex items-center gap-2">
                 <div className="border border-[#6a6f73] px-4 py-2.5 flex-1 text-xl font-extralight text-[#6a6f73] truncate">
-                  {details.thumbnailFile ? details.thumbnailFile.name : "No file selected"}
+                  {isThumbnailUploading
+                    ? "Uploading image..."
+                    : details.thumbnailFile
+                    ? details.thumbnailFile.name
+                    : previewThumbnail
+                    ? "Image uploaded"
+                    : "No file selected"}
                 </div>
                 <button
                   type="button"
+                  disabled={isThumbnailUploading}
                   onClick={() => thumbnailInputRef.current?.click()}
-                  className="border border-[#5624d0] text-[#5624d0] hover:bg-purple-50 font-light text-xl px-5 py-2.5 transition-colors shrink-0"
+                  className={`border border-[#5624d0] text-[#5624d0] font-light text-xl px-5 py-2.5 transition-colors shrink-0 flex items-center gap-2 ${
+                    isThumbnailUploading
+                      ? "opacity-50 cursor-not-allowed bg-purple-50"
+                      : "hover:bg-purple-50"
+                  }`}
                 >
-                  Upload File
+                  {isThumbnailUploading && <Loader2 className="w-5 h-5 animate-spin" />}
+                  {isThumbnailUploading ? "Uploading..." : "Upload File"}
                 </button>
                 <input
                   ref={thumbnailInputRef}
                   type="file"
                   accept="image/*"
+                  disabled={isThumbnailUploading}
                   onChange={handleThumbnailChange}
                   className="hidden"
                 />
@@ -856,8 +993,10 @@ const CourseLandingPageTab = () => {
                 </div>
               ) : details.promoVideoStatus === "ready" && details.promoVideoUrl ? (
                 <div className="relative group w-full h-full cursor-pointer" onClick={() => setIsPreviewOpen(true)}>
-                  <div className="absolute inset-0 bg-black/35 group-hover:bg-black/45 transition-colors flex items-center justify-center z-10">
-                    <PlayCircle className="w-14 h-14 text-white fill-white/10" />
+                  <div className="absolute inset-0 bg-black/40 group-hover:bg-black/55 transition-colors flex items-center justify-center z-10">
+                    <div className="h-12 w-12 rounded-full bg-white/95 group-hover:bg-white flex items-center justify-center shadow-lg transition-transform group-hover:scale-110">
+                      <Play className="w-6 h-6 text-[#1c1d1f] fill-[#1c1d1f] translate-x-0.5" />
+                    </div>
                   </div>
                   {details.promoVideoThumbnail ? (
                     <img src={details.promoVideoThumbnail} alt="Promo preview" className="w-full h-full object-cover" />

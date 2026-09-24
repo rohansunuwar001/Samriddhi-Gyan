@@ -13,14 +13,30 @@ import {
   ChevronUp,
   Plus,
   Play,
+  Link as LinkIcon,
+  Upload,
+  ExternalLink,
+  Loader2,
+  FolderDown,
+  Sparkles,
 } from "lucide-react";
 import PropTypes from "prop-types";
 import { toast } from "sonner";
 import { useGetCourseByIdQuery } from "@/features/api/courseApi";
-import { useUpdateLectureMutation, useDeleteLectureMutation } from "@/features/api/lectureApi";
+import {
+  useUpdateLectureMutation,
+  useDeleteLectureMutation,
+  useAddLectureResourceLinkMutation,
+  useUploadLectureResourceFileMutation,
+  useDeleteLectureResourceMutation,
+  useUpdateLectureLabMutation,
+  useUploadLectureLabPdfMutation,
+  useDeleteLectureLabMutation,
+} from "@/features/api/lectureApi";
 import { Link } from "react-router-dom";
 import { BASE_URL } from "@/app/constant";
 import BolaVideoPlayer from "./BolaVideoPlayer";
+import { ChunkedUploader } from "@/utils/chunkedUploader";
 
 const LectureItem = ({ lecture, courseId, index }) => {
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -36,18 +52,37 @@ const LectureItem = ({ lecture, courseId, index }) => {
   // Single file upload states
   const [selectedFileToUpload, setSelectedFileToUpload] = useState(null);
   const [uploadingFile, setUploadingFile] = useState(null); // { name, progress, status }
-  const xhrRef = useRef(null);
+  const uploaderRef = useRef(null);
   const pollTimerRef = useRef(null);
 
   // Linked details state
   const [showDesc, setShowDesc] = useState(false);
   const [lectureDesc, setLectureDesc] = useState(lecture.description || "");
 
-  // Resources & Lab mock states
+  // Resources states
   const [showResources, setShowResources] = useState(false);
-  const [showLab, setShowLab] = useState(false);
+  const [resourceTab, setResourceTab] = useState("file"); // "file" | "link"
+  const [resourceFile, setResourceFile] = useState(null);
+  const [resourceTitle, setResourceTitle] = useState("");
   const [resourceLink, setResourceLink] = useState("");
-  const [labConfig, setLabConfig] = useState("");
+  const resourceFileRef = useRef(null);
+
+  // Lab states
+  const [showLab, setShowLab] = useState(false);
+  const [labTitle, setLabTitle] = useState(lecture.lab?.title || "");
+  const [labDesc, setLabDesc] = useState(lecture.lab?.description || "");
+  const [labUrl, setLabUrl] = useState(lecture.lab?.url || "");
+  const [labPdfFile, setLabPdfFile] = useState(null);
+  const labPdfRef = useRef(null);
+
+  // Sync lab inputs if lecture updates
+  useEffect(() => {
+    if (lecture.lab) {
+      setLabTitle(lecture.lab.title || "");
+      setLabDesc(lecture.lab.description || "");
+      setLabUrl(lecture.lab.url || "");
+    }
+  }, [lecture.lab]);
 
   // Video Preview controls
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -56,6 +91,16 @@ const LectureItem = ({ lecture, courseId, index }) => {
   const { data: courseData, refetch: refetchCourse } = useGetCourseByIdQuery(courseId);
   const [updateLecture] = useUpdateLectureMutation();
   const [deleteLecture] = useDeleteLectureMutation();
+
+  // Resources mutations
+  const [addLectureResourceLink, { isLoading: isAddingLink }] = useAddLectureResourceLinkMutation();
+  const [uploadLectureResourceFile, { isLoading: isUploadingResourceFile }] = useUploadLectureResourceFileMutation();
+  const [deleteLectureResource, { isLoading: isDeletingResource }] = useDeleteLectureResourceMutation();
+
+  // Lab mutations
+  const [updateLectureLab, { isLoading: isUpdatingLab }] = useUpdateLectureLabMutation();
+  const [uploadLectureLabPdf, { isLoading: isUploadingLabPdf }] = useUploadLectureLabPdfMutation();
+  const [deleteLectureLab, { isLoading: isDeletingLab }] = useDeleteLectureLabMutation();
 
   const handleUpdateTitle = async () => {
     if (!editedTitle.trim()) return;
@@ -80,6 +125,115 @@ const LectureItem = ({ lecture, courseId, index }) => {
       } catch {
         toast.error("Failed to delete lecture.");
       }
+    }
+  };
+
+  // ── Resources Handlers ──────────────────────────────────────────────────────
+  const handleAddLinkResource = async () => {
+    if (!resourceLink.trim()) {
+      toast.error("Please enter a valid URL (e.g. Google Drive, GitHub)");
+      return;
+    }
+    const title = resourceTitle.trim() || resourceLink.trim();
+    try {
+      await addLectureResourceLink({
+        lectureId: lecture._id,
+        title,
+        url: resourceLink.trim(),
+        courseId,
+      }).unwrap();
+      setResourceTitle("");
+      setResourceLink("");
+      toast.success("External resource link added!");
+    } catch (err) {
+      toast.error(err?.data?.message || "Failed to add resource link");
+    }
+  };
+
+  const handleUploadResourceFile = async () => {
+    if (!resourceFile) {
+      toast.error("Please select a file or PDF to upload");
+      return;
+    }
+    const formData = new FormData();
+    formData.append("file", resourceFile);
+    if (resourceTitle.trim()) {
+      formData.append("title", resourceTitle.trim());
+    }
+    try {
+      await uploadLectureResourceFile({
+        lectureId: lecture._id,
+        formData,
+        courseId,
+      }).unwrap();
+      setResourceFile(null);
+      setResourceTitle("");
+      if (resourceFileRef.current) resourceFileRef.current.value = "";
+      toast.success("File uploaded to Cloudinary successfully!");
+    } catch (err) {
+      toast.error(err?.data?.message || "Failed to upload file to Cloudinary");
+    }
+  };
+
+  const handleDeleteResource = async (resourceId) => {
+    if (!window.confirm("Delete this resource?")) return;
+    try {
+      await deleteLectureResource({
+        lectureId: lecture._id,
+        resourceId,
+        courseId,
+      }).unwrap();
+      toast.success("Resource removed");
+    } catch (err) {
+      toast.error("Failed to delete resource");
+    }
+  };
+
+  // ── Lab Handlers ────────────────────────────────────────────────────────────
+  const handleSaveLab = async () => {
+    if (!labTitle.trim() && !labUrl.trim() && !labPdfFile) {
+      toast.error("Please provide a Lab title, workspace URL, or upload an assignment PDF");
+      return;
+    }
+    try {
+      await updateLectureLab({
+        lectureId: lecture._id,
+        title: labTitle.trim(),
+        description: labDesc.trim(),
+        url: labUrl.trim(),
+        isActive: true,
+        courseId,
+      }).unwrap();
+
+      if (labPdfFile) {
+        const formData = new FormData();
+        formData.append("file", labPdfFile);
+        await uploadLectureLabPdf({
+          lectureId: lecture._id,
+          formData,
+          courseId,
+        }).unwrap();
+        setLabPdfFile(null);
+        if (labPdfRef.current) labPdfRef.current.value = "";
+      }
+
+      toast.success("Lab configuration saved!");
+    } catch (err) {
+      toast.error(err?.data?.message || "Failed to save lab configuration");
+    }
+  };
+
+  const handleDeleteLab = async () => {
+    if (!window.confirm("Remove this lab configuration?")) return;
+    try {
+      await deleteLectureLab({ lectureId: lecture._id, courseId }).unwrap();
+      setLabTitle("");
+      setLabDesc("");
+      setLabUrl("");
+      setLabPdfFile(null);
+      toast.success("Lab removed from this lecture");
+    } catch (err) {
+      toast.error("Failed to remove lab");
     }
   };
 
@@ -158,8 +312,8 @@ const LectureItem = ({ lecture, courseId, index }) => {
     }, 3000);
   };
 
-  // Start upload of video
-  const handleStartSingleUpload = () => {
+  // Start upload of video via Chunked Direct-to-Cloud
+  const handleStartSingleUpload = async () => {
     if (!selectedFileToUpload) return;
     const file = selectedFileToUpload;
     setSelectedFileToUpload(null);
@@ -167,49 +321,57 @@ const LectureItem = ({ lecture, courseId, index }) => {
     setUploadingFile({
       name: file.name,
       progress: 0,
-      status: "uploading",
+      status: "Initiating direct cloud upload…",
     });
 
-    const xhr = new XMLHttpRequest();
-    xhrRef.current = xhr;
-    const formData = new FormData();
-    formData.append("video", file);
+    const uploader = new ChunkedUploader({
+      file,
+      lectureId: lecture._id,
+      baseUrl: BASE_URL || "http://localhost:10000",
+      token: localStorage.getItem("authToken") || "",
+      chunkSize: 10 * 1024 * 1024,
+      concurrency: 3,
+      onProgress: (pct, stats) => {
+        setUploadingFile((prev) =>
+          prev
+            ? {
+                ...prev,
+                progress: pct,
+                status: stats?.speedFormatted
+                  ? `Uploading • ${stats.speedFormatted} • ${stats.etaFormatted}`
+                  : (prev.status || "Uploading chunks to cloud…"),
+              }
+            : null
+        );
+      },
+      onStatusChange: (statusText) => {
+        setUploadingFile((prev) => (prev ? { ...prev, status: statusText } : null));
+      },
+    });
 
-    xhr.upload.onprogress = (e) => {
-      if (e.lengthComputable) {
-        const pct = Math.round((e.loaded * 100) / e.total);
-        setUploadingFile((prev) => prev ? { ...prev, progress: pct } : null);
+    uploaderRef.current = uploader;
+
+    try {
+      await uploader.upload();
+      setUploadingFile((prev) =>
+        prev ? { ...prev, status: "Processing", progress: 100 } : null
+      );
+      setIsEditingVideoOverride(false);
+      refetchCourse();
+      startStatusPolling();
+    } catch (err) {
+      if (err.message !== "Upload cancelled" && err.message !== "Upload aborted") {
+        toast.error(err.message || "Upload failed.");
       }
-    };
-
-    xhr.onload = () => {
-      if (xhr.status === 200) {
-        setUploadingFile((prev) => prev ? { ...prev, status: "Processing", progress: 100 } : null);
-        setIsEditingVideoOverride(false);
-        refetchCourse();
-        startStatusPolling();
-      } else {
-        toast.error("Upload failed.");
-        setUploadingFile(null);
-      }
-    };
-
-    xhr.onerror = () => {
-      toast.error("Upload failed.");
       setUploadingFile(null);
-    };
-
-    xhr.open("POST", `${BASE_URL || "http://localhost:10000"}/api/v1/lectures/${lecture._id}/upload`);
-    const token = localStorage.getItem("authToken");
-    if (token) {
-      xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    } finally {
+      uploaderRef.current = null;
     }
-    xhr.send(formData);
   };
 
   const handleCancelUpload = () => {
-    if (xhrRef.current) {
-      xhrRef.current.abort();
+    if (uploaderRef.current) {
+      uploaderRef.current.abort();
     }
     setUploadingFile(null);
     toast.info("Upload cancelled.");
@@ -735,9 +897,9 @@ const LectureItem = ({ lecture, courseId, index }) => {
                     setShowDesc(false);
                     setShowLab(false);
                   }}
-                  className={`border hover:bg-slate-50 text-[#1c1d1f] font-light text-[10px] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1 ${showResources ? "border-[#1c1d1f] bg-[#f7f9fa]" : "border-[#6a6f73]"}`}
+                  className={`border hover:bg-slate-50 text-[#1c1d1f] font-light text-[10px] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1.5 ${showResources ? "border-[#1c1d1f] bg-[#f7f9fa]" : "border-[#6a6f73]"}`}
                 >
-                  <Plus className="w-3 h-3" /> Resources
+                  <Plus className="w-3 h-3" /> Resources {lecture.resources?.length > 0 ? `(${lecture.resources.length})` : ""}
                 </button>
                 <button
                   onClick={() => {
@@ -745,9 +907,9 @@ const LectureItem = ({ lecture, courseId, index }) => {
                     setShowDesc(false);
                     setShowResources(false);
                   }}
-                  className={`border hover:bg-slate-50 text-[#1c1d1f] font-light text-[10px] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1 ${showLab ? "border-[#1c1d1f] bg-[#f7f9fa]" : "border-[#6a6f73]"}`}
+                  className={`border hover:bg-slate-50 text-[#1c1d1f] font-light text-[10px] px-3.5 py-1.5 rounded-full transition-colors flex items-center gap-1.5 ${showLab ? "border-[#1c1d1f] bg-[#f7f9fa]" : "border-[#6a6f73]"}`}
                 >
-                  <Plus className="w-3 h-3" /> Lab
+                  <Plus className="w-3 h-3" /> Lab {lecture.lab?.title || lecture.lab?.pdfUrl ? "(Configured)" : ""}
                 </button>
               </div>
 
@@ -778,57 +940,343 @@ const LectureItem = ({ lecture, courseId, index }) => {
 
               {/* Resources Panel */}
               {showResources && (
-                <div className="bg-white border border-[#d1d7dc] p-5 space-y-4">
-                  <h4 className="font-light text-lg text-[#1c1d1f]">Lecture Resources</h4>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      placeholder="Add external link (e.g. Github Repo, PDF URL)"
-                      value={resourceLink}
-                      onChange={(e) => setResourceLink(e.target.value)}
-                      className="flex-grow border border-[#6a6f73] px-3 py-2 text-lg text-[#1c1d1f] outline-none focus:border-[#1c1d1f]"
-                    />
+                <div className="bg-white border border-[#d1d7dc] p-5 space-y-5">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-medium text-lg text-[#1c1d1f]">Lecture Resources</h4>
+                      <p className="text-sm text-[#6a6f73]">
+                        Upload downloadable files (PDFs, slides) directly via Cloudinary or paste external links (Google Drive, GitHub).
+                      </p>
+                    </div>
                     <button
-                      onClick={() => {
-                        if (!resourceLink.trim()) return;
-                        toast.success("Resource link saved!");
-                        setShowResources(false);
-                        setResourceLink("");
-                      }}
-                      className="bg-[#1c1d1f] text-white font-light text-lg px-4 py-2 hover:bg-black transition-colors shrink-0"
+                      onClick={() => setShowResources(false)}
+                      className="text-gray-400 hover:text-gray-700"
                     >
-                      Add Link
+                      <X className="w-5 h-5" />
                     </button>
+                  </div>
+
+                  {/* Attached Resources List */}
+                  {lecture.resources && lecture.resources.length > 0 ? (
+                    <div className="space-y-2 border-b border-[#d1d7dc] pb-4">
+                      <h5 className="text-xs font-semibold text-[#1c1d1f] uppercase tracking-wider">
+                        Attached Resources ({lecture.resources.length})
+                      </h5>
+                      <div className="divide-y divide-[#e4e8eb] border border-[#d1d7dc] rounded-sm bg-white">
+                        {lecture.resources.map((item) => (
+                          <div key={item._id} className="flex items-center justify-between p-3 gap-3">
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              {item.type === "pdf" ? (
+                                <span className="px-2 py-0.5 text-[10px] font-bold bg-red-100 text-red-700 rounded border border-red-200">
+                                  PDF
+                                </span>
+                              ) : item.type === "file" ? (
+                                <span className="px-2 py-0.5 text-[10px] font-bold bg-blue-100 text-blue-700 rounded border border-blue-200">
+                                  FILE
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 text-[10px] font-bold bg-purple-100 text-purple-700 rounded border border-purple-200">
+                                  LINK
+                                </span>
+                              )}
+                              <div className="min-w-0">
+                                <p className="text-sm font-medium text-[#1c1d1f] truncate">{item.title}</p>
+                                {item.size && <span className="text-xs text-[#6a6f73]">{item.size}</span>}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2 shrink-0">
+                              <a
+                                href={item.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-xs flex items-center gap-1 text-[#5624d0] hover:underline font-medium px-2.5 py-1 bg-white border border-[#d1d7dc] rounded hover:border-[#5624d0]"
+                              >
+                                <ExternalLink className="w-3.5 h-3.5" /> View / Download
+                              </a>
+                              <button
+                                onClick={() => handleDeleteResource(item._id)}
+                                disabled={isDeletingResource}
+                                className="text-gray-400 hover:text-red-600 p-1 transition-colors"
+                                title="Delete resource"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="p-3 bg-slate-50 border border-dashed border-[#d1d7dc] text-center text-sm text-[#6a6f73]">
+                      No resources attached yet. Upload a PDF or add a Google Drive link below.
+                    </div>
+                  )}
+
+                  {/* Add Resource Tab Switcher */}
+                  <div className="space-y-3 pt-2">
+                    <div className="flex border-b border-[#d1d7dc] text-sm">
+                      <button
+                        onClick={() => setResourceTab("file")}
+                        className={`pb-2 px-4 font-medium transition-colors ${
+                          resourceTab === "file"
+                            ? "border-b-2 border-[#1c1d1f] text-[#1c1d1f]"
+                            : "text-[#6a6f73] hover:text-[#1c1d1f]"
+                        }`}
+                      >
+                        Upload PDF / Document (Cloudinary)
+                      </button>
+                      <button
+                        onClick={() => setResourceTab("link")}
+                        className={`pb-2 px-4 font-medium transition-colors ${
+                          resourceTab === "link"
+                            ? "border-b-2 border-[#1c1d1f] text-[#1c1d1f]"
+                            : "text-[#6a6f73] hover:text-[#1c1d1f]"
+                        }`}
+                      >
+                        Add External Link (Google Drive / GitHub)
+                      </button>
+                    </div>
+
+                    {resourceTab === "file" ? (
+                      <div className="space-y-3 pt-1">
+                        <div>
+                          <label className="block text-xs font-semibold text-[#1c1d1f] mb-1">
+                            Choose PDF or Document file
+                          </label>
+                          <input
+                            type="file"
+                            ref={resourceFileRef}
+                            accept=".pdf,.doc,.docx,.zip,.txt"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              setResourceFile(file || null);
+                              if (file && !resourceTitle) {
+                                setResourceTitle(file.name);
+                              }
+                            }}
+                            className="block w-full text-sm text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:border-0 file:text-xs file:font-semibold file:bg-[#1c1d1f] file:text-white hover:file:bg-black file:cursor-pointer cursor-pointer border border-[#d1d7dc] p-1.5 bg-slate-50"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-[#1c1d1f] mb-1">
+                            Title / Display Name (optional)
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Lecture 1 Slides & Cheat Sheet"
+                            value={resourceTitle}
+                            onChange={(e) => setResourceTitle(e.target.value)}
+                            className="w-full border border-[#d1d7dc] px-3 py-2 text-sm text-[#1c1d1f] outline-none focus:border-[#1c1d1f]"
+                          />
+                        </div>
+                        <button
+                          onClick={handleUploadResourceFile}
+                          disabled={isUploadingResourceFile || !resourceFile}
+                          className="bg-[#1c1d1f] text-white text-sm font-medium px-4 py-2 hover:bg-black transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isUploadingResourceFile ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" /> Uploading to Cloudinary…
+                            </>
+                          ) : (
+                            <>
+                              <Upload className="w-4 h-4" /> Upload File to Cloudinary
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="space-y-3 pt-1">
+                        <div>
+                          <label className="block text-xs font-semibold text-[#1c1d1f] mb-1">
+                            Resource Title
+                          </label>
+                          <input
+                            type="text"
+                            placeholder="e.g. Google Drive Lecture Slides, GitHub Starter Repo"
+                            value={resourceTitle}
+                            onChange={(e) => setResourceTitle(e.target.value)}
+                            className="w-full border border-[#d1d7dc] px-3 py-2 text-sm text-[#1c1d1f] outline-none focus:border-[#1c1d1f]"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-xs font-semibold text-[#1c1d1f] mb-1">
+                            External URL (Google Drive, GitHub, etc.)
+                          </label>
+                          <input
+                            type="url"
+                            placeholder="https://drive.google.com/... or https://github.com/..."
+                            value={resourceLink}
+                            onChange={(e) => setResourceLink(e.target.value)}
+                            className="w-full border border-[#d1d7dc] px-3 py-2 text-sm text-[#1c1d1f] outline-none focus:border-[#1c1d1f]"
+                          />
+                        </div>
+                        <button
+                          onClick={handleAddLinkResource}
+                          disabled={isAddingLink || !resourceLink.trim()}
+                          className="bg-[#1c1d1f] text-white text-sm font-medium px-4 py-2 hover:bg-black transition-colors flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {isAddingLink ? (
+                            <>
+                              <Loader2 className="w-4 h-4 animate-spin" /> Saving…
+                            </>
+                          ) : (
+                            <>
+                              <LinkIcon className="w-4 h-4" /> Add External Link
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
 
               {/* Lab Panel */}
               {showLab && (
-                <div className="bg-white border border-[#d1d7dc] p-5 space-y-4">
-                  <h4 className="font-light text-lg text-[#1c1d1f]">Lab Configuration</h4>
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      placeholder="Config workspace labs docker image / setup URL"
-                      value={labConfig}
-                      onChange={(e) => setLabConfig(e.target.value)}
-                      className="flex-grow border border-[#6a6f73] px-3 py-2 text-lg text-[#1c1d1f] outline-none focus:border-[#1c1d1f]"
-                    />
+                <div className="bg-white border border-[#d1d7dc] p-5 space-y-5">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h4 className="font-medium text-lg text-[#1c1d1f]">Lab Configuration</h4>
+                      <p className="text-sm text-[#6a6f73]">
+                        Configure hands-on lab workspace (Google Colab, GitHub, Google Drive) and upload an assignment PDF via Cloudinary.
+                      </p>
+                    </div>
                     <button
-                      onClick={() => {
-                        if (!labConfig.trim()) return;
-                        toast.success("Lab workspace configured!");
-                        setShowLab(false);
-                        setLabConfig("");
-                      }}
-                      className="bg-[#1c1d1f] text-white font-light text-lg px-4 py-2 hover:bg-black transition-colors shrink-0"
+                      onClick={() => setShowLab(false)}
+                      className="text-gray-400 hover:text-gray-700"
                     >
-                      Save Lab
+                      <X className="w-5 h-5" />
                     </button>
+                  </div>
+
+                  {/* Active Lab Card if configured */}
+                  {(lecture.lab?.title || lecture.lab?.pdfUrl || lecture.lab?.url) && (
+                    <div className="p-3.5 bg-purple-50 border border-purple-200 rounded flex items-start justify-between gap-3">
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold bg-[#a435f0] text-white px-2 py-0.5 rounded">
+                            ACTIVE LAB
+                          </span>
+                          <h5 className="font-semibold text-sm text-[#1c1d1f] truncate">
+                            {lecture.lab.title || "Lecture Hands-on Lab"}
+                          </h5>
+                        </div>
+                        {lecture.lab.description && (
+                          <p className="text-xs text-[#6a6f73] line-clamp-2">{lecture.lab.description}</p>
+                        )}
+                        <div className="flex flex-wrap gap-3 pt-1 text-xs">
+                          {lecture.lab.url && (
+                            <a
+                              href={lecture.lab.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[#5624d0] hover:underline flex items-center gap-1 font-medium"
+                            >
+                              <ExternalLink className="w-3.5 h-3.5" /> Open Lab Workspace
+                            </a>
+                          )}
+                          {lecture.lab.pdfUrl && (
+                            <a
+                              href={lecture.lab.pdfUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-red-700 hover:underline flex items-center gap-1 font-medium"
+                            >
+                              <FileText className="w-3.5 h-3.5 text-red-600" /> View Assignment PDF
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                      <button
+                        onClick={handleDeleteLab}
+                        disabled={isDeletingLab}
+                        className="text-gray-400 hover:text-red-600 p-1 shrink-0"
+                        title="Remove lab configuration"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Lab Inputs Form */}
+                  <div className="space-y-3 pt-1">
+                    <div>
+                      <label className="block text-xs font-semibold text-[#1c1d1f] mb-1">
+                        Lab Title
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g. Lab 1: React State & Todo App Project"
+                        value={labTitle}
+                        onChange={(e) => setLabTitle(e.target.value)}
+                        className="w-full border border-[#d1d7dc] px-3 py-2 text-sm text-[#1c1d1f] outline-none focus:border-[#1c1d1f]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-[#1c1d1f] mb-1">
+                        Lab Instructions / Objectives (optional)
+                      </label>
+                      <textarea
+                        rows={3}
+                        placeholder="Brief summary of steps students need to follow to complete this lab."
+                        value={labDesc}
+                        onChange={(e) => setLabDesc(e.target.value)}
+                        className="w-full border border-[#d1d7dc] p-3 text-sm text-[#1c1d1f] outline-none focus:border-[#1c1d1f]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-[#1c1d1f] mb-1">
+                        Lab Workspace URL (Google Colab, Google Drive, GitHub Classroom, etc.)
+                      </label>
+                      <input
+                        type="url"
+                        placeholder="https://colab.research.google.com/... or https://drive.google.com/..."
+                        value={labUrl}
+                        onChange={(e) => setLabUrl(e.target.value)}
+                        className="w-full border border-[#d1d7dc] px-3 py-2 text-sm text-[#1c1d1f] outline-none focus:border-[#1c1d1f]"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-[#1c1d1f] mb-1">
+                        Upload Lab Assignment PDF (via Cloudinary)
+                      </label>
+                      <input
+                        type="file"
+                        ref={labPdfRef}
+                        accept=".pdf"
+                        onChange={(e) => setLabPdfFile(e.target.files?.[0] || null)}
+                        className="block w-full text-sm text-slate-500 file:mr-3 file:py-1.5 file:px-3 file:border-0 file:text-xs file:font-semibold file:bg-[#1c1d1f] file:text-white hover:file:bg-black file:cursor-pointer cursor-pointer border border-[#d1d7dc] p-1.5 bg-slate-50"
+                      />
+                      {lecture.lab?.pdfName && !labPdfFile && (
+                        <p className="text-xs text-[#6a6f73] mt-1">Current file: {lecture.lab.pdfName}</p>
+                      )}
+                    </div>
+                    <div className="flex justify-end gap-2.5 pt-2">
+                      <button
+                        onClick={() => setShowLab(false)}
+                        className="px-4 py-2 border border-[#d1d7dc] text-sm text-[#6a6f73] hover:text-[#1c1d1f]"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSaveLab}
+                        disabled={isUpdatingLab || isUploadingLabPdf}
+                        className="bg-[#1c1d1f] text-white text-sm font-medium px-5 py-2 hover:bg-black transition-colors flex items-center gap-2 disabled:opacity-50"
+                      >
+                        {isUpdatingLab || isUploadingLabPdf ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" /> Saving Lab…
+                          </>
+                        ) : (
+                          "Save Lab Configuration"
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               )}
+
 
             </div>
           )}

@@ -24,6 +24,7 @@ import {
   getPublicUserProfile,
   getMyLearningCoursesController,
   trackCourseViewController,
+  saveSearchTermController,
   archiveCourseController,
   unarchiveCourseController,
   getArchivedCoursesController,
@@ -59,6 +60,7 @@ router
 
 // ── Learning routes ──────────────────────────────────────────────────────────
 router.route("/view-history/:courseId").post(isAuthenticated, trackCourseViewController);
+router.route("/search-history").post(isAuthenticated, saveSearchTermController);
 router.route("/my-learning").get(isAuthenticated, getMyLearningCoursesController);
 router.route("/archived").get(isAuthenticated, getArchivedCoursesController);
 router.route("/archive/:courseId").post(isAuthenticated, archiveCourseController);

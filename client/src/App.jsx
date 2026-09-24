@@ -67,7 +67,6 @@ const BlogPage = lazy(() => import("./pages/Blog/BlogPage"));
 const SingleBlogPage = lazy(() => import("./pages/Blog/SingleBlogPage"));
 const ForumPage = lazy(() => import("./pages/Community/ForumPage"));
 const CourseAnalytics = lazy(() => import("./pages/admin/course/CourseAnalytics"));
-const CoursePayout = lazy(() => import("./pages/admin/course/CoursePayout"));
 const CourseReviews = lazy(() => import("./pages/admin/course/CourseReviews"));
 const CourseStudent = lazy(() => import("./pages/admin/course/CourseStudent"));
 const EditLecture = lazy(() => import("./pages/admin/lecture/EditLecture"));
@@ -110,6 +109,9 @@ const AlgorithmPlayground = lazy(() => import("./pages/student/AlgorithmPlaygrou
 const NearbyHub = lazy(() => import("./pages/student/NearbyHub"));
 const StudentAssignments = lazy(() => import("./pages/student/StudentAssignments"));
 const InstructorAssignments = lazy(() => import("./pages/admin/course/InstructorAssignments"));
+const InstructorSubmissionsArrival = lazy(() => import("./pages/admin/course/InstructorSubmissionsArrival"));
+const InstructorCheckingSection = lazy(() => import("./pages/admin/course/InstructorCheckingSection"));
+
 
 // --- LAYOUT WRAPPER COMPONENT ---
 const MainLayoutWithScroll = () => (
@@ -574,7 +576,16 @@ const appRouter = createBrowserRouter([
         element: <SearchPage />,
       },
 
-      // NOTE: The main course detail page for students
+      // Udemy-style course detail route: /course/:courseId (supports slug and ID)
+      {
+        path: "course/:courseId",
+        element: (
+          <StudentRoute>
+            <CourseDetailPage />
+          </StudentRoute>
+        ),
+      },
+      // Legacy course detail route kept for backward compatibility
       {
         path: "course-detail/:courseId",
         element: (
@@ -614,7 +625,14 @@ const appRouter = createBrowserRouter([
           { path: "course/create/:step", element: <AddCourse /> }, // 4-step wizard
           { path: "course/:courseId", element: <EditCourse /> }, // The new central hub for editing
           { path: "course/:courseId/assignments", element: <InstructorAssignments /> },
+          { path: "course/:courseId/assignments/submissions", element: <InstructorSubmissionsArrival /> },
+          { path: "course/:courseId/assignments/check", element: <InstructorCheckingSection /> },
+          { path: "course/:courseId/assignments/check/:submissionId", element: <InstructorCheckingSection /> },
           { path: "assignments", element: <InstructorAssignments /> },
+          { path: "assignments/submissions", element: <InstructorSubmissionsArrival /> },
+          { path: "assignments/check", element: <InstructorCheckingSection /> },
+          { path: "assignments/check/:submissionId", element: <InstructorCheckingSection /> },
+
 
           // C. Lecture management route (simplified and corrected)
           // The old "/course/:courseId/lecture" route for creating is REMOVED.
@@ -635,7 +653,7 @@ const appRouter = createBrowserRouter([
           },
           {
             path: `course/payouts`,
-            element: <CoursePayout />,
+            element: <Navigate to="/instructor/course/analytics" replace />,
           },
           {
             path: "course/analytics",
@@ -757,6 +775,28 @@ const appRouter = createBrowserRouter([
       <ProtectedRoute>
         <ScrollToTop />
         <Checkout />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/course/:courseId/content",
+    element: (
+      <ProtectedRoute>
+        <PurchaseCourseProtectedRoute>
+          <ScrollToTop />
+          <CourseProgress />
+        </PurchaseCourseProtectedRoute>
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/course/:courseId/assignments",
+    element: (
+      <ProtectedRoute>
+        <PurchaseCourseProtectedRoute>
+          <ScrollToTop />
+          <StudentAssignments />
+        </PurchaseCourseProtectedRoute>
       </ProtectedRoute>
     ),
   },

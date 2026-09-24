@@ -50,7 +50,7 @@ const YouMightAlsoLike = ({ excludeIds = [], limit = 10 }) => {
             return (
               <Link
                 key={course._id}
-                to={`/course-detail/${course._id}`}
+                to={`/course/${course.slug || course._id}`}
                 className="flex-shrink-0 w-64 group"
               >
                 <img

@@ -336,7 +336,7 @@ const TopicPage = () => {
                     {courses.map((c) => (
                       <div
                         key={c._id}
-                        onClick={() => navigate(`/course-detail/${c._id}`)}
+                        onClick={() => navigate(`/course/${c.slug || c._id}`)}
                         className="bg-white border border-slate-100 rounded-3xl overflow-hidden shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between h-full group"
                       >
                         <div>
@@ -385,7 +385,7 @@ const TopicPage = () => {
                       Highest rated course in this certification preparation path. Start with this course for optimal preparation.
                     </p>
                     <button
-                      onClick={() => navigate(`/course-detail/${topCourse._id}`)}
+                      onClick={() => navigate(`/course/${topCourse.slug || topCourse._id}`)}
                       className="text-sm font-semibold text-purple-700 hover:text-purple-800 inline-flex items-center gap-1 mt-1"
                     >
                       Start Learning Now <ChevronRight size={14} />
@@ -612,7 +612,7 @@ const TopicPage = () => {
               courses.slice(0, 6).map((course, idx) => (
                 <div
                   key={course._id}
-                  onClick={() => navigate(`/course-detail/${course._id}`)}
+                  onClick={() => navigate(`/course/${course.slug || course._id}`)}
                   className="w-[240px] shrink-0 bg-white text-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:scale-[1.02] transition-transform shadow-lg cursor-pointer"
                 >
                   <div className="space-y-2">
@@ -697,7 +697,7 @@ const TopicPage = () => {
                       </div>
                       <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-2">
                         <span className="text-lg font-light text-slate-900">Rs {course.price?.current}</span>
-                        <Link to={`/course-detail/${course._id}`} className="text-base font-light text-purple-600 hover:underline">View</Link>
+                        <Link to={`/course/${course.slug || course._id}`} className="text-base font-light text-purple-600 hover:underline">View</Link>
                       </div>
                     </div>
                   </React.Fragment>
@@ -789,7 +789,7 @@ const TopicPage = () => {
               {practiceCourses.map((c) => (
                 <div
                   key={c._id}
-                  onClick={() => navigate(`/course-detail/${c._id}`)}
+                  onClick={() => navigate(`/course/${c.slug || c._id}`)}
                   className="w-[280px] shrink-0 bg-white border border-slate-200 p-5 rounded-2xl flex flex-col justify-between hover:shadow-md transition-shadow cursor-pointer"
                 >
                   <div className="space-y-3">
@@ -1059,13 +1059,25 @@ const TopicPage = () => {
               ) : (
                 <div className="flex flex-col gap-6">
                   {filteredAndSortedCourses.map((course) => {
-                    const ratings = course.ratings || [];
-                    const avgRating = course.avgRating > 0
-                      ? course.avgRating.toFixed(1)
-                      : ratings.length
-                      ? (ratings.reduce((s, r) => s + r, 0) / ratings.length).toFixed(1)
-                      : null;
-                    const reviewCount = course.reviewCount ?? ratings.length ?? 0;
+                    const isRatingArray = Array.isArray(course.ratings);
+                    const ratingsList = isRatingArray ? course.ratings : [];
+                    const avgRating =
+                      course.avgRating > 0
+                        ? course.avgRating.toFixed(1)
+                        : typeof course.ratings === "number" && course.ratings > 0
+                        ? course.ratings.toFixed(1)
+                        : ratingsList.length
+                        ? (
+                            ratingsList.reduce(
+                              (s, r) => s + (typeof r === "number" ? r : r?.rating || 0),
+                              0
+                            ) / ratingsList.length
+                          ).toFixed(1)
+                        : null;
+                    const reviewCount =
+                      course.reviewCount ??
+                      course.numOfReviews ??
+                      (isRatingArray ? ratingsList.length : 0);
 
                     return (
                       <div
@@ -1084,7 +1096,7 @@ const TopicPage = () => {
                         {/* Middle Info */}
                         <div className="space-y-2">
                           <h3 className="text-xl sm:text-2xl font-light text-slate-800 leading-snug">
-                            <Link to={`/course-detail/${course._id}`} className="hover:text-purple-700">
+                            <Link to={`/course/${course.slug || course._id}`} className="hover:text-purple-700">
                               {course.title}
                             </Link>
                           </h3>
@@ -1131,7 +1143,7 @@ const TopicPage = () => {
                           )}
 
                           <Button
-                            onClick={() => navigate(`/course-detail/${course._id}`)}
+                            onClick={() => navigate(`/course/${course.slug || course._id}`)}
                             className="bg-slate-900 hover:bg-slate-800 text-white font-light w-full text-base h-9 rounded-lg"
                           >
                             Learn more

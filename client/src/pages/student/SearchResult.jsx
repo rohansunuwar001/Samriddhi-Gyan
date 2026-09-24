@@ -8,7 +8,7 @@ const SearchResult = ({ course }) => {
   return (
     <article className="group flex flex-col md:flex-row gap-4 p-4 border-b border-gray-200 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900/50 transition-colors duration-200 rounded-lg">
       <Link
-        to={`/course-detail/${course._id}`}
+        to={`/course/${course.slug || course._id}`}
         className="flex flex-col md:flex-row gap-4 flex-1"
         aria-label={`View ${course.title} course details`}
       >
@@ -90,7 +90,7 @@ const SearchResult = ({ course }) => {
           className="w-full"
           variant={course.price?.current === 0 ? "outline" : "default"}
         >
-          <Link to={`/course-detail/${course._id}`}>
+          <Link to={`/course/${course.slug || course._id}`}>
             {course.price?.current === 0 ? "Enroll Now" : "Buy Now"}
           </Link>
         </Button>

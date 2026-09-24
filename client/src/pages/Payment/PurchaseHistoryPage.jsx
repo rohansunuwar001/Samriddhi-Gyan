@@ -59,7 +59,7 @@ const PurchaseHistoryPage = () => {
                         />
                         <div className="min-w-0">
                           <Link 
-                            to={`/course-detail/${course._id}`} 
+                            to={`/course/${course.slug || course._id}`} 
                             className="text-lg font-light text-slate-800 hover:text-[#5624d0] hover:underline line-clamp-1"
                           >
                             {course.title}

@@ -187,3 +187,67 @@ export const gradeSubmission = async (req, res) => {
     });
   }
 };
+
+/**
+ * Lists all submissions across all assignments for a specific course (Instructor/Admin only)
+ * @route GET /api/v1/assignment/submissions/course/:courseId
+ */
+export const getCourseSubmissions = async (req, res) => {
+  try {
+    const { courseId } = req.params;
+
+    const assignments = await Assignment.find({ courseId }).select("_id title type maxPoints deadline");
+    const assignmentIds = assignments.map((a) => a._id);
+
+    const submissions = await Submission.find({ assignmentId: { $in: assignmentIds } })
+      .populate("studentId", "name email photoUrl")
+      .populate("assignmentId", "title type maxPoints deadline requiredStructures")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return res.status(200).json({
+      success: true,
+      submissions
+    });
+  } catch (error) {
+    console.error("getCourseSubmissions error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error fetching course submissions."
+    });
+  }
+};
+
+/**
+ * Retrieves a single submission with full details for checking/grading
+ * @route GET /api/v1/assignment/submission/:submissionId
+ */
+export const getSubmissionById = async (req, res) => {
+  try {
+    const { submissionId } = req.params;
+
+    const submission = await Submission.findById(submissionId)
+      .populate("studentId", "name email photoUrl")
+      .populate("assignmentId", "title description type maxPoints deadline requiredStructures courseId")
+      .lean();
+
+    if (!submission) {
+      return res.status(404).json({
+        success: false,
+        message: "Submission not found."
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      submission
+    });
+  } catch (error) {
+    console.error("getSubmissionById error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error fetching submission details."
+    });
+  }
+};
+
