@@ -50,6 +50,7 @@ import {
   getCourseAnalytics,
   bulkUploadCourseVideos,
   deletePromoVideo,
+  webhookPromoComplete,
   listAllCoursesBrief,
 } from "../controllers/course.controller.js";
 
@@ -116,6 +117,10 @@ router.post(  "/:courseId/bulk-upload", isAuthenticated, uploadBulk.array("video
 // will treat the sub-path segment (e.g. "promo-video") as the courseId value.
 router.delete("/:courseId/promo-video", isAuthenticated, deletePromoVideo);
 router.delete("/:courseId", isAuthenticated, removeCourse);
+
+// Internal webhook for video-server transcode completion
+router.post("/internal/promo/:courseId/complete", webhookPromoComplete);
+router.post("/:courseId/internal/promo/complete", webhookPromoComplete);
 
 // Explicit publish route (in case frontend uses this URL pattern)
 router.patch("/:courseId/publish", isAuthenticated, togglePublishCourse);

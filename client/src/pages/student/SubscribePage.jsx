@@ -483,7 +483,7 @@ const SubscribePage = () => {
                     return (
                       <Link
                         key={c._id}
-                        to={`/course-detail/${c._id}`}
+                        to={`/course/${c.slug || c._id}`}
                         className="flex flex-col items-start text-left group"
                       >
                         <h4 className="font-semibold text-[18px] text-[#1c1d1f] group-hover:text-[#5624d0] leading-[1.25] line-clamp-2">

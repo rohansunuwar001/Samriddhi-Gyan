@@ -10,7 +10,7 @@ import loadUserIfAuthenticated from "../middlewares/loadUserIfAuthenticated.js";
 const router = express.Router();
  
 // GET /api/recommendations — personalized or popular recommendations
-router.get("/", getRecommendedCourses);
+router.get("/", loadUserIfAuthenticated, getRecommendedCourses);
  
 // GET /api/recommendations/trending — needs user context to exclude purchased courses
 router.get("/trending", loadUserIfAuthenticated, getTrendingCourses);

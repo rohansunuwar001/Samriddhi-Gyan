@@ -72,12 +72,37 @@ export const deleteFromCloudinary = async (publicId, resource_type = "image") =>
     if (!publicId) return;
 
     try {
-        // This single function can handle both videos and images by specifying the resource_type
         await cloudinary.uploader.destroy(publicId, { resource_type });
         console.log(`Successfully deleted ${resource_type} with public_id: ${publicId}`);
-
     } catch (error) {
         console.error(`Failed to delete ${resource_type} from Cloudinary:`, error);
+    }
+};
+
+/**
+ * Upload a document (PDF, TXT, ZIP, etc.) to Cloudinary.
+ */
+export const uploadDocument = async (localFilePath, originalName = "document.pdf") => {
+    if (!localFilePath) return null;
+
+    try {
+        const uploadResponse = await cloudinary.uploader.upload(localFilePath, {
+            resource_type: "auto",
+            folder: "samriddhi-gyan/resources",
+            use_filename: true,
+            unique_filename: true,
+        });
+
+        if (fs.existsSync(localFilePath)) {
+            try { fs.unlinkSync(localFilePath); } catch (e) {}
+        }
+        return uploadResponse;
+    } catch (error) {
+        if (fs.existsSync(localFilePath)) {
+            try { fs.unlinkSync(localFilePath); } catch (e) {}
+        }
+        console.error("Cloudinary document upload failed:", error);
+        return null;
     }
 };
 

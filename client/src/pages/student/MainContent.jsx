@@ -1,9 +1,11 @@
 import PropTypes from "prop-types";
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useRef } from "react";
 import { FaFacebookF, FaLink, FaLinkedinIn, FaStar } from "react-icons/fa";
 import {
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
+  ChevronUp,
   Search,
   MessageSquare,
   ThumbsUp,
@@ -17,9 +19,13 @@ import {
   Bot,
   Check,
   BookOpen,
+  ExternalLink,
+  FileText,
+  FolderDown,
 } from "lucide-react";
 import ReviewsSection from "../Reviews/ReviewSection";
 import BolaVideoPlayer from "../admin/lecture/BolaVideoPlayer";
+import CourseNotesTab from "./CourseNotesTab";
 import {
   useGetCourseQuestionsQuery,
   useCreateQuestionMutation,
@@ -56,6 +62,10 @@ const MainContent = ({
   setIsSidebarOpen,
 }) => {
   const [selectedTab, setSelectedTab] = useState("overview");
+  const videoPlayerRef = useRef(null);
+  const [currentVideoTime, setCurrentVideoTime] = useState(0);
+  const [isNoteEditorOpen, setIsNoteEditorOpen] = useState(false);
+  const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
 
   const course = courseData?.course;
   const courseId = course?._id;
@@ -157,7 +167,7 @@ const MainContent = ({
   const instructor = course.creator || {};
   const instructorName = instructor.name || "Unknown Instructor";
   const instructorHeadline = instructor.headline || "";
-  const instructorPhoto = instructor.photoUrl || "https://via.placeholder.com/100";
+  const instructorPhoto = instructor.photoUrl || "https://placehold.co/100x100/e2e8f0/475569.png?text=Instructor";
   const instructorLinks = instructor.links || {};
 
   const totalLectures = (course.sections || []).reduce(
@@ -306,6 +316,7 @@ const MainContent = ({
 
   const tabs = [
     { id: "overview", label: "Overview" },
+    { id: "resources", label: "Resources & Lab" },
     { id: "qna", label: "Q&A" },
     { id: "notes", label: "Notes" },
     { id: "flashcards", label: "Flashcards" },
@@ -321,9 +332,21 @@ const MainContent = ({
         <div className="w-full max-w-[1200px] relative aspect-video">
           {selectedLecture?.videoUrl ? (
             <BolaVideoPlayer
+              ref={videoPlayerRef}
               key={selectedLecture._id}
               src={selectedLecture.videoUrl}
               onEnded={() => onLectureViewed(selectedLecture._id, true)}
+              onPrevLecture={onPrevLecture}
+              onNextLecture={onNextLecture}
+              hasPrev={!!prevLecture}
+              hasNext={!!nextLecture}
+              onTimeProgress={(time) => setCurrentVideoTime(time)}
+              onAddNote={(time) => {
+                setCurrentVideoTime(time);
+                setSelectedTab("notes");
+                setIsNoteEditorOpen(true);
+              }}
+              onToggleTranscript={() => setSelectedTab("overview")}
             />
           ) : (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#1c1d1f] text-white text-center p-4">
@@ -338,28 +361,6 @@ const MainContent = ({
             </div>
           )}
         </div>
-
-        {/* Previous Lecture Skip Overlay Control */}
-        {prevLecture && (
-          <button
-            onClick={onPrevLecture}
-            className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/90 text-white h-11 w-11 rounded-full flex items-center justify-center opacity-0 group-hover/player:opacity-100 transition-opacity duration-200 z-20"
-            title={`Previous: ${prevLecture.title}`}
-          >
-            <ChevronLeft className="h-6 w-6" />
-          </button>
-        )}
-
-        {/* Next Lecture Skip Overlay Control */}
-        {nextLecture && (
-          <button
-            onClick={onNextLecture}
-            className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/60 hover:bg-black/90 text-white h-11 w-11 rounded-full flex items-center justify-center opacity-0 group-hover/player:opacity-100 transition-opacity duration-200 z-20"
-            title={`Next: ${nextLecture.title}`}
-          >
-            <ChevronRight className="h-6 w-6" />
-          </button>
-        )}
 
         {/* Float Chevron to Slide-out/Toggle Sidebar if closed */}
         {!isSidebarOpen && (
@@ -452,10 +453,32 @@ const MainContent = ({
               {/* Description */}
               <div className="space-y-3">
                 <h2 className="text-2xl font-light text-[#2d2f31]">Description</h2>
-                <div
-                  className="text-lg text-[#2d2f31] leading-relaxed prose max-w-none"
-                  dangerouslySetInnerHTML={{ __html: course.description }}
-                />
+                <div className="relative">
+                  <div
+                    className={`text-lg text-[#2d2f31] leading-relaxed prose max-w-none transition-all duration-300 ${
+                      isDescriptionExpanded ? "" : "max-h-64 overflow-hidden"
+                    }`}
+                    dangerouslySetInnerHTML={{ __html: course.description }}
+                  />
+                  {!isDescriptionExpanded && (course.description?.length > 200) && (
+                    <div className="absolute bottom-0 left-0 w-full h-24 bg-gradient-to-t from-white via-white/80 to-transparent pointer-events-none" />
+                  )}
+                </div>
+
+                {course.description && course.description.length > 200 && (
+                  <button
+                    type="button"
+                    onClick={() => setIsDescriptionExpanded(!isDescriptionExpanded)}
+                    className="text-[#a435f0] hover:text-[#8710d8] font-bold text-sm flex items-center gap-1.5 pt-1 transition-colors cursor-pointer"
+                  >
+                    <span>{isDescriptionExpanded ? "Show less" : "Show more"}</span>
+                    {isDescriptionExpanded ? (
+                      <ChevronUp className="w-4 h-4 stroke-[2.5]" />
+                    ) : (
+                      <ChevronDown className="w-4 h-4 stroke-[2.5]" />
+                    )}
+                  </button>
+                )}
               </div>
 
               <div className="h-px bg-[#d1d7dc]" />
@@ -510,6 +533,132 @@ const MainContent = ({
                 </div>
               </div>
             </article>
+          )}
+
+          {/* ────────────────── Resources & Lab Tab ────────────────── */}
+          {selectedTab === "resources" && (
+            <div className="space-y-8 text-[#2d2f31] bg-white py-2">
+              <div>
+                <h2 className="text-2xl font-light text-[#2d2f31]">
+                  Resources & Hands-on Lab
+                </h2>
+                <p className="text-sm text-gray-500 mt-1">
+                  Downloadable course materials, cheat sheets, and practical lab assignments for{" "}
+                  <span className="font-medium text-[#1c1d1f]">{selectedLecture?.title || "this lecture"}</span>.
+                </p>
+              </div>
+
+              {/* 1. Downloadable Lecture Resources */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium text-[#1c1d1f] flex items-center gap-2">
+                  <FolderDown className="w-5 h-5 text-[#5624d0]" />
+                  Downloadable Resources ({selectedLecture?.resources?.length || 0})
+                </h3>
+
+                {selectedLecture?.resources && selectedLecture.resources.length > 0 ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {selectedLecture.resources.map((resItem) => (
+                      <div
+                        key={resItem._id}
+                        className="p-4 border border-[#d1d7dc] rounded hover:border-[#1c1d1f] bg-slate-50 transition-all flex flex-col justify-between gap-3 group"
+                      >
+                        <div className="flex items-start gap-2.5">
+                          {resItem.type === "pdf" ? (
+                            <span className="px-2 py-0.5 text-xs font-bold bg-red-100 text-red-700 rounded border border-red-200 shrink-0">
+                              PDF
+                            </span>
+                          ) : resItem.type === "file" ? (
+                            <span className="px-2 py-0.5 text-xs font-bold bg-blue-100 text-blue-700 rounded border border-blue-200 shrink-0">
+                              FILE
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 text-xs font-bold bg-purple-100 text-purple-700 rounded border border-purple-200 shrink-0">
+                              LINK
+                            </span>
+                          )}
+                          <div className="min-w-0">
+                            <h4 className="text-sm font-semibold text-[#1c1d1f] truncate group-hover:text-[#5624d0] transition-colors">
+                              {resItem.title}
+                            </h4>
+                            {resItem.size && (
+                              <p className="text-xs text-gray-500 mt-0.5">{resItem.size}</p>
+                            )}
+                          </div>
+                        </div>
+
+                        <a
+                          href={resItem.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="w-full text-center text-xs font-medium py-2 px-3 bg-white border border-[#d1d7dc] rounded text-[#1c1d1f] hover:bg-[#1c1d1f] hover:text-white transition-colors flex items-center justify-center gap-1.5 shadow-2xs"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" /> Open / Download Resource
+                        </a>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="p-6 bg-slate-50 border border-dashed border-[#d1d7dc] rounded text-center text-sm text-gray-500">
+                    No downloadable files or external reference links have been attached to this lecture yet.
+                  </div>
+                )}
+              </div>
+
+              {/* 2. Interactive Hands-on Lab */}
+              <div className="space-y-4 pt-4 border-t border-[#d1d7dc]">
+                <h3 className="text-lg font-medium text-[#1c1d1f] flex items-center gap-2">
+                  <Sparkles className="w-5 h-5 text-[#a435f0]" />
+                  Interactive Lab Assignment
+                </h3>
+
+                {selectedLecture?.lab?.title || selectedLecture?.lab?.pdfUrl || selectedLecture?.lab?.url ? (
+                  <div className="p-5 border border-purple-200 bg-purple-50/50 rounded-lg space-y-4">
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 text-xs font-bold bg-[#a435f0] text-white rounded">
+                        HANDS-ON LAB
+                      </span>
+                      <h4 className="text-base font-semibold text-[#1c1d1f]">
+                        {selectedLecture.lab.title || "Lecture Practice Lab"}
+                      </h4>
+                    </div>
+
+                    {selectedLecture.lab.description && (
+                      <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                        {selectedLecture.lab.description}
+                      </p>
+                    )}
+
+                    <div className="flex flex-wrap gap-3 pt-2">
+                      {selectedLecture.lab.url && (
+                        <a
+                          href={selectedLecture.lab.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-4 py-2 bg-[#5624d0] hover:bg-[#401b9c] text-white text-xs font-semibold rounded flex items-center gap-1.5 shadow-sm transition-colors"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" /> Launch Lab Workspace (Colab / GitHub / Drive)
+                        </a>
+                      )}
+
+                      {selectedLecture.lab.pdfUrl && (
+                        <a
+                          href={selectedLecture.lab.pdfUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="px-4 py-2 bg-white hover:bg-slate-50 border border-red-300 text-red-700 text-xs font-semibold rounded flex items-center gap-1.5 shadow-2xs transition-colors"
+                        >
+                          <FileText className="w-3.5 h-3.5 text-red-600" /> View / Download Lab Instructions PDF
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-6 bg-slate-50 border border-dashed border-[#d1d7dc] rounded text-center text-sm text-gray-500">
+                    No active lab workspace or assignment has been assigned to this lecture.
+                  </div>
+                )}
+              </div>
+            </div>
           )}
 
           {/* ────────────────── Q&A Tab (Picture 3) ────────────────── */}
@@ -1085,9 +1234,18 @@ const MainContent = ({
           })()}
 
           {selectedTab === "notes" && (
-            <div className="p-4 bg-gray-50 border border-dashed border-gray-300 text-center text-lg text-gray-500">
-              Create and manage study notes to keep track of key concepts during lectures.
-            </div>
+            <CourseNotesTab
+              courseId={courseId}
+              selectedLecture={selectedLecture}
+              currentVideoTime={currentVideoTime}
+              onSeekTo={(seconds) => {
+                if (videoPlayerRef.current) {
+                  videoPlayerRef.current.seekTo(seconds);
+                }
+              }}
+              isEditorOpenInitially={isNoteEditorOpen}
+              onEditorStateChange={setIsNoteEditorOpen}
+            />
           )}
 
           {selectedTab === "announcements" && (

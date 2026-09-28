@@ -55,7 +55,7 @@ const MyLearningCourseCard = ({ course }) => {
   const instructorName = creator.name || "Unknown Instructor";
 
   const handleCardClick = () => {
-    navigate(`/course-detail/${courseId}/content`);
+    navigate(`/course/${course.slug || courseId}/content`);
   };
 
   const handleRatingStarClick = (star, e) => {

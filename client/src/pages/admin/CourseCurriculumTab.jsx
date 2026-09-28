@@ -17,12 +17,13 @@ import { useCreateSectionMutation } from "@/features/api/sectionApi";
 import axios from "axios";
 import { BASE_URL } from "@/app/constant";
 
-const CourseCurriculumTab = () => {
+const CourseCurriculumTab = ({ onRegisterSave, onValidationChange }) => {
   const { courseId } = useParams();
   const [newSectionTitle, setNewSectionTitle] = useState("");
   const [newSectionObjective, setNewSectionObjective] = useState("");
   const [isAddingSection, setIsAddingSection] = useState(false);
   const [isBulkOpen, setIsBulkOpen] = useState(false);
+  const [isSavingCurriculum, setIsSavingCurriculum] = useState(false);
 
   // Bulk Uploader state
   const [bulkStep, setBulkStep] = useState("select"); // select | preview | uploading | complete
@@ -37,6 +38,47 @@ const CourseCurriculumTab = () => {
   const { data: courseData, isLoading: isLoadingCourse, isError, refetch } = useGetCourseByIdQuery(courseId);
   const [createSection, { isLoading: isCreatingSection }] = useCreateSectionMutation();
   const [editCourse] = useEditCourseMutation();
+
+  const handleSaveCurriculum = async () => {
+    setIsSavingCurriculum(true);
+    try {
+      // If user typed a section title in the open form, auto-create the section on save
+      if (newSectionTitle.trim()) {
+        await createSection({
+          courseId,
+          title: newSectionTitle.trim(),
+          learningObjective: newSectionObjective.trim(),
+        }).unwrap();
+        setNewSectionTitle("");
+        setNewSectionObjective("");
+        setIsAddingSection(false);
+      }
+
+      // Persist section order and structure to course
+      const currentSections = courseData?.course?.sections || [];
+      if (currentSections.length > 0) {
+        const sectionIds = currentSections.map((s) => s._id);
+        const formData = new FormData();
+        formData.append("sections", JSON.stringify(sectionIds));
+        await editCourse({ courseId, formData }).unwrap();
+      }
+
+      toast.success("Curriculum saved successfully!");
+      refetch();
+    } catch (err) {
+      toast.error(err?.data?.message || err?.message || "Failed to save curriculum.");
+    } finally {
+      setIsSavingCurriculum(false);
+    }
+  };
+
+  const handleSaveRef = useRef(handleSaveCurriculum);
+  handleSaveRef.current = handleSaveCurriculum;
+
+  useEffect(() => {
+    onRegisterSave?.(() => handleSaveRef.current());
+    onValidationChange?.(true);
+  }, [onRegisterSave, onValidationChange]);
 
   const handleAddSection = async (e) => {
     if (e && e.preventDefault) e.preventDefault();
@@ -312,6 +354,24 @@ const CourseCurriculumTab = () => {
           </button>
         </div>
       )}
+
+      {/* ── INSIDE SECTION SAVE BUTTON ── */}
+      <div className="border-t border-[#d1d7dc] pt-6 mt-8 flex justify-end">
+        <button
+          type="button"
+          onClick={handleSaveCurriculum}
+          disabled={isSavingCurriculum}
+          className="bg-[#a435f0] hover:bg-[#8710d8] disabled:bg-slate-300 text-white font-light text-xl px-7 py-3 transition-colors flex items-center gap-2 cursor-pointer"
+        >
+          {isSavingCurriculum ? (
+            <>
+              <Loader2 className="w-4 h-4 animate-spin" /> Saving...
+            </>
+          ) : (
+            "Save"
+          )}
+        </button>
+      </div>
 
       {/* ══ BULK UPLOADER MODAL (Samriddhi Gyan Design) ══ */}
       {isBulkOpen && (

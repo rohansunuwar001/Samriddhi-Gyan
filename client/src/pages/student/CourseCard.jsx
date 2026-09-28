@@ -166,7 +166,14 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
     course.avgRating !== undefined && course.avgRating !== null
       ? Number(course.avgRating)
       : Array.isArray(course.ratings) && course.ratings.length
-      ? Number((course.ratings.reduce((s, r) => s + r, 0) / course.ratings.length).toFixed(1))
+      ? Number(
+          (
+            course.ratings.reduce(
+              (s, r) => s + (typeof r === "number" ? r : r?.rating || 0),
+              0
+            ) / course.ratings.length
+          ).toFixed(1)
+        )
       : typeof course.ratings === "number"
       ? course.ratings
       : typeof course.rating === "number"
@@ -236,7 +243,7 @@ const CourseCard = ({ course, showRecommendationBadge }) => {
     <Popover open={showDetails} onOpenChange={setShowDetails}>
       <PopoverAnchor asChild>
         <Link
-          to={`/course-detail/${course._id}`}
+          to={`/course/${course.slug || course._id}`}
           className="group relative h-full block"
           ref={cardRef}
           onMouseEnter={handleMouseEnter}
@@ -403,16 +410,20 @@ CourseCard.propTypes = {
     _id: PropTypes.string.isRequired,
     title: PropTypes.string.isRequired,
     thumbnail: PropTypes.string,
-    price: PropTypes.shape({
-      current: PropTypes.number.isRequired,
-      original: PropTypes.number,
-    }),
+    price: PropTypes.oneOfType([
+      PropTypes.shape({
+        current: PropTypes.number,
+        original: PropTypes.number,
+      }),
+      PropTypes.number,
+    ]),
     progress: PropTypes.number,
     isPurchased: PropTypes.bool,
     level: PropTypes.string,
-    ratings: PropTypes.number,
+    ratings: PropTypes.oneOfType([PropTypes.number, PropTypes.array]),
+    rating: PropTypes.oneOfType([PropTypes.number, PropTypes.array]),
     numOfReviews: PropTypes.number,
-    enrolledStudents: PropTypes.array,
+    enrolledStudents: PropTypes.any,
     subtitle: PropTypes.string,
     description: PropTypes.string,
     learnings: PropTypes.arrayOf(PropTypes.string),

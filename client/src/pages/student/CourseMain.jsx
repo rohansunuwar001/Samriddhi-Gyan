@@ -308,7 +308,7 @@ const CourseMain = () => {
                     <>
                       Because you viewed &quot;
                       <Link
-                        to={`/course-detail/${viewedRow.pivot._id}`}
+                        to={`/course/${viewedRow.pivot.slug || viewedRow.pivot._id}`}
                         className="text-violet-600 underline underline-offset-2 hover:text-violet-700"
                       >
                         {viewedRow.pivot.title}
@@ -326,7 +326,7 @@ const CourseMain = () => {
                     <>
                       Because you wishlisted &quot;
                       <Link
-                        to={`/course-detail/${wishlistRow.pivot._id}`}
+                        to={`/course/${wishlistRow.pivot.slug || wishlistRow.pivot._id}`}
                         className="text-violet-600 underline underline-offset-2 hover:text-violet-700"
                       >
                         {wishlistRow.pivot.title}

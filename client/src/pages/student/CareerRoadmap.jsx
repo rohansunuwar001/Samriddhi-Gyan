@@ -138,7 +138,7 @@ const CareerRoadmap = () => {
 
                   {/* Course Node Card */}
                   <div
-                    onClick={() => navigate(`/course-detail/${course._id}`)}
+                    onClick={() => navigate(`/course/${course.slug || course._id}`)}
                     className={`border p-6 rounded-xl cursor-pointer transition-all shadow-sm ${
                       course.isCompleted
                         ? "bg-green-50/20 border-green-200 hover:bg-green-50/40"

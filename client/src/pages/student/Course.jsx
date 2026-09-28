@@ -134,26 +134,34 @@ const Course = ({ course }) => {
 
   const bulletPoints = Array.isArray(course.learnings) && course.learnings.length > 0
     ? course.learnings.slice(0, 3)
-    : [
-        "Become a Full-Stack Web Developer with just one course.",
-        "Build 16 web development projects for your portfolio.",
-        "Learn the latest technologies including React, Node, and Web3."
-      ];
+    : (course.subtitle ? [course.subtitle] : []);
 
-  const ratingValue = course.ratings ?? course.rating ?? 4.5;
-  const reviewsCount = course.numOfReviews ?? course.numRatings ?? 2500;
-  const enrolledStudentsText = course.enrolledStudents 
-    ? (Array.isArray(course.enrolledStudents) ? course.enrolledStudents.length : course.enrolledStudents) 
-    : "1.2k";
+  const ratingValue =
+    typeof course.ratings === "number"
+      ? course.ratings
+      : Array.isArray(course.ratings) && course.ratings.length
+      ? Number(
+          (
+            course.ratings.reduce(
+              (s, r) => s + (typeof r === "number" ? r : r?.rating || 0),
+              0
+            ) / course.ratings.length
+          ).toFixed(1)
+        )
+      : course.rating ?? 0;
+  const reviewsCount = course.numOfReviews ?? course.numRatings ?? (Array.isArray(course.reviews) ? course.reviews.length : 0);
+  const enrolledStudentsText = Array.isArray(course.enrolledStudents) 
+    ? course.enrolledStudents.length 
+    : (typeof course.enrolledStudents === 'number' ? course.enrolledStudents : 0);
   const instructorName = course.creator?.name ?? course.instructor?.name ?? "Instructor";
-  const totalLectures = course.totalLectures ?? 12;
+  const totalLectures = course.totalLectures ?? (course.lectures?.length || 0);
   const courseLevel = course.level ?? "All Levels";
 
   return (
     <Popover open={showDetails} onOpenChange={setShowDetails}>
       <PopoverAnchor asChild>
         <Link
-          to={`/course-detail/${course._id}`}
+          to={`/course/${course.slug || course._id}`}
           className="group block relative h-full"
           ref={cardRef}
           onMouseEnter={handleMouseEnter}
@@ -329,8 +337,8 @@ Course.propTypes = {
     title: PropTypes.string.isRequired,
     description: PropTypes.string,
     subtitles: PropTypes.string,
-    ratings: PropTypes.number,
-    rating: PropTypes.number,
+    ratings: PropTypes.oneOfType([PropTypes.number, PropTypes.array]),
+    rating: PropTypes.oneOfType([PropTypes.number, PropTypes.array]),
     numOfReviews: PropTypes.number,
     numRatings: PropTypes.number,
     enrolledStudents: PropTypes.any,

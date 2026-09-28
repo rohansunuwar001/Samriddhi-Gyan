@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+/* eslint-disable react/prop-types */
+import React, { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   useGetNearbyTutorsQuery,
@@ -10,20 +11,15 @@ import {
   BookOpen,
   Navigation,
   Compass,
-  Search,
   MessageSquare,
-  AlertCircle,
-  CheckCircle,
   RefreshCw,
-  Sparkles,
   ShieldAlert,
-  Globe,
   Car,
+  KeyRound,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Skeleton } from "@/components/ui/skeleton";
 
 // Helper to parse cookie
 const getCookie = (name) => {
@@ -33,32 +29,36 @@ const getCookie = (name) => {
   return null;
 };
 
-// 2D Live Street Map Tracker (Google Maps API-based supporting all three visual modes in Light Theme & Ridesharing Directions)
-const LiveTrackingMap = ({ userCoords, tutors = [], peers = [], activeTab, onUserMove, visualMode, activeRouteTarget, setActiveRouteTarget }) => {
-  const mapContainerRef = React.useRef(null);
-  const mapRef = React.useRef(null);
-  const userMarkerRef = React.useRef(null);
-  const radarCircleRef = React.useRef(null);
-  const markersRef = React.useRef([]);
-  const polylinesRef = React.useRef([]);
-  
-  // Directions routing references
-  const directionsServiceRef = React.useRef(null);
-  const directionsRendererRef = React.useRef(null);
-  const [routeInfo, setRouteInfo] = React.useState(null);
+// 2D Live Street Map Tracker (Google Maps API Engine)
+const LiveTrackingMap = ({
+  userCoords,
+  tutors = [],
+  peers = [],
+  activeTab,
+  onUserMove,
+  visualMode,
+  activeRouteTarget,
+  setActiveRouteTarget,
+}) => {
+  const mapContainerRef = useRef(null);
+  const mapRef = useRef(null);
+  const userMarkerRef = useRef(null);
+  const radarCircleRef = useRef(null);
+  const markersRef = useRef([]);
+  const polylinesRef = useRef([]);
+
+  const directionsServiceRef = useRef(null);
+  const directionsRendererRef = useRef(null);
+  const [routeInfo, setRouteInfo] = useState(null);
+
+  const initialLat = userCoords?.lat || 27.7172;
+  const initialLon = userCoords?.lon || 85.324;
 
   // 1. Initialize Google Map & Directions Instances
-  React.useEffect(() => {
-    if (!mapContainerRef.current) return;
+  useEffect(() => {
+    if (!mapContainerRef.current || !window.google?.maps) return;
 
     const google = window.google;
-    if (!google) {
-      console.warn("Google Maps SDK not loaded yet. Make sure to paste a valid API key in index.html");
-      return;
-    }
-
-    const initialLat = userCoords?.lat || 27.7172;
-    const initialLon = userCoords?.lon || 85.3240;
 
     const map = new google.maps.Map(mapContainerRef.current, {
       center: { lat: initialLat, lng: initialLon },
@@ -67,42 +67,42 @@ const LiveTrackingMap = ({ userCoords, tutors = [], peers = [], activeTab, onUse
       zoomControl: true,
       mapTypeControl: false,
       streetViewControl: false,
-      fullscreenControl: false
+      fullscreenControl: false,
     });
 
     directionsServiceRef.current = new google.maps.DirectionsService();
     directionsRendererRef.current = new google.maps.DirectionsRenderer({
       map: map,
-      suppressMarkers: true, // Keep our customized markers
+      suppressMarkers: true,
       polylineOptions: {
-        strokeColor: "#4f46e5", // Indigo routing path
+        strokeColor: "#4f46e5",
         strokeWeight: 5,
-        strokeOpacity: 0.85
-      }
+        strokeOpacity: 0.85,
+      },
     });
 
     mapRef.current = map;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 2. Real-Time Geolocation Tracking (watchPosition)
-  React.useEffect(() => {
+  useEffect(() => {
     const google = window.google;
-    if (!google || !mapRef.current) return;
+    if (!google?.maps || !mapRef.current) return;
 
     let watchId;
     if (navigator.geolocation) {
       watchId = navigator.geolocation.watchPosition(
         (position) => {
           const { latitude, longitude } = position.coords;
-          
           if (onUserMove) {
             onUserMove({ lat: latitude, lon: longitude });
           }
 
           const map = mapRef.current;
+          if (!map) return;
           const pos = { lat: latitude, lng: longitude };
 
-          // Update or Create Pulsing User Marker
           if (userMarkerRef.current) {
             userMarkerRef.current.setPosition(pos);
           } else {
@@ -112,22 +112,21 @@ const LiveTrackingMap = ({ userCoords, tutors = [], peers = [], activeTab, onUse
               title: "Your Location (Live)",
               icon: {
                 path: google.maps.SymbolPath.CIRCLE,
-                fillColor: "#4f46e5", // Indigo
+                fillColor: "#4f46e5",
                 fillOpacity: 1,
                 strokeColor: "#ffffff",
                 strokeWeight: 2.5,
-                scale: 8
-              }
+                scale: 8,
+              },
             });
           }
 
-          // Smoothly pan map center to track student movement (only if not navigating a route or zoomed out on globe)
           if (visualMode !== "globe" && !activeRouteTarget) {
             map.panTo(pos);
           }
         },
         (error) => {
-          console.error("Google Geolocation Watch Error:", error);
+          console.warn("Geolocation watch position error:", error);
         },
         { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
       );
@@ -140,19 +139,43 @@ const LiveTrackingMap = ({ userCoords, tutors = [], peers = [], activeTab, onUse
     };
   }, [onUserMove, visualMode, activeRouteTarget]);
 
-  // 3. Dynamic Visual Modes Handler (Map, Globe, Radar)
-  React.useEffect(() => {
+  // Sync user marker when userCoords change from props
+  useEffect(() => {
     const google = window.google;
     const map = mapRef.current;
-    if (!google || !map) return;
+    if (!google?.maps || !map || !userCoords?.lat || !userCoords?.lon) return;
 
-    // Clean up previous radar circles
+    const pos = { lat: userCoords.lat, lng: userCoords.lon };
+    if (userMarkerRef.current) {
+      userMarkerRef.current.setPosition(pos);
+    } else {
+      userMarkerRef.current = new google.maps.Marker({
+        position: pos,
+        map: map,
+        title: "Your Location (Live)",
+        icon: {
+          path: google.maps.SymbolPath.CIRCLE,
+          fillColor: "#4f46e5",
+          fillOpacity: 1,
+          strokeColor: "#ffffff",
+          strokeWeight: 2.5,
+          scale: 8,
+        },
+      });
+    }
+  }, [userCoords]);
+
+  // 3. Dynamic Visual Modes Handler (Map, Globe, Radar)
+  useEffect(() => {
+    const google = window.google;
+    const map = mapRef.current;
+    if (!google?.maps || !map) return;
+
     if (radarCircleRef.current) {
       radarCircleRef.current.setMap(null);
       radarCircleRef.current = null;
     }
 
-    // Only set map styles and zooms if we are NOT actively navigating a route
     if (!activeRouteTarget) {
       if (visualMode === "globe") {
         map.setMapTypeId(google.maps.MapTypeId.HYBRID);
@@ -173,7 +196,7 @@ const LiveTrackingMap = ({ userCoords, tutors = [], peers = [], activeTab, onUse
             fillOpacity: 0.12,
             map: map,
             center: center,
-            radius: 1200
+            radius: 1200,
           });
         }
       } else {
@@ -187,15 +210,17 @@ const LiveTrackingMap = ({ userCoords, tutors = [], peers = [], activeTab, onUse
   }, [visualMode, userCoords, activeRouteTarget]);
 
   // 4. Live Trip / Directions Route Engine
-  React.useEffect(() => {
+  useEffect(() => {
     const google = window.google;
     const map = mapRef.current;
     const directionsService = directionsServiceRef.current;
     const directionsRenderer = directionsRendererRef.current;
 
-    if (!google || !map || !directionsService || !directionsRenderer) return;
+    if (!google?.maps || !map || !directionsService || !directionsRenderer) return;
 
-    // Clear route if no target is active
+    polylinesRef.current.forEach((p) => p.setMap(null));
+    polylinesRef.current = [];
+
     if (!activeRouteTarget || !userCoords) {
       directionsRenderer.setDirections({ routes: [] });
       setRouteInfo(null);
@@ -206,33 +231,31 @@ const LiveTrackingMap = ({ userCoords, tutors = [], peers = [], activeTab, onUse
     const targetLon = activeRouteTarget.locationDetails?.longitude;
     if (targetLat === undefined || targetLon === undefined) return;
 
-    // Always force roadmap view for clean turn-by-turn navigation paths
     map.setMapTypeId(google.maps.MapTypeId.ROADMAP);
 
     directionsService.route(
       {
         origin: { lat: userCoords.lat, lng: userCoords.lon },
         destination: { lat: targetLat, lng: targetLon },
-        travelMode: google.maps.TravelMode.DRIVING
+        travelMode: google.maps.TravelMode.DRIVING,
       },
       (result, status) => {
         if (status === google.maps.DirectionsStatus.OK) {
           directionsRenderer.setDirections(result);
-          
+
           const route = result.routes[0];
-          if (route && route.legs && route.legs[0]) {
+          if (route?.legs?.[0]) {
             const leg = route.legs[0];
             setRouteInfo({
               duration: leg.duration.text,
               distance: leg.distance.text,
-              instruction: leg.steps[0]?.instructions.replace(/<[^>]*>/g, '') || "Follow GPS routing path"
+              instruction: leg.steps[0]?.instructions.replace(/<[^>]*>/g, "") || "Follow GPS routing path",
             });
           }
         } else {
-          console.warn("Directions service failed: " + status + ". Falling back to geodesic line.");
+          console.warn("Google Directions failed (" + status + "). Using fallback direct line.");
           directionsRenderer.setDirections({ routes: [] });
 
-          // Calculate direct Haversine distance as fallback
           const R_earth = 6371; // km
           const dLat = ((targetLat - userCoords.lat) * Math.PI) / 180;
           const dLon = ((targetLon - userCoords.lon) * Math.PI) / 180;
@@ -243,56 +266,44 @@ const LiveTrackingMap = ({ userCoords, tutors = [], peers = [], activeTab, onUse
               Math.sin(dLon / 2) *
               Math.sin(dLon / 2);
           const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-          const directDistance = R_earth * c;
+          const directDistance = (R_earth * c).toFixed(2);
 
           setRouteInfo({
-            duration: "Directions API disabled",
-            distance: `${directDistance.toFixed(2)} km (direct)`,
-            instruction: "Enable 'Directions API' in Google Cloud for turn-by-turn road routes."
+            duration: "Direct path",
+            distance: `${directDistance} km`,
+            instruction: `Head directly towards ${activeRouteTarget.name}`,
           });
 
-          // Draw the fallback dashed polyline
           const fallbackPath = new google.maps.Polyline({
             path: [
               { lat: userCoords.lat, lng: userCoords.lon },
-              { lat: targetLat, lng: targetLon }
+              { lat: targetLat, lng: targetLon },
             ],
             geodesic: true,
             strokeColor: "#4f46e5",
-            strokeOpacity: 0,
-            icons: [
-              {
-                icon: {
-                  path: "M 0,-1 0,1",
-                  strokeOpacity: 0.7,
-                  scale: 2,
-                  strokeWeight: 2
-                },
-                offset: "0",
-                repeat: "10px"
-              }
-            ]
+            strokeOpacity: 0.8,
+            strokeWeight: 4,
           });
           fallbackPath.setMap(map);
           polylinesRef.current.push(fallbackPath);
+
+          const bounds = new google.maps.LatLngBounds();
+          bounds.extend({ lat: userCoords.lat, lng: userCoords.lon });
+          bounds.extend({ lat: targetLat, lng: targetLon });
+          map.fitBounds(bounds);
         }
       }
     );
   }, [activeRouteTarget, userCoords]);
 
   // 5. Render Nearby Members Markers
-  React.useEffect(() => {
+  useEffect(() => {
     const google = window.google;
     const map = mapRef.current;
-    if (!google || !map) return;
+    if (!google?.maps || !map) return;
 
-    // Clear previous markers
-    markersRef.current.forEach(m => m.setMap(null));
+    markersRef.current.forEach((m) => m.setMap(null));
     markersRef.current = [];
-
-    // Clear previous straight-line paths (since we use DirectionsRenderer now!)
-    polylinesRef.current.forEach(p => p.setMap(null));
-    polylinesRef.current = [];
 
     const targets = activeTab === "tutors" ? tutors : peers;
     const bounds = new google.maps.LatLngBounds();
@@ -319,29 +330,33 @@ const LiveTrackingMap = ({ userCoords, tutors = [], peers = [], activeTab, onUse
           fillOpacity: 0.9,
           strokeColor: "#ffffff",
           strokeWeight: 1.5,
-          scale: 6
-        }
+          scale: 7,
+        },
       });
+
+      const distText =
+        target.distance !== undefined
+          ? `${target.distance} km away`
+          : activeTab === "tutors"
+          ? "Nearby Tutor"
+          : "Nearby Peer";
 
       const infoWindow = new google.maps.InfoWindow({
         content: `
-          <div style="color: #0f172a; font-family: sans-serif; font-size: 12px; padding: 4px; line-height: 1.4;">
-            <b style="font-size: 13px; display: block; margin-bottom: 2px; color: #1e1b4b;">${target.name}</b>
-            <span style="color: #64748b; display: block; margin-bottom: 4px;">${target.headline || ''}</span>
-            <b style="color: #4f46e5; display: block; margin-top: 2px;">
-              ${target.distance !== undefined ? target.distance + ' km away' : 'Nearby Peer'}
-            </b>
-            ${activeTab === "tutors" ? '<button id="info-route-btn" style="margin-top:6px; background:#4f46e5; color:white; border:none; padding:4px 8px; border-radius:4px; font-size:10px; font-weight:bold; cursor:pointer;">Start Navigation</button>' : ''}
+          <div style="color: #0f172a; font-family: system-ui, -apple-system, sans-serif; font-size: 12px; padding: 4px; line-height: 1.4; min-width: 150px;">
+            <b style="font-size: 13px; display: block; margin-bottom: 2px; color: #1e1b4b;">${target.name || ""}</b>
+            <span style="color: #64748b; display: block; margin-bottom: 4px; font-size: 11px;">${target.headline || ""}</span>
+            <b style="color: #4f46e5; display: block; margin-top: 2px; font-size: 11px;">${distText}</b>
+            <button id="info-route-btn-${target._id}" style="margin-top:6px; background:#4f46e5; color:white; border:none; padding:5px 8px; border-radius:5px; font-size:10px; font-weight:bold; cursor:pointer; width:100%;">Start Navigation</button>
           </div>
-        `
+        `,
       });
 
       marker.addListener("click", () => {
         infoWindow.open(map, marker);
-        
-        // Listen to navigation trigger inside popup window bubble
-        google.maps.event.addListenerOnce(infoWindow, 'domready', () => {
-          const btn = document.getElementById("info-route-btn");
+
+        google.maps.event.addListenerOnce(infoWindow, "domready", () => {
+          const btn = document.getElementById(`info-route-btn-${target._id}`);
           if (btn) {
             btn.onclick = () => {
               setActiveRouteTarget(target);
@@ -354,11 +369,10 @@ const LiveTrackingMap = ({ userCoords, tutors = [], peers = [], activeTab, onUse
       markersRef.current.push(marker);
     });
 
-    // Auto-adjust map boundaries to show student and all nearby results at once (only when not actively navigating)
     if (targets.length > 0 && userCoords && visualMode !== "globe" && !activeRouteTarget) {
       map.fitBounds(bounds);
     }
-  }, [userCoords, tutors, peers, activeTab, visualMode, activeRouteTarget]);
+  }, [userCoords, tutors, peers, activeTab, visualMode, activeRouteTarget, setActiveRouteTarget]);
 
   const handleCancelTrip = () => {
     setActiveRouteTarget(null);
@@ -367,7 +381,7 @@ const LiveTrackingMap = ({ userCoords, tutors = [], peers = [], activeTab, onUse
   return (
     <div className="w-full h-full relative z-0">
       <div ref={mapContainerRef} className="w-full h-full absolute inset-0 z-0" />
-      
+
       {/* Turn-by-Turn Instruction Banner (Floating Top HUD) */}
       {routeInfo && (
         <div className="absolute top-16 left-1/2 transform -translate-x-1/2 z-20 w-[90%] max-w-md bg-slate-900 text-white rounded-xl p-3.5 shadow-lg flex items-center gap-3 animate-in slide-in-from-top duration-300 font-sans border border-slate-800">
@@ -394,12 +408,14 @@ const LiveTrackingMap = ({ userCoords, tutors = [], peers = [], activeTab, onUse
                 <span className="text-sm text-slate-300">•</span>
                 <span className="text-sm font-medium text-slate-500">{routeInfo.distance}</span>
               </div>
-              <p className="text-[11px] text-slate-400 font-normal truncate mt-0.5">Navigating to {activeRouteTarget.name}</p>
+              <p className="text-[11px] text-slate-400 font-normal truncate mt-0.5">
+                Navigating to {activeRouteTarget.name}
+              </p>
             </div>
           </div>
-          <Button 
-            variant="destructive" 
-            size="sm" 
+          <Button
+            variant="destructive"
+            size="sm"
             onClick={handleCancelTrip}
             className="text-sm font-medium h-8 shrink-0 bg-rose-50 hover:bg-rose-100 text-rose-600 hover:text-rose-700 border-none shadow-none"
           >
@@ -419,12 +435,25 @@ const NearbyHub = () => {
   const [locLoading, setLocLoading] = useState(false);
   const [locError, setLocError] = useState(null);
 
-  const [mapLoaded, setMapLoaded] = useState(!!window.google);
+  const [mapLoaded, setMapLoaded] = useState(!!window.google?.maps);
   const [scriptError, setScriptError] = useState(false);
+  const [authError, setAuthError] = useState(false);
+
+  const mapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
 
   useEffect(() => {
-    if (window.google) {
+    // Listen for Google Maps Authentication failure (e.g. invalid key or unbilled account)
+    window.gm_authFailure = () => {
+      console.error("Google Maps authentication failure. Check your API key and enabled APIs in Google Cloud.");
+      setAuthError(true);
+    };
+
+    if (window.google?.maps) {
       setMapLoaded(true);
+      return;
+    }
+
+    if (!mapsApiKey) {
       return;
     }
 
@@ -432,7 +461,6 @@ const NearbyHub = () => {
     let script = document.getElementById(scriptId);
 
     if (!script) {
-      const mapsApiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
       script = document.createElement("script");
       script.id = scriptId;
       script.src = `https://maps.googleapis.com/maps/api/js?key=${mapsApiKey}&libraries=geometry`;
@@ -451,7 +479,7 @@ const NearbyHub = () => {
       script.removeEventListener("load", handleLoad);
       script.removeEventListener("error", handleError);
     };
-  }, []);
+  }, [mapsApiKey]);
 
   // Initialize coordinates from cookie if present
   useEffect(() => {
@@ -602,7 +630,28 @@ const NearbyHub = () => {
           
           <CardContent className="relative flex-1 flex items-center justify-center p-0 overflow-hidden min-h-[480px]">
             <div className="w-full h-full relative z-0 flex items-center justify-center">
-              {mapLoaded ? (
+              {!mapsApiKey ? (
+                <div className="flex flex-col items-center justify-center p-8 text-center max-w-md font-sans space-y-3">
+                  <div className="p-3 bg-amber-50 text-amber-600 rounded-full border border-amber-200">
+                    <KeyRound className="h-8 w-8" />
+                  </div>
+                  <h3 className="text-xl font-semibold text-slate-800">Google Maps API Key Required</h3>
+                  <p className="text-sm text-slate-500 leading-relaxed">
+                    Please provide your Google Maps API Key or paste it into <code className="bg-slate-100 px-1.5 py-0.5 rounded text-slate-700 text-xs font-mono">client/.env</code> as <code className="bg-slate-100 px-1.5 py-0.5 rounded text-indigo-600 text-xs font-mono">VITE_GOOGLE_MAPS_API_KEY</code>.
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Ensure <strong>Maps JavaScript API</strong> and <strong>Directions API</strong> are enabled in your Google Cloud Console.
+                  </p>
+                </div>
+              ) : authError ? (
+                <div className="flex flex-col items-center justify-center p-8 text-center max-w-md text-rose-500 font-sans space-y-2">
+                  <ShieldAlert className="h-10 w-10 text-rose-600 mb-1" />
+                  <h3 className="font-semibold text-lg text-slate-800">Google Maps Authentication Error</h3>
+                  <p className="text-sm text-slate-500">
+                    Google rejected the API key. Please ensure billing is linked and the <strong>Maps JavaScript API</strong> and <strong>Directions API</strong> are enabled in your Google Cloud Console.
+                  </p>
+                </div>
+              ) : mapLoaded ? (
                 <LiveTrackingMap 
                   userCoords={coords} 
                   tutors={tutorsData?.tutors || []} 
@@ -622,8 +671,8 @@ const NearbyHub = () => {
               ) : (
                 <div className="flex flex-col items-center justify-center p-8 text-center text-slate-500 font-sans">
                   <RefreshCw className="h-8 w-8 mb-2 animate-spin text-indigo-600" />
-                  <p className="font-medium text-base">Loading Map Engine...</p>
-                  <p className="text-sm text-muted-foreground mt-1">Fetching secure spatial API client...</p>
+                  <p className="font-medium text-base">Loading Google Maps Engine...</p>
+                  <p className="text-sm text-muted-foreground mt-1">Initializing geospatial mapping client...</p>
                 </div>
               )}
             </div>

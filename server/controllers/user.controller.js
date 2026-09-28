@@ -185,6 +185,19 @@ export class UserController extends BaseController {
     }
   };
 
+  saveSearchTermController = async (req, res) => {
+    try {
+      const { term } = req.body;
+      if (!term?.trim()) return this.sendError(res, "Search term is required.", 400);
+
+      await this.service.saveSearchTerm(req.user._id, term);
+      return this.sendSuccess(res, {}, "Search term saved.");
+    } catch (error) {
+      console.error("saveSearchTerm error:", error.message);
+      return this.sendError(res, "Failed to save search term.", 500);
+    }
+  };
+
   archiveCourseController = async (req, res) => {
     try {
       const { courseId } = req.params;
@@ -281,6 +294,7 @@ export const updateUserAvatarController = userController.updateUserAvatarControl
 export const updateUserPasswordController = userController.updateUserPasswordController;
 export const getMyLearningCoursesController = userController.getMyLearningCoursesController;
 export const trackCourseViewController = userController.trackCourseViewController;
+export const saveSearchTermController = userController.saveSearchTermController;
 export const archiveCourseController = userController.archiveCourseController;
 export const unarchiveCourseController = userController.unarchiveCourseController;
 export const getArchivedCoursesController = userController.getArchivedCoursesController;

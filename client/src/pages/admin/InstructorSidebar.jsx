@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { 
+  LayoutDashboard,
   Play, 
   MessageSquare, 
   BarChart3, 
@@ -10,8 +11,9 @@ import {
   ChevronRight,
   BookOpen,
   Users,
-  DollarSign,
   Award,
+  Inbox,
+  CheckSquare,
 } from "lucide-react";
 
 const InstructorSidebar = () => {
@@ -28,12 +30,46 @@ const InstructorSidebar = () => {
     }
   };
 
-  // Helper to check if any child of a sub-menu is active
-  const isSubMenuActive = (paths) => {
-    return paths.some(path => location.pathname.includes(path));
+  // Routes that start with /instructor/course but belong to other menu tabs
+  const excludedFromCourses = [
+    "/instructor/course/reviews",
+    "/instructor/course/students",
+    "/instructor/course/analytics"
+  ];
+
+  // Helper to check if a menu item or any of its children is active
+  const isItemActive = (item) => {
+    if (item.subItems) {
+      return item.subItems.some((sub) =>
+        location.pathname === sub.to || location.pathname.startsWith(sub.to + "/")
+      );
+    }
+
+    if (item.id === "courses") {
+      if (excludedFromCourses.some((p) => location.pathname === p || location.pathname.startsWith(p + "/"))) {
+        return false;
+      }
+      return location.pathname === "/instructor/course" || location.pathname.startsWith("/instructor/course/");
+    }
+
+    if (item.to) {
+      if (location.pathname === item.to) return true;
+      if (item.to !== "/instructor/dashboard" && location.pathname.startsWith(item.to + "/")) {
+        return true;
+      }
+    }
+
+    return false;
   };
 
   const menuItems = [
+    {
+      id: "dashboard",
+      label: "Dashboard",
+      icon: <LayoutDashboard className="w-5 h-5" />,
+      to: "/instructor/dashboard",
+      paths: ["/instructor/dashboard"],
+    },
     {
       id: "courses",
       label: "Courses",
@@ -55,11 +91,8 @@ const InstructorSidebar = () => {
       id: "performance",
       label: "Performance",
       icon: <BarChart3 className="w-5 h-5" />,
-      paths: ["/instructor/course/analytics", "/instructor/course/payouts"],
-      subItems: [
-        { to: "/instructor/course/analytics", label: "Analytics", icon: <BarChart3 className="w-4 h-4" /> },
-        { to: "/instructor/course/payouts", label: "Payouts", icon: <DollarSign className="w-4 h-4" /> }
-      ]
+      to: "/instructor/course/analytics",
+      paths: ["/instructor/course/analytics"],
     },
     {
       id: "certificates",
@@ -72,10 +105,11 @@ const InstructorSidebar = () => {
       id: "tools",
       label: "Tools",
       icon: <Wrench className="w-5 h-5" />,
-      paths: ["/instructor/tools", "/instructor/assignments", "/instructor/playground"],
+      paths: ["/instructor/assignments", "/instructor/playground"],
       subItems: [
-        { to: "/instructor/dashboard", label: "Instructor Tools", icon: <Wrench className="w-4 h-4" /> },
         { to: "/instructor/assignments", label: "Assignment Manager", icon: <Award className="w-4 h-4" /> },
+        { to: "/instructor/assignments/submissions", label: "Submissions Arrival", icon: <Inbox className="w-4 h-4" /> },
+        { to: "/instructor/assignments/check", label: "Checking & Grading", icon: <CheckSquare className="w-4 h-4" /> },
         { to: "/instructor/playground", label: "Algorithms Playground", icon: <Wrench className="w-4 h-4" /> }
       ]
     },
@@ -83,12 +117,13 @@ const InstructorSidebar = () => {
       id: "resources",
       label: "Resources",
       icon: <HelpCircle className="w-5 h-5" />,
-      paths: ["/instructor/resources"],
+      paths: ["/instructor/resources", "/contact"],
       subItems: [
-        { to: "/instructor/dashboard", label: "Help & Support", icon: <HelpCircle className="w-4 h-4" /> }
+        { to: "/contact", label: "Help & Support", icon: <HelpCircle className="w-4 h-4" /> }
       ]
     }
   ];
+
 
   return (
     <div 
@@ -129,7 +164,7 @@ const InstructorSidebar = () => {
         <nav className="flex-grow py-6 overflow-y-auto space-y-1 scrollbar-none px-2">
           {menuItems.map((item) => {
             const isMenuOpen = openSubMenu === item.id;
-            const isMenuBtnActive = isSubMenuActive(item.paths);
+            const isMenuBtnActive = isItemActive(item);
 
             // Direct link item (no sub-items)
             if (!item.subItems) {
@@ -202,7 +237,7 @@ const InstructorSidebar = () => {
                 {isHovered && isMenuOpen && (
                   <div className="pl-6 pr-2 py-1 space-y-1 bg-black/20 rounded-lg border-l border-[#3e4143] ml-5 animate-slide-down">
                     {item.subItems.map((sub) => {
-                      const isSubActive = location.pathname === sub.to;
+                      const isSubActive = location.pathname === sub.to || location.pathname.startsWith(sub.to + "/");
                       return (
                         <NavLink
                           key={sub.to}

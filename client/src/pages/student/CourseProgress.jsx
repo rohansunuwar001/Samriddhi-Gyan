@@ -218,7 +218,8 @@ const CourseProgress = () => {
 
   const progressPercent = totalLectures > 0 ? Math.round((completedCount / totalLectures) * 100) : 0;
 
-  const courseUrl = `${window.location.origin}/course-detail/${courseId}`;
+  const courseSlugOrId = courseData?.course?.slug || courseId;
+  const courseUrl = `${window.location.origin}/course/${courseSlugOrId}`;
 
   const handleCopyUrl = () => {
     navigator.clipboard.writeText(courseUrl);
@@ -248,7 +249,7 @@ const CourseProgress = () => {
         <div className="flex items-center gap-4 text-xl font-light text-[#d1d7dc]">
           {/* Assignments/Tasks Link */}
           <Link
-            to={`/course-detail/${courseId}/assignments`}
+            to={`/course/${courseSlugOrId}/assignments`}
             className="flex items-center gap-1.5 hover:text-white transition-colors border border-[#8a8d91] hover:border-white px-3 py-1.5 rounded-none shrink-0 font-light text-sm"
           >
             Assignments

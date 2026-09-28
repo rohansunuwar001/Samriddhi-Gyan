@@ -104,6 +104,8 @@ const userSchema = new mongoose.Schema({
         viewedAt: { type: Date, default: Date.now },
       }
     ],
+    // Stores the last 10 search terms submitted by the user (newest first)
+    searchHistory: [{ type: String }],
     subscription: {
         status: {
             type: String,

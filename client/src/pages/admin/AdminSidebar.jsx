@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { 
   LayoutDashboard,
@@ -35,7 +35,7 @@ const AdminSidebar = () => {
 
   // Helper to check if any child of a sub-menu is active
   const isSubMenuActive = (paths) => {
-    return paths.some(path => location.pathname.includes(path));
+    return paths.some(path => location.pathname === path || location.pathname.startsWith(path + "/"));
   };
 
   const menuItems = [

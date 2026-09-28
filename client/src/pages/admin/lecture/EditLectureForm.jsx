@@ -11,6 +11,7 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { toast } from "sonner";
 import SubtitleAlignerTab from "./SubtitleAlignerTab";
+import { ChunkedUploader } from "@/utils/chunkedUploader";
 
 const BACKEND_URL = import.meta.env.VITE_BASE_URL ;
 
@@ -19,6 +20,7 @@ const BACKEND_URL = import.meta.env.VITE_BASE_URL ;
 const StatusBadge = ({ status, phase, progress }) => {
   const config = {
     pending:      { label: "No video yet",   cls: "bg-gray-100 text-gray-600" },
+    uploading:    { label: phase || "Uploading chunks…", cls: "bg-blue-100 text-blue-700" },
     transcoding:  { label: phase || "Transcoding…",  cls: "bg-amber-100 text-amber-700" },
     uploading_r2: { label: phase || "Uploading…",    cls: "bg-blue-100 text-blue-700" },
     ready:        { label: "Live",           cls: "bg-green-100 text-green-700" },
@@ -27,7 +29,7 @@ const StatusBadge = ({ status, phase, progress }) => {
   const c = config[status] || config.pending;
   return (
     <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-base font-extralight ${c.cls}`}>
-      {status === "transcoding" && <Loader2 className="w-3 h-3 animate-spin" />}
+      {(status === "transcoding" || status === "uploading") && <Loader2 className="w-3 h-3 animate-spin" />}
       {status === "ready"       && <CheckCircle2 className="w-3 h-3" />}
       {status === "failed"      && <AlertCircle className="w-3 h-3" />}
       {c.label}
@@ -62,13 +64,14 @@ const EditLectureForm = () => {
   const [isPreview, setIsPreview] = useState(false);
   const [selectedFile, setSelectedFile]     = useState(null);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [uploadStats, setUploadStats]       = useState({ speedFormatted: "", etaFormatted: "" });
   const [isUploading, setIsUploading]       = useState(false);
   const [processingStatus, setProcessingStatus]   = useState("pending");
   const [processingProgress, setProcessingProgress] = useState(0);
   const [processingPhase, setProcessingPhase]       = useState("");
   const [pollEnabled, setPollEnabled] = useState(false);
   const fileInputRef = useRef(null);
-  const xhrRef       = useRef(null);
+  const uploaderRef  = useRef(null);
 
   const { data: lectureData, isLoading } = useGetLectureByIdQuery(lectureId);
   const { data: courseData } = useGetCourseByIdQuery(courseId);
@@ -123,52 +126,50 @@ const EditLectureForm = () => {
     return () => clearInterval(interval);
   }, [pollEnabled, processingStatus, lectureId]);
 
-  // ── Video upload via XHR (fetch has no upload progress) ──────────────────
+  // ── Direct-to-Cloud Chunked Upload ──────────────────────────────────────
   const handleUpload = async () => {
     if (!selectedFile || !lectureId) return;
 
     setIsUploading(true);
     setUploadProgress(0);
-    setProcessingStatus("transcoding");
+    setUploadStats({ speedFormatted: "", etaFormatted: "" });
+    setProcessingStatus("uploading");
+    setProcessingPhase("Initiating direct cloud upload…");
 
-    const formData = new FormData();
-    formData.append("video", selectedFile);
+    const uploader = new ChunkedUploader({
+      file: selectedFile,
+      lectureId,
+      baseUrl: BACKEND_URL,
+      token: localStorage.getItem("authToken"),
+      chunkSize: 10 * 1024 * 1024, // 10MB chunks
+      concurrency: 3,
+      onProgress: (pct, stats) => {
+        setUploadProgress(pct);
+        if (stats?.speedFormatted) {
+          setUploadStats({
+            speedFormatted: stats.speedFormatted,
+            etaFormatted: stats.etaFormatted,
+          });
+        }
+      },
+      onStatusChange: (phase) => setProcessingPhase(phase),
+    });
+
+    uploaderRef.current = uploader;
 
     try {
-      await new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhrRef.current = xhr;
-
-        xhr.upload.onprogress = (e) => {
-          if (e.lengthComputable) {
-            setUploadProgress(Math.round((e.loaded / e.total) * 100));
-          }
-        };
-
-        xhr.onload = () => {
-          if (xhr.status >= 200 && xhr.status < 300) resolve(JSON.parse(xhr.responseText));
-          else {
-            try { reject(new Error(JSON.parse(xhr.responseText).message || "Upload failed")); }
-            catch { reject(new Error("Upload failed")); }
-          }
-        };
-        xhr.onerror = () => reject(new Error("Network error during upload"));
-        xhr.onabort = () => reject(new Error("Upload cancelled"));
-
-        xhr.open("POST", `${BACKEND_URL}/api/v1/lectures/${lectureId}/upload`);
-        xhr.setRequestHeader("Authorization", `Bearer ${localStorage.getItem("authToken")}`);
-        xhr.send(formData);
-      });
-
-      toast.info("Video uploaded! Transcoding started in background…");
+      await uploader.upload();
+      toast.info("Chunks uploaded to cloud! Transcoding started in background…");
       setSelectedFile(null);
+      setProcessingStatus("transcoding");
+      setProcessingPhase("Starting FFmpeg…");
       setPollEnabled(true);
     } catch (err) {
       toast.error(err.message);
       setProcessingStatus(lectureData?.lecture?.status || "pending");
     } finally {
       setIsUploading(false);
-      xhrRef.current = null;
+      uploaderRef.current = null;
     }
   };
 
@@ -211,7 +212,7 @@ const EditLectureForm = () => {
   if (isLoading) return <p className="text-center p-8">Loading lecture editor…</p>;
 
   const lecture = lectureData?.lecture;
-  const isProcessing = ["transcoding", "uploading_r2"].includes(processingStatus);
+  const isProcessing = ["transcoding", "uploading", "uploading_r2"].includes(processingStatus);
 
   return (
     <div className="space-y-6">
@@ -314,10 +315,18 @@ const EditLectureForm = () => {
                 {/* Upload progress */}
                 {isUploading && (
                   <div className="space-y-3 p-4 bg-blue-50 rounded-lg border border-blue-100">
-                    <ProgressBar value={uploadProgress} label="Uploading to server…" color="bg-blue-500" />
+                    <ProgressBar
+                      value={uploadProgress}
+                      label={
+                        uploadStats.speedFormatted
+                          ? `Uploading directly to cloud • ${uploadStats.speedFormatted} • ${uploadStats.etaFormatted}`
+                          : (processingPhase || "Uploading chunks directly to cloud…")
+                      }
+                      color="bg-blue-500"
+                    />
                     <button
                       type="button"
-                      onClick={() => xhrRef.current?.abort()}
+                      onClick={() => uploaderRef.current?.abort()}
                       className="text-base text-red-500 hover:text-red-700 flex items-center gap-1"
                     >
                       <X className="w-3 h-3" /> Cancel

@@ -249,20 +249,11 @@ export const getTrendingCourses = async (req, res) => {
 
 export const getRecommendedCourses = async (req, res) => {
   try {
-    const token = req.cookies?.token || req.headers?.authorization?.split?.(" ")?.[1];
-    let userId = null;
+    // loadUserIfAuthenticated middleware populates req.user; use the shared
+    // helper so subscription courses are also excluded (same as trending/featured).
+    const userId = req.user?._id ?? null;
 
-    if (token) {
-      try {
-        const { default: jwt } = await import("jsonwebtoken");
-        const decoded = jwt.verify(token, process.env.SECRET_KEY);
-        userId = decoded?.userId;
-      } catch (err) {
-        console.warn("Token invalid/expired — proceeding as guest");
-      }
-    }
-
-    // Guest user
+    // Guest user — no token / not logged in
     if (!userId) {
       const popular = await getPopularCourses({ isPublished: true }, 8);
       return res.json({
@@ -271,6 +262,9 @@ export const getRecommendedCourses = async (req, res) => {
       });
     }
 
+    // Resolve all enrolled/purchased course IDs (including subscription courses)
+    const enrolledCourseIds = await getEnrolledIds(req);
+
     const user = await User.findById(userId).populate({
       path: "enrolledCourses",
       select: "title description tags category subtitle level embedding",
@@ -278,12 +272,14 @@ export const getRecommendedCourses = async (req, res) => {
 
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const enrolledCourses   = user.enrolledCourses || [];
-    const enrolledCourseIds = enrolledCourses.map((c) => c._id.toString());
+    const enrolledCourses = user.enrolledCourses || [];
 
-    // No enrolled courses → show popular
+    // No enrolled courses → show popular (excluding any subscription courses)
     if (enrolledCourses.length === 0) {
-      const popular = await getPopularCourses({ isPublished: true }, 8);
+      const popular = await getPopularCourses(
+        { isPublished: true, _id: { $nin: enrolledCourseIds } },
+        8
+      );
       return res.json({
         message: "You haven't enrolled in any courses yet. Here are some popular ones.",
         recommendedCourses: popular.map(withRecommendationBadge),

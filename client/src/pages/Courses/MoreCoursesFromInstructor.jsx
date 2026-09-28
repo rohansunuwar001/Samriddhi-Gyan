@@ -17,7 +17,7 @@ const CourseCard = ({ course }) => {
     return (
         <div 
             onClick={() => {
-                navigate(`/course-detail/${course._id}`);
+                navigate(`/course/${course.slug || course._id}`);
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             }}
             className="border border-[#d1d7dc] bg-white overflow-hidden cursor-pointer hover:shadow-md transition-shadow flex flex-col h-full font-sans text-left"

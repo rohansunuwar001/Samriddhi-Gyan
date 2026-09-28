@@ -61,7 +61,7 @@ const WishList = () => {
               key={course._id} 
               className="flex flex-col md:flex-row items-start md:items-center justify-between border rounded-lg p-4 transition-shadow hover:shadow-md"
             >
-              <Link to={`/course-detail/${course._id}`} className="flex items-center space-x-4 mb-4 md:mb-0">
+              <Link to={`/course/${course.slug || course._id}`} className="flex items-center space-x-4 mb-4 md:mb-0">
                   <img src={course.thumbnail || '/placeholder.jpg'} alt={course.title} className="w-24 h-16 object-cover rounded-md" />
                   <div>
                       <h4 className="font-medium text-xl hover:text-blue-600">{course.title}</h4>

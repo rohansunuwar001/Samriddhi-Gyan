@@ -289,7 +289,8 @@ ReviewsSection.propTypes = {
     _id: PropTypes.string.isRequired,
     allowReview: PropTypes.bool,
     isEnrolled: PropTypes.bool,
-    ratings: PropTypes.number,
+    ratings: PropTypes.oneOfType([PropTypes.number, PropTypes.array]),
+    rating: PropTypes.oneOfType([PropTypes.number, PropTypes.array]),
     numOfReviews: PropTypes.number,
     reviews: PropTypes.arrayOf(
       PropTypes.shape({

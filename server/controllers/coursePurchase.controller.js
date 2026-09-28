@@ -9,7 +9,11 @@
 
 import Stripe from "stripe";
 import dotenv from "dotenv";
+import mongoose from "mongoose";
 import { Course } from "../models/course.model.js";
+import { Section } from "../models/section.model.js";
+import { Lecture } from "../models/lecture.model.js";
+import { Review } from "../models/review.model.js";
 import { CoursePurchase } from "../models/coursePurchase.model.js";
 import { CourseProgress } from "../models/courseProgress.model.js";
 import Category from "../models/category.model.js";
@@ -295,7 +299,12 @@ export const getCourseDetailWithPurchaseStatus = async (req, res) => {
     const { courseId } = req.params;
     const userId = req.user?._id;
 
-    const course = await Course.findById(courseId)
+    const isObjectId = mongoose.Types.ObjectId.isValid(courseId);
+    const courseQuery = isObjectId
+      ? { $or: [{ _id: courseId }, { slug: courseId }] }
+      : { slug: courseId };
+
+    const course = await Course.findOne(courseQuery)
       .populate({ path: "creator", select: "name headline photoUrl links" })
       .populate({ path: "sections", populate: { path: "lectures" } })
       .populate({
@@ -308,9 +317,80 @@ export const getCourseDetailWithPurchaseStatus = async (req, res) => {
       return res.status(404).json({ success: false, message: "Course not found!" });
     }
 
+    const realCourseId = course._id;
+
     // Default values — not enrolled
     course.topics = removeDuplicateCategoryTopics(course.topics, course.category);
     Object.assign(course, await getCategoryDisplayInfo(course.category));
+
+    // Live compute course includes & statistics directly from populated sections and lectures
+    let liveDuration = 0;
+    let liveLectures = 0;
+    let liveResources = 0;
+    let liveCodingExercises = 0;
+    let liveArticles = 0;
+    let liveCaptions = false;
+
+    if (Array.isArray(course.sections)) {
+      for (const section of course.sections) {
+        const lectures = section?.lectures || [];
+        liveLectures += lectures.length;
+        for (const lecture of lectures) {
+          if (!lecture) continue;
+          liveDuration += (lecture.durationInSeconds || 0);
+
+          if (Array.isArray(lecture.resources)) {
+            liveResources += lecture.resources.length;
+          }
+
+          if (
+            lecture.lab &&
+            (lecture.lab.isActive || lecture.lab.title || lecture.lab.url || lecture.lab.pdfUrl)
+          ) {
+            liveCodingExercises += 1;
+          }
+
+          if (
+            Array.isArray(lecture.captions) &&
+            lecture.captions.length > 0 &&
+            !lecture.captionsDisabled
+          ) {
+            liveCaptions = true;
+          }
+
+          if (
+            (!lecture.videoUrl || lecture.videoUrl === "") &&
+            (lecture.description || lecture.transcript)
+          ) {
+            liveArticles += 1;
+          }
+        }
+      }
+    }
+
+    const dbCi = course.courseIncludes || {};
+    course.totalDurationInSeconds = liveDuration > 0 ? liveDuration : (course.totalDurationInSeconds || 0);
+    course.totalLectures = liveLectures > 0 ? liveLectures : (course.totalLectures || 0);
+    course.courseIncludes = {
+      ...dbCi,
+      downloadableResources: liveResources,
+      codingExercises: liveCodingExercises,
+      hasCaptions: liveCaptions || (dbCi.hasCaptions ?? false),
+      articles: Math.max(liveArticles, dbCi.articles || 0),
+      hasMobileAccess: dbCi.hasMobileAccess !== false,
+      hasCertificate: dbCi.hasCertificate !== false,
+    };
+
+    // Live compute reviews and ratings from populated reviews array
+    const reviewsArr = Array.isArray(course.reviews) ? course.reviews : [];
+    if (reviewsArr.length > 0) {
+      const sumRatings = reviewsArr.reduce((sum, r) => sum + (r?.rating || 0), 0);
+      course.numOfReviews = reviewsArr.length;
+      course.ratings = Math.round((sumRatings / reviewsArr.length) * 10) / 10;
+    } else {
+      course.numOfReviews = course.numOfReviews || 0;
+      course.ratings = course.ratings || 0;
+    }
 
     course.isEnrolled      = false;
     course.allowReview     = false;
@@ -321,7 +401,7 @@ export const getCourseDetailWithPurchaseStatus = async (req, res) => {
       // ── Step 1: Check the CoursePurchase collection (preferred) ───────────
       const purchase = await CoursePurchase.findOne({
         userId,
-        "courses.courseId": courseId,
+        "courses.courseId": realCourseId,
         status: "completed",
       });
 
@@ -342,14 +422,14 @@ export const getCourseDetailWithPurchaseStatus = async (req, res) => {
 
         if (!purchase && isDirectlyEnrolled) {
           await CoursePurchase.findOneAndUpdate(
-            { userId, "courses.courseId": courseId },
+            { userId, "courses.courseId": realCourseId },
             { status: "completed" },
             { new: true }
           ).catch(() => {}); // non-critical — don't block the response
         }
 
         // ── Calculate progress ─────────────────────────────────────────────
-        const progress = await CourseProgress.findOne({ userId, courseId }).lean();
+        const progress = await CourseProgress.findOne({ userId, courseId: realCourseId }).lean();
 
         const totalLectures = course.sections.reduce(
           (sum, section) => sum + (section.lectures?.length || 0),

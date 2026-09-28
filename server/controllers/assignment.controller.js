@@ -111,3 +111,48 @@ export const getCourseAssignments = async (req, res) => {
     });
   }
 };
+
+/**
+ * Deletes an assignment and its associated submissions (Instructor/Admin only)
+ * @route DELETE /api/v1/assignment/:assignmentId
+ */
+export const deleteAssignment = async (req, res) => {
+  try {
+    const { assignmentId } = req.params;
+    const userId = req.user._id;
+
+    const assignment = await Assignment.findById(assignmentId);
+    if (!assignment) {
+      return res.status(404).json({
+        success: false,
+        message: "Assignment not found."
+      });
+    }
+
+    const course = await Course.findById(assignment.courseId);
+    const isCreator = course && course.creator.toString() === userId.toString();
+    const isAdmin = req.user.role === "admin" || req.user.role === "superadmin";
+
+    if (!isCreator && !isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: "You are not authorized to delete this assignment."
+      });
+    }
+
+    await Assignment.findByIdAndDelete(assignmentId);
+    await Submission.deleteMany({ assignmentId });
+
+    return res.status(200).json({
+      success: true,
+      message: "Assignment and related submissions deleted successfully."
+    });
+  } catch (error) {
+    console.error("deleteAssignment error:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Server error deleting assignment."
+    });
+  }
+};
+

@@ -46,7 +46,7 @@ const ProfileCourseCard = ({ course }) => {
 
   return (
     <div 
-      onClick={() => navigate(`/course-detail/${course._id}`)}
+      onClick={() => navigate(`/course/${course.slug || course._id}`)}
       className="border border-[#d1d7dc] bg-white overflow-hidden cursor-pointer hover:shadow-md transition-shadow flex flex-col h-full font-sans text-left"
     >
       <div className="aspect-video w-full bg-gray-100">

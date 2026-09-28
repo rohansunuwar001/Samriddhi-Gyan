@@ -164,13 +164,13 @@ const Cart = () => {
                   ? Math.round(100 - (current / original) * 100)
                   : 0;
 
-                const ratingValue = course.ratings ?? course.rating ?? 4.5;
-                const reviewsCount = course.numOfReviews ?? course.numRatings ?? 2500;
+                const ratingValue = course.ratings ?? course.rating ?? 0;
+                const reviewsCount = course.numOfReviews ?? course.numRatings ?? (Array.isArray(course.reviews) ? course.reviews.length : 0);
                 const instructorName = course.creator?.name ?? course.instructor?.name ?? "Instructor";
                 const totalHours = course.totalDurationInSeconds 
                   ? Math.round(course.totalDurationInSeconds / 3600) 
-                  : 45;
-                const totalLectures = course.totalLectures ?? 120;
+                  : (course.lectures?.length ? Math.max(1, Math.round(course.lectures.length * 0.5)) : 0);
+                const totalLectures = course.totalLectures ?? (course.lectures?.length || 0);
                 const courseLevel = course.level ?? "All Levels";
 
                 return (
@@ -187,7 +187,7 @@ const Cart = () => {
                       />
                       <div className="min-w-0 space-y-1">
                         <Link
-                          to={`/course-detail/${course._id}`}
+                          to={`/course/${course.slug || course._id}`}
                           className="font-semibold text-[#2d2f31] text-lg leading-snug hover:text-[#5624d0] line-clamp-2"
                         >
                           {course.title}

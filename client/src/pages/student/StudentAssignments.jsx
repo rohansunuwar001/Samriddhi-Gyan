@@ -328,7 +328,7 @@ const StudentAssignments = () => {
 
       {/* Back to course */}
       <button
-        onClick={() => navigate(`/course-detail/${courseId}/content`)}
+        onClick={() => navigate(`/course/${courseId}/content`)}
         className="flex items-center gap-1.5 text-base font-normal text-slate-400 hover:text-violet-600 transition-colors mb-6"
       >
         <ChevronLeft className="h-4 w-4" />

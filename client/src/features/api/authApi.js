@@ -75,6 +75,9 @@ export const authApi = apiSlice.injectEndpoints({
         trackCourseView: builder.mutation({
             query: (courseId) => ({ url: `/user/view-history/${courseId}`, method: 'POST' }),
         }),
+        saveSearchTerm: builder.mutation({
+            query: (term) => ({ url: '/user/search-history', method: 'POST', body: { term } }),
+        }),
         trackVisit: builder.mutation({
             query: (locationDetails) => ({
                 url: '/analytics/track-visit',
@@ -97,6 +100,7 @@ export const {
     useLogoutUserMutation,
     useLoadUserQuery,
     useTrackCourseViewMutation,
+    useSaveSearchTermMutation,
     useTrackVisitMutation,
     useGetMyLearningCoursesQuery,
     useGetArchivedCoursesQuery,

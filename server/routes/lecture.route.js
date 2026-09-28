@@ -6,6 +6,10 @@ import { isAuthenticated } from '../middlewares/isAuthenticated.js';
 import {
   createLecture,
   uploadVideo,
+  initiateChunkedUpload,
+  completeChunkedUpload,
+  abortChunkedUpload,
+  webhookLectureComplete,
   getLectureStatus,
   updateLecture,
   deleteLecture,
@@ -13,9 +17,34 @@ import {
   uploadCaption,
   toggleCaptionsDisable,
   deleteCaption,
+  addLectureResourceLink,
+  uploadLectureResourceFile,
+  deleteLectureResource,
+  updateLectureLab,
+  uploadLectureLabPdf,
+  deleteLectureLab,
 } from '../controllers/lecture.controller.js';
+import { webhookPromoComplete } from '../controllers/course.controller.js';
 
 const router = express.Router();
+
+// ─── Multer config for resource/document uploads (PDFs, files, zips) ─────────
+const documentStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(process.cwd(), 'uploads', 'documents');
+    fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, `${req.params.lectureId}-${Date.now()}${ext}`);
+  },
+});
+
+const uploadDocumentMiddleware = multer({
+  storage: documentStorage,
+  limits: { fileSize: 100 * 1024 * 1024 }, // 100MB limit
+});
 
 // ─── Multer config for captions uploads ──────────────────────────────────────
 const captionsStorage = multer.diskStorage({
@@ -69,8 +98,17 @@ const uploadMiddleware = multer({
 // Create a lecture entry (no video yet)
 router.post('/sections/:sectionId/lectures', isAuthenticated, createLecture);
 
-// Upload video to an existing lecture + trigger FFmpeg + R2
+// Upload video to an existing lecture + trigger FFmpeg + R2 (legacy fallback)
 router.post('/lectures/:lectureId/upload', isAuthenticated, uploadMiddleware.single('video'), uploadVideo);
+
+// Direct-to-Cloud Chunked (Multipart) Upload
+router.post('/lectures/:lectureId/multipart/initiate', isAuthenticated, initiateChunkedUpload);
+router.post('/lectures/:lectureId/multipart/complete', isAuthenticated, completeChunkedUpload);
+router.post('/lectures/:lectureId/multipart/abort', isAuthenticated, abortChunkedUpload);
+
+// Internal webhook for Dedicated Video Transcoder Server
+router.post('/internal/lectures/:lectureId/complete', webhookLectureComplete);
+router.post('/internal/promo/:courseId/complete', webhookPromoComplete);
 
 // Poll transcoding/upload progress (frontend polls this every 3s)
 router.get('/lectures/:lectureId/status', isAuthenticated, getLectureStatus);
@@ -92,6 +130,16 @@ router.put('/lectures/:lectureId/captions/toggle-disable', isAuthenticated, togg
 
 // Delete caption from a lecture
 router.delete('/lectures/:lectureId/captions/:captionId', isAuthenticated, deleteCaption);
+
+// ─── Resources Endpoints ──────────────────────────────────────────────────────
+router.post('/lectures/:lectureId/resources/link', isAuthenticated, addLectureResourceLink);
+router.post('/lectures/:lectureId/resources/upload', isAuthenticated, uploadDocumentMiddleware.single('file'), uploadLectureResourceFile);
+router.delete('/lectures/:lectureId/resources/:resourceId', isAuthenticated, deleteLectureResource);
+
+// ─── Lab Endpoints ────────────────────────────────────────────────────────────
+router.put('/lectures/:lectureId/lab', isAuthenticated, updateLectureLab);
+router.post('/lectures/:lectureId/lab/upload', isAuthenticated, uploadDocumentMiddleware.single('file'), uploadLectureLabPdf);
+router.delete('/lectures/:lectureId/lab', isAuthenticated, deleteLectureLab);
 
 // ─── Multer error handler ─────────────────────────────────────────────────────
 
