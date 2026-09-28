@@ -3,15 +3,6 @@ import { Course } from "../models/course.model.js";
 import { CourseProgress } from "../models/courseProgress.model.js";
 import { User } from "../models/user.model.js";
 
-// ============================================================================
-// 1. DAG & Topological Course Prerequisite Sorting
-// ============================================================================
-
-/**
- * Computes a valid topological learning order of published courses.
- * Flags circular dependencies (cycles) if found.
- * @route GET /api/pathways/sequencing
- */
 export const getCourseSequencing = async (req, res) => {
   try {
     const courses = await Course.find({ isPublished: true })
@@ -21,28 +12,24 @@ export const getCourseSequencing = async (req, res) => {
     const inDegree = {};
     const adj = {};
 
-    // Initialize structures
     courses.forEach((c) => {
       const id = c._id.toString();
       inDegree[id] = 0;
       adj[id] = [];
     });
 
-    // Populate in-degrees and adjacency lists
     courses.forEach((c) => {
       const u = c._id.toString();
       const prereqs = c.prerequisites || [];
       prereqs.forEach((pId) => {
         const v = pId.toString();
-        // If the prerequisite is also a published course
         if (adj[v]) {
-          adj[v].push(u); // Direction: prerequisite v -> course u
+          adj[v].push(u);
           inDegree[u]++;
         }
       });
     });
 
-    // Queue nodes with in-degree 0 (no prerequisites)
     const queue = [];
     courses.forEach((c) => {
       const id = c._id.toString();
@@ -73,7 +60,6 @@ export const getCourseSequencing = async (req, res) => {
       });
     }
 
-    // Resolve course documents in sorted order
     const sortedCourses = sequence.map((id) =>
       courses.find((c) => c._id.toString() === id)
     );
@@ -89,14 +75,6 @@ export const getCourseSequencing = async (req, res) => {
   }
 };
 
-// ============================================================================
-// 2. A* Pathfinding for Career Roadmap Planning
-// ============================================================================
-
-/**
- * Computes the optimal A* learning path from user's current baseline to target category.
- * @route GET /api/pathways/career-roadmap
- */
 export const getCareerRoadmap = async (req, res) => {
   try {
     const { targetCategory } = req.query;
@@ -110,7 +88,6 @@ export const getCareerRoadmap = async (req, res) => {
       .select("_id title category prerequisites totalDurationInSeconds")
       .lean();
 
-    // Get user's completed courses
     let completedCourseIds = new Set();
     if (userId) {
       const user = await User.findById(userId).select("enrolledCourses").lean();
@@ -119,9 +96,8 @@ export const getCareerRoadmap = async (req, res) => {
       }
     }
 
-    // Map graph nodes
     const graph = {};
-    const h = {}; // Heuristic: cost to target category
+    const h = {};
 
     allCourses.forEach((c) => {
       const id = c._id.toString();
@@ -133,12 +109,9 @@ export const getCareerRoadmap = async (req, res) => {
         prereqs: (c.prerequisites || []).map(p => p.toString())
       };
 
-      // Heuristic: If course is already in the target category, h(n) = 0.
-      // Else, h(n) = 5 hours (18000s) representing expected remaining workload.
       h[id] = c.category.toLowerCase() === targetCategory.toLowerCase() ? 0 : 18000;
     });
 
-    // Start set: Find courses with no prerequisites or those user has completed
     const startNodes = allCourses.filter(c => {
       const id = c._id.toString();
       const prereqs = c.prerequisites || [];
@@ -146,10 +119,9 @@ export const getCareerRoadmap = async (req, res) => {
     }).map(c => c._id.toString());
 
     if (startNodes.length === 0 && allCourses.length > 0) {
-      startNodes.push(allCourses[0]._id.toString()); // Fallback
+      startNodes.push(allCourses[0]._id.toString());
     }
 
-    // Open set for A* search: array of { node, g, f, path }
     const openSet = startNodes.map(id => {
       const course = graph[id];
       const g = completedCourseIds.has(id) ? 0 : course.duration;
@@ -158,7 +130,7 @@ export const getCareerRoadmap = async (req, res) => {
     });
 
     let bestPath = [];
-    let searchLimit = 500; // Prevent infinite loops
+    let searchLimit = 500;
 
     while (openSet.length > 0 && searchLimit-- > 0) {
       openSet.sort((a, b) => a.f - b.f);
@@ -166,7 +138,6 @@ export const getCareerRoadmap = async (req, res) => {
 
       const course = graph[curr.node];
       
-      // A course is only the final target if it is in the category AND not a prerequisite for another course in that category
       const isPrereqForOtherInCat = allCourses.some(c => {
         const inSameCat = c.category.toLowerCase() === targetCategory.toLowerCase();
         const hasPrereq = (c.prerequisites || []).map(p => p.toString()).includes(curr.node);
@@ -178,7 +149,6 @@ export const getCareerRoadmap = async (req, res) => {
         break;
       }
 
-      // Find neighbors: courses that require the current course
       const neighbors = allCourses.filter(c => {
         const prereqs = (c.prerequisites || []).map(p => p.toString());
         return prereqs.includes(curr.node);
@@ -188,7 +158,6 @@ export const getCareerRoadmap = async (req, res) => {
         const nId = n._id.toString();
         const neighborCourse = graph[nId];
         if (!curr.path.includes(nId)) {
-          // If student already completed the neighbor, cost addition is 0
           const stepCost = completedCourseIds.has(nId) ? 0 : (neighborCourse?.duration || 3600);
           const gScore = curr.g + stepCost;
           const fScore = gScore + h[nId];
@@ -197,7 +166,6 @@ export const getCareerRoadmap = async (req, res) => {
       });
     }
 
-    // Resolve course details for the final path
     const resolvedPath = bestPath.map(id => {
       const c = graph[id];
       return {
@@ -221,14 +189,6 @@ export const getCareerRoadmap = async (req, res) => {
   }
 };
 
-// ============================================================================
-// 3. Markov Chain Progression Friction Bottleneck Analytics
-// ============================================================================
-
-/**
- * Calculates drop-off and re-watch friction parameters on a course progression chain.
- * @route GET /api/pathways/friction/:courseId
- */
 export const getCourseFrictionAnalytics = async (req, res) => {
   try {
     const { courseId } = req.params;
@@ -242,7 +202,6 @@ export const getCourseFrictionAnalytics = async (req, res) => {
       return res.status(404).json({ success: false, message: "Course not found." });
     }
 
-    // Flatten all lectures in order
     const lectures = [];
     (course.sections || []).forEach((sec) => {
       (sec.lectures || []).forEach((lec) => {
@@ -254,12 +213,9 @@ export const getCourseFrictionAnalytics = async (req, res) => {
       return res.status(200).json({ success: true, frictionStates: [] });
     }
 
-    // Fetch progress logs for this course across all students
     const progresses = await CourseProgress.find({ courseId }).lean();
     const studentCount = progresses.length;
 
-    // Track state movements
-    // States: 0 to N-1 correspond to lectures. State N is "Exit/Drop-out".
     const stateTransitions = Array.from({ length: lectures.length }, () => ({
       progressNext: 0,
       rewatchSelf: 0,
@@ -278,7 +234,6 @@ export const getCourseFrictionAnalytics = async (req, res) => {
         if (currentViewed) {
           stateTransitions[i].totalTransitions += 1;
 
-          // Check next state movement
           if (i + 1 < lectures.length) {
             const nextLecId = lectures[i + 1].id;
             const nextViewed = viewedSet.has(nextLecId);
@@ -286,20 +241,14 @@ export const getCourseFrictionAnalytics = async (req, res) => {
             if (nextViewed) {
               stateTransitions[i].progressNext += 1;
             } else {
-              // Viewed current but not next -> either exited or rewatching current
-              // If they spent time but didn't finish, we model 70% as exit, 30% as rewatch
               stateTransitions[i].dropoutExit += 0.7;
               stateTransitions[i].rewatchSelf += 0.3;
             }
           } else {
-            // Last lecture
-            stateTransitions[i].progressNext += 1; // Completed course
+            stateTransitions[i].progressNext += 1;
           }
         } else {
-          // If they haven't viewed the current lecture but completed others later (skip)
-          // Or if they dropped out before this lecture
           if (i > 0 && viewedSet.has(lectures[i - 1].id)) {
-            // Exit occurred at the previous node
             stateTransitions[i - 1].dropoutExit += 1;
             stateTransitions[i - 1].totalTransitions += 1;
           }
@@ -307,7 +256,6 @@ export const getCourseFrictionAnalytics = async (req, res) => {
       }
     });
 
-    // Format output transition probabilities
     const frictionStates = lectures.map((lec, idx) => {
       const t = stateTransitions[idx];
       const sum = t.totalTransitions || 1;

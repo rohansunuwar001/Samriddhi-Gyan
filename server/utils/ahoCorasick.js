@@ -1,7 +1,3 @@
-/**
- * Keyword Tagging Utility.
- * Identifies course topics and categories from text metadata.
- */
 export class AhoCorasickTagger {
   constructor(patterns = []) {
     this.patterns = Array.from(new Set(patterns.map((p) => p && p.trim()).filter(Boolean)));

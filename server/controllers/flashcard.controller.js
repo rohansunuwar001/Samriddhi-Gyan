@@ -70,14 +70,14 @@ export const reviewFlashcard = async (req, res) => {
       [stability, difficulty] = INITIAL_FSRS[rating];
       repetitions = 1;
     } else {
-      // Subsequent review steps
+   
       if (rating === 1) {
-        // Forgot the card (Again)
+       
         stability = Math.max(0.1, stability * 0.15);
         difficulty = Math.min(10.0, difficulty + 1.5);
-        repetitions = 0; // Reset consecutive successes
+        repetitions = 0;
       } else {
-        // Recalled successfully
+       
         const dFactor = rating === 2 ? 1.0 : (rating === 3 ? 0.0 : -1.0);
         difficulty = Math.min(10.0, Math.max(1.0, difficulty + dFactor));
 

@@ -413,8 +413,10 @@ export const getCourseDetailWithPurchaseStatus = async (req, res) => {
       );
 
       const isSubscribedAndIncluded = req.user?.subscription?.status === "active" && course.includedInSubscription;
+      const isCreator = course.creator?._id?.toString() === userId.toString() || course.creator?.toString() === userId.toString();
+      const isAdmin = req.user?.role === "admin" || req.user?.role === "superadmin";
 
-      const hasAccess = !!purchase || isDirectlyEnrolled || !!isSubscribedAndIncluded;
+      const hasAccess = !!purchase || isDirectlyEnrolled || !!isSubscribedAndIncluded || isCreator || isAdmin;
 
       if (hasAccess) {
         course.isEnrolled     = true;

@@ -24,6 +24,7 @@ import {
   useGetCourseAssignmentsQuery,
   useSubmitAssignmentMutation,
 } from "@/features/api/assignmentApi";
+import { BASE_URL } from "@/app/constant";
 
 /* ─── helpers ─────────────────────────────────────────────────────────── */
 const CODE_EXTS = ["js","py","java","cpp","c","ts","html","css","go","rs","json","jsx","tsx","php","rb","sh","sql"];
@@ -206,7 +207,7 @@ const StudentAssignments = () => {
   const { courseId } = useParams();
   const navigate     = useNavigate();
 
-  const { data, isLoading, refetch } = useGetCourseAssignmentsQuery(courseId);
+  const { data, isLoading, isError, error, refetch } = useGetCourseAssignmentsQuery(courseId);
   const [submitAssignment, { isLoading: isSubmitting }] = useSubmitAssignmentMutation();
 
   const [view, setView] = useState("list");
@@ -228,7 +229,14 @@ const StudentAssignments = () => {
     setIsEditingExisting(false);
     setSubmissionContent("");
     setView("workspace");
-    if (asm.submission?.fileUrl) loadSubmission(asm.submission.fileUrl);
+    if (asm.submission?.extractedText) {
+      setSubmissionContent(asm.submission.extractedText);
+    } else if (asm.submission?.fileUrl) {
+      const url = asm.submission.fileUrl.startsWith("/")
+        ? `${BASE_URL || ""}${asm.submission.fileUrl}`
+        : asm.submission.fileUrl;
+      loadSubmission(url);
+    }
   };
 
   const goBack = () => {
@@ -317,6 +325,28 @@ const StudentAssignments = () => {
   if (isLoading) return (
     <div className="flex justify-center items-center h-96">
       <Loader2 className="h-7 w-7 animate-spin text-violet-600" />
+    </div>
+  );
+
+  if (isError) return (
+    <div className="max-w-2xl mx-auto px-5 py-10">
+      <button
+        onClick={() => navigate(`/course/${courseId}/content`)}
+        className="flex items-center gap-1.5 text-base font-normal text-slate-400 hover:text-violet-600 transition-colors mb-6"
+      >
+        <ChevronLeft className="h-4 w-4" />
+        Back to Course
+      </button>
+      <div className="flex flex-col items-center justify-center gap-3 py-16 border-2 border-dashed border-rose-100 bg-rose-50/30 rounded-2xl text-center">
+        <Info className="h-8 w-8 text-rose-500" />
+        <h2 className="text-xl font-medium text-slate-800">Unable to load assignments</h2>
+        <p className="text-sm font-extralight text-slate-500 max-w-sm">
+          {error?.data?.message || "There was an issue fetching the assignments for this course."}
+        </p>
+        <Button onClick={() => refetch()} variant="outline" className="mt-3">
+          Try Again
+        </Button>
+      </div>
     </div>
   );
 

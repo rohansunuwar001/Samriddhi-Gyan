@@ -1,34 +1,20 @@
-/**
- * Simple, self-contained Matrix Factorization (SVD) algorithm using Stochastic Gradient Descent (SGD).
- * Predicts user-item ratings in a sparse matrix.
- */
 export class SVD {
-  /**
-   * @param {number} latentFactors - Dimensionality of the latent space (number of features).
-   * @param {number} learningRate - Step size for SGD parameter updates.
-   * @param {number} regularization - Penalty factor to prevent overfitting.
-   * @param {number} epochs - Number of training iterations over the dataset.
-   */
   constructor(latentFactors = 5, learningRate = 0.05, regularization = 0.02, epochs = 25) {
     this.latentFactors = latentFactors;
     this.learningRate = learningRate;
     this.regularization = regularization;
     this.epochs = epochs;
 
-    this.mu = 0; // Global mean rating
-    this.bUser = {}; // User bias dictionary: userId -> bias
-    this.bCourse = {}; // Course bias dictionary: courseId -> bias
-    this.pUser = {}; // User latent factors dictionary: userId -> float array
-    this.qCourse = {}; // Course latent factors dictionary: courseId -> float array
+    this.mu = 0;
+    this.bUser = {};
+    this.bCourse = {};
+    this.pUser = {};
+    this.qCourse = {};
   }
 
-  /**
-   * Trains the SVD latent factors on a sparse rating array.
-   * @param {Array<{userId: string, courseId: string, rating: number}>} ratings - Observed user-course rating interactions.
-   */
   train(ratings) {
     if (!Array.isArray(ratings) || ratings.length === 0) {
-      this.mu = 4.0; // Default fallback global rating
+      this.mu = 4.0;
       return;
     }
 
@@ -44,8 +30,6 @@ export class SVD {
 
     this.mu = totalRating / ratings.length;
 
-    // Initialize biases to 0
-    // Initialize latent vectors to small random float values
     userIds.forEach((u) => {
       this.bUser[u] = 0;
       this.pUser[u] = Array.from(
@@ -62,7 +46,6 @@ export class SVD {
       );
     });
 
-    // Run Stochastic Gradient Descent
     for (let epoch = 0; epoch < this.epochs; epoch++) {
       ratings.forEach(({ userId, courseId, rating }) => {
         const u = userId.toString();
@@ -73,7 +56,6 @@ export class SVD {
         const pu = this.pUser[u] ?? Array(this.latentFactors).fill(0);
         const qc = this.qCourse[c] ?? Array(this.latentFactors).fill(0);
 
-        // Calculate predicted rating: r_hat = mu + b_u + b_c + P_u . Q_c
         let dot = 0;
         for (let k = 0; k < this.latentFactors; k++) {
           dot += pu[k] * qc[k];
@@ -81,11 +63,9 @@ export class SVD {
         const prediction = this.mu + bu + bc + dot;
         const error = rating - prediction;
 
-        // Update biases
         this.bUser[u] = bu + this.learningRate * (error - this.regularization * bu);
         this.bCourse[c] = bc + this.learningRate * (error - this.regularization * bc);
 
-        // Update latent vectors pu and qc
         for (let k = 0; k < this.latentFactors; k++) {
           const puK = pu[k];
           const qcK = qc[k];
@@ -99,12 +79,6 @@ export class SVD {
     }
   }
 
-  /**
-   * Predicts the rating a user would give to a course.
-   * @param {string} userId - ID of the user.
-   * @param {string} courseId - ID of the course.
-   * @returns {number} Predicted rating score, clamped between 1.0 and 5.0.
-   */
   predict(userId, courseId) {
     const u = userId ? userId.toString() : null;
     const c = courseId ? courseId.toString() : null;

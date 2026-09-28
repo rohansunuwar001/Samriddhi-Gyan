@@ -40,11 +40,7 @@ const buildMasterPlaylist = (renditions) => {
   return content;
 };
 
-/**
- * Run ffmpeg as a raw child process so we have full control over how
- * arguments are passed — no fluent-ffmpeg string parsing in between.
- * This is the only reliable way to handle paths with spaces on Windows.
- */
+
 import { spawn } from 'child_process';
 
 const runFFmpeg = (args, onProgress, duration) =>
@@ -96,9 +92,7 @@ export const transcodeToHLS = async (inputPath, outputDir, onProgress) => {
 
     console.log(`[Transcoder] Starting ${rendition.name} in dir: ${renditionDir}`);
 
-    // By using only filenames (no paths) for output and segment pattern,
-    // and setting cwd to renditionDir, we completely avoid spaces-in-path issues.
-    // FFmpeg writes files relative to its working directory.
+
     const args = [
       '-i', inputPath,
       '-vcodec', 'libx264',

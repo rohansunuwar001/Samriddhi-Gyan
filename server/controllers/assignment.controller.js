@@ -1,6 +1,17 @@
+import mongoose from "mongoose";
 import { Assignment } from "../models/assignment.model.js";
 import { Course } from "../models/course.model.js";
 import { Submission } from "../models/submission.model.js";
+
+// Helper to find a course by ObjectId or slug
+const resolveCourse = async (identifier) => {
+  if (!identifier) return null;
+  const isObjectId = mongoose.Types.ObjectId.isValid(identifier);
+  const query = isObjectId
+    ? { $or: [{ _id: identifier }, { slug: identifier }] }
+    : { slug: identifier };
+  return await Course.findOne(query);
+};
 
 /**
  * Creates a new assignment for a course (Instructors/Admins only)
@@ -25,13 +36,15 @@ export const createAssignment = async (req, res) => {
       });
     }
 
-    const course = await Course.findById(courseId);
+    const course = await resolveCourse(courseId);
     if (!course) {
       return res.status(404).json({
         success: false,
         message: "Course not found."
       });
     }
+
+    const resolvedCourseId = course._id;
 
     // Verify user is the course creator or instructor
     const isCreator = course.creator.toString() === userId.toString();
@@ -48,7 +61,7 @@ export const createAssignment = async (req, res) => {
       title,
       description,
       type,
-      courseId,
+      courseId: resolvedCourseId,
       sectionId: sectionId || null,
       requiredStructures: Array.isArray(requiredStructures) ? requiredStructures : [],
       maxPoints: Number(maxPoints) || 100,
@@ -78,7 +91,25 @@ export const getCourseAssignments = async (req, res) => {
     const { courseId } = req.params;
     const studentId = req.user._id;
 
-    const assignments = await Assignment.find({ courseId })
+    if (!courseId) {
+      return res.status(400).json({
+        success: false,
+        message: "Course identifier is required."
+      });
+    }
+
+    // Resolve course by either ObjectId or slug
+    const course = await resolveCourse(courseId);
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found."
+      });
+    }
+
+    const resolvedCourseId = course._id;
+
+    const assignments = await Assignment.find({ courseId: resolvedCourseId })
       .populate("sectionId", "title")
       .sort({ deadline: 1 })
       .lean();
@@ -120,6 +151,13 @@ export const deleteAssignment = async (req, res) => {
   try {
     const { assignmentId } = req.params;
     const userId = req.user._id;
+
+    if (!mongoose.Types.ObjectId.isValid(assignmentId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid assignment ID."
+      });
+    }
 
     const assignment = await Assignment.findById(assignmentId);
     if (!assignment) {

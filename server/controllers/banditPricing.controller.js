@@ -1,6 +1,5 @@
 import mongoose from "mongoose";
 
-// --- Schema Definition ---
 const banditPricingSchema = new mongoose.Schema({
   courseId: {
     type: mongoose.Schema.Types.ObjectId,
@@ -10,8 +9,8 @@ const banditPricingSchema = new mongoose.Schema({
   },
   arms: [
     {
-      discountPercent: { type: Number, required: true }, // e.g. 0, 10, 20, 30
-      trials: { type: Number, default: 1 }, // Initialize to 1 to avoid division by zero
+      discountPercent: { type: Number, required: true },
+      trials: { type: Number, default: 1 },
       successes: { type: Number, default: 0 }
     }
   ]
@@ -19,38 +18,25 @@ const banditPricingSchema = new mongoose.Schema({
 
 const BanditPricing = mongoose.model("BanditPricing", banditPricingSchema);
 
-// --- Helper: Beta Distribution Sampler (Thompson Sampling) ---
-/**
- * Generates a random sample from a Beta(alpha, beta) distribution.
- * Uses a normal approximation for performance simplicity.
- */
 function sampleBeta(alpha, beta) {
   const mean = alpha / (alpha + beta);
   const variance = (alpha * beta) / (Math.pow(alpha + beta, 2) * (alpha + beta + 1));
   const stdDev = Math.sqrt(variance);
 
-  // Box-Muller transform for normal random sampling
   const u1 = Math.random() || 0.0001;
   const u2 = Math.random() || 0.0001;
   const normalRand = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(2.0 * Math.PI * u2);
 
   const sample = mean + normalRand * stdDev;
-  return Math.min(1.0, Math.max(0.0, sample)); // Clamp to [0, 1]
+  return Math.min(1.0, Math.max(0.0, sample));
 }
 
-// --- Controller Methods ---
-
-/**
- * Gets the dynamically generated discount percentage for a course utilizing Thompson Sampling.
- * @route GET /api/bandit-pricing/:courseId
- */
 export const getCourseDiscount = async (req, res) => {
   try {
     const { courseId } = req.params;
 
     let pricing = await BanditPricing.findOne({ courseId });
 
-    // Initialize bandit arms if not existing
     if (!pricing) {
       pricing = await BanditPricing.create({
         courseId,
@@ -63,12 +49,10 @@ export const getCourseDiscount = async (req, res) => {
       });
     }
 
-    // Sample from the beta distribution for each arm
     let bestArm = pricing.arms[0];
     let maxSample = -1;
 
     pricing.arms.forEach((arm) => {
-      // Add 1 to successes and trials to represent prior beliefs
       const sample = sampleBeta(arm.successes + 1, arm.trials - arm.successes + 1);
       if (sample > maxSample) {
         maxSample = sample;
@@ -76,7 +60,6 @@ export const getCourseDiscount = async (req, res) => {
       }
     });
 
-    // Increment trial count for the selected arm
     bestArm.trials += 1;
     await pricing.save();
 
@@ -93,10 +76,6 @@ export const getCourseDiscount = async (req, res) => {
   }
 };
 
-/**
- * Records a successful purchase, incrementing the successes metric of the active discount arm.
- * @route POST /api/bandit-pricing/purchase
- */
 export const recordBanditPurchase = async (req, res) => {
   try {
     const { courseId, discountPercent } = req.body;
@@ -107,7 +86,6 @@ export const recordBanditPurchase = async (req, res) => {
       return res.status(404).json({ success: false, message: "Pricing data not found for course." });
     }
 
-    // Find corresponding arm and increment success count
     const arm = pricing.arms.find(a => a.discountPercent === discount);
     if (arm) {
       arm.successes += 1;

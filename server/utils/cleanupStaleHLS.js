@@ -2,10 +2,7 @@ import fs from "fs";
 import path from "path";
 import { Lecture } from "../models/lecture.model.js";
 
-/**
- * Scans public/hls/ and deletes any directories belonging to lectures
- * that are either deleted from the database or have a "failed" status.
- */
+
 export const cleanupStaleHLS = async () => {
   try {
     if (!process.env.RENDER) {

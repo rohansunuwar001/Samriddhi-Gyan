@@ -1,7 +1,6 @@
 import geoip from "geoip-lite";
 import { countries } from "countries-list";
 
-// Continent code to name mapping
 export const getContinentName = (code) => {
   const continents = {
     AF: "Africa",
@@ -15,10 +14,6 @@ export const getContinentName = (code) => {
   return continents[code] || "Unknown";
 };
 
-/**
- * Resolves an IP address to coarse location details using geoip-lite.
- * Defaults to Kathmandu, Nepal for local loopbacks / private IPs for dev testing.
- */
 export const lookupIPLocation = (ipAddress) => {
   if (!ipAddress) {
     return {
@@ -29,10 +24,8 @@ export const lookupIPLocation = (ipAddress) => {
     };
   }
 
-  // Clean the IP address (handling forward proxies)
   let cleanIp = ipAddress.split(",")[0].trim();
 
-  // If local IPv4/IPv6 loopback or private range, return Kathmandu mock data for easy dev testing
   if (
     cleanIp === "::1" ||
     cleanIp === "127.0.0.1" ||
@@ -43,7 +36,7 @@ export const lookupIPLocation = (ipAddress) => {
   ) {
     return {
       continent: "Asia",
-      country: "NP", // Nepal
+      country: "NP",
       region: "Bagmati",
       city: "Kathmandu",
       latitude: 27.7172,

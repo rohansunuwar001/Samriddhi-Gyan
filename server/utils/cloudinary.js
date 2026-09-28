@@ -12,18 +12,12 @@ cloudinary.config({
 });
 
 
-/**
- * @description Uploads a generic file (optimized for images) to Cloudinary
- * @param {string} localFilePath - The local path to the file to upload
- * @returns {object | null} - The Cloudinary upload response object or null on failure
- */
 export const uploadMedia = async (localFilePath) => {
     if (!localFilePath) return null;
 
     try {
         const uploadResponse = await cloudinary.uploader.upload(localFilePath, {
-            resource_type: "auto", // Automatically detect the resource type (good for images)
-            // You can add folders or transformations here if needed
+            resource_type: "auto",
         });
         
         // After successful upload, remove the local file
