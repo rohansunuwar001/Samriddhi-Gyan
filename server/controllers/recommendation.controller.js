@@ -1,8 +1,3 @@
-// server/controllers/recommendation.controller.js
-//
-// CHANGES:
-//   1. Imported SVD, Review, and CourseProgress for collaborative recommendations.
-//   2. Updated getRecommendedCourses to train a local SVD model and blend predicted ratings.
 
 import mongoose from "mongoose";
 import { Course } from "../models/course.model.js";
@@ -16,11 +11,8 @@ import { SVD } from "../utils/svd.js";
 
 const populateCreator = { path: "creator", select: "name email photoUrl role" };
 
-/**
- * Returns the most popular published courses, sorted by actual enrollment count.
- */
+
 async function getPopularCourses(filter, limit) {
-  // Deep clone filter and convert any string IDs to ObjectIds for the aggregation pipeline
   const queryFilter = { ...filter };
   if (queryFilter._id) {
     if (queryFilter._id.$nin) {
@@ -69,15 +61,12 @@ function withRecommendationBadge(course) {
   };
 }
 
-// ─── Featured Courses ─────────────────────────────────────────────────────────
 
 export const getFeaturedCourses = async (req, res) => {
   try {
     const tab = req.query.tab || "popular";
     const limit = 5;
 
-    // Uses shared helper — reads req.user (set by loadUserIfAuthenticated middleware)
-    // Returns [] for guests so the $nin filter is skipped cleanly
     const enrolledCourseIds = await getEnrolledIds(req);
 
     if (tab === "new") {
@@ -144,14 +133,13 @@ export const getFeaturedCourses = async (req, res) => {
   }
 };
 
-// ─── Trending Courses ─────────────────────────────────────────────────────────
 
 export const getTrendingCourses = async (req, res) => {
   try {
     const limit = 8;
     const since = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
-    // Uses shared helper — reads req.user (set by loadUserIfAuthenticated middleware)
+ 
     const enrolledCourseIds = await getEnrolledIds(req);
     const enrolledObjectIds = enrolledCourseIds.map(
       (id) => new mongoose.Types.ObjectId(id)
@@ -249,8 +237,6 @@ export const getTrendingCourses = async (req, res) => {
 
 export const getRecommendedCourses = async (req, res) => {
   try {
-    // loadUserIfAuthenticated middleware populates req.user; use the shared
-    // helper so subscription courses are also excluded (same as trending/featured).
     const userId = req.user?._id ?? null;
 
     // Guest user — no token / not logged in

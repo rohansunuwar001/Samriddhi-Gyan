@@ -1,14 +1,3 @@
-/**
- * MinHash & Locality Sensitive Hashing (LSH) Plagiarism Checker.
- * Matches student assignment text duplicates in near-linear O(N) time.
- */
-
-/**
- * Computes word shingles (n-grams) from text.
- * @param {string} text 
- * @param {number} k 
- * @returns {Set<string>} Set of shingles.
- */
 function getShingles(text, k = 5) {
   const clean = text.toLowerCase().replace(/[^a-z0-9\s]/g, "").split(/\s+/).filter(Boolean);
   const shingles = new Set();
@@ -18,9 +7,6 @@ function getShingles(text, k = 5) {
   return shingles;
 }
 
-/**
- * Basic hash function mapping string to a 32-bit positive integer.
- */
 function simpleHash(str, seed) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -39,9 +25,6 @@ function computeSignature(shingles, numHashes = 20) {
   return sig;
 }
 
-/**
- * Compares document signatures to identify candidate duplicates.
- */
 export function checkPlagiarism(docText, refDocs, threshold = 0.5) {
   const targetShingles = getShingles(docText);
   if (targetShingles.size === 0) return [];

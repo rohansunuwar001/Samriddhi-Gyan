@@ -1,8 +1,20 @@
+import mongoose from "mongoose";
 import { Submission } from "../models/submission.model.js";
 import { Assignment } from "../models/assignment.model.js";
+import { Course } from "../models/course.model.js";
 import { extractTextFromFile } from "../utils/textExtractor.js";
 import { parseCodeToAST, validateAST } from "../utils/astValidator.js";
 import { checkPlagiarism } from "../utils/plagiarismChecker.js";
+
+// Helper to find a course by ObjectId or slug
+const resolveCourse = async (identifier) => {
+  if (!identifier) return null;
+  const isObjectId = mongoose.Types.ObjectId.isValid(identifier);
+  const query = isObjectId
+    ? { $or: [{ _id: identifier }, { slug: identifier }] }
+    : { slug: identifier };
+  return await Course.findOne(query);
+};
 
 /**
  * Handles a student submitting an assignment file (uploads and auto-extracts/validates text)
@@ -12,6 +24,13 @@ export const submitAssignment = async (req, res) => {
   try {
     const { assignmentId } = req.params;
     const studentId = req.user._id;
+
+    if (!mongoose.Types.ObjectId.isValid(assignmentId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid assignment ID."
+      });
+    }
 
     if (!req.file) {
       return res.status(400).json({
@@ -31,6 +50,7 @@ export const submitAssignment = async (req, res) => {
     const filePath = req.file.path;
     const fileName = req.file.originalname;
     const fileType = req.file.mimetype;
+    const fileUrl = req.file.filename ? `/uploads/${req.file.filename}` : filePath;
 
     // 1. Extract plain text content from document (pdf, docx, txt, coding files)
     let extractedText = "";
@@ -56,7 +76,7 @@ export const submitAssignment = async (req, res) => {
 
     if (submission) {
       // Overwrite/Update existing submission
-      submission.fileUrl = filePath;
+      submission.fileUrl = fileUrl;
       submission.fileName = fileName;
       submission.fileType = fileType;
       submission.extractedText = extractedText;
@@ -70,7 +90,7 @@ export const submitAssignment = async (req, res) => {
       submission = await Submission.create({
         assignmentId,
         studentId,
-        fileUrl: filePath,
+        fileUrl,
         fileName,
         fileType,
         extractedText,
@@ -99,6 +119,13 @@ export const submitAssignment = async (req, res) => {
 export const getAssignmentSubmissions = async (req, res) => {
   try {
     const { assignmentId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(assignmentId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid assignment ID."
+      });
+    }
 
     const assignment = await Assignment.findById(assignmentId);
     if (!assignment) {
@@ -134,6 +161,13 @@ export const gradeSubmission = async (req, res) => {
   try {
     const { submissionId } = req.params;
     const { grade, feedback, threshold } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(submissionId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid submission ID."
+      });
+    }
 
     const submission = await Submission.findById(submissionId)
       .populate("studentId", "name email");
@@ -196,7 +230,24 @@ export const getCourseSubmissions = async (req, res) => {
   try {
     const { courseId } = req.params;
 
-    const assignments = await Assignment.find({ courseId }).select("_id title type maxPoints deadline");
+    if (!courseId) {
+      return res.status(400).json({
+        success: false,
+        message: "Course identifier is required."
+      });
+    }
+
+    const course = await resolveCourse(courseId);
+    if (!course) {
+      return res.status(404).json({
+        success: false,
+        message: "Course not found."
+      });
+    }
+
+    const resolvedCourseId = course._id;
+
+    const assignments = await Assignment.find({ courseId: resolvedCourseId }).select("_id title type maxPoints deadline");
     const assignmentIds = assignments.map((a) => a._id);
 
     const submissions = await Submission.find({ assignmentId: { $in: assignmentIds } })
@@ -225,6 +276,13 @@ export const getCourseSubmissions = async (req, res) => {
 export const getSubmissionById = async (req, res) => {
   try {
     const { submissionId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(submissionId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid submission ID."
+      });
+    }
 
     const submission = await Submission.findById(submissionId)
       .populate("studentId", "name email photoUrl")

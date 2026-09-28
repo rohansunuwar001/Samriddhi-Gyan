@@ -1,12 +1,6 @@
 import fs from "fs";
 import path from "path";
 
-/**
- * Extracts plain text from an uploaded file path based on its name extension
- * @param {string} filePath - Absolute path to the file on disk
- * @param {string} originalName - Original filename with extension
- * @returns {Promise<string>} Plain text content extracted
- */
 export async function extractTextFromFile(filePath, originalName) {
   if (!fs.existsSync(filePath)) {
     throw new Error(`File not found on disk at path: ${filePath}`);
@@ -59,10 +53,7 @@ export async function extractTextFromFile(filePath, originalName) {
   return extractAlphanumericFallback(filePath);
 }
 
-/**
- * Fallback to scrape printable characters from binary files (e.g. pdf, docx, pptx, csv) 
- * if external library extraction fails, preventing server crashes.
- */
+
 function extractAlphanumericFallback(filePath) {
   try {
     const buffer = fs.readFileSync(filePath);

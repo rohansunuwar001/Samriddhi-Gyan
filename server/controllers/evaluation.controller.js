@@ -2,7 +2,6 @@ import { parseCodeToAST, validateAST } from "../utils/astValidator.js";
 import { detectLanguageWithGemini } from "../utils/geminiClient.js";
 import { checkPlagiarism } from "../utils/plagiarismChecker.js";
 
-// Pre-seeded library of mock student submissions for LSH comparison fallback
 const DEFAULT_REFERENCE_DOCS = [
   {
     id: "Ref-1: Node.js Overview",
@@ -22,10 +21,6 @@ const DEFAULT_REFERENCE_DOCS = [
   }
 ];
 
-/**
- * Parses raw code to an Abstract Syntax Tree (AST) and validates structural components
- * @route POST /api/v1/evaluation/validate-code
- */
 export const validateCodeAST = async (req, res) => {
   try {
     const { code, requiredStructures, language } = req.body;
@@ -86,10 +81,6 @@ export const validateCodeAST = async (req, res) => {
   }
 };
 
-/**
- * Runs MinHash & LSH checks on a target document against library reference documents
- * @route POST /api/v1/evaluation/check-plagiarism
- */
 export const checkPlagiarismLSH = async (req, res) => {
   try {
     const { docText, referenceDocs, threshold } = req.body;
@@ -103,7 +94,6 @@ export const checkPlagiarismLSH = async (req, res) => {
 
     const checkThreshold = typeof threshold === "number" ? threshold : 0.5;
 
-    // Use custom reference docs if provided, fallback to pre-seeded defaults
     const comparisonDocs = Array.isArray(referenceDocs) && referenceDocs.length > 0
       ? referenceDocs.map((doc, idx) => ({
           id: doc.id || `Custom-Doc-${idx + 1}`,
@@ -128,10 +118,6 @@ export const checkPlagiarismLSH = async (req, res) => {
   }
 };
 
-/**
- * Performs pair-wise plagiarism checking across a batch of uploaded files
- * @route POST /api/v1/evaluation/cross-compare-plagiarism
- */
 export const crossComparePlagiarism = async (req, res) => {
   try {
     const { documents, threshold } = req.body;
@@ -146,7 +132,6 @@ export const crossComparePlagiarism = async (req, res) => {
     const checkThreshold = typeof threshold === "number" ? threshold : 0.5;
     const results = [];
 
-    // Compare each document pair-wise
     for (let i = 0; i < documents.length; i++) {
       const docA = documents[i];
       const otherDocs = documents
